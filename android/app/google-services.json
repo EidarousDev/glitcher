@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "844244619365",
+    "firebase_url": "https://glitcher-ae1e7.firebaseio.com",
+    "project_id": "glitcher-ae1e7",
+    "storage_bucket": "glitcher-ae1e7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:844244619365:android:472e7d724ee52399f2768c",
+        "android_client_info": {
+          "package_name": "com.eidarousdev.glitcher"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "844244619365-20553cpt5th6778duuapi7pqubrcfd0e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.eidarousdev.glitcher",
+            "certificate_hash": "e8917f352c482ad06597f4b37b972b40ffaef989"
+          }
+        },
+        {
+          "client_id": "844244619365-m1h5hqveov4jor2f6v3pv7b9bnrvekjb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPAOREZ9auR3WajPViQP-9iD1f3G5ImZo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "844244619365-m1h5hqveov4jor2f6v3pv7b9bnrvekjb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
