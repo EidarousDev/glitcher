@@ -14,20 +14,23 @@ class _NewPostState extends State<NewPost> {
   var _video;
   var _uploadedFileURL;
   VideoPlayerController _controller;
+  bool _isPlaying;
 
   @override
   void initState() {
     super.initState();
-//    _controller = VideoPlayerController.network(
-//        'http://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_20mb.mp4')
-//      ..initialize().then((_) {
-//        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-//        setState(() {});
-//      });
   }
 
   void playVideo(){
     _controller = VideoPlayerController.file(_video)
+      ..addListener(() {
+        final bool isPlaying = _controller.value.isPlaying;
+        if (isPlaying != _isPlaying) {
+          setState(() {
+            _isPlaying = isPlaying;
+          });
+        }
+      })
       ..initialize().then((_) {
         // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
         setState(() {
@@ -37,6 +40,28 @@ class _NewPostState extends State<NewPost> {
 //              : _controller.play();
         });
       });
+
+  }
+
+  void _pause() {
+    setState(() {
+      _controller.pause();
+    });
+  }
+
+  void _play() {
+    setState(() {
+      if (!_controller.value.initialized) {
+        _controller.initialize().then((_) {
+          _controller.play();
+        }).catchError((dynamic error) => print('Video player error: $error'));
+      } else {
+        if (_controller.value.position >= _controller.value.duration) {
+          _controller.seekTo(Duration(seconds: 0));
+        }
+        _controller.play();
+      }
+    });
   }
 
   Future chooseImage() async {
@@ -106,13 +131,13 @@ class _NewPostState extends State<NewPost> {
                   child: FloatingActionButton(
                     onPressed: () {
                       setState(() {
-                        _controller.value.isPlaying
-                            ? _controller.pause()
-                            : _controller.play();
+                        _isPlaying
+                            ? _pause()
+                            : _play();
                       });
                     },
                     child: Icon(
-                      _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+                      _isPlaying ? Icons.pause : Icons.play_arrow,
                     ),
                   ),
                 ),
