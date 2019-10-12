@@ -86,10 +86,14 @@ class _NewPostState extends State<NewPost> {
     });
   }
 
-  Future chooseImage() async {
+  void clearVars(){
     _video = null;
     _image = null;
     _youtubeId = null;
+  }
+
+  Future chooseImage() async {
+    clearVars();
     await ImagePicker.pickImage(source: ImageSource.gallery).then((image) {
       setState(() {
         _image = image;
@@ -98,9 +102,7 @@ class _NewPostState extends State<NewPost> {
   }
 
   Future chooseVideo() async {
-    _video = null;
-    _image = null;
-    _youtubeId = null;
+    clearVars();
     await ImagePicker.pickVideo(source: ImageSource.gallery).then((video) {
       setState(() {
         _video = video;
@@ -119,9 +121,10 @@ class _NewPostState extends State<NewPost> {
         .ref()
         .child('$parentFolder/${p.basename(fileName.path)}');
     StorageUploadTask uploadTask = storageReference.putFile(fileName);
+    clearVars();
     await uploadTask.onComplete;
     print('File Uploaded');
-    storageReference.getDownloadURL().then((fileURL) {
+    await storageReference.getDownloadURL().then((fileURL) {
       setState(() {
         _uploadedFileURL = fileURL;
       });
