@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:glitcher/style//theme.dart' as Theme;
+import 'package:glitcher/style/theme.dart' as Theme;
 import 'package:glitcher/utils/bubble_indication_painter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:glitcher/utils/app_util.dart';
+import 'package:glitcher/utils/firebase_anonymously_util.dart';
+import 'package:glitcher/views/user_timeline/user_timeline.dart';
 
 class LoginPage extends StatefulWidget {
+  static const String id = 'login_screen';
   LoginPage({Key key}) : super(key: key);
 
   @override
@@ -15,12 +20,17 @@ class _LoginPageState extends State<LoginPage>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
+  String mEmail, mPassword;
+
   final FocusNode myFocusNodeEmailLogin = FocusNode();
   final FocusNode myFocusNodePasswordLogin = FocusNode();
 
   final FocusNode myFocusNodePassword = FocusNode();
   final FocusNode myFocusNodeEmail = FocusNode();
   final FocusNode myFocusNodeName = FocusNode();
+
+  final _auth = FirebaseAuth.instance;
+  FirebaseAnonymouslyUtil firebaseAnonymouslyUtil;
 
   TextEditingController loginEmailController = new TextEditingController();
   TextEditingController loginPasswordController = new TextEditingController();
@@ -138,6 +148,67 @@ class _LoginPageState extends State<LoginPage>
     _pageController = PageController();
   }
 
+  String validateEmail(String value) {
+    String pattern =
+        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+    RegExp regExp = new RegExp(pattern);
+    if (value.length == 0) {
+      AppUtil().showAlert("Email is Required");
+      return "Email is Required";
+    } else if (!regExp.hasMatch(value)) {
+      AppUtil().showAlert("Invalid Email");
+      return "Invalid Email";
+    } else {
+      return null;
+    }
+  }
+
+  @override
+  void moveUserDashboardScreen(FirebaseUser currentUser) {
+    Navigator.of(context).push<String>(
+      new MaterialPageRoute(
+        settings: RouteSettings(name: '/home_screen'),
+        builder: (context) => UserTimelineScreen(currentUser),
+      ),
+    );
+  }
+
+  loginError(e) {
+    setState(() {
+      AppUtil().showAlert(e.message);
+      //_isLoading = false;
+    });
+  }
+
+  Future _signUp() async {
+    print(mEmail + ' : ' + mPassword);
+    try {
+      final newUser = await _auth.createUserWithEmailAndPassword(
+          email: mEmail, password: mPassword);
+
+      if (newUser != null) {
+        FirebaseUser userLoggedIn = (await _auth.signInWithEmailAndPassword(
+                email: mEmail, password: mPassword))
+            .user;
+        moveUserDashboardScreen(userLoggedIn);
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future _login() async {
+    print(mEmail + ' : ' + mPassword);
+    try {
+      FirebaseUser userLoggedIn = (await _auth.signInWithEmailAndPassword(
+              email: mEmail, password: mPassword))
+          .user;
+      moveUserDashboardScreen(userLoggedIn);
+    } catch (e) {
+      print(e);
+    }
+  }
+
   void showInSnackBar(String value) {
     FocusScope.of(context).requestFocus(new FocusNode());
     _scaffoldKey.currentState?.removeCurrentSnackBar();
@@ -230,6 +301,9 @@ class _LoginPageState extends State<LoginPage>
                           focusNode: myFocusNodeEmailLogin,
                           controller: loginEmailController,
                           keyboardType: TextInputType.emailAddress,
+                          onChanged: (value) {
+                            mEmail = value;
+                          },
                           style: TextStyle(
                               fontFamily: "WorkSansSemiBold",
                               fontSize: 16.0,
@@ -259,6 +333,9 @@ class _LoginPageState extends State<LoginPage>
                           focusNode: myFocusNodePasswordLogin,
                           controller: loginPasswordController,
                           obscureText: _obscureTextLogin,
+                          onChanged: (value) {
+                            mPassword = value;
+                          },
                           style: TextStyle(
                               fontFamily: "WorkSansSemiBold",
                               fontSize: 16.0,
@@ -331,7 +408,7 @@ class _LoginPageState extends State<LoginPage>
                             fontFamily: "WorkSansBold"),
                       ),
                     ),
-                    onPressed: () => showInSnackBar("Login button pressed")),
+                    onPressed: () => _login()),
               ),
             ],
           ),
@@ -495,6 +572,9 @@ class _LoginPageState extends State<LoginPage>
                         child: TextField(
                           focusNode: myFocusNodeEmail,
                           controller: signupEmailController,
+                          onChanged: (value) {
+                            mEmail = value;
+                          },
                           keyboardType: TextInputType.emailAddress,
                           style: TextStyle(
                               fontFamily: "WorkSansSemiBold",
@@ -524,6 +604,9 @@ class _LoginPageState extends State<LoginPage>
                           focusNode: myFocusNodePassword,
                           controller: signupPasswordController,
                           obscureText: _obscureTextSignup,
+                          onChanged: (value) {
+                            mPassword = value;
+                          },
                           style: TextStyle(
                               fontFamily: "WorkSansSemiBold",
                               fontSize: 16.0,
@@ -632,7 +715,7 @@ class _LoginPageState extends State<LoginPage>
                             fontFamily: "WorkSansBold"),
                       ),
                     ),
-                    onPressed: () => showInSnackBar("SignUp button pressed")),
+                    onPressed: () => _signUp()),
               ),
             ],
           ),
