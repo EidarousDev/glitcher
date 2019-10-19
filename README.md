@@ -1,6 +1,6 @@
 # glitcher
 
-A new Flutter project.
+Glitcher - Social App for Gamers!
 
 ## Getting Started
 
