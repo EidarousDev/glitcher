@@ -16,6 +16,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   var _profileImage;
   var _uploadedFileURL;
   var _screenState = ScreenState.to_edit;
+  double _coverHeight = 200;
+
+  String _descText = 'Description here';
+  String _nameText = 'Ahmed Nabil';
+  var _descEditingController = TextEditingController()..text = 'Description here';
+  var _nameEditingController = TextEditingController()..text = 'Ahmed Nabil';
 
   Future chooseImage(int whichImage) async {
     await ImagePicker.pickImage(source: ImageSource.gallery).then((image) {
@@ -62,6 +68,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void save() {
     setState(() {
       _screenState = ScreenState.to_edit;
+      _descText = _descEditingController.text;
+      _nameText = _nameEditingController.text;
     });
   }
 
@@ -88,14 +96,70 @@ class _ProfileScreenState extends State<ProfileScreen> {
       alignment: Alignment.bottomRight,
       children: <Widget>[
         child,
-        Icon(FontAwesome.getIconData('camera'))
+        Container(
+          margin: EdgeInsets.all(10),
+          child: Icon(FontAwesome.getIconData('camera')),
+          height: size,
+          width: size,
+          decoration: new BoxDecoration(
+            color: const Color(0x000000).withOpacity(0.3),
+            shape: BoxShape.circle,
+          ),
+        )
       ],
     );
   }
 
   Widget _build() {
     return SafeArea(
-      child: _profileAndCover(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          _profileAndCover(),
+          SizedBox(
+            height: 10,
+          ),
+          _screenState == ScreenState.to_edit
+              ? Text(
+                  _nameText,
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                )
+              : Container(
+                  height: 30,
+                  width: 200,
+                  child: TextField(
+                    textAlign: TextAlign.center,
+                    controller: _nameEditingController,
+                    onChanged: (text) => {},
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                ),
+          SizedBox(
+            height: 8,
+          ),
+          _screenState == ScreenState.to_edit
+              ? Text(
+                  _descText,
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                )
+              : Container(
+                  height: 30,
+                  width: 200,
+                  child: TextField(
+                    textAlign: TextAlign.center,
+                    controller: _descEditingController,
+                    onChanged: (text) => {},
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+          SizedBox(
+            height: 8,
+          ),
+          Divider(
+            color: Colors.grey.shade400,
+          ),
+        ],
+      ),
     );
   }
 
@@ -104,28 +168,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
       alignment: Alignment(0, 0),
       children: <Widget>[
         _coverImage == null
-            ? Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                child: GestureDetector(
-                  onTap: _screenState == ScreenState.to_save
-                      ? () {
-                          chooseImage(1);
-                        }
-                      : () {},
-                  child: Image(
+            ? _screenState == ScreenState.to_save
+                ? coverOverlay(
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: _coverHeight,
+                      child: GestureDetector(
+                        onTap: _screenState == ScreenState.to_save
+                            ? () {
+                                chooseImage(1);
+                              }
+                            : () {},
+                        child: FittedBox(
+                          fit: BoxFit.cover,
+                          child: Image(
+                            image: AssetImage('images/default_cover.jpg'),
+                          ),
+                        ),
+                      ),
+                    ),
+                    50)
+                : Container(
                     width: MediaQuery.of(context).size.width,
-                    image: AssetImage('images/default_cover.jpg'),
-                  ),
-                ),
-              )
+                    height: _coverHeight,
+                    child: GestureDetector(
+                      onTap: _screenState == ScreenState.to_save
+                          ? () {
+                              chooseImage(1);
+                            }
+                          : () {},
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        child: Image(
+                          width: MediaQuery.of(context).size.width,
+                          image: AssetImage('images/default_cover.jpg'),
+                        ),
+                      ),
+                    ),
+                  )
             : Container(
                 child: _screenState == ScreenState.viewing
                     ? Image.network('')
-                    : Image(key: Key('s'),
-                  width: MediaQuery.of(context).size.width,
-                  height: 200,
-                    image:FileImage(_coverImage)),
+                    : Image(
+                        key: Key('s'),
+                        width: MediaQuery.of(context).size.width,
+                        height: _coverHeight,
+                        image: FileImage(_coverImage)),
               ),
         GestureDetector(
           onTap: _screenState == ScreenState.to_save
