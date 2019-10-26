@@ -1,41 +1,77 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum ScreenState { to_edit, viewing, to_save }
 
 class ProfileScreen extends StatefulWidget {
+  FirebaseUser currentUser;
+  ProfileScreen({this.currentUser});
+
   @override
-  _ProfileScreenState createState() => _ProfileScreenState();
+  _ProfileScreenState createState() =>
+      _ProfileScreenState(currentUser: currentUser);
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  var _coverImage;
-  var _profileImage;
-  var _uploadedFileURL;
+  var _coverImageUrl;
+  var _profileImageUrl;
+  var _coverImageFile;
+  var _profileImageFile;
   var _screenState = ScreenState.to_edit;
   double _coverHeight = 200;
 
   String _descText = 'Description here';
   String _nameText = 'Ahmed Nabil';
-  var _descEditingController = TextEditingController()..text = 'Description here';
+  var _descEditingController = TextEditingController()
+    ..text = 'Description here';
   var _nameEditingController = TextEditingController()..text = 'Ahmed Nabil';
+  Firestore _firestore = Firestore.instance;
+
+  FirebaseUser currentUser;
+
+  var userData;
+  _ProfileScreenState({this.currentUser});
 
   Future chooseImage(int whichImage) async {
     await ImagePicker.pickImage(source: ImageSource.gallery).then((image) {
       setState(() {
         if (whichImage == 1) {
           setState(() {
-            _coverImage = image;
+            _coverImageFile = image;
+            _coverImageUrl = null;
           });
         } else {
           setState(() {
-            _profileImage = image;
+            _profileImageFile = image;
+            _profileImageUrl = null;
           });
         }
+
         //print(_profileImage.toString());
+      });
+    });
+  }
+
+  void loadUserData() async {
+    await _firestore
+        .collection('users')
+        .document(currentUser.uid)
+        .get()
+        .then((onValue) {
+      setState(() {
+        userData = onValue.data;
+        _nameText = onValue.data['name'];
+        _descText = onValue.data['description'];
+        _profileImageUrl = onValue.data['profile_url'];
+        _coverImageUrl = onValue.data['cover_url'];
+
+        _profileImageFile = null;
+        _coverImageFile = null;
       });
     });
   }
@@ -44,18 +80,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (fileName == null) return;
 
     print((fileName));
-
     StorageReference storageReference = FirebaseStorage.instance
         .ref()
-        .child('$parentFolder/${p.basename(fileName.path)}');
+        .child('$parentFolder/${currentUser.uid}');
     StorageUploadTask uploadTask = storageReference.putFile(fileName);
+
     await uploadTask.onComplete;
     print('File Uploaded');
     storageReference.getDownloadURL().then((fileURL) {
-      setState(() {
-        _uploadedFileURL = fileURL;
-      });
-      print(_uploadedFileURL);
+
+      if (parentFolder == 'profile_img') {
+
+        setState(() {
+          _profileImageUrl = fileURL;
+        });
+
+        _firestore
+            .collection('users')
+            .document(currentUser.uid)
+            .updateData({'profile_url': _profileImageUrl});
+      } else if (parentFolder == 'cover_img') {
+
+        setState(() {
+          _coverImageUrl = fileURL;
+
+        });
+
+        _firestore
+            .collection('users')
+            .document(currentUser.uid)
+            .updateData({'cover_url': _coverImageUrl});
+      }
+      _profileImageFile = null;
+      _coverImageFile = null;
+      //print(_uploadedFileURL);
     });
   }
 
@@ -65,15 +123,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  void save() {
+  Future save() async {
     setState(() {
       _screenState = ScreenState.to_edit;
       _descText = _descEditingController.text;
       _nameText = _nameEditingController.text;
+
+      userData['name'] = _nameText;
+      userData['description'] = _descText;
+
+      _firestore
+          .collection('users')
+          .document(currentUser.uid)
+          .updateData(userData);
+
+      if (_profileImageFile != null) {
+        uploadFile('profile_img', _profileImageFile);
+      }
+      if (_coverImageFile != null) {
+        uploadFile('cover_img', _coverImageFile);
+      }
     });
   }
 
   Widget profileOverlay(Widget child, double size) {
+    if (_screenState == ScreenState.to_edit) {
+      return child;
+    }
+
     return Stack(
       alignment: Alignment(0, 0),
       children: <Widget>[
@@ -92,6 +169,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget coverOverlay(Widget child, double size) {
+    if (_screenState == ScreenState.to_edit) {
+      return child;
+    }
     return Stack(
       alignment: Alignment.bottomRight,
       children: <Widget>[
@@ -110,7 +190,101 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Stack _profileAndCover() {
+    return Stack(
+      alignment: Alignment(0, 0),
+      children: <Widget>[
+        _coverImageUrl == null
+            ? _coverImageFile == null
+                ? Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: _coverHeight,
+                    child: GestureDetector(
+                      onTap: _screenState == ScreenState.to_save
+                          ? () {
+                              chooseImage(1);
+                            }
+                          : () {},
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        child: Image(
+                          width: MediaQuery.of(context).size.width,
+                          image: AssetImage('images/default_cover.jpg'),
+                        ),
+                      ),
+                    ),
+                  )
+                : Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: _coverHeight,
+                    child: GestureDetector(
+                      onTap: _screenState == ScreenState.to_save
+                          ? () {
+                              chooseImage(1);
+                            }
+                          : () {},
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        child: Image(
+                          width: MediaQuery.of(context).size.width,
+                          image: FileImage(_coverImageFile),
+                        ),
+                      ),
+                    ),
+                  )
+            : Container(
+                width: MediaQuery.of(context).size.width,
+                height: _coverHeight,
+                child: GestureDetector(
+                  onTap: _screenState == ScreenState.to_save
+                      ? () {
+                          chooseImage(1);
+                        }
+                      : () {},
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    child: Image(
+                      width: MediaQuery.of(context).size.width,
+                      image: NetworkImage(_coverImageUrl),
+                    ),
+                  ),
+                ),
+              ),
+        GestureDetector(
+            onTap: _screenState == ScreenState.to_save
+                ? () {
+                    chooseImage(2);
+                  }
+                : () {},
+            child: _profileImageUrl == null
+                ? _profileImageFile == null
+                    ? profileOverlay(
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundImage:
+                              AssetImage('images/default_profile.png'),
+                        ),
+                        100)
+                    : profileOverlay(
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundImage: FileImage(_profileImageFile),
+                        ),
+                        100)
+                : profileOverlay(
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundImage: NetworkImage(_profileImageUrl),
+                    ),
+                    100))
+      ],
+    );
+  }
+
   Widget _build() {
+    if (userData == null) {
+      loadUserData();
+    }
     return SafeArea(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -160,88 +334,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Stack _profileAndCover() {
-    return Stack(
-      alignment: Alignment(0, 0),
-      children: <Widget>[
-        _coverImage == null
-            ? _screenState == ScreenState.to_save
-                ? coverOverlay(
-                    Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: _coverHeight,
-                      child: GestureDetector(
-                        onTap: _screenState == ScreenState.to_save
-                            ? () {
-                                chooseImage(1);
-                              }
-                            : () {},
-                        child: FittedBox(
-                          fit: BoxFit.cover,
-                          child: Image(
-                            image: AssetImage('images/default_cover.jpg'),
-                          ),
-                        ),
-                      ),
-                    ),
-                    50)
-                : Container(
-                    width: MediaQuery.of(context).size.width,
-                    height: _coverHeight,
-                    child: GestureDetector(
-                      onTap: _screenState == ScreenState.to_save
-                          ? () {
-                              chooseImage(1);
-                            }
-                          : () {},
-                      child: FittedBox(
-                        fit: BoxFit.cover,
-                        child: Image(
-                          width: MediaQuery.of(context).size.width,
-                          image: AssetImage('images/default_cover.jpg'),
-                        ),
-                      ),
-                    ),
-                  )
-            : Container(
-                child: _screenState == ScreenState.viewing
-                    ? Image.network('')
-                    : Image(
-                        key: Key('s'),
-                        width: MediaQuery.of(context).size.width,
-                        height: _coverHeight,
-                        image: FileImage(_coverImage)),
-              ),
-        GestureDetector(
-          onTap: _screenState == ScreenState.to_save
-              ? () {
-                  chooseImage(2);
-                }
-              : () {},
-          child: _profileImage == null
-              ? _screenState == ScreenState.to_save
-                  ? profileOverlay(
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundImage:
-                            AssetImage('images/default_profile.png'),
-                      ),
-                      100)
-                  : CircleAvatar(
-                      radius: 50,
-                      backgroundImage: AssetImage('images/default_profile.png'),
-                    )
-              : CircleAvatar(
-                  radius: 50,
-                  backgroundImage: _screenState == ScreenState.viewing
-                      ? NetworkImage('')
-                      : FileImage(_profileImage),
-                ),
-        )
-      ],
     );
   }
 
