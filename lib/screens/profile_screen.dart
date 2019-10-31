@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:glitcher/screens/fullscreen_overaly.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter_icons/flutter_icons.dart';
@@ -35,6 +36,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   FirebaseUser currentUser;
 
   var userData;
+
+  int _followers = 0;
+
+  int _following = 0;
+
   _ProfileScreenState({this.currentUser});
 
   Future chooseImage(int whichImage) async {
@@ -69,6 +75,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _descText = onValue.data['description'];
         _profileImageUrl = onValue.data['profile_url'];
         _coverImageUrl = onValue.data['cover_url'];
+        _followers = onValue.data['followers'];
+        _following = onValue.data['following'];
 
         _profileImageFile = null;
         _coverImageFile = null;
@@ -88,9 +96,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await uploadTask.onComplete;
     print('File Uploaded');
     storageReference.getDownloadURL().then((fileURL) {
-
       if (parentFolder == 'profile_img') {
-
         setState(() {
           _profileImageUrl = fileURL;
         });
@@ -100,10 +106,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             .document(currentUser.uid)
             .updateData({'profile_url': _profileImageUrl});
       } else if (parentFolder == 'cover_img') {
-
         setState(() {
           _coverImageUrl = fileURL;
-
         });
 
         _firestore
@@ -194,68 +198,77 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Stack(
       alignment: Alignment(0, 0),
       children: <Widget>[
-        _coverImageUrl == null
-            ? _coverImageFile == null
-                ? Container(
-                    width: MediaQuery.of(context).size.width,
-                    height: _coverHeight,
-                    child: GestureDetector(
-                      onTap: _screenState == ScreenState.to_save
-                          ? () {
-                              chooseImage(1);
-                            }
-                          : () {},
-                      child: FittedBox(
-                        fit: BoxFit.cover,
-                        child: Image(
-                          width: MediaQuery.of(context).size.width,
-                          image: AssetImage('images/default_cover.jpg'),
-                        ),
+        GestureDetector(
+          onTap: _screenState == ScreenState.to_save
+              ? () {
+                  chooseImage(1);
+                }
+              : () {
+                  if (_coverImageUrl != null) {
+                    showDialog(
+                        barrierDismissible: true,
+                        context: context,
+                        builder: (_) =>
+                            FullScreenOverlay(url: _coverImageUrl, type: 1));
+                  } else if (_coverImageFile != null) {
+                    showDialog(
+                        context: context,
+                        builder: (_) =>
+                            FullScreenOverlay(url: _coverImageFile, type: 2));
+                  } else {
+                    showDialog(
+                        context: context,
+                        builder: (_) => FullScreenOverlay(
+                            url: 'images/default_cover.jpg', type: 3));
+                  }
+                },
+          child: _coverImageUrl == null
+              ? _coverImageFile == null
+                  ? FittedBox(
+                      fit: BoxFit.cover,
+                      child: Image(
+                        width: MediaQuery.of(context).size.width,
+                        image: AssetImage('images/default_cover.jpg'),
                       ),
-                    ),
-                  )
-                : Container(
-                    width: MediaQuery.of(context).size.width,
-                    height: _coverHeight,
-                    child: GestureDetector(
-                      onTap: _screenState == ScreenState.to_save
-                          ? () {
-                              chooseImage(1);
-                            }
-                          : () {},
-                      child: FittedBox(
-                        fit: BoxFit.cover,
-                        child: Image(
-                          width: MediaQuery.of(context).size.width,
-                          image: FileImage(_coverImageFile),
-                        ),
+                    )
+                  : FittedBox(
+                      fit: BoxFit.cover,
+                      child: Image(
+                        width: MediaQuery.of(context).size.width,
+                        image: FileImage(_coverImageFile),
                       ),
-                    ),
-                  )
-            : Container(
-                width: MediaQuery.of(context).size.width,
-                height: _coverHeight,
-                child: GestureDetector(
-                  onTap: _screenState == ScreenState.to_save
-                      ? () {
-                          chooseImage(1);
-                        }
-                      : () {},
-                  child: FittedBox(
-                    fit: BoxFit.cover,
-                    child: Image(
-                      width: MediaQuery.of(context).size.width,
-                      image: NetworkImage(_coverImageUrl),
-                    ),
+                    )
+              : FittedBox(
+                  fit: BoxFit.cover,
+                  child: Image(
+                    width: MediaQuery.of(context).size.width,
+                    image: NetworkImage(_coverImageUrl),
                   ),
                 ),
-              ),
+        ),
         GestureDetector(
             onTap: _screenState == ScreenState.to_save
                 ? () {
                     chooseImage(2);
                   }
-                : () {},
+                : () {
+                    if (_coverImageUrl != null) {
+                      showDialog(
+                          context: context,
+                          builder: (_) => FullScreenOverlay(
+                              url: _profileImageUrl, type: 1));
+                    } else if (_coverImageFile != null) {
+                      showDialog(
+                          context: context,
+                          builder: (_) => FullScreenOverlay(
+                              url: _profileImageFile, type: 2));
+                    } else {
+                      showDialog(
+                          context: context,
+                          builder: (_) => FullScreenOverlay(
+                              url: 'images/default_profile.png', type: 3));
+                    }
+                  },
             child: _profileImageUrl == null
                 ? _profileImageFile == null
                     ? profileOverlay(
@@ -278,6 +291,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     100))
       ],
+    );
+  }
+
+  void moveToFullscreenOverlay(String url) {
+    Navigator.of(context).push<String>(
+      new MaterialPageRoute(
+        settings: RouteSettings(name: '/fullscreen_overlay'),
+        builder: (context) => FullScreenOverlay(url: url),
+      ),
     );
   }
 
@@ -332,6 +354,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Divider(
             color: Colors.grey.shade400,
           ),
+          SizedBox(
+            height: 8,
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Column(
+                children: <Widget>[
+                  Text(
+                    'Followers',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  Text(_followers.toString())
+                ],
+              ),
+              SizedBox(
+                width: 50,
+              ),
+              Column(
+                children: <Widget>[
+                  Text(
+                    'Following',
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                  ),
+                  Text(_following.toString())
+                ],
+              ),
+            ],
+          )
         ],
       ),
     );
