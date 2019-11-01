@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:glitcher/screens/fullscreen_overaly.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as p;
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -27,10 +26,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   double _coverHeight = 200;
 
   String _descText = 'Description here';
-  String _nameText = 'Ahmed Nabil';
+  String _nameText = 'Username';
   var _descEditingController = TextEditingController()
     ..text = 'Description here';
-  var _nameEditingController = TextEditingController()..text = 'Ahmed Nabil';
+  var _nameEditingController = TextEditingController()..text = 'Username';
   Firestore _firestore = Firestore.instance;
 
   FirebaseUser currentUser;
@@ -47,18 +46,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await ImagePicker.pickImage(source: ImageSource.gallery).then((image) {
       setState(() {
         if (whichImage == 1) {
-          setState(() {
-            _coverImageFile = image;
-            _coverImageUrl = null;
-          });
+          _coverImageFile = image;
+          _coverImageUrl = null;
         } else {
-          setState(() {
-            _profileImageFile = image;
-            _profileImageUrl = null;
-          });
+          _profileImageFile = image;
+          _profileImageUrl = null;
         }
-
-        //print(_profileImage.toString());
       });
     });
   }
@@ -203,47 +196,65 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ? () {
                   chooseImage(1);
                 }
-              : () {
+              : () async {
                   if (_coverImageUrl != null) {
-                    showDialog(
+                    var result = await showDialog(
                         barrierDismissible: true,
                         context: context,
-                        builder: (_) =>
-                            FullScreenOverlay(url: _coverImageUrl, type: 1));
+                        builder: (_) => FullScreenOverlay(
+                              url: _coverImageUrl,
+                              type: 1,
+                              whichImage: 1,
+                              currentUser: currentUser,
+                            ));
+                    setState(() {
+                      _coverImageUrl = result;
+                    });
                   } else if (_coverImageFile != null) {
-                    showDialog(
-                        context: context,
-                        builder: (_) =>
-                            FullScreenOverlay(url: _coverImageFile, type: 2));
-                  } else {
-                    showDialog(
+                    var result = await showDialog(
                         context: context,
                         builder: (_) => FullScreenOverlay(
-                            url: 'images/default_cover.jpg', type: 3));
+                              url: _coverImageFile,
+                              type: 2,
+                              whichImage: 1,
+                              currentUser: currentUser,
+                            ));
+                    setState(() {
+                      _coverImageUrl = result;
+                    });
+                  } else {
+                    var result = await showDialog(
+                        context: context,
+                        builder: (_) => FullScreenOverlay(
+                              url: 'images/default_cover.jpg',
+                              type: 3,
+                              whichImage: 1,
+                              currentUser: currentUser,
+                            ));
+                    setState(() {
+                      _coverImageUrl = result;
+                    });
                   }
                 },
           child: _coverImageUrl == null
               ? _coverImageFile == null
-                  ? FittedBox(
-                      fit: BoxFit.cover,
-                      child: Image(
-                        width: MediaQuery.of(context).size.width,
-                        image: AssetImage('images/default_cover.jpg'),
-                      ),
+                  ? Image.asset(
+                      'images/default_cover.jpg',
+                      fit: BoxFit.fill,
+                      width: MediaQuery.of(context).size.width,
+                      height: _coverHeight,
                     )
-                  : FittedBox(
-                      fit: BoxFit.cover,
-                      child: Image(
-                        width: MediaQuery.of(context).size.width,
-                        image: FileImage(_coverImageFile),
-                      ),
+                  : Image.file(
+                      _coverImageFile,
+                      fit: BoxFit.fill,
+                      width: MediaQuery.of(context).size.width,
+                      height: _coverHeight,
                     )
-              : FittedBox(
-                  fit: BoxFit.cover,
-                  child: Image(
-                    width: MediaQuery.of(context).size.width,
-                    image: NetworkImage(_coverImageUrl),
-                  ),
+              : Image.network(
+                  _coverImageUrl,
+                  fit: BoxFit.fill,
+                  width: MediaQuery.of(context).size.width,
+                  height: _coverHeight,
                 ),
         ),
         GestureDetector(
@@ -251,22 +262,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ? () {
                     chooseImage(2);
                   }
-                : () {
-                    if (_coverImageUrl != null) {
-                      showDialog(
+                : () async {
+                    if (_profileImageUrl != null) {
+                      var result = await showDialog(
                           context: context,
                           builder: (_) => FullScreenOverlay(
-                              url: _profileImageUrl, type: 1));
-                    } else if (_coverImageFile != null) {
-                      showDialog(
+                                url: _profileImageUrl,
+                                type: 1,
+                                whichImage: 2,
+                                currentUser: currentUser,
+                              ));
+                      setState(() {
+                        _profileImageUrl = result;
+                      });
+                    } else if (_profileImageFile != null) {
+                      var result = await showDialog(
                           context: context,
                           builder: (_) => FullScreenOverlay(
-                              url: _profileImageFile, type: 2));
+                                url: _profileImageFile,
+                                type: 2,
+                                whichImage: 2,
+                                currentUser: currentUser,
+                              ));
+                      setState(() {
+                        _profileImageUrl = result;
+                      });
                     } else {
-                      showDialog(
+                      var result = await showDialog(
                           context: context,
                           builder: (_) => FullScreenOverlay(
-                              url: 'images/default_profile.png', type: 3));
+                                url: 'images/default_profile.png',
+                                type: 3,
+                                whichImage: 2,
+                                currentUser: currentUser,
+                              ));
+
+                      setState(() {
+                        _profileImageUrl = result;
+                      });
                     }
                   },
             child: _profileImageUrl == null
@@ -294,97 +327,90 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void moveToFullscreenOverlay(String url) {
-    Navigator.of(context).push<String>(
-      new MaterialPageRoute(
-        settings: RouteSettings(name: '/fullscreen_overlay'),
-        builder: (context) => FullScreenOverlay(url: url),
-      ),
-    );
-  }
-
   Widget _build() {
     if (userData == null) {
       loadUserData();
     }
     return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          _profileAndCover(),
-          SizedBox(
-            height: 10,
-          ),
-          _screenState == ScreenState.to_edit
-              ? Text(
-                  _nameText,
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                )
-              : Container(
-                  height: 30,
-                  width: 200,
-                  child: TextField(
-                    textAlign: TextAlign.center,
-                    controller: _nameEditingController,
-                    onChanged: (text) => {},
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            _profileAndCover(),
+            SizedBox(
+              height: 10,
+            ),
+            _screenState == ScreenState.to_edit
+                ? Text(
+                    _nameText,
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  )
+                : Container(
+                    height: 30,
+                    width: 200,
+                    child: TextField(
+                      textAlign: TextAlign.center,
+                      controller: _nameEditingController,
+                      onChanged: (text) => {},
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
                   ),
+            SizedBox(
+              height: 8,
+            ),
+            _screenState == ScreenState.to_edit
+                ? Text(
+                    _descText,
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  )
+                : Container(
+                    height: 30,
+                    width: 200,
+                    child: TextField(
+                      textAlign: TextAlign.center,
+                      controller: _descEditingController,
+                      onChanged: (text) => {},
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+            SizedBox(
+              height: 8,
+            ),
+            Divider(
+              color: Colors.grey.shade400,
+            ),
+            SizedBox(
+              height: 8,
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Column(
+                  children: <Widget>[
+                    Text(
+                      'Followers',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    Text(_followers.toString())
+                  ],
                 ),
-          SizedBox(
-            height: 8,
-          ),
-          _screenState == ScreenState.to_edit
-              ? Text(
-                  _descText,
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                )
-              : Container(
-                  height: 30,
-                  width: 200,
-                  child: TextField(
-                    textAlign: TextAlign.center,
-                    controller: _descEditingController,
-                    onChanged: (text) => {},
-                    style: TextStyle(fontSize: 16),
-                  ),
+                SizedBox(
+                  width: 50,
                 ),
-          SizedBox(
-            height: 8,
-          ),
-          Divider(
-            color: Colors.grey.shade400,
-          ),
-          SizedBox(
-            height: 8,
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Column(
-                children: <Widget>[
-                  Text(
-                    'Followers',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  Text(_followers.toString())
-                ],
-              ),
-              SizedBox(
-                width: 50,
-              ),
-              Column(
-                children: <Widget>[
-                  Text(
-                    'Following',
-                    style: TextStyle(color: Colors.grey, fontSize: 14),
-                  ),
-                  Text(_following.toString())
-                ],
-              ),
-            ],
-          )
-        ],
+                Column(
+                  children: <Widget>[
+                    Text(
+                      'Following',
+                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                    ),
+                    Text(_following.toString())
+                  ],
+                ),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }

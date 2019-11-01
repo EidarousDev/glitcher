@@ -178,6 +178,7 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
+
   void moveUserProfileScreen(FirebaseUser currentUser) {
     Navigator.of(context).push<String>(
       new MaterialPageRoute(
@@ -186,7 +187,6 @@ class _LoginPageState extends State<LoginPage>
       ),
     );
   }
-
   void addUserToDatabase(String id){
     Map<String, dynamic> userMap = {
       'name': signupNameController.text,
