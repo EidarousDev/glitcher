@@ -29,7 +29,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _nameText = 'Username';
   var _descEditingController = TextEditingController()
     ..text = 'Description here';
-  var _nameEditingController = TextEditingController()..text = 'Username';
+  var _nameEditingController = TextEditingController()..text = '';
   Firestore _firestore = Firestore.instance;
 
   FirebaseUser currentUser;
@@ -47,10 +47,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         if (whichImage == 1) {
           _coverImageFile = image;
-          _coverImageUrl = null;
+          if(_coverImageFile != null)
+            _coverImageUrl = null;
         } else {
           _profileImageFile = image;
-          _profileImageUrl = null;
+          if(_profileImageFile != null)
+            _profileImageUrl = null;
         }
       });
     });
@@ -117,6 +119,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void edit() {
     setState(() {
       _screenState = ScreenState.to_save;
+      _nameEditingController..text = _nameText;
+      _descEditingController..text = _descText;
     });
   }
 
@@ -208,7 +212,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               currentUser: currentUser,
                             ));
                     setState(() {
-                      _coverImageUrl = result;
+                      if (result != null) {
+                        _coverImageUrl = result;
+                      }
                     });
                   } else if (_coverImageFile != null) {
                     var result = await showDialog(
@@ -220,7 +226,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               currentUser: currentUser,
                             ));
                     setState(() {
-                      _coverImageUrl = result;
+                      if (result != null) {
+                        _coverImageUrl = result;
+                      }
                     });
                   } else {
                     var result = await showDialog(
@@ -232,7 +240,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               currentUser: currentUser,
                             ));
                     setState(() {
-                      _coverImageUrl = result;
+                      if (result != null) {
+                        _coverImageUrl = result;
+                      }
                     });
                   }
                 },
@@ -273,7 +283,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 currentUser: currentUser,
                               ));
                       setState(() {
-                        _profileImageUrl = result;
+                        if (result != null) {
+                          _profileImageUrl = result;
+                        }
                       });
                     } else if (_profileImageFile != null) {
                       var result = await showDialog(
@@ -285,7 +297,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 currentUser: currentUser,
                               ));
                       setState(() {
-                        _profileImageUrl = result;
+                        if (result != null) {
+                          _profileImageUrl = result;
+                        }
                       });
                     } else {
                       var result = await showDialog(
@@ -298,7 +312,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ));
 
                       setState(() {
-                        _profileImageUrl = result;
+                        if (result != null) {
+                          _profileImageUrl = result;
+                        }
                       });
                     }
                   },
@@ -352,7 +368,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       textAlign: TextAlign.center,
                       controller: _nameEditingController,
                       onChanged: (text) => {},
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                   ),
             SizedBox(
