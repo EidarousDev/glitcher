@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:glitcher/Models/user.dart';
+import 'package:glitcher/screens/home/home.dart';
 import 'package:glitcher/screens/profile_screen.dart';
 import 'package:glitcher/style/theme.dart' as Theme;
 import 'package:glitcher/utils/bubble_indication_painter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/firebase_anonymously_util.dart';
-import 'package:glitcher/screens//user_timeline/user_timeline.dart';
 import 'package:toast/toast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginPage extends StatefulWidget {
   static const String id = 'login_screen';
-  LoginPage({Key key}) : super(key: key);
+  final FirebaseUser currentUser;
+  LoginPage({Key key, this.currentUser}) : super(key: key);
 
   @override
   _LoginPageState createState() => new _LoginPageState();
@@ -44,11 +44,11 @@ class _LoginPageState extends State<LoginPage>
   bool _obscureTextSignup = true;
   bool _obscureTextSignupConfirm = true;
 
-  TextEditingController signupEmailController =  TextEditingController();
-  TextEditingController signupNameController =  TextEditingController();
-  TextEditingController signupPasswordController =  TextEditingController();
+  TextEditingController signupEmailController = TextEditingController();
+  TextEditingController signupNameController = TextEditingController();
+  TextEditingController signupPasswordController = TextEditingController();
   TextEditingController signupConfirmPasswordController =
-       TextEditingController();
+      TextEditingController();
 
   PageController _pageController;
 
@@ -141,9 +141,25 @@ class _LoginPageState extends State<LoginPage>
     super.dispose();
   }
 
+  void getCurrentUser() async {
+    try {
+      final user = await _auth.currentUser();
+      if (user != null) {
+        moveUserTo(widget: HomePage(), routeId: HomePage.id);
+        //Navigator.pushNamed(context, HomePage.id);
+        print("User logged: " + user.email);
+      } else {
+        print("User not logged in :( ");
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    getCurrentUser();
 
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -168,17 +184,6 @@ class _LoginPageState extends State<LoginPage>
     }
   }
 
-  @override
-  void moveUserDashboardScreen(FirebaseUser currentUser) {
-    Navigator.of(context).push<String>(
-      new MaterialPageRoute(
-        settings: RouteSettings(name: '/home_screen'),
-        builder: (context) => UserTimelineScreen(currentUser),
-      ),
-    );
-  }
-
-
   void moveUserProfileScreen(FirebaseUser currentUser) {
     Navigator.of(context).push<String>(
       new MaterialPageRoute(
@@ -187,13 +192,22 @@ class _LoginPageState extends State<LoginPage>
       ),
     );
   }
-  void addUserToDatabase(String id){
+
+  void moveUserTo({Widget widget, String routeId, FirebaseUser currentUser}) {
+    Navigator.of(context).push<String>(
+      new MaterialPageRoute(
+        settings: RouteSettings(name: '/$routeId'),
+        builder: (context) => widget,
+      ),
+    );
+  }
+
+  void addUserToDatabase(String id) {
     Map<String, dynamic> userMap = {
       'name': signupNameController.text,
       'description': 'Write something about yourself',
       'followers': 0,
       'following': 0
-
     };
 
     _firestore.collection('users').document(id).setData(userMap);

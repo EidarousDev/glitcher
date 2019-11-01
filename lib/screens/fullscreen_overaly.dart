@@ -129,7 +129,6 @@ class FullScreenOverlay extends StatelessWidget {
       _file = null;
       _file = null;
 
-
       Navigator.pop(context, _url);
       //print(_uploadedFileURL);
     });
