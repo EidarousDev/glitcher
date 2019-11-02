@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:glitcher/screens/fullscreen_overaly.dart';
+import 'package:glitcher/utils/Loader.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -29,7 +30,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _nameText = 'Username';
   var _descEditingController = TextEditingController()
     ..text = 'Description here';
-  var _nameEditingController = TextEditingController()..text = 'Username';
+  var _nameEditingController = TextEditingController()..text = '';
   Firestore _firestore = Firestore.instance;
 
   FirebaseUser currentUser;
@@ -40,6 +41,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   int _following = 0;
 
+  bool _loading = false;
+
   _ProfileScreenState({this.currentUser});
 
   Future chooseImage(int whichImage) async {
@@ -47,16 +50,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         if (whichImage == 1) {
           _coverImageFile = image;
-          _coverImageUrl = null;
+          if (_coverImageFile != null) _coverImageUrl = null;
         } else {
           _profileImageFile = image;
-          _profileImageUrl = null;
+          if (_profileImageFile != null) _profileImageUrl = null;
         }
       });
     });
   }
 
   void loadUserData() async {
+    setState(() {
+      _loading = true;
+    });
     await _firestore
         .collection('users')
         .document(currentUser.uid)
@@ -73,6 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         _profileImageFile = null;
         _coverImageFile = null;
+        _loading = false;
       });
     });
   }
@@ -80,6 +87,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future uploadFile(String parentFolder, var fileName) async {
     if (fileName == null) return;
 
+    _loading = true;
     print((fileName));
     StorageReference storageReference = FirebaseStorage.instance
         .ref()
@@ -108,8 +116,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             .document(currentUser.uid)
             .updateData({'cover_url': _coverImageUrl});
       }
-      _profileImageFile = null;
-      _coverImageFile = null;
+      setState(() {
+        _profileImageFile = null;
+        _coverImageFile = null;
+        _loading = false;
+      });
+
       //print(_uploadedFileURL);
     });
   }
@@ -117,10 +129,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void edit() {
     setState(() {
       _screenState = ScreenState.to_save;
+      _nameEditingController..text = _nameText;
+      _descEditingController..text = _descText;
     });
   }
 
   Future save() async {
+
     setState(() {
       _screenState = ScreenState.to_edit;
       _descText = _descEditingController.text;
@@ -208,7 +223,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               currentUser: currentUser,
                             ));
                     setState(() {
-                      _coverImageUrl = result;
+                      if (result != null) {
+                        _coverImageUrl = result;
+                      }
                     });
                   } else if (_coverImageFile != null) {
                     var result = await showDialog(
@@ -220,7 +237,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               currentUser: currentUser,
                             ));
                     setState(() {
-                      _coverImageUrl = result;
+                      if (result != null) {
+                        _coverImageUrl = result;
+                      }
                     });
                   } else {
                     var result = await showDialog(
@@ -232,7 +251,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               currentUser: currentUser,
                             ));
                     setState(() {
-                      _coverImageUrl = result;
+                      if (result != null) {
+                        _coverImageUrl = result;
+                      }
                     });
                   }
                 },
@@ -273,7 +294,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 currentUser: currentUser,
                               ));
                       setState(() {
-                        _profileImageUrl = result;
+                        if (result != null) {
+                          _profileImageUrl = result;
+                        }
                       });
                     } else if (_profileImageFile != null) {
                       var result = await showDialog(
@@ -285,7 +308,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 currentUser: currentUser,
                               ));
                       setState(() {
-                        _profileImageUrl = result;
+                        if (result != null) {
+                          _profileImageUrl = result;
+                        }
                       });
                     } else {
                       var result = await showDialog(
@@ -298,7 +323,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ));
 
                       setState(() {
-                        _profileImageUrl = result;
+                        if (result != null) {
+                          _profileImageUrl = result;
+                        }
                       });
                     }
                   },
@@ -332,86 +359,98 @@ class _ProfileScreenState extends State<ProfileScreen> {
       loadUserData();
     }
     return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            _profileAndCover(),
-            SizedBox(
-              height: 10,
-            ),
-            _screenState == ScreenState.to_edit
-                ? Text(
-                    _nameText,
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  )
-                : Container(
-                    height: 30,
-                    width: 200,
-                    child: TextField(
-                      textAlign: TextAlign.center,
-                      controller: _nameEditingController,
-                      onChanged: (text) => {},
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-            SizedBox(
-              height: 8,
-            ),
-            _screenState == ScreenState.to_edit
-                ? Text(
-                    _descText,
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                  )
-                : Container(
-                    height: 30,
-                    width: 200,
-                    child: TextField(
-                      textAlign: TextAlign.center,
-                      controller: _descEditingController,
-                      onChanged: (text) => {},
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-            SizedBox(
-              height: 8,
-            ),
-            Divider(
-              color: Colors.grey.shade400,
-            ),
-            SizedBox(
-              height: 8,
-            ),
-            Row(
+      child: Stack(
+        alignment: Alignment(0, 0),
+        children: <Widget>[
+          SingleChildScrollView(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Column(
-                  children: <Widget>[
-                    Text(
-                      'Followers',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    Text(_followers.toString())
-                  ],
+                _profileAndCover(),
+                SizedBox(
+                  height: 10,
+                ),
+                _screenState == ScreenState.to_edit
+                    ? Text(
+                        _nameText,
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
+                      )
+                    : Container(
+                        height: 30,
+                        width: 200,
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          controller: _nameEditingController,
+                          onChanged: (text) => {},
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                SizedBox(
+                  height: 8,
+                ),
+                _screenState == ScreenState.to_edit
+                    ? Text(
+                        _descText,
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      )
+                    : Container(
+                        height: 30,
+                        width: 200,
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          controller: _descEditingController,
+                          onChanged: (text) => {},
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                SizedBox(
+                  height: 8,
+                ),
+                Divider(
+                  color: Colors.grey.shade400,
                 ),
                 SizedBox(
-                  width: 50,
+                  height: 8,
                 ),
-                Column(
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Text(
-                      'Following',
-                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                    Column(
+                      children: <Widget>[
+                        Text(
+                          'Followers',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        Text(_followers.toString())
+                      ],
                     ),
-                    Text(_following.toString())
+                    SizedBox(
+                      width: 50,
+                    ),
+                    Column(
+                      children: <Widget>[
+                        Text(
+                          'Following',
+                          style: TextStyle(color: Colors.grey, fontSize: 14),
+                        ),
+                        Text(_following.toString())
+                      ],
+                    ),
                   ],
-                ),
+                )
               ],
-            )
-          ],
-        ),
+            ),
+          ),
+          _loading
+          ? LoaderTwo()
+          : Container(
+            width: 0,
+            height: 0,
+          ),
+        ],
       ),
     );
   }
