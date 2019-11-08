@@ -11,7 +11,7 @@ class TwitterBody extends StatelessWidget {
   ];
   final names = ['apple', 'orange', 'banana', 'guava', 'papaya', 'strawberry'];
   final usernames = [
-    '@apple',
+    '@ahmed',
     '@orange',
     '@banana',
     '@guava',
@@ -37,6 +37,7 @@ class TwitterBody extends StatelessWidget {
   final replies = ['1', '15', '10', '19', '69', '3'];
   final retweets = ['10', '1k', '1', '9', '6', '30'];
   final likes = ['50', '10', '70', '2', '5', '10'];
+
   Widget getList() {
     return ListView.builder(
       itemCount: 6,
@@ -228,6 +229,8 @@ class TwitterBody extends StatelessWidget {
       ),
     );
   }
+
+
 
   @override
   Widget build(BuildContext context) {
