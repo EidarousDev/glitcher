@@ -184,11 +184,20 @@ class _LoginPageState extends State<LoginPage>
     }
   }
 
-  void moveUserProfileScreen(FirebaseUser currentUser) {
+  void moveUserToProfileScreen(FirebaseUser currentUser) {
     Navigator.of(context).push<String>(
       new MaterialPageRoute(
         settings: RouteSettings(name: '/profile_screen'),
         builder: (context) => ProfileScreen(currentUser: currentUser),
+      ),
+    );
+  }
+
+  void moveUserToHome(FirebaseUser currentUser) {
+    Navigator.of(context).push<String>(
+      new MaterialPageRoute(
+        settings: RouteSettings(name: '/home'),
+        builder: (context) => HomePage(),
       ),
     );
   }
@@ -232,7 +241,7 @@ class _LoginPageState extends State<LoginPage>
             .user;
         addUserToDatabase(userLoggedIn.uid);
         //moveUserDashboardScreen(userLoggedIn);
-        moveUserProfileScreen(userLoggedIn);
+        moveUserToProfileScreen(userLoggedIn);
       }
     } catch (e) {
       print(e);
@@ -245,7 +254,7 @@ class _LoginPageState extends State<LoginPage>
       FirebaseUser userLoggedIn = (await _auth.signInWithEmailAndPassword(
               email: mEmail, password: mPassword))
           .user;
-      moveUserProfileScreen(userLoggedIn);
+      moveUserToProfileScreen(userLoggedIn);
       //moveUserDashboardScreen(userLoggedIn);
     } catch (e) {
       print(e);

@@ -1,8 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/screens/home/home_body.dart';
-import 'package:glitcher/screens/home/profile.dart';
 import 'package:glitcher/screens/login_page.dart';
+import 'package:glitcher/screens/new_post.dart';
+import 'package:glitcher/screens/profile_screen.dart';
 
 class HomePage extends StatefulWidget {
   static const String id = 'home_page';
@@ -13,6 +14,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _auth = FirebaseAuth.instance;
+
+  FirebaseUser currentUser;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,7 +41,7 @@ class _HomePageState extends State<HomePage> {
         title: Text('Home'),
       ),
       //MainBody
-      body: TwitterBody(),
+      body: HomeBody(),
       drawer: Drawer(
         // The sidebar/Drawer
         child: Container(
@@ -54,7 +57,7 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ProfilePage()));
+                              builder: (context) => ProfileScreen(currentUser: currentUser,)));
                     },
                     child: Container(
                       width: 75.0,
@@ -105,15 +108,24 @@ class _HomePageState extends State<HomePage> {
                     padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
                     child: Column(
                       children: <Widget>[
-                        ListTile(
-                          title: Text(
-                            'Profile',
-                            style: TextStyle(color: Colors.black54),
+                        FlatButton(
+                          child: ListTile(
+                            title: Text(
+                              'Profile',
+                              style: TextStyle(color: Colors.black54),
+                            ),
+                            leading: Icon(
+                              Icons.person,
+                              color: Colors.grey,
+                            ),
                           ),
-                          leading: Icon(
-                            Icons.person,
-                            color: Colors.grey,
-                          ),
+                          onPressed: (){
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ProfileScreen(currentUser: currentUser,)));
+
+                          },
                         ),
                         ListTile(
                           title: Text(
@@ -222,7 +234,13 @@ class _HomePageState extends State<HomePage> {
       ),
 
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => NewPost(currentUser: currentUser,)));
+
+        },
         child: Icon(Icons.edit),
         backgroundColor: Theme.of(context).accentColor,
       ),
@@ -257,10 +275,10 @@ class _HomePageState extends State<HomePage> {
 
   void getCurrentUser() async {
     try {
-      final user = await _auth.currentUser();
-      if (user != null) {
+      currentUser = await _auth.currentUser();
+      if (currentUser != null) {
         //Navigator.pushNamed(context, HomePage.id);
-        print("User logged: " + user.email);
+        print("User logged: " + currentUser.email);
       } else {
         moveUserTo(widget: LoginPage(), routeId: HomePage.id);
       }

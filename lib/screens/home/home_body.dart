@@ -1,45 +1,97 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 
-class TwitterBody extends StatelessWidget {
-  final profileimages = [
-    'assets/images/face1.jpeg',
-    'assets/images/face2.jpeg',
-    'assets/images/face3.jpeg',
-    'assets/images/face4.jpeg',
-    'assets/images/face5.jpeg',
-    'assets/images/face5.jpeg',
-  ];
-  final names = ['apple', 'orange', 'banana', 'guava', 'papaya', 'strawberry'];
-  final usernames = [
-    '@apple',
-    '@orange',
-    '@banana',
-    '@guava',
-    '@papaya',
-    '@strawberry'
-  ];
-  final images = [
-    null,
-    'assets/images/image1.jpeg',
-    null,
-    'assets/images/face4.jpeg',
-    null,
-    'assets/images/image2.jpeg',
-  ];
-  final tweets = [
-    'Create the highest, grandest vision possible for your life, because you become what you believe.',
-    'When you can’t find the sunshine, be the sunshine',
-    'The grass is greener where you water it',
-    'Wherever life plants you, bloom with grace',
-    'So, what if, instead of thinking about solving your whole life, you just think about adding additional good things. One at a time. Just let your pile of good things grow',
-    'Little by little, day by day, what is mean for you WILL find its way',
-  ];
-  final replies = ['1', '15', '10', '19', '69', '3'];
-  final retweets = ['10', '1k', '1', '9', '6', '30'];
-  final likes = ['50', '10', '70', '2', '5', '10'];
+class HomeBody extends StatefulWidget {
+  @override
+  _HomeBodyState createState() => _HomeBodyState();
+}
+
+class _HomeBodyState extends State<HomeBody> {
+  Firestore _firestore = Firestore.instance;
+
+  var posts = [];
+  Timestamp lastVisiblePostSnapShot;
+  var postsRef;
+
+  var profileimages = [];
+  var names = ['ahmed'];
+  var usernames = [];
+  var replies = ['1'];
+  var retweets = ['10'];
+  var likes = ['50'];
+
+  var _scrollController = ScrollController();
+
+  void loadPosts() async {
+    await _firestore
+        .collection("posts")
+        .orderBy("timestamp")
+        .limit(10)
+        .getDocuments()
+        .then((snap) {
+      for (int i = 0; i < snap.documents.length; i++) {
+        setState(() {
+          this.posts.add(snap.documents[i].data);
+          loadUserData(snap.documents[i].data['owner']);
+        });
+      }
+
+      this.lastVisiblePostSnapShot =
+          snap.documents[snap.documents.length - 1].data['timestamp'];
+
+    });
+  }
+
+  void loadUserData(String uid) async {
+    await _firestore
+        .collection('users')
+        .document(uid)
+        .get()
+        .then((onValue) {
+      setState(() {
+        profileimages.add(onValue.data['profile_url']);
+        usernames.add(onValue.data['name']);
+      });
+    });
+  }
+
+  nextPosts() async {
+    await _firestore
+        .collection("posts")
+        .orderBy("timestamp")
+        .startAfter([this.lastVisiblePostSnapShot])
+        .limit(10)
+        .getDocuments().then((snap) {
+      for (int i = 0; i < snap.documents.length; i++) {
+        setState(() {
+          this.posts.add(snap.documents[i].data);
+          loadUserData(snap.documents[i].data['owner']);
+        });
+      }
+      this.lastVisiblePostSnapShot = snap.documents[snap.documents.length - 1].data['timestamp'];
+    });
+  }
+
+  prev() async {
+    this.posts = [];
+    var query = await this
+        .postsRef
+        .orderBy("city")
+        .endBefore(this.lastVisiblePostSnapShot)
+        .limit(10);
+    query.get().then((snap) {
+      snap.forEach((doc) {
+        this.posts.add(doc.data());
+      });
+      this.lastVisiblePostSnapShot = snap.docs[snap.docs.length - 1];
+    });
+  }
+
   Widget getList() {
     return ListView.builder(
-      itemCount: 6,
+      controller: _scrollController,
+      itemCount: posts.length,
       itemBuilder: (context, index) => Column(
         children: <Widget>[
           Row(
@@ -55,7 +107,7 @@ class TwitterBody extends StatelessWidget {
                     shape: BoxShape.circle,
                     image: DecorationImage(
                       fit: BoxFit.fitHeight,
-                      image: AssetImage(profileimages[index]),
+                      image: NetworkImage(profileimages[index]),
                     ),
                   ),
                 ),
@@ -73,7 +125,7 @@ class TwitterBody extends StatelessWidget {
                           Row(
                             children: <Widget>[
                               Text(
-                                names[index],
+                                names[0],
                                 style: TextStyle(
                                     color: Colors.black54,
                                     fontWeight: FontWeight.bold),
@@ -98,20 +150,21 @@ class TwitterBody extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 0.0, bottom: 8.0),
                         child: Text(
-                          tweets[index],
+                          posts.length > 0 ? posts[index]['text'] : '',
                           style: TextStyle(
                             color: Colors.black54,
                           ),
                         ),
                       ),
                       Container(
-                        child: images[index] == null
+                        child: posts[index]['image'] == null
                             ? null
                             : Container(
                                 width: double.infinity,
                                 child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8.0),
-                                    child: Image.asset(images[index])),
+                                    child:
+                                        Image.network(posts[index]['image'])),
                               ),
                       ),
                       Padding(
@@ -139,7 +192,7 @@ class TwitterBody extends StatelessWidget {
                                     height: 14.0,
                                     width: 18.0,
                                     child: Text(
-                                      replies[index],
+                                      replies[0],
                                       style: TextStyle(color: Colors.black54),
                                     )),
                               ],
@@ -164,7 +217,7 @@ class TwitterBody extends StatelessWidget {
                                     height: 14.0,
                                     width: 18.0,
                                     child: Text(
-                                      retweets[index],
+                                      retweets[0],
                                       style: TextStyle(color: Colors.black54),
                                     )),
                               ],
@@ -189,7 +242,7 @@ class TwitterBody extends StatelessWidget {
                                     height: 14.0,
                                     width: 18.0,
                                     child: Text(
-                                      likes[index],
+                                      likes[0],
                                       style: TextStyle(color: Colors.grey),
                                     )),
                               ],
@@ -235,5 +288,21 @@ class TwitterBody extends StatelessWidget {
       color: Theme.of(context).primaryColor,
       child: getList(),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.atEdge) {
+        if (_scrollController.position.pixels == 0) {
+        } else {
+          nextPosts();
+        }
+      }
+    });
+
+    loadPosts();
   }
 }

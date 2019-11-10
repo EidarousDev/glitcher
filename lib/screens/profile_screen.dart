@@ -355,9 +355,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _build() {
-    if (userData == null) {
-      loadUserData();
-    }
     return SafeArea(
       child: Stack(
         alignment: Alignment(0, 0),
@@ -455,6 +452,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  @override
+  void initState() {
+    super.initState();
+
+    if (userData == null) {
+      loadUserData();
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

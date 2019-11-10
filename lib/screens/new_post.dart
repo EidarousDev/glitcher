@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:glitcher/utils/Loader.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:video_player/video_player.dart';
@@ -7,11 +9,13 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:toast/toast.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:chewie/chewie.dart';
 
 class NewPost extends StatefulWidget {
+  FirebaseUser currentUser;
+  NewPost({this.currentUser});
   @override
-  _NewPostState createState() => _NewPostState();
+  _NewPostState createState() => _NewPostState(currentUser: currentUser);
 }
 
 class _NewPostState extends State<NewPost> {
@@ -19,13 +23,16 @@ class _NewPostState extends State<NewPost> {
   var _video;
   var _uploadedFileURL;
   bool _isPlaying;
-  VideoPlayerController _controller;
+  VideoPlayerController videoPlayerController;
+  ChewieController chewieController;
+  Chewie playerWidget;
+  FirebaseUser currentUser;
+
+  _NewPostState({this.currentUser});
 
   //YoutubePlayer
   bool _showYoutubeUrl = false;
   String _youtubeId;
-  //String _playerStatus = "";
-  //String _errorCode = '0';
   YoutubePlayerController _youtubeController = YoutubePlayerController();
   final uTubeTextController = TextEditingController();
   final mainTextController = TextEditingController();
@@ -38,6 +45,35 @@ class _NewPostState extends State<NewPost> {
   void initState() {
     super.initState();
   }
+
+  void playVideo() {
+    videoPlayerController = VideoPlayerController.file(_video) ;
+    chewieController = ChewieController(
+      videoPlayerController: videoPlayerController,
+      aspectRatio: videoPlayerController.value.aspectRatio,
+      autoPlay: true,
+      looping: false,
+    );
+
+    playerWidget = Chewie(
+      controller: chewieController,
+    );
+    videoPlayerController..addListener(() {
+      final bool isPlaying = videoPlayerController.value.isPlaying;
+      if (isPlaying != _isPlaying) {
+        setState(() {
+          _isPlaying = isPlaying;
+        });
+      }
+    });
+    videoPlayerController..initialize().then((_) {
+      // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+      setState(() {
+      });
+    });
+  }
+
+
   void listener() {
     if (_youtubeController.value.playerState == PlayerState.ENDED) {
       //_showThankYouDialog();
@@ -50,51 +86,19 @@ class _NewPostState extends State<NewPost> {
     }
   }
 
-  void playVideo() {
-    _controller = VideoPlayerController.file(_video) ;
-    _controller..addListener(() {
-        final bool isPlaying = _controller.value.isPlaying;
-        if (isPlaying != _isPlaying) {
-          setState(() {
-            _isPlaying = isPlaying;
-          });
-        }
-      });
-      _controller..initialize().then((_) {
-        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-        setState(() {
-        });
-      });
+  @override
+  void dispose() {
+    videoPlayerController.dispose();
+    chewieController.dispose();
+    super.dispose();
   }
 
-  void _pause() {
-    setState(() {
-      _controller.pause();
-    });
-  }
-
-  void _play() {
-    setState(() {
-      if (!_controller.value.initialized) {
-        _controller.initialize().then((_) {
-          _controller.play();
-        }).catchError((dynamic error) => print('Video player error: $error'));
-      } else {
-        if (_controller.value.position >= _controller.value.duration) {
-          _controller.seekTo(Duration(seconds: 0));
-        }
-        _controller.play();
-      }
-    });
-  }
-
-  void clearVars(){
+  void clearVars() {
     setState(() {
       _video = null;
       _image = null;
       _youtubeId = null;
     });
-
   }
 
   Future chooseImage() async {
@@ -111,16 +115,12 @@ class _NewPostState extends State<NewPost> {
     await ImagePicker.pickVideo(source: ImageSource.gallery).then((video) {
       setState(() {
         _video = video;
+        playVideo();
       });
     });
-
-    playVideo();
   }
 
   Future uploadFile(String parentFolder, var fileName) async {
-    setState(() {
-      _loading = true;
-    });
     if (fileName == null) return;
 
     print((fileName));
@@ -135,200 +135,182 @@ class _NewPostState extends State<NewPost> {
       setState(() {
         _uploadedFileURL = fileURL;
       });
-      print(_uploadedFileURL);
-      uploadPost(mainTextController.text);
     });
-
   }
 
   Future uploadPost(String text) async {
-    await _firestore.collection('posts').add({
-      'text' : text,
-      'youtubeId' : _youtubeId,
-      'video' : _video != null ? _uploadedFileURL : null,
-      'image' : _image != null ? _uploadedFileURL : null,
-    }).then((_){
-      print('post uploaded');
-      Toast.show('Post uploaded', context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
+    setState(() {
+      _loading = true;
+    });
+
+    if (_video != null) {
+      await uploadFile('videos', _video);
+    } else if (_image != null) {
+      await uploadFile('images', _image);
+    }
+
+    await _firestore
+        .collection('posts')
+        .add({
+      'owner': currentUser.uid,
+      'text': text,
+      'youtubeId': _youtubeId,
+      'video': _video != null ? _uploadedFileURL : null,
+      'image': _image != null ? _uploadedFileURL : null,
+      'timestamp' : FieldValue.serverTimestamp()
+    }).then((_) {
       setState(() {
         _loading = false;
+        Navigator.pop(context);
       });
     });
   }
 
   Widget _buildWidget() {
     return SafeArea(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: mainTextController,
-              decoration: new InputDecoration.collapsed(
-                  hintText: 'What\'s in your mind?'),
-              minLines: 1,
-              maxLines: 5,
-              autocorrect: true,
-              autofocus: true,
-            ),
-          ),
-
-          SizedBox(
-            height: 15,
-          ),
-
-          _showYoutubeUrl
-              ? Row(
-            children: <Widget>[
-              Expanded(
-                flex: 11,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    controller: uTubeTextController,
-                    decoration: new InputDecoration.collapsed(
-                        hintText: 'Paste YOUTUBE Url here'),
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 2,
-                child: Container(
-                  margin: EdgeInsets.only(right: 3),
-                  child: RaisedButton(
-                      child: Text('OK'),
-                      textColor: Colors.white,
-                      color: Colors.blue,
-                      onPressed: () {
-                        setState(() {
-                          _youtubeId = YoutubePlayer.convertUrlToId(uTubeTextController.text);
-                          _showYoutubeUrl = false;
-                          _video = null;
-                          _image = null;
-                        });
-                      }),
-                ),
-              )
-            ],
-          )
-              : Container(),
-
-          _video != null
-              ? Stack(alignment: const Alignment(0, 0), children: <Widget>[
-            AspectRatio(
-              aspectRatio: _controller.value.aspectRatio,
-              child: VideoPlayer(_controller),
-            ),
-            Center(
-              child: FloatingActionButton(
-                backgroundColor: Colors.blue,
-                onPressed: () {
-                  setState(() {
-                    _isPlaying ? _pause() : _play();
-                  });
-                },
-                child: Icon(
-                  _isPlaying ? Icons.pause : Icons.play_arrow,
-                ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: mainTextController,
+                decoration: new InputDecoration.collapsed(
+                    hintText: 'What\'s in your mind?'),
+                minLines: 1,
+                maxLines: 5,
+                autocorrect: true,
+                autofocus: true,
               ),
             ),
-          ])
-              : Container(),
-
-          _youtubeId != null
-              ? YoutubePlayer(
-            context: context,
-            videoId: _youtubeId,
-            flags: YoutubePlayerFlags(
-              autoPlay: false,
-              showVideoProgressIndicator: true,
+            SizedBox(
+              height: 15,
             ),
-            videoProgressIndicatorColor: Colors.red,
-            progressColors: ProgressColors(
-              playedColor: Colors.red,
-              handleColor: Colors.redAccent,
-            ),
-            onPlayerInitialized: (controller) {
-              _youtubeController = controller;
-              _youtubeController.addListener(listener);
-            },
-          ): Container(),
-
-          _image != null ? Image.file(_image) : Container(),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Expanded(
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 10),
-                  child: RaisedButton(
-                      child: Icon(FontAwesome.getIconData("file-video-o")),
-                      textColor: Colors.white,
-                      color: Colors.blue,
-                      onPressed: () {
-                        chooseVideo();
-                      }),
-                ),
-                flex: 1,
-              ),
-              SizedBox(
-                width: 20,
-              ),
-              Expanded(
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 10),
-                  child: RaisedButton(
-                      child: Icon(FontAwesome.getIconData("youtube")),
-                      textColor: Colors.white,
-                      color: Colors.blue,
-                      onPressed: () {
-                        setState(() {
-                          _showYoutubeUrl = true;
-                        });
-                      }),
-                ),
-                flex: 1,
-              ),
-              SizedBox(
-                width: 20,
-              ),
-              Expanded(
-                child: Container(
+            _showYoutubeUrl
+                ? Row(
+                    children: <Widget>[
+                      Expanded(
+                        flex: 11,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextField(
+                            controller: uTubeTextController,
+                            decoration: new InputDecoration.collapsed(
+                                hintText: 'Paste YOUTUBE Url here'),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Container(
+                          margin: EdgeInsets.only(right: 3),
+                          child: RaisedButton(
+                              child: Text('OK'),
+                              textColor: Colors.white,
+                              color: Colors.blue,
+                              onPressed: () {
+                                setState(() {
+                                  _youtubeId = YoutubePlayer.convertUrlToId(
+                                      uTubeTextController.text);
+                                  _showYoutubeUrl = false;
+                                  _video = null;
+                                  _image = null;
+                                });
+                              }),
+                        ),
+                      )
+                    ],
+                  )
+                : Container(),
+            _video != null
+                ? playerWidget
+                : Container(),
+            _youtubeId != null
+                ? YoutubePlayer(
+                    context: context,
+                    videoId: _youtubeId,
+                    flags: YoutubePlayerFlags(
+                      autoPlay: false,
+                      showVideoProgressIndicator: true,
+                    ),
+                    videoProgressIndicatorColor: Colors.red,
+                    progressColors: ProgressColors(
+                      playedColor: Colors.red,
+                      handleColor: Colors.redAccent,
+                    ),
+                    onPlayerInitialized: (controller) {
+                      _youtubeController = controller;
+                      _youtubeController.addListener(listener);
+                    },
+                  )
+                : Container(),
+            _image != null ? Image.file(_image) : Container(),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Expanded(
+                  child: Container(
                     margin: EdgeInsets.symmetric(horizontal: 10),
                     child: RaisedButton(
-                        child: Icon(FontAwesome.getIconData("image")),
+                        child: Icon(FontAwesome.getIconData("file-video-o")),
                         textColor: Colors.white,
                         color: Colors.blue,
                         onPressed: () {
-                          chooseImage();
-                        })),
-                flex: 1,
-              ),
-            ],
-          ),
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 10),
-            child: RaisedButton(
-                child: Text('Publish'),
-                textColor: Colors.white,
-                color: Colors.blue,
-                onPressed: () {
-                  if (_video != null) {
-                    uploadFile('videos', _video);
-                  } else if (_image != null) {
-                    uploadFile('images', _image);
-                  }
-                  else if(_video == null && _image == null){
+                          chooseVideo();
+                        }),
+                  ),
+                  flex: 1,
+                ),
+                SizedBox(
+                  width: 20,
+                ),
+                Expanded(
+                  child: Container(
+                    margin: EdgeInsets.symmetric(horizontal: 10),
+                    child: RaisedButton(
+                        child: Icon(FontAwesome.getIconData("youtube")),
+                        textColor: Colors.white,
+                        color: Colors.blue,
+                        onPressed: () {
+                          setState(() {
+                            _showYoutubeUrl = true;
+                          });
+                        }),
+                  ),
+                  flex: 1,
+                ),
+                SizedBox(
+                  width: 20,
+                ),
+                Expanded(
+                  child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 10),
+                      child: RaisedButton(
+                          child: Icon(FontAwesome.getIconData("image")),
+                          textColor: Colors.white,
+                          color: Colors.blue,
+                          onPressed: () {
+                            chooseImage();
+                          })),
+                  flex: 1,
+                ),
+              ],
+            ),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 10),
+              child: RaisedButton(
+                  child: Text('Publish'),
+                  textColor: Colors.white,
+                  color: Colors.blue,
+                  onPressed: () {
                     uploadPost(mainTextController.text);
-                  }
-
-                }),
-          )
-        ],
+                  }),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -339,11 +321,18 @@ class _NewPostState extends State<NewPost> {
       appBar: AppBar(
         title: Text('New Post'),
       ),
-      body: ModalProgressHUD(
-        child: _buildWidget(),
-        inAsyncCall: _loading,
+      body: Stack(
+        alignment: Alignment(0, 0),
+        children: <Widget>[
+          _buildWidget(),
+          _loading
+              ? LoaderTwo()
+              : Container(
+                  width: 0,
+                  height: 0,
+                ),
+        ],
       ),
-
     );
   }
 }
