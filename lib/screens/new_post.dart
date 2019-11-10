@@ -44,7 +44,6 @@ class _NewPostState extends State<NewPost> {
   @override
   void initState() {
     super.initState();
-
   }
 
   void playVideo() {
@@ -151,17 +150,6 @@ class _NewPostState extends State<NewPost> {
     }
 
     await _firestore
-        .collection('users')
-        .document(currentUser.uid)
-        .collection('posts')
-        .add({
-      'text': text,
-      'youtubeId': _youtubeId,
-      'video': _video != null ? _uploadedFileURL : null,
-      'image': _image != null ? _uploadedFileURL : null,
-    });
-
-    await _firestore
         .collection('posts')
         .add({
       'owner': currentUser.uid,
@@ -169,6 +157,7 @@ class _NewPostState extends State<NewPost> {
       'youtubeId': _youtubeId,
       'video': _video != null ? _uploadedFileURL : null,
       'image': _image != null ? _uploadedFileURL : null,
+      'timestamp' : FieldValue.serverTimestamp()
     }).then((_) {
       setState(() {
         _loading = false;

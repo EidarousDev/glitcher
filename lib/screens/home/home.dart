@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
         title: Text('Home'),
       ),
       //MainBody
-      body: TwitterBody(),
+      body: HomeBody(),
       drawer: Drawer(
         // The sidebar/Drawer
         child: Container(
