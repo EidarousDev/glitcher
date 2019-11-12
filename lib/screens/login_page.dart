@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:glitcher/utils/Loader.dart';
+import 'package:glitcher/utils/functions.dart';
+import 'package:glitcher/utils/auth.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:glitcher/screens/home/home.dart';
@@ -13,8 +17,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginPage extends StatefulWidget {
   static const String id = 'login_screen';
-  final FirebaseUser currentUser;
-  LoginPage({Key key, this.currentUser}) : super(key: key);
+
+  LoginPage({Key key, this.auth, this.loginCallback}) : super(key: key);
+
+  final BaseAuth auth;
+  final VoidCallback loginCallback;
 
   @override
   _LoginPageState createState() => new _LoginPageState();
@@ -25,6 +32,7 @@ class _LoginPageState extends State<LoginPage>
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   String mEmail, mPassword;
+  String userId = "";
 
   final FocusNode myFocusNodeEmailLogin = FocusNode();
   final FocusNode myFocusNodePasswordLogin = FocusNode();
@@ -44,6 +52,8 @@ class _LoginPageState extends State<LoginPage>
   bool _obscureTextSignup = true;
   bool _obscureTextSignupConfirm = true;
 
+  bool _loading = false;
+
   TextEditingController signupEmailController = TextEditingController();
   TextEditingController signupNameController = TextEditingController();
   TextEditingController signupPasswordController = TextEditingController();
@@ -59,11 +69,8 @@ class _LoginPageState extends State<LoginPage>
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _scaffoldKey,
-      body: NotificationListener<OverscrollIndicatorNotification>(
-        onNotification: (overscroll) {
-          overscroll.disallowGlow();
-        },
-        child: SingleChildScrollView(
+      body: Stack(alignment: Alignment(0, 0), children: <Widget>[
+        SingleChildScrollView(
           child: Container(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height >= 775.0
@@ -124,11 +131,17 @@ class _LoginPageState extends State<LoginPage>
                     ],
                   ),
                 ),
+                _loading
+                    ? LoaderTwo()
+                    : Container(
+                        width: 0,
+                        height: 0,
+                      ),
               ],
             ),
           ),
         ),
-      ),
+      ]),
     );
   }
 
@@ -141,25 +154,10 @@ class _LoginPageState extends State<LoginPage>
     super.dispose();
   }
 
-  void getCurrentUser() async {
-    try {
-      final user = await _auth.currentUser();
-      if (user != null) {
-        moveUserTo(widget: HomePage(), routeId: HomePage.id);
-        //Navigator.pushNamed(context, HomePage.id);
-        print("User logged: " + user.email);
-      } else {
-        print("User not logged in :( ");
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    getCurrentUser();
+    Functions.getCurrentUser();
 
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -184,33 +182,6 @@ class _LoginPageState extends State<LoginPage>
     }
   }
 
-  void moveUserToProfileScreen(FirebaseUser currentUser) {
-    Navigator.of(context).push<String>(
-      new MaterialPageRoute(
-        settings: RouteSettings(name: '/profile_screen'),
-        builder: (context) => ProfileScreen(currentUser: currentUser),
-      ),
-    );
-  }
-
-  void moveUserToHome(FirebaseUser currentUser) {
-    Navigator.of(context).push<String>(
-      new MaterialPageRoute(
-        settings: RouteSettings(name: '/home'),
-        builder: (context) => HomePage(),
-      ),
-    );
-  }
-
-  void moveUserTo({Widget widget, String routeId, FirebaseUser currentUser}) {
-    Navigator.of(context).push<String>(
-      new MaterialPageRoute(
-        settings: RouteSettings(name: '/$routeId'),
-        builder: (context) => widget,
-      ),
-    );
-  }
-
   void addUserToDatabase(String id) {
     Map<String, dynamic> userMap = {
       'name': signupNameController.text,
@@ -231,51 +202,45 @@ class _LoginPageState extends State<LoginPage>
 
   Future _signUp() async {
     print(mEmail + ' : ' + mPassword);
+    setState(() {
+      _loading = true;
+    });
+    print('Should be true: $_loading');
     try {
-      final newUser = await _auth.createUserWithEmailAndPassword(
-          email: mEmail, password: mPassword);
-
-      if (newUser != null) {
-        FirebaseUser userLoggedIn = (await _auth.signInWithEmailAndPassword(
-                email: mEmail, password: mPassword))
-            .user;
-        addUserToDatabase(userLoggedIn.uid);
-        //moveUserDashboardScreen(userLoggedIn);
-        moveUserToProfileScreen(userLoggedIn);
-      }
+      userId = await widget.auth.signUp(mEmail, mPassword);
+      //widget.auth.sendEmailVerification();
+      //_showVerifyEmailSentDialog();
+      print('Signed up user: $userId');
     } catch (e) {
       print(e);
     }
+    setState(() {
+      _loading = false;
+    });
+    print('Should be false: $_loading');
   }
 
   Future _login() async {
-    print(mEmail + ' : ' + mPassword);
+    //print(mEmail + ' : ' + mPassword);
+    setState(() {
+      _loading = true;
+    });
+    print('Should be true: $_loading');
     try {
-      FirebaseUser userLoggedIn = (await _auth.signInWithEmailAndPassword(
-              email: mEmail, password: mPassword))
-          .user;
-      moveUserToProfileScreen(userLoggedIn);
-      //moveUserDashboardScreen(userLoggedIn);
+      userId = await widget.auth.signIn(mEmail, mPassword);
+      //print('Signed in: $userId');
+      Functions.moveUserTo(
+          context: context, widget: HomePage(), routeId: HomePage.id);
     } catch (e) {
-      print(e);
+      // Email or Password Incorrect
+      Functions.showInSnackBar(
+          context, _scaffoldKey, 'Email or Password incorrect!');
+      //showInSnackBar('$e');
     }
-  }
-
-  void showInSnackBar(String value) {
-    FocusScope.of(context).requestFocus(new FocusNode());
-    _scaffoldKey.currentState?.removeCurrentSnackBar();
-    _scaffoldKey.currentState.showSnackBar(new SnackBar(
-      content: new Text(
-        value,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-            color: Colors.white,
-            fontSize: 16.0,
-            fontFamily: "WorkSansSemiBold"),
-      ),
-      backgroundColor: Colors.blue,
-      duration: Duration(seconds: 3),
-    ));
+    setState(() {
+      _loading = false;
+    });
+    print('Should be true: $_loading');
   }
 
   Widget _buildMenuBar(BuildContext context) {
@@ -531,7 +496,8 @@ class _LoginPageState extends State<LoginPage>
               Padding(
                 padding: EdgeInsets.only(top: 10.0, right: 40.0),
                 child: GestureDetector(
-                  onTap: () => showInSnackBar("Facebook button pressed"),
+                  onTap: () => Functions.showInSnackBar(
+                      context, _scaffoldKey, "Facebook button pressed"),
                   child: Container(
                     padding: const EdgeInsets.all(15.0),
                     decoration: new BoxDecoration(
@@ -548,7 +514,8 @@ class _LoginPageState extends State<LoginPage>
               Padding(
                 padding: EdgeInsets.only(top: 10.0),
                 child: GestureDetector(
-                  onTap: () => showInSnackBar("Google button pressed"),
+                  onTap: () => Functions.showInSnackBar(
+                      context, _scaffoldKey, "Google button pressed"),
                   child: Container(
                     padding: const EdgeInsets.all(15.0),
                     decoration: new BoxDecoration(

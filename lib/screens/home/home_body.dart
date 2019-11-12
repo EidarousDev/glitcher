@@ -1,6 +1,10 @@
+import 'package:chewie/chewie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:video_player/video_player.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class HomeBody extends StatefulWidget {
   @override
@@ -21,7 +25,61 @@ class _HomeBodyState extends State<HomeBody> {
   var retweets = ['10'];
   var likes = ['50'];
 
+  YoutubePlayerController _youtubeController = YoutubePlayerController();
+  bool _isPlaying;
+  VideoPlayerController videoPlayerController;
+  ChewieController chewieController;
+  Chewie playerWidget;
+  FirebaseUser currentUser;
+
   var _scrollController = ScrollController();
+
+  void playVideo(String video) {
+    videoPlayerController = VideoPlayerController.network(video);
+    chewieController = ChewieController(
+      videoPlayerController: videoPlayerController,
+      aspectRatio: videoPlayerController.value.aspectRatio,
+      autoPlay: true,
+      looping: false,
+    );
+
+    playerWidget = Chewie(
+      controller: chewieController,
+    );
+    videoPlayerController
+      ..addListener(() {
+        final bool isPlaying = videoPlayerController.value.isPlaying;
+        if (isPlaying != _isPlaying) {
+          setState(() {
+            _isPlaying = isPlaying;
+          });
+        }
+      });
+    videoPlayerController
+      ..initialize().then((_) {
+        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+        setState(() {});
+      });
+  }
+
+  void listener() {
+    if (_youtubeController.value.playerState == PlayerState.ENDED) {
+      //_showThankYouDialog();
+    }
+    if (mounted) {
+      setState(() {
+        //_playerStatus = _youtubeController.value.playerState.toString();
+        //_errorCode = _youtubeController.value.errorCode.toString();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    videoPlayerController.dispose();
+    chewieController.dispose();
+    super.dispose();
+  }
 
   void loadPosts() async {
     await _firestore
@@ -34,21 +92,20 @@ class _HomeBodyState extends State<HomeBody> {
         setState(() {
           this.posts.add(snap.documents[i].data);
           loadUserData(snap.documents[i].data['owner']);
+
+          if (posts[i]['video'] != null) {
+            playVideo(posts[i]['video']);
+          }
         });
       }
 
       this.lastVisiblePostSnapShot =
           snap.documents[snap.documents.length - 1].data['timestamp'];
-
     });
   }
 
   void loadUserData(String uid) async {
-    await _firestore
-        .collection('users')
-        .document(uid)
-        .get()
-        .then((onValue) {
+    await _firestore.collection('users').document(uid).get().then((onValue) {
       setState(() {
         profileimages.add(onValue.data['profile_url']);
         usernames.add(onValue.data['name']);
@@ -62,15 +119,21 @@ class _HomeBodyState extends State<HomeBody> {
         .orderBy("timestamp")
         .startAfter([this.lastVisiblePostSnapShot])
         .limit(10)
-        .getDocuments().then((snap) {
-      for (int i = 0; i < snap.documents.length; i++) {
-        setState(() {
-          this.posts.add(snap.documents[i].data);
-          loadUserData(snap.documents[i].data['owner']);
+        .getDocuments()
+        .then((snap) {
+          for (int i = 0; i < snap.documents.length; i++) {
+            setState(() {
+              this.posts.add(snap.documents[i].data);
+              loadUserData(snap.documents[i].data['owner']);
+
+              if (posts[i]['video'] != null) {
+                playVideo(posts[i]['video']);
+              }
+            });
+          }
+          this.lastVisiblePostSnapShot =
+              snap.documents[snap.documents.length - 1].data['timestamp'];
         });
-      }
-      this.lastVisiblePostSnapShot = snap.documents[snap.documents.length - 1].data['timestamp'];
-    });
   }
 
   prev() async {
@@ -166,6 +229,10 @@ class _HomeBodyState extends State<HomeBody> {
                                     child:
                                         Image.network(posts[index]['image'])),
                               ),
+                      ),
+                      Container(
+                        child:
+                            posts[index]['video'] == null ? null : playerWidget,
                       ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(8, 8, 16, 8),

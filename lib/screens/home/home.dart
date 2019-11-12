@@ -4,9 +4,17 @@ import 'package:glitcher/screens/home/home_body.dart';
 import 'package:glitcher/screens/login_page.dart';
 import 'package:glitcher/screens/new_post.dart';
 import 'package:glitcher/screens/profile_screen.dart';
+import 'package:glitcher/utils/auth.dart';
+import 'package:glitcher/utils/functions.dart';
 
 class HomePage extends StatefulWidget {
   static const String id = 'home_page';
+  HomePage({Key key, this.auth, this.userId, this.logoutCallback})
+      : super(key: key);
+
+  final BaseAuth auth;
+  final VoidCallback logoutCallback;
+  final String userId;
 
   @override
   State<StatefulWidget> createState() => _HomePageState();
@@ -57,7 +65,9 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ProfileScreen(currentUser: currentUser,)));
+                              builder: (context) => ProfileScreen(
+                                    currentUser: currentUser,
+                                  )));
                     },
                     child: Container(
                       width: 75.0,
@@ -119,12 +129,13 @@ class _HomePageState extends State<HomePage> {
                               color: Colors.grey,
                             ),
                           ),
-                          onPressed: (){
+                          onPressed: () {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => ProfileScreen(currentUser: currentUser,)));
-
+                                    builder: (context) => ProfileScreen(
+                                          currentUser: currentUser,
+                                        )));
                           },
                         ),
                         ListTile(
@@ -184,7 +195,7 @@ class _HomePageState extends State<HomePage> {
                           onPressed: () {
                             setState(() {
                               _auth.signOut();
-                              getCurrentUser();
+                              Functions.getCurrentUser();
                             });
                           },
                         ),
@@ -238,8 +249,9 @@ class _HomePageState extends State<HomePage> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => NewPost(currentUser: currentUser,)));
-
+                  builder: (context) => NewPost(
+                        currentUser: currentUser,
+                      )));
         },
         child: Icon(Icons.edit),
         backgroundColor: Theme.of(context).accentColor,
@@ -273,24 +285,10 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void getCurrentUser() async {
-    try {
-      currentUser = await _auth.currentUser();
-      if (currentUser != null) {
-        //Navigator.pushNamed(context, HomePage.id);
-        print("User logged: " + currentUser.email);
-      } else {
-        moveUserTo(widget: LoginPage(), routeId: HomePage.id);
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    getCurrentUser();
+    Functions.getCurrentUser();
   }
 
   void moveUserTo({Widget widget, String routeId, FirebaseUser currentUser}) {
