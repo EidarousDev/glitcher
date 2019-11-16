@@ -2,36 +2,41 @@ import 'package:flutter/material.dart';
 import 'package:glitcher/utils/Loader.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/utils/auth.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:glitcher/screens/home/home.dart';
-import 'package:glitcher/screens/profile_screen.dart';
 import 'package:glitcher/style/theme.dart' as Theme;
 import 'package:glitcher/utils/bubble_indication_painter.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:glitcher/utils/app_util.dart';
-import 'package:glitcher/utils/firebase_anonymously_util.dart';
-import 'package:toast/toast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginPage extends StatefulWidget {
   static const String id = 'login_screen';
 
-  LoginPage({Key key, this.auth, this.loginCallback}) : super(key: key);
+  LoginPage({Key key, this.auth, this.onSignedIn}) : super(key: key);
 
   final BaseAuth auth;
-  final VoidCallback loginCallback;
+  final VoidCallback onSignedIn;
 
   @override
   _LoginPageState createState() => new _LoginPageState();
 }
 
+enum FormMode { LOGIN, SIGNUP }
+
 class _LoginPageState extends State<LoginPage>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final _formKey = new GlobalKey<FormState>();
 
-  String mEmail, mPassword;
+  String _email;
+  String _password;
+  String _errorMessage;
+
+  // Initial form is login form
+  FormMode _formMode = FormMode.LOGIN;
+  bool _isIos;
+
   String userId = "";
 
   final FocusNode myFocusNodeEmailLogin = FocusNode();
@@ -41,8 +46,6 @@ class _LoginPageState extends State<LoginPage>
   final FocusNode myFocusNodeEmail = FocusNode();
   final FocusNode myFocusNodeName = FocusNode();
 
-  final _auth = FirebaseAuth.instance;
-  FirebaseAnonymouslyUtil firebaseAnonymouslyUtil;
   Firestore _firestore = Firestore.instance;
 
   TextEditingController loginEmailController = new TextEditingController();
@@ -51,8 +54,7 @@ class _LoginPageState extends State<LoginPage>
   bool _obscureTextLogin = true;
   bool _obscureTextSignup = true;
   bool _obscureTextSignupConfirm = true;
-
-  bool _loading = false;
+  bool _loading;
 
   TextEditingController signupEmailController = TextEditingController();
   TextEditingController signupNameController = TextEditingController();
@@ -131,16 +133,16 @@ class _LoginPageState extends State<LoginPage>
                     ],
                   ),
                 ),
-                _loading
-                    ? LoaderTwo()
-                    : Container(
-                        width: 0,
-                        height: 0,
-                      ),
               ],
             ),
           ),
         ),
+        _loading
+            ? LoaderTwo()
+            : Container(
+                width: 0,
+                height: 0,
+              ),
       ]),
     );
   }
@@ -156,8 +158,9 @@ class _LoginPageState extends State<LoginPage>
 
   @override
   void initState() {
+    _errorMessage = "";
+    _loading = false;
     super.initState();
-    Functions.getCurrentUser();
 
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -201,18 +204,21 @@ class _LoginPageState extends State<LoginPage>
   }
 
   Future _signUp() async {
-    print(mEmail + ' : ' + mPassword);
+    print(_email + ' : ' + _password);
     setState(() {
       _loading = true;
     });
     print('Should be true: $_loading');
     try {
-      userId = await widget.auth.signUp(mEmail, mPassword);
+      userId = await widget.auth.signUp(_email, _password);
       //widget.auth.sendEmailVerification();
       //_showVerifyEmailSentDialog();
-      print('Signed up user: $userId');
+      //print('Signed up user: $userId');
+      Functions.moveUserTo(
+          context: context, widget: HomePage(), routeId: HomePage.id);
     } catch (e) {
-      print(e);
+      //print(e);
+      Functions.showInSnackBar(context, _scaffoldKey, '$e');
     }
     setState(() {
       _loading = false;
@@ -227,7 +233,7 @@ class _LoginPageState extends State<LoginPage>
     });
     print('Should be true: $_loading');
     try {
-      userId = await widget.auth.signIn(mEmail, mPassword);
+      userId = await widget.auth.signIn(_email, _password);
       //print('Signed in: $userId');
       Functions.moveUserTo(
           context: context, widget: HomePage(), routeId: HomePage.id);
@@ -319,7 +325,7 @@ class _LoginPageState extends State<LoginPage>
                           controller: loginEmailController,
                           keyboardType: TextInputType.emailAddress,
                           onChanged: (value) {
-                            mEmail = value;
+                            _email = value;
                           },
                           style: TextStyle(
                               fontFamily: "WorkSansSemiBold",
@@ -351,7 +357,7 @@ class _LoginPageState extends State<LoginPage>
                           controller: loginPasswordController,
                           obscureText: _obscureTextLogin,
                           onChanged: (value) {
-                            mPassword = value;
+                            _password = value;
                           },
                           style: TextStyle(
                               fontFamily: "WorkSansSemiBold",
@@ -592,7 +598,7 @@ class _LoginPageState extends State<LoginPage>
                           focusNode: myFocusNodeEmail,
                           controller: signupEmailController,
                           onChanged: (value) {
-                            mEmail = value;
+                            _email = value;
                           },
                           keyboardType: TextInputType.emailAddress,
                           style: TextStyle(
@@ -624,7 +630,7 @@ class _LoginPageState extends State<LoginPage>
                           controller: signupPasswordController,
                           obscureText: _obscureTextSignup,
                           onChanged: (value) {
-                            mPassword = value;
+                            _password = value;
                           },
                           style: TextStyle(
                               fontFamily: "WorkSansSemiBold",
@@ -743,6 +749,56 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
+  // Check if form is valid before perform login or signup
+  bool _validateAndSave() {
+    final form = _formKey.currentState;
+    if (form.validate()) {
+      form.save();
+      return true;
+    }
+    return false;
+  }
+
+  // Perform login or signup
+  void _validateAndSubmit() async {
+    setState(() {
+      _errorMessage = "";
+      _loading = true;
+    });
+    if (_validateAndSave()) {
+      String userId = "";
+      try {
+        if (_formMode == FormMode.LOGIN) {
+          userId = await widget.auth.signIn(_email, _password);
+          print('Signed in: $userId');
+        } else {
+          userId = await widget.auth.signUp(_email, _password);
+          widget.auth.sendEmailVerification();
+          _showVerifyEmailSentDialog();
+          print('Signed up user: $userId');
+        }
+        setState(() {
+          _loading = false;
+        });
+
+        if (userId.length > 0 &&
+            userId != null &&
+            _formMode == FormMode.LOGIN) {
+          widget.onSignedIn();
+        }
+      } catch (e) {
+        print('Error: $e');
+        setState(() {
+          _loading = false;
+          if (_isIos) {
+            _errorMessage = e.details;
+          } else
+            _errorMessage = e.message;
+        });
+      }
+    }
+  }
+
   void _onSignInButtonPress() {
     _pageController.animateToPage(0,
         duration: Duration(milliseconds: 500), curve: Curves.decelerate);
@@ -754,15 +810,44 @@ class _LoginPageState extends State<LoginPage>
   }
 
   void _toggleLogin() {
+    _formKey.currentState.reset();
+    _errorMessage = "";
     setState(() {
+      _formMode = FormMode.LOGIN;
       _obscureTextLogin = !_obscureTextLogin;
     });
   }
 
   void _toggleSignup() {
+    _formKey.currentState.reset();
+    _errorMessage = "";
     setState(() {
+      _formMode = FormMode.SIGNUP;
       _obscureTextSignup = !_obscureTextSignup;
     });
+  }
+
+  void _showVerifyEmailSentDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text("Verify your account"),
+          content:
+              new Text("Link to verify account has been sent to your email"),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text("Dismiss"),
+              onPressed: () {
+                _toggleLogin();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _toggleSignupConfirm() {

@@ -4,22 +4,6 @@ import 'package:glitcher/screens/home/home.dart';
 import 'package:glitcher/screens/login_page.dart';
 
 class Functions {
-  static FirebaseUser currentUser;
-  static final _auth = FirebaseAuth.instance;
-  static void getCurrentUser() async {
-    try {
-      currentUser = await _auth.currentUser();
-      if (currentUser != null) {
-        //Navigator.pushNamed(context, HomePage.id);
-        print("User logged: " + currentUser.email);
-      } else {
-        moveUserTo(widget: LoginPage(), routeId: HomePage.id);
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
-
   static void moveUserTo(
       {BuildContext context,
       Widget widget,
