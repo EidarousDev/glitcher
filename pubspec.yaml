@@ -26,6 +26,8 @@ dependencies:
   cloud_firestore: ^0.12.9+5
   toast: ^0.1.5
   modal_progress_hud: ^0.1.3
+  soundpool: ^0.5.3
+  assets_audio_player: ^1.0.1
 
 dev_dependencies:
   flutter_test:
@@ -40,6 +42,7 @@ flutter:
   assets:
    - assets/img/login_logo.png
    - assets/images/
+   - assets/sounds/
 
   fonts:
     - family: WorkSansSemiBold

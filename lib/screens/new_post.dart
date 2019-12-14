@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:glitcher/utils/Loader.dart';
+import 'package:glitcher/utils/auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:video_player/video_player.dart';
@@ -15,7 +16,7 @@ class NewPost extends StatefulWidget {
   FirebaseUser currentUser;
   NewPost({this.currentUser});
   @override
-  _NewPostState createState() => _NewPostState(currentUser: currentUser);
+  _NewPostState createState() => _NewPostState();
 }
 
 class _NewPostState extends State<NewPost> {
@@ -28,7 +29,7 @@ class _NewPostState extends State<NewPost> {
   Chewie playerWidget;
   FirebaseUser currentUser;
 
-  _NewPostState({this.currentUser});
+
 
   //YoutubePlayer
   bool _showYoutubeUrl = false;
@@ -44,6 +45,7 @@ class _NewPostState extends State<NewPost> {
   @override
   void initState() {
     super.initState();
+    getCurrentUser();
   }
 
   void playVideo() {
@@ -157,6 +159,9 @@ class _NewPostState extends State<NewPost> {
       'youtubeId': _youtubeId,
       'video': _video != null ? _uploadedFileURL : null,
       'image': _image != null ? _uploadedFileURL : null,
+      'likes': 0,
+      'dislikes': 0,
+      'comments': 0,
       'timestamp' : FieldValue.serverTimestamp()
     }).then((_) {
       setState(() {
@@ -164,6 +169,10 @@ class _NewPostState extends State<NewPost> {
         Navigator.pop(context);
       });
     });
+  }
+
+  void getCurrentUser() async{
+    this.currentUser = await Auth().getCurrentUser();
   }
 
   Widget _buildWidget() {

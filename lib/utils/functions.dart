@@ -6,6 +6,7 @@ import 'package:glitcher/screens/login_page.dart';
 class Functions {
   static FirebaseUser currentUser;
   static final _auth = FirebaseAuth.instance;
+
   static void getCurrentUser() async {
     try {
       currentUser = await _auth.currentUser();

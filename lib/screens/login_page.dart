@@ -69,7 +69,9 @@ class _LoginPageState extends State<LoginPage>
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _scaffoldKey,
-      body: Stack(alignment: Alignment(0, 0), children: <Widget>[
+      body: Stack(
+          alignment: Alignment(0, 0),
+          children: <Widget>[
         SingleChildScrollView(
           child: Container(
             width: MediaQuery.of(context).size.width,
@@ -131,16 +133,17 @@ class _LoginPageState extends State<LoginPage>
                     ],
                   ),
                 ),
-                _loading
-                    ? LoaderTwo()
-                    : Container(
-                        width: 0,
-                        height: 0,
-                      ),
+
               ],
             ),
           ),
         ),
+            _loading
+                ? LoaderTwo()
+                : Container(
+                  width: 0,
+                  height: 0,
+            ),
       ]),
     );
   }

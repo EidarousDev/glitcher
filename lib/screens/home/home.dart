@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/screens/home/home_body.dart';
@@ -16,20 +17,39 @@ class HomePage extends StatefulWidget {
   final VoidCallback logoutCallback;
   final String userId;
 
+
   @override
   State<StatefulWidget> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   final _auth = FirebaseAuth.instance;
+  Firestore _firestore = Firestore.instance;
+
+  String username;
+
+  String profileImageUrl;
+
+
+  void loadUserData(String uid) async {
+    await _firestore.collection('users').document(uid).get().then((onValue) {
+      setState(() {
+        username = onValue.data['username'];
+        profileImageUrl = onValue.data['profile_url'];
+      });
+    });
+  }
 
   FirebaseUser currentUser;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       //AppBar
       appBar: AppBar(
+
         leading: Builder(
+
             builder: (context) => Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: InkWell(
@@ -39,7 +59,7 @@ class _HomePageState extends State<HomePage> {
                         shape: BoxShape.circle,
                         image: DecorationImage(
                           fit: BoxFit.fill,
-                          image: AssetImage('assets/images/face1.jpeg'),
+                          image: NetworkImage(profileImageUrl),
                         ),
                       ),
                     ),
@@ -65,9 +85,7 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ProfileScreen(
-                                    currentUser: currentUser,
-                                  )));
+                              builder: (context) => ProfileScreen()));
                     },
                     child: Container(
                       width: 75.0,
@@ -76,7 +94,7 @@ class _HomePageState extends State<HomePage> {
                         shape: BoxShape.circle,
                         image: DecorationImage(
                           fit: BoxFit.fitHeight,
-                          image: AssetImage('assets/images/face1.jpeg'),
+                          image: NetworkImage(profileImageUrl),
                         ),
                       ),
                     ),
@@ -87,27 +105,21 @@ class _HomePageState extends State<HomePage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Text(
-                        'carol Danvers',
-                        style: TextStyle(
-                            color: Colors.black54,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                        child: Text(
+                          username,
+                          style: TextStyle(
+                              color: Colors.black54,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20),
+                        ),
                       ),
                       Icon(Icons.arrow_drop_down)
                     ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                  child: Text(
-                    '@dan_carol',
-                    style: TextStyle(
-                        color: Colors.grey,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14),
-                  ),
-                ),
+
                 Container(
                   width: double.infinity,
                   color: Colors.grey,
@@ -118,25 +130,21 @@ class _HomePageState extends State<HomePage> {
                     padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
                     child: Column(
                       children: <Widget>[
-                        FlatButton(
-                          child: ListTile(
-                            title: Text(
-                              'Profile',
-                              style: TextStyle(color: Colors.black54),
-                            ),
-                            leading: Icon(
-                              Icons.person,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          onPressed: () {
+                        ListTile(
+                          onTap: (){
                             Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ProfileScreen(
-                                          currentUser: currentUser,
-                                        )));
+                            context,
+                            MaterialPageRoute(
+                            builder: (context) => ProfileScreen()));
                           },
+                          title: Text(
+                            'Profile',
+                            style: TextStyle(color: Colors.black54),
+                          ),
+                          leading: Icon(
+                            Icons.person,
+                            color: Colors.grey,
+                          ),
                         ),
                         ListTile(
                           title: Text(
@@ -288,7 +296,12 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    Functions.getCurrentUser();
+    getCurrentUser();
+  }
+
+  void getCurrentUser() async{
+    this.currentUser = await Auth().getCurrentUser();
+    loadUserData(currentUser.uid);
   }
 
   void moveUserTo({Widget widget, String routeId, FirebaseUser currentUser}) {
