@@ -642,9 +642,24 @@ class _HomeBodyState extends State<HomeBody> {
                   },
                   onFocusChanged: (hasFocus) {},
                   itemBuilder: (context, item) {
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(item),
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Container(
+                            color: Colors.grey.shade300,
+                            child: Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Text(item),
+                            )),
+
+                        Container(
+                          width: double.infinity,
+                          color: Colors.grey,
+                          height: .5,
+                        )
+
+                      ],
                     );
                   },
                 ),
