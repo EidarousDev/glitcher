@@ -2,11 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/screens/home/home_body.dart';
-import 'package:glitcher/screens/login_page.dart';
 import 'package:glitcher/screens/new_post.dart';
 import 'package:glitcher/screens/profile_screen.dart';
 import 'package:glitcher/utils/auth.dart';
 import 'package:glitcher/utils/functions.dart';
+import 'package:glitcher/utils/statics.dart';
 
 class HomePage extends StatefulWidget {
   static const String id = 'home_page';
@@ -67,6 +67,16 @@ class _HomePageState extends State<HomePage> {
                 )),
         backgroundColor: Theme.of(context).primaryColorDark,
         title: Text('Home'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.filter_list),
+            onPressed: () {
+              setState(() {
+                Statics.filterPanel = !Statics.filterPanel;
+              });
+            },
+          ),
+        ],
       ),
       //MainBody
       body: HomeBody(),

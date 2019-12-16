@@ -1,8 +1,11 @@
+import 'package:dropdownfield/dropdownfield.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart' as prefix0;
 import 'package:glitcher/utils/Loader.dart';
 import 'package:glitcher/utils/auth.dart';
+import 'package:glitcher/utils/constants.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:video_player/video_player.dart';
@@ -11,6 +14,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:toast/toast.dart';
 import 'package:chewie/chewie.dart';
+import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 
 class NewPost extends StatefulWidget {
   FirebaseUser currentUser;
@@ -29,8 +33,6 @@ class _NewPostState extends State<NewPost> {
   Chewie playerWidget;
   FirebaseUser currentUser;
 
-
-
   //YoutubePlayer
   bool _showYoutubeUrl = false;
   String _youtubeId;
@@ -41,6 +43,9 @@ class _NewPostState extends State<NewPost> {
   bool _loading = false;
 
   var _firestore = Firestore.instance;
+
+  String selectedCategory = "";
+  GlobalKey<AutoCompleteTextFieldState<String>> autocompleteKey = new GlobalKey();
 
   @override
   void initState() {
@@ -162,7 +167,8 @@ class _NewPostState extends State<NewPost> {
       'likes': 0,
       'dislikes': 0,
       'comments': 0,
-      'timestamp' : FieldValue.serverTimestamp()
+      'timestamp': FieldValue.serverTimestamp(),
+      'category':  selectedCategory
     }).then((_) {
       setState(() {
         _loading = false;
@@ -308,6 +314,43 @@ class _NewPostState extends State<NewPost> {
                 ),
               ],
             ),
+
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: AutoCompleteTextField<String>(
+
+                clearOnSubmit: false,
+                key: autocompleteKey,
+                 suggestions: Constants.categories,
+                decoration: InputDecoration(
+                  icon: Icon(Icons.videogame_asset),
+                  hintText: "Category"
+                ),
+                itemFilter: (item, query){return item.toLowerCase().startsWith(query.toLowerCase());},
+                itemSorter: (a, b){return a.compareTo(b);},
+                itemSubmitted: (item){
+                  selectedCategory = item;
+
+                },
+                onFocusChanged: (hasFocus){},
+                itemBuilder: (context, item){return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(item),
+                );},
+              ),
+            ),
+//            DropDownField(
+//                value: selectedCategory,
+//                strict: true,
+//                icon: Icon(Icons.category),
+//                items: categories,
+//                setter: (dynamic newValue) {
+//                  setState(() {
+//                    selectedCategory = newValue;
+//                  });
+//                }
+//            ),
+
             Container(
               margin: EdgeInsets.symmetric(horizontal: 10),
               child: RaisedButton(
