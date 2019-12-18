@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/screens/home/home_body.dart';
+import 'package:glitcher/utils/auth.dart';
+import 'package:glitcher/screens/login_page.dart';
 import 'package:glitcher/screens/new_post.dart';
 import 'package:glitcher/screens/profile_screen.dart';
 import 'package:glitcher/utils/auth.dart';
@@ -10,16 +12,16 @@ import 'package:glitcher/utils/statics.dart';
 
 class HomePage extends StatefulWidget {
   static const String id = 'home_page';
-  HomePage({Key key, this.auth, this.userId, this.logoutCallback})
+  HomePage({Key key, this.auth, this.userId, this.onSignedOut})
       : super(key: key);
 
   final BaseAuth auth;
-  final VoidCallback logoutCallback;
+  final VoidCallback onSignedOut;
   final String userId;
 
 
   @override
-  State<StatefulWidget> createState() => _HomePageState();
+  State<StatefulWidget> createState() => _HomePageState(auth);
 }
 
 class _HomePageState extends State<HomePage> {
@@ -42,6 +44,8 @@ class _HomePageState extends State<HomePage> {
 
   FirebaseUser currentUser;
 
+
+  _HomePageState(auth);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -210,11 +214,13 @@ class _HomePageState extends State<HomePage> {
                               style: TextStyle(color: Colors.black54),
                             ),
                           ),
-                          onPressed: () {
-                            setState(() {
-                              _auth.signOut();
-                              Functions.getCurrentUser();
-                            });
+                          onPressed: () async {
+                            try {
+                              await widget.auth.signOut();
+                              widget.onSignedOut();
+                            } catch (e) {
+                              print(e);
+                            }
                           },
                         ),
                       ],
