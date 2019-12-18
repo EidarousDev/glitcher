@@ -31,7 +31,6 @@ class _LoginPageState extends State<LoginPage>
 
   String _email;
   String _password;
-  String _errorMessage;
 
   // Initial form is login form
   FormMode _formMode = FormMode.LOGIN;
@@ -148,6 +147,7 @@ class _LoginPageState extends State<LoginPage>
 
               ],
             ),
+    );
   }
 
   @override
@@ -161,7 +161,6 @@ class _LoginPageState extends State<LoginPage>
 
   @override
   void initState() {
-    _errorMessage = "";
     _loading = false;
     super.initState();
 
@@ -765,7 +764,6 @@ class _LoginPageState extends State<LoginPage>
   // Perform login or signup
   void _validateAndSubmit() async {
     setState(() {
-      _errorMessage = "";
       _loading = true;
     });
     if (_validateAndSave()) {
@@ -791,13 +789,7 @@ class _LoginPageState extends State<LoginPage>
         }
       } catch (e) {
         print('Error: $e');
-        setState(() {
-          _loading = false;
-          if (_isIos) {
-            _errorMessage = e.details;
-          } else
-            _errorMessage = e.message;
-        });
+        setState(() {});
       }
     }
   }
@@ -814,7 +806,6 @@ class _LoginPageState extends State<LoginPage>
 
   void _toggleLogin() {
     _formKey.currentState.reset();
-    _errorMessage = "";
     setState(() {
       _formMode = FormMode.LOGIN;
       _obscureTextLogin = !_obscureTextLogin;
@@ -823,7 +814,6 @@ class _LoginPageState extends State<LoginPage>
 
   void _toggleSignup() {
     _formKey.currentState.reset();
-    _errorMessage = "";
     setState(() {
       _formMode = FormMode.SIGNUP;
       _obscureTextSignup = !_obscureTextSignup;

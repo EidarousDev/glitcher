@@ -3,6 +3,12 @@ import 'package:glitcher/screens/login_page.dart';
 import 'package:glitcher/utils/auth.dart';
 import 'package:glitcher/screens/home/home.dart';
 
+enum AuthStatus {
+  NOT_DETERMINED,
+  NOT_LOGGED_IN,
+  LOGGED_IN,
+}
+
 class RootPage extends StatefulWidget {
   RootPage({this.auth});
 
@@ -10,12 +16,6 @@ class RootPage extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() => new _RootPageState();
-}
-
-enum AuthStatus {
-  NOT_DETERMINED,
-  NOT_LOGGED_IN,
-  LOGGED_IN,
 }
 
 class _RootPageState extends State<RootPage> {
@@ -36,7 +36,7 @@ class _RootPageState extends State<RootPage> {
     });
   }
 
-  void _onLoggedIn() {
+  void loginCallback() {
     widget.auth.getCurrentUser().then((user) {
       setState(() {
         _userId = user.uid.toString();
@@ -47,14 +47,14 @@ class _RootPageState extends State<RootPage> {
     });
   }
 
-  void _onSignedOut() {
+  void logoutCallback() {
     setState(() {
       authStatus = AuthStatus.NOT_LOGGED_IN;
       _userId = "";
     });
   }
 
-  Widget _buildWaitingScreen() {
+  Widget buildWaitingScreen() {
     return Scaffold(
       body: Container(
         alignment: Alignment.center,
@@ -67,12 +67,11 @@ class _RootPageState extends State<RootPage> {
   Widget build(BuildContext context) {
     switch (authStatus) {
       case AuthStatus.NOT_DETERMINED:
-        return _buildWaitingScreen();
+        return buildWaitingScreen();
         break;
       case AuthStatus.NOT_LOGGED_IN:
         return new LoginPage(
           auth: widget.auth,
-          onSignedIn: _onLoggedIn,
         );
         break;
       case AuthStatus.LOGGED_IN:
@@ -80,13 +79,12 @@ class _RootPageState extends State<RootPage> {
           return new HomePage(
             userId: _userId,
             auth: widget.auth,
-            onSignedOut: _onSignedOut,
           );
         } else
-          return _buildWaitingScreen();
+          return buildWaitingScreen();
         break;
       default:
-        return _buildWaitingScreen();
+        return buildWaitingScreen();
     }
   }
 }
