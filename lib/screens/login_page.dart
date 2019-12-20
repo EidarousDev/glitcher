@@ -304,8 +304,15 @@ class _LoginPageState extends State<LoginPage>
               context, _scaffoldKey, "Passwords don't match");
           myFocusNodePassword.requestFocus();
         } else {
-          print('$_errorMsgUsername\n$_errorMsgEmail');
-          Functions.showInSnackBar(context, _scaffoldKey, "An Error Occurred");
+          if (_errorMsgUsername != null) {
+            Functions.showInSnackBar(context, _scaffoldKey, _errorMsgUsername);
+          } else if (_errorMsgEmail != null) {
+            Functions.showInSnackBar(context, _scaffoldKey, _errorMsgEmail);
+          } else {
+            print('$_errorMsgUsername\n$_errorMsgEmail');
+            Functions.showInSnackBar(
+                context, _scaffoldKey, "An Error Occurred");
+          }
         }
       }
     }
