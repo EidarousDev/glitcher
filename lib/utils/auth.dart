@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 abstract class BaseAuth {
   Future<String> signIn(String email, String password);
 
-  Future<String> signUp(String email, String password);
+  Future<String> signUp(String username, String email, String password);
 
   Future<FirebaseUser> getCurrentUser();
 
@@ -26,17 +26,27 @@ abstract class BaseAuth {
 class Auth implements BaseAuth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
+  @override
   Future<String> signIn(String email, String password) async {
-    print('===========>' + email);
     FirebaseUser user = (await _firebaseAuth.signInWithEmailAndPassword(
-        email: email, password: password)) as FirebaseUser;
-    return user.uid;
+            email: email, password: password))
+        .user;
+    if (user.isEmailVerified) return user.uid;
+    return null;
   }
 
-  Future<String> signUp(String email, String password) async {
+  // ignore: missing_return
+  Future<String> signUp(String username, String email, String password) async {
     FirebaseUser user = (await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email, password: password)) as FirebaseUser;
-    return user.uid;
+            email: email, password: password))
+        .user;
+    try {
+      await user.sendEmailVerification();
+      return user.uid;
+    } catch (e) {
+      print("An error occured while trying to send email        verification");
+      print(e.message);
+    }
   }
 
   Future<FirebaseUser> getCurrentUser() async {
