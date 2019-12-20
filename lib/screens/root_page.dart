@@ -21,19 +21,25 @@ class RootPage extends StatefulWidget {
 class _RootPageState extends State<RootPage> {
   AuthStatus authStatus = AuthStatus.NOT_DETERMINED;
   String _userId = "";
+  bool emailVerified;
 
   @override
   void initState() {
     super.initState();
+
     widget.auth.getCurrentUser().then((user) {
       setState(() {
-        if (user != null) {
+        if (user != null && user.isEmailVerified) {
           _userId = user?.uid;
+          authStatus = AuthStatus.LOGGED_IN;
+        } else {
+          authStatus = AuthStatus.NOT_LOGGED_IN;
         }
-        authStatus =
-            user?.uid == null ? AuthStatus.NOT_LOGGED_IN : AuthStatus.LOGGED_IN;
+//        authStatus =
+//            user?.uid == null ? AuthStatus.NOT_LOGGED_IN : AuthStatus.LOGGED_IN;
       });
     });
+    print('authStatus = $authStatus');
   }
 
   void loginCallback() {

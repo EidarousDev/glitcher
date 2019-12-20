@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/utils/Loader.dart';
 import 'package:glitcher/utils/functions.dart';
@@ -23,18 +27,14 @@ class LoginPage extends StatefulWidget {
 }
 
 enum FormMode { LOGIN, SIGNUP }
+enum authProblems { EmailExists, UserNotFound, PasswordNotValid, NetworkError }
 
 class _LoginPageState extends State<LoginPage>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  final _formKey = new GlobalKey<FormState>();
 
-  String _email;
-  String _password;
-
-  // Initial form is login form
-  FormMode _formMode = FormMode.LOGIN;
-  bool _isIos;
+  String _email, _password, _confirmPassword, _username;
+  String _errorMsgEmail, _errorMsgUsername;
 
   String userId = "";
 
@@ -70,9 +70,7 @@ class _LoginPageState extends State<LoginPage>
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _scaffoldKey,
-      body: Stack(
-          alignment: Alignment(0, 0),
-          children: <Widget>[
+      body: Stack(alignment: Alignment(0, 0), children: <Widget>[
         SingleChildScrollView(
           child: Container(
             width: MediaQuery.of(context).size.width,
@@ -144,9 +142,7 @@ class _LoginPageState extends State<LoginPage>
                 width: 0,
                 height: 0,
               ),
-
-              ],
-            ),
+      ]),
     );
   }
 
@@ -156,11 +152,15 @@ class _LoginPageState extends State<LoginPage>
     myFocusNodeEmail.dispose();
     myFocusNodeName.dispose();
     _pageController?.dispose();
+    myFocusNodeEmailLogin.dispose();
+    myFocusNodePasswordLogin.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
+    _errorMsgEmail = "";
+    _errorMsgUsername = "";
     _loading = false;
     super.initState();
 
@@ -178,24 +178,63 @@ class _LoginPageState extends State<LoginPage>
     RegExp regExp = new RegExp(pattern);
     if (value.length == 0) {
       AppUtil().showAlert("Email is Required");
-      return "Email is Required";
+      setState(() {
+        _errorMsgEmail = "Email is Required";
+      });
     } else if (!regExp.hasMatch(value)) {
       AppUtil().showAlert("Invalid Email");
-      return "Invalid Email";
+      setState(() {
+        _errorMsgEmail = "Invalid Email";
+      });
     } else {
-      return null;
+      setState(() {
+        _errorMsgEmail = null;
+      });
     }
+    return _errorMsgEmail;
+  }
+
+  String validateUsername(String value) {
+    String pattern =
+        r'^(?=.{8,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$';
+    RegExp regExp = new RegExp(pattern);
+    if (value.length == 0) {
+      AppUtil().showAlert("Username is Required");
+      setState(() {
+        _errorMsgUsername = "Username is Required";
+      });
+    } else if (!regExp.hasMatch(value)) {
+      AppUtil().showAlert("Invalid Username");
+      setState(() {
+        _errorMsgUsername = "Invalid Username";
+      });
+      return _errorMsgUsername;
+    } else {
+      setState(() {
+        _errorMsgUsername = null;
+      });
+    }
+    return _errorMsgUsername;
   }
 
   void addUserToDatabase(String id) {
     Map<String, dynamic> userMap = {
-      'name': signupNameController.text,
+      'username': _username,
       'description': 'Write something about yourself',
       'followers': 0,
       'following': 0
     };
 
     _firestore.collection('users').document(id).setData(userMap);
+  }
+
+  Future<bool> isUsernameTaken(String name) async {
+    final QuerySnapshot result = await Firestore.instance
+        .collection('users')
+        .where('username', isEqualTo: name)
+        .limit(1)
+        .getDocuments();
+    return result.documents.isEmpty;
   }
 
   loginError(e) {
@@ -206,22 +245,78 @@ class _LoginPageState extends State<LoginPage>
   }
 
   Future _signUp() async {
-    print(_email + ' : ' + _password);
+    //print(_email + ' : ' + _password);
     setState(() {
       _loading = true;
     });
-    print('Should be true: $_loading');
-    try {
-      userId = await widget.auth.signUp(_email, _password);
-      //widget.auth.sendEmailVerification();
-      //_showVerifyEmailSentDialog();
-      //print('Signed up user: $userId');
-      Functions.moveUserTo(
-          context: context, widget: HomePage(), routeId: HomePage.id);
-    } catch (e) {
-      //print(e);
-      Functions.showInSnackBar(context, _scaffoldKey, '$e');
+    //print('Should be true: $_loading');
+    String validEmail = validateEmail(_email);
+    String validUsername = validateUsername(_username);
+
+    print('validEmail: $validEmail ');
+    print('validEmail: $validUsername ');
+
+    final valid = await isUsernameTaken(_username);
+
+    if (!valid) {
+      // username exists
+      Functions.showInSnackBar(context, _scaffoldKey,
+          '$_username is already in use. Please choose a different username.');
+      myFocusNodeName.requestFocus();
+    } else {
+      if (validEmail == null &&
+          validUsername == null &&
+          _password == _confirmPassword) {
+        // Validation Passed
+        try {
+          userId = await widget.auth.signUp(_username, _email, _password);
+          addUserToDatabase(userId);
+          //widget.auth.sendEmailVerification();
+          //showVerifyEmailSentDialog(context);
+          print('Signed up user: $userId');
+//        Functions.moveUserTo(
+//            context: context, widget: HomePage(), routeId: HomePage.id);
+          showVerifyEmailSentDialog(context);
+        } catch (signUpError) {
+          if (signUpError is PlatformException) {
+            if (signUpError.code == 'ERROR_EMAIL_ALREADY_IN_USE') {
+              Functions.showInSnackBar(
+                  context, _scaffoldKey, '$_email is already in use.');
+              myFocusNodeEmail.requestFocus();
+            } else if (signUpError.code == 'ERROR_WEAK_PASSWORD') {
+              Functions.showInSnackBar(context, _scaffoldKey,
+                  'Password is too weak. Please, type in a more complex password.');
+              myFocusNodePassword.requestFocus();
+            } else if (signUpError.code == 'ERROR_INVALID_EMAIL') {
+              Functions.showInSnackBar(context, _scaffoldKey, 'Invalid Email.');
+              myFocusNodeEmail.requestFocus();
+            } else {
+              Functions.showInSnackBar(
+                  context, _scaffoldKey, 'Unknown Error.. $signUpError');
+            }
+          }
+          //print(e);
+
+        }
+      } else {
+        if (_password != _confirmPassword) {
+          Functions.showInSnackBar(
+              context, _scaffoldKey, "Passwords don't match");
+          myFocusNodePassword.requestFocus();
+        } else {
+          if (_errorMsgUsername != null) {
+            Functions.showInSnackBar(context, _scaffoldKey, _errorMsgUsername);
+          } else if (_errorMsgEmail != null) {
+            Functions.showInSnackBar(context, _scaffoldKey, _errorMsgEmail);
+          } else {
+            print('$_errorMsgUsername\n$_errorMsgEmail');
+            Functions.showInSnackBar(
+                context, _scaffoldKey, "An Error Occurred");
+          }
+        }
+      }
     }
+
     setState(() {
       _loading = false;
     });
@@ -233,7 +328,7 @@ class _LoginPageState extends State<LoginPage>
     setState(() {
       _loading = true;
     });
-    print('Should be true: $_loading');
+    //print('Should be true: $_loading');
     try {
       userId = await widget.auth.signIn(_email, _password);
       //print('Signed in: $userId');
@@ -242,13 +337,12 @@ class _LoginPageState extends State<LoginPage>
     } catch (e) {
       // Email or Password Incorrect
       Functions.showInSnackBar(
-          context, _scaffoldKey, 'Email or Password incorrect!');
-      //showInSnackBar('$e');
+          context, _scaffoldKey, 'Email or Password incorrect!$e');
     }
     setState(() {
       _loading = false;
     });
-    print('Should be true: $_loading');
+    //print('Should be true: $_loading');
   }
 
   Widget _buildMenuBar(BuildContext context) {
@@ -570,6 +664,9 @@ class _LoginPageState extends State<LoginPage>
                         child: TextField(
                           focusNode: myFocusNodeName,
                           controller: signupNameController,
+                          onChanged: (value) {
+                            _username = value;
+                          },
                           keyboardType: TextInputType.text,
                           textCapitalization: TextCapitalization.words,
                           style: TextStyle(
@@ -582,7 +679,7 @@ class _LoginPageState extends State<LoginPage>
                               FontAwesomeIcons.user,
                               color: Colors.black,
                             ),
-                            hintText: "Name",
+                            hintText: "Username",
                             hintStyle: TextStyle(
                                 fontFamily: "WorkSansSemiBold", fontSize: 16.0),
                           ),
@@ -671,6 +768,9 @@ class _LoginPageState extends State<LoginPage>
                         child: TextField(
                           controller: signupConfirmPasswordController,
                           obscureText: _obscureTextSignupConfirm,
+                          onChanged: (value) {
+                            _confirmPassword = value;
+                          },
                           style: TextStyle(
                               fontFamily: "WorkSansSemiBold",
                               fontSize: 16.0,
@@ -751,50 +851,13 @@ class _LoginPageState extends State<LoginPage>
     );
   }
 
-  // Check if form is valid before perform login or signup
-  bool _validateAndSave() {
-    final form = _formKey.currentState;
-    if (form.validate()) {
-      form.save();
-      return true;
-    }
-    return false;
-  }
-
-  // Perform login or signup
-  void _validateAndSubmit() async {
-    setState(() {
-      _loading = true;
-    });
-    if (_validateAndSave()) {
-      String userId = "";
-      try {
-        if (_formMode == FormMode.LOGIN) {
-          userId = await widget.auth.signIn(_email, _password);
-          print('Signed in: $userId');
-        } else {
-          userId = await widget.auth.signUp(_email, _password);
-          widget.auth.sendEmailVerification();
-          _showVerifyEmailSentDialog();
-          print('Signed up user: $userId');
-        }
-        setState(() {
-          _loading = false;
-        });
-
-        if (userId.length > 0 &&
-            userId != null &&
-            _formMode == FormMode.LOGIN) {
-          widget.onSignedIn();
-        }
-      } catch (e) {
-        print('Error: $e');
-        setState(() {});
-      }
-    }
-  }
-
   void _onSignInButtonPress() {
+    setState(() {
+      signupPasswordController.clear();
+      signupConfirmPasswordController.clear();
+      signupEmailController.clear();
+      signupNameController.clear();
+    });
     _pageController.animateToPage(0,
         duration: Duration(milliseconds: 500), curve: Curves.decelerate);
   }
@@ -805,24 +868,22 @@ class _LoginPageState extends State<LoginPage>
   }
 
   void _toggleLogin() {
-    _formKey.currentState.reset();
     setState(() {
-      _formMode = FormMode.LOGIN;
+//      _formMode = FormMode.LOGIN;
       _obscureTextLogin = !_obscureTextLogin;
     });
   }
 
   void _toggleSignup() {
-    _formKey.currentState.reset();
     setState(() {
-      _formMode = FormMode.SIGNUP;
       _obscureTextSignup = !_obscureTextSignup;
     });
   }
 
-  void _showVerifyEmailSentDialog() {
+  void showVerifyEmailSentDialog(BuildContext context) {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         // return object of type Dialog
         return AlertDialog(
@@ -833,7 +894,7 @@ class _LoginPageState extends State<LoginPage>
             new FlatButton(
               child: new Text("Dismiss"),
               onPressed: () {
-                _toggleLogin();
+                _onSignInButtonPress();
                 Navigator.of(context).pop();
               },
             ),

@@ -15,6 +15,6 @@ class MyApp extends StatelessWidget {
             primaryColorDark: Colors.white70,
             accentColor: Color(0xff1CA1F1),
             iconTheme: IconThemeData(color: Color(0xff1CA1F1))),
-            home: new RootPage(auth: new Auth()));
+        home: new RootPage(auth: new Auth()));
   }
 }
