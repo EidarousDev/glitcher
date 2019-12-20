@@ -72,8 +72,8 @@ class _LoaderTwoState extends State<LoaderTwo> with SingleTickerProviderStateMix
 
   @override
   void dispose() {
-    super.dispose();
     controller.dispose();
+    super.dispose();
   }
 
   @override

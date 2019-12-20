@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:glitcher/screens/fullscreen_overaly.dart';
 import 'package:glitcher/utils/Loader.dart';
+import 'package:glitcher/utils/auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,11 +12,11 @@ enum ScreenState { to_edit, viewing, to_save }
 
 class ProfileScreen extends StatefulWidget {
   FirebaseUser currentUser;
-  ProfileScreen({this.currentUser});
+  ProfileScreen();
 
   @override
   _ProfileScreenState createState() =>
-      _ProfileScreenState(currentUser: currentUser);
+      _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
@@ -45,6 +46,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   _ProfileScreenState({this.currentUser});
 
+  @override
+  void initState(){
+    super.initState();
+    getCurrentUser();
+  }
+
+  void getCurrentUser() async{
+    this.currentUser = await Auth().getCurrentUser();
+
+    if (userData == null) {
+      loadUserData();
+    }
+  }
   Future chooseImage(int whichImage) async {
     await ImagePicker.pickImage(source: ImageSource.gallery).then((image) {
       setState(() {
@@ -70,7 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         .then((onValue) {
       setState(() {
         userData = onValue.data;
-        _nameText = onValue.data['name'];
+        _nameText = onValue.data['username'];
         _descText = onValue.data['description'];
         _profileImageUrl = onValue.data['profile_url'];
         _coverImageUrl = onValue.data['cover_url'];
@@ -452,14 +466,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
 
-    if (userData == null) {
-      loadUserData();
-    }
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
