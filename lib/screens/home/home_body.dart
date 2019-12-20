@@ -284,7 +284,7 @@ class _HomeBodyState extends State<HomeBody> {
                       shape: BoxShape.circle,
                       image: DecorationImage(
                         fit: BoxFit.fitHeight,
-                        image: NetworkImage(profileImages[index]),
+                        image: profileImages[index] != null ? NetworkImage(profileImages[index]) : AssetImage('assets/images/default_profile.png'),
                       ),
                     ),
                   ),
@@ -303,7 +303,7 @@ class _HomeBodyState extends State<HomeBody> {
                           Row(
                             children: <Widget>[
                               Text(
-                                usernames[index],
+                                usernames[index] != null ? usernames[index] : '',
                                 style: TextStyle(
                                   color: Colors.grey,
                                 ),

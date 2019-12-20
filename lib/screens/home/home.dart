@@ -63,7 +63,7 @@ class _HomePageState extends State<HomePage> {
                         shape: BoxShape.circle,
                         image: DecorationImage(
                           fit: BoxFit.fill,
-                          image: NetworkImage(profileImageUrl),
+                          image: profileImageUrl != null ? NetworkImage(profileImageUrl) : AssetImage('assets/images/default_profile.png'),
                         ),
                       ),
                     ),
@@ -108,7 +108,7 @@ class _HomePageState extends State<HomePage> {
                         shape: BoxShape.circle,
                         image: DecorationImage(
                           fit: BoxFit.fitHeight,
-                          image: NetworkImage(profileImageUrl),
+                          image: profileImageUrl != null ? NetworkImage(profileImageUrl) : AssetImage('assets/images/default_profile.png'),
                         ),
                       ),
                     ),
@@ -122,7 +122,7 @@ class _HomePageState extends State<HomePage> {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                         child: Text(
-                          username,
+                          username != null ? username : '',
                           style: TextStyle(
                               color: Colors.black54,
                               fontWeight: FontWeight.bold,
