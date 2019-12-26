@@ -30,6 +30,8 @@ dependencies:
   assets_audio_player: ^1.0.1
   dropdownfield: ^1.0.3
   autocomplete_textfield: ^1.7.3
+  dropdown_formfield: ^0.1.1
+
 
 dev_dependencies:
   flutter_test:

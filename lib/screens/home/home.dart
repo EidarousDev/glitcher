@@ -99,7 +99,7 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ProfileScreen()));
+                              builder: (context) => ProfileScreen(userId: this.currentUser.uid)));
                     },
                     child: Container(
                       width: 75.0,
@@ -149,7 +149,7 @@ class _HomePageState extends State<HomePage> {
                             Navigator.push(
                             context,
                             MaterialPageRoute(
-                            builder: (context) => ProfileScreen()));
+                            builder: (context) => ProfileScreen(userId: this.currentUser.uid)));
                           },
                           title: Text(
                             'Profile',

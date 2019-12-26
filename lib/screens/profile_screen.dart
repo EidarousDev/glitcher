@@ -3,20 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:glitcher/screens/fullscreen_overaly.dart';
 import 'package:glitcher/utils/Loader.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum ScreenState { to_edit, viewing, to_save }
+enum ScreenState { to_edit, to_follow, to_save, to_unfollow }
 
 class ProfileScreen extends StatefulWidget {
-  FirebaseUser currentUser;
-  ProfileScreen();
+  String userId;
+
+  ProfileScreen({this.userId});
 
   @override
-  _ProfileScreenState createState() =>
-      _ProfileScreenState();
+  _ProfileScreenState createState() => _ProfileScreenState(userId: userId);
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
@@ -34,7 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   var _nameEditingController = TextEditingController()..text = '';
   Firestore _firestore = Firestore.instance;
 
-  FirebaseUser currentUser;
+  String userId;
 
   var userData;
 
@@ -44,21 +45,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   bool _loading = false;
 
-  _ProfileScreenState({this.currentUser});
+  FirebaseUser currentUser;
+
+  _ProfileScreenState({this.userId});
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
-    getCurrentUser();
+    checkUser();
   }
 
-  void getCurrentUser() async{
-    this.currentUser = await Auth().getCurrentUser();
+  void checkUser() async {
+    currentUser = await Auth().getCurrentUser();
+
+    if (this.userId != currentUser.uid) {
+      DocumentSnapshot followSnapshot = await _firestore
+          .collection('users')
+          .document(currentUser.uid)
+          .collection('following')
+          .document(userId)
+          .get();
+
+      bool isFollowing = followSnapshot.exists;
+
+      setState(() {
+        if (isFollowing)
+          _screenState = ScreenState.to_unfollow;
+        else
+          _screenState = ScreenState.to_follow;
+      });
+    }
 
     if (userData == null) {
       loadUserData();
     }
   }
+
   Future chooseImage(int whichImage) async {
     await ImagePicker.pickImage(source: ImageSource.gallery).then((image) {
       setState(() {
@@ -77,11 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       _loading = true;
     });
-    await _firestore
-        .collection('users')
-        .document(currentUser.uid)
-        .get()
-        .then((onValue) {
+    await _firestore.collection('users').document(userId).get().then((onValue) {
       setState(() {
         userData = onValue.data;
         _nameText = onValue.data['username'];
@@ -103,9 +121,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     _loading = true;
     print((fileName));
-    StorageReference storageReference = FirebaseStorage.instance
-        .ref()
-        .child('$parentFolder/${currentUser.uid}');
+    StorageReference storageReference =
+        FirebaseStorage.instance.ref().child('$parentFolder/$userId');
     StorageUploadTask uploadTask = storageReference.putFile(fileName);
 
     await uploadTask.onComplete;
@@ -118,7 +135,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         _firestore
             .collection('users')
-            .document(currentUser.uid)
+            .document(userId)
             .updateData({'profile_url': _profileImageUrl});
       } else if (parentFolder == 'cover_img') {
         setState(() {
@@ -127,7 +144,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         _firestore
             .collection('users')
-            .document(currentUser.uid)
+            .document(userId)
             .updateData({'cover_url': _coverImageUrl});
       }
       setState(() {
@@ -149,7 +166,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future save() async {
-
     setState(() {
       _screenState = ScreenState.to_edit;
       _descText = _descEditingController.text;
@@ -158,10 +174,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       userData['name'] = _nameText;
       userData['description'] = _descText;
 
-      _firestore
-          .collection('users')
-          .document(currentUser.uid)
-          .updateData(userData);
+      _firestore.collection('users').document(userId).updateData(userData);
 
       if (_profileImageFile != null) {
         uploadFile('profile_img', _profileImageFile);
@@ -173,7 +186,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget profileOverlay(Widget child, double size) {
-    if (_screenState == ScreenState.to_edit) {
+    if (_screenState == ScreenState.to_edit ||
+        _screenState == ScreenState.to_follow ||
+        _screenState == ScreenState.to_unfollow) {
       return child;
     }
 
@@ -234,7 +249,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               url: _coverImageUrl,
                               type: 1,
                               whichImage: 1,
-                              currentUser: currentUser,
+                              userId: userId,
                             ));
                     setState(() {
                       if (result != null) {
@@ -248,7 +263,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               url: _coverImageFile,
                               type: 2,
                               whichImage: 1,
-                              currentUser: currentUser,
+                              userId: userId,
                             ));
                     setState(() {
                       if (result != null) {
@@ -262,7 +277,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               url: 'images/default_cover.jpg',
                               type: 3,
                               whichImage: 1,
-                              currentUser: currentUser,
+                              userId: userId,
                             ));
                     setState(() {
                       if (result != null) {
@@ -305,7 +320,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 url: _profileImageUrl,
                                 type: 1,
                                 whichImage: 2,
-                                currentUser: currentUser,
+                                userId: userId,
                               ));
                       setState(() {
                         if (result != null) {
@@ -319,7 +334,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 url: _profileImageFile,
                                 type: 2,
                                 whichImage: 2,
-                                currentUser: currentUser,
+                                userId: userId,
                               ));
                       setState(() {
                         if (result != null) {
@@ -333,7 +348,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 url: 'images/default_profile.png',
                                 type: 3,
                                 whichImage: 2,
-                                currentUser: currentUser,
+                                userId: userId,
                               ));
 
                       setState(() {
@@ -381,7 +396,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(
                   height: 10,
                 ),
-                _screenState == ScreenState.to_edit
+                _screenState == ScreenState.to_edit ||
+                        _screenState == ScreenState.to_follow ||
+                        _screenState == ScreenState.to_unfollow
                     ? Text(
                         _nameText,
                         style: TextStyle(
@@ -401,7 +418,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(
                   height: 8,
                 ),
-                _screenState == ScreenState.to_edit
+                _screenState == ScreenState.to_edit ||
+                        _screenState == ScreenState.to_follow ||
+                        _screenState == ScreenState.to_unfollow
                     ? Text(
                         _descText,
                         style: TextStyle(fontSize: 16, color: Colors.grey),
@@ -456,16 +475,118 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           _loading
-          ? LoaderTwo()
-          : Container(
-            width: 0,
-            height: 0,
-          ),
+              ? LoaderTwo()
+              : Container(
+                  width: 0,
+                  height: 0,
+                ),
         ],
       ),
     );
   }
 
+  void followUser() async {
+    setState(() {
+      _loading = true;
+    });
+
+    FieldValue timestamp = FieldValue.serverTimestamp();
+
+    await _firestore
+        .collection('users')
+        .document(userId)
+        .collection('followers')
+        .document(currentUser.uid)
+        .setData({
+      'timestamp': timestamp,
+    });
+
+    await _firestore
+        .collection('users')
+        .document(userId)
+        .updateData({
+      'followers': ++_followers,
+    });
+
+    int following = 0;
+
+    await _firestore
+        .collection('users')
+        .document(currentUser.uid)
+        .get().then((onValue){
+          following = onValue.data['following'];
+    });
+
+    await _firestore
+        .collection('users')
+        .document(currentUser.uid)
+        .updateData({
+      'following': ++following,
+    });
+
+    await _firestore
+        .collection('users')
+        .document(currentUser.uid)
+        .collection('following')
+        .document(userId)
+        .setData({
+      'timestamp': timestamp,
+    }).then((_) {
+      setState(() {
+        _loading = false;
+        AppUtil().showAlert('You started following ' + _nameText);
+        setState(() {
+          _screenState = ScreenState.to_unfollow;
+        });
+      });
+    });
+  }
+
+  void unfollowUser() async {
+
+    await _firestore
+        .collection('users')
+        .document(currentUser.uid)
+        .collection('following')
+        .document(userId)
+        .delete();
+
+    int following = 0;
+
+    await _firestore
+        .collection('users')
+        .document(currentUser.uid)
+        .get().then((onValue){
+      following = onValue.data['following'];
+    });
+
+    await _firestore
+        .collection('users')
+        .document(currentUser.uid)
+        .updateData({
+      'following': --following,
+    });
+
+    await _firestore
+        .collection('users')
+        .document(userId)
+        .collection('followers')
+        .document(currentUser.uid)
+        .delete();
+
+    await _firestore
+        .collection('users')
+        .document(userId)
+        .updateData({
+      'followers': --_followers,
+    });
+
+    setState(() {
+      setState(() {
+        _screenState = ScreenState.to_follow;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -479,15 +600,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ? Icon(MaterialIcons.getIconData('edit'))
             : _screenState == ScreenState.to_save
                 ? Icon(MaterialIcons.getIconData('save'))
-                : Icon(FontAwesome.getIconData('user-plus')),
+                : _screenState == ScreenState.to_follow
+                    ? Icon(FontAwesome.getIconData('user-plus'))
+                    : Icon(FontAwesome.getIconData('user-times')),
         onPressed: _screenState == ScreenState.to_edit
             ? () {
                 edit();
               }
-            : () {
-                save();
-              },
+            : _screenState == ScreenState.to_save
+                ? () {
+                    save();
+                  }
+                : _screenState == ScreenState.to_follow
+                    ? () {
+                        //VIEWING
+                        followUser();
+                      }
+                    : () {
+                        unfollowUser();
+
+                      },
       ),
     );
   }
+
+
 }
+

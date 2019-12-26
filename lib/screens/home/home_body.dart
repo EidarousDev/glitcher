@@ -14,6 +14,7 @@ import 'package:glitcher/utils/statics.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:soundpool/soundpool.dart';
+import 'package:dropdown_formfield/dropdown_formfield.dart';
 
 class HomeBody extends StatefulWidget {
   @override
@@ -45,6 +46,10 @@ class _HomeBodyState extends State<HomeBody> {
   String selectedCategory = "";
   GlobalKey<AutoCompleteTextFieldState<String>> autocompleteKey =
       new GlobalKey();
+
+  int allOrFollowing = 0;
+
+  var following = [];
 
   void getCurrentUser() async {
     this.currentUser = await Auth().getCurrentUser();
@@ -151,7 +156,7 @@ class _HomeBodyState extends State<HomeBody> {
     }
   }
 
-  void loadFilteredPosts() async {
+  void loadCategorizedPosts() async {
     this.posts = [];
     this.postsIDs = [];
     this.likes = [];
@@ -163,7 +168,6 @@ class _HomeBodyState extends State<HomeBody> {
         .limit(10)
         .where('category', isEqualTo: selectedCategory)
         .getDocuments()
-
         .then((snap) {
       for (int i = 0; i < snap.documents.length; i++) {
         setState(() {
@@ -177,7 +181,7 @@ class _HomeBodyState extends State<HomeBody> {
         });
       }
       this.lastVisiblePostSnapShot =
-      snap.documents[snap.documents.length - 1].data['timestamp'];
+          snap.documents[snap.documents.length - 1].data['timestamp'];
     });
 
     for (int j = 0; j < postsIDs.length; j++) {
@@ -203,16 +207,71 @@ class _HomeBodyState extends State<HomeBody> {
     }
   }
 
-  void loadUserData(String uid) async {
-    await _firestore.collection('users').document(uid).get().then((onValue) {
-      setState(() {
-        profileImages.add(onValue.data['profile_url']);
-        usernames.add(onValue.data['username']);
+  void loadFollowingPosts() async {
+    this.posts = [];
+    this.postsIDs = [];
+    this.likes = [];
+    this.dislikes = [];
+
+    if (following.length == 0) {
+      await _firestore
+          .collection('users')
+          .document(currentUser.uid)
+          .collection('following')
+          .getDocuments()
+          .then((snap) {
+        for (int i = 0; i < snap.documents.length; i++) {
+          this.following.add(snap.documents[i].documentID);
+        }
       });
+    }
+
+    await _firestore
+        .collection("posts")
+        .orderBy("timestamp")
+        .limit(10)
+        .where('owner', whereIn: following)
+        .getDocuments()
+        .then((snap) {
+      for (int i = 0; i < snap.documents.length; i++) {
+        setState(() {
+          this.posts.add(snap.documents[i]);
+          this.postsIDs.add(snap.documents[i].documentID);
+          loadUserData(snap.documents[i].data['owner']);
+
+          if (snap.documents[i].data['video'] != null) {
+            playVideo(snap.documents[i].data['video']);
+          }
+        });
+      }
+      this.lastVisiblePostSnapShot =
+          snap.documents[snap.documents.length - 1].data['timestamp'];
     });
+
+    for (int j = 0; j < postsIDs.length; j++) {
+      DocumentSnapshot likedSnapshot = await _firestore
+          .collection('posts')
+          .document(postsIDs[j])
+          .collection('likes')
+          .document(currentUser.uid)
+          .get();
+      DocumentSnapshot dislikedSnapshot = await _firestore
+          .collection('posts')
+          .document(postsIDs[j])
+          .collection('dislikes')
+          .document(currentUser.uid)
+          .get();
+
+      bool liked = likedSnapshot.exists;
+      bool disliked = dislikedSnapshot.exists;
+      setState(() {
+        likes.add(liked);
+        dislikes.add(disliked);
+      });
+    }
   }
 
-  nextPosts() async {
+  void nextPosts() async {
     await _firestore
         .collection("posts")
         .orderBy("timestamp")
@@ -255,6 +314,103 @@ class _HomeBodyState extends State<HomeBody> {
     }
   }
 
+  void nextCategorizedPosts() async {
+    await _firestore
+        .collection("posts")
+        .orderBy("timestamp")
+        .startAfter([this.lastVisiblePostSnapShot])
+        .limit(10)
+        .where('category', isEqualTo: selectedCategory)
+        .getDocuments()
+        .then((snap) {
+      for (int i = 0; i < snap.documents.length; i++) {
+        setState(() {
+          this.posts.add(snap.documents[i]);
+          loadUserData(snap.documents[i].data['owner']);
+
+          if (snap.documents[i].data['video'] != null) {
+            playVideo(snap.documents[i].data['video']);
+          }
+        });
+      }
+      this.lastVisiblePostSnapShot =
+      snap.documents[snap.documents.length - 1].data['timestamp'];
+    });
+
+    for (int j = 0; j < postsIDs.length; j++) {
+      DocumentSnapshot likedSnapshot = await _firestore
+          .collection('posts')
+          .document(postsIDs[j])
+          .collection('likes')
+          .document(currentUser.uid)
+          .get();
+      DocumentSnapshot dislikedSnapshot = await _firestore
+          .collection('posts')
+          .document(postsIDs[j])
+          .collection('dislikes')
+          .document(currentUser.uid)
+          .get();
+
+      bool liked = likedSnapshot.exists;
+      bool disliked = dislikedSnapshot.exists;
+      likes.add(liked);
+      dislikes.add(disliked);
+    }
+  }
+
+  void nextFollowingPosts() async {
+    await _firestore
+        .collection("posts")
+        .orderBy("timestamp")
+        .startAfter([this.lastVisiblePostSnapShot])
+        .limit(10)
+        .where('owner', whereIn: following)
+        .getDocuments()
+        .then((snap) {
+      for (int i = 0; i < snap.documents.length; i++) {
+        setState(() {
+          this.posts.add(snap.documents[i]);
+          loadUserData(snap.documents[i].data['owner']);
+
+          if (snap.documents[i].data['video'] != null) {
+            playVideo(snap.documents[i].data['video']);
+          }
+        });
+      }
+      this.lastVisiblePostSnapShot =
+      snap.documents[snap.documents.length - 1].data['timestamp'];
+    });
+
+    for (int j = 0; j < postsIDs.length; j++) {
+      DocumentSnapshot likedSnapshot = await _firestore
+          .collection('posts')
+          .document(postsIDs[j])
+          .collection('likes')
+          .document(currentUser.uid)
+          .get();
+      DocumentSnapshot dislikedSnapshot = await _firestore
+          .collection('posts')
+          .document(postsIDs[j])
+          .collection('dislikes')
+          .document(currentUser.uid)
+          .get();
+
+      bool liked = likedSnapshot.exists;
+      bool disliked = dislikedSnapshot.exists;
+      likes.add(liked);
+      dislikes.add(disliked);
+    }
+  }
+
+  void loadUserData(String uid) async {
+    await _firestore.collection('users').document(uid).get().then((onValue) {
+      setState(() {
+        profileImages.add(onValue.data['profile_url']);
+        usernames.add(onValue.data['username']);
+      });
+    });
+  }
+
   Widget getList() {
     return ListView.builder(
       controller: _scrollController,
@@ -268,12 +424,12 @@ class _HomeBodyState extends State<HomeBody> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               GestureDetector(
-                onTap: (){
+                onTap: () {
                   Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                           builder: (context) => ProfileScreen(
-                          )));
+                              userId: posts[index].data['owner'])));
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -284,7 +440,9 @@ class _HomeBodyState extends State<HomeBody> {
                       shape: BoxShape.circle,
                       image: DecorationImage(
                         fit: BoxFit.fitHeight,
-                        image: profileImages[index] != null ? NetworkImage(profileImages[index]) : AssetImage('assets/images/default_profile.png'),
+                        image: profileImages[index] != null
+                            ? NetworkImage(profileImages[index])
+                            : AssetImage('assets/images/default_profile.png'),
                       ),
                     ),
                   ),
@@ -303,7 +461,9 @@ class _HomeBodyState extends State<HomeBody> {
                           Row(
                             children: <Widget>[
                               Text(
-                                usernames[index] != null ? usernames[index] : '',
+                                usernames[index] != null
+                                    ? usernames[index]
+                                    : '',
                                 style: TextStyle(
                                   color: Colors.grey,
                                 ),
@@ -623,78 +783,105 @@ class _HomeBodyState extends State<HomeBody> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Statics.filterPanel
-              ? Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Expanded(
-                flex: 4,
-                child: AutoCompleteTextField<String>(
-                  clearOnSubmit: false,
-                  key: autocompleteKey,
-                  suggestions: Constants.categories,
-                  decoration: InputDecoration(
-                      icon: Icon(Icons.videogame_asset),
-                      hintText: "Category"),
-                  itemFilter: (item, query) {
-                    return item
-                        .toLowerCase()
-                        .startsWith(query.toLowerCase());
-                  },
-                  itemSorter: (a, b) {
-                    return a.compareTo(b);
-                  },
-                  itemSubmitted: (item) {
-                    setState(() {
-                      selectedCategory = item;
-                      loadFilteredPosts();
-                    });
-                  },
-                  onFocusChanged: (hasFocus) {},
-                  itemBuilder: (context, item) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Container(
-                            color: Colors.grey.shade300,
-                            child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Text(item),
-                            )),
-
-                        Container(
-                          width: double.infinity,
-                          color: Colors.grey,
-                          height: .5,
-                        )
-
-                      ],
-                    );
-                  },
-                ),
-              ),
-              IconButton(
-                color: Colors.blue,
-                icon: Icon(Icons.close),
-                onPressed: (){
-                  loadPosts();
-                },
-              )
-            ],
-          )
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    SizedBox(
+                      height: 10,
+                    ),
+                    CupertinoSegmentedControl(
+                      children: {0: Text('All'), 1: Text('Following')},
+                      onValueChanged: (int value) {
+                        setState(() {
+                          if (value == 0) {
+                            loadPosts();
+                          } else if (value == 1) {
+                            loadFollowingPosts();
+                          }
+                          allOrFollowing = value;
+                        });
+                      },
+                      groupValue: allOrFollowing,
+                    ),
+                    (allOrFollowing == 0)
+                        ? Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Expanded(
+                                flex: 4,
+                                child: AutoCompleteTextField<String>(
+                                  clearOnSubmit: false,
+                                  key: autocompleteKey,
+                                  suggestions: Constants.categories,
+                                  decoration: InputDecoration(
+                                      icon: Icon(Icons.videogame_asset),
+                                      hintText: "Category"),
+                                  itemFilter: (item, query) {
+                                    return item
+                                        .toLowerCase()
+                                        .startsWith(query.toLowerCase());
+                                  },
+                                  itemSorter: (a, b) {
+                                    return a.compareTo(b);
+                                  },
+                                  itemSubmitted: (item) {
+                                    setState(() {
+                                      selectedCategory = item;
+                                      loadCategorizedPosts();
+                                    });
+                                  },
+                                  onFocusChanged: (hasFocus) {},
+                                  itemBuilder: (context, item) {
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        Container(
+                                            color: Colors.grey.shade300,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(10.0),
+                                              child: Text(item),
+                                            )),
+                                        Container(
+                                          width: double.infinity,
+                                          color: Colors.grey,
+                                          height: .5,
+                                        )
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ),
+                              IconButton(
+                                color: Colors.blue,
+                                icon: Icon(Icons.close),
+                                onPressed: () {
+                                  loadPosts();
+                                  selectedCategory = null;
+                                },
+                              ),
+                            ],
+                          )
+                        : Container()
+                  ],
+                )
               : Container(),
         ),
         Statics.filterPanel
-        ? Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Container(
-            width: double.infinity,
-            color: Colors.grey,
-            height: 1,
-          ),
-        )
-        : Container(),
+            ? Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Container(
+                  width: double.infinity,
+                  color: Colors.grey,
+                  height: 1,
+                ),
+              )
+            : Container(),
         Container(
           color: Theme.of(context).primaryColor,
           child: getList(),
@@ -713,7 +900,19 @@ class _HomeBodyState extends State<HomeBody> {
       if (_scrollController.position.atEdge) {
         if (_scrollController.position.pixels == 0) {
         } else {
-          nextPosts();
+          if(allOrFollowing == 0){
+            if(selectedCategory == null){
+              nextPosts();
+            }
+            else{
+              nextCategorizedPosts();
+            }
+
+          }
+
+          else if(allOrFollowing == 1){
+            nextFollowingPosts();
+          }
         }
       }
     });

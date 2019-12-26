@@ -12,13 +12,13 @@ class FullScreenOverlay extends StatefulWidget {
   final String url;
   final int type;
   final int whichImage;
-  final FirebaseUser currentUser;
+  final String userId;
 
-  FullScreenOverlay({this.url, this.type, this.whichImage, this.currentUser});
+  FullScreenOverlay({this.url, this.type, this.whichImage, this.userId});
 
   @override
   _FullscreenOverlayState createState() =>
-      _FullscreenOverlayState(url: url, type: type, whichImage: whichImage, currentUser: currentUser);
+      _FullscreenOverlayState(url: url, type: type, whichImage: whichImage, userId: userId);
 }
 
 class _FullscreenOverlayState extends State<FullScreenOverlay> {
@@ -66,7 +66,7 @@ class _FullscreenOverlayState extends State<FullScreenOverlay> {
   final String url;
   final int type;
   final int whichImage;
-  final FirebaseUser currentUser;
+  final String userId;
   final Firestore _firestore = Firestore.instance;
   File _file;
 
@@ -76,7 +76,7 @@ class _FullscreenOverlayState extends State<FullScreenOverlay> {
     this.url,
     this.type,
     this.whichImage,
-    this.currentUser,
+    this.userId,
   });
 
   Stack _editBtnOverlay(BuildContext context, Widget child) {
@@ -129,7 +129,7 @@ class _FullscreenOverlayState extends State<FullScreenOverlay> {
     print((file));
     StorageReference storageReference = FirebaseStorage.instance
         .ref()
-        .child('$parentFolder/${currentUser.uid}');
+        .child('$parentFolder/$userId');
     StorageUploadTask uploadTask = storageReference.putFile(file);
 
     await uploadTask.onComplete;
@@ -142,7 +142,7 @@ class _FullscreenOverlayState extends State<FullScreenOverlay> {
 
         _firestore
             .collection('users')
-            .document(currentUser.uid)
+            .document(userId)
             .updateData({'profile_url': _url}).then((onValue){
           setState(() {
             _file = null;
@@ -158,7 +158,7 @@ class _FullscreenOverlayState extends State<FullScreenOverlay> {
 
         _firestore
             .collection('users')
-            .document(currentUser.uid)
+            .document(userId)
             .updateData({'cover_url': _url}).then((onValue){
           setState(() {
             _file = null;
