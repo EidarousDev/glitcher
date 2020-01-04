@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/screens/chats.dart';
 import 'package:glitcher/screens/home/home_body.dart';
 import 'package:glitcher/utils/auth.dart';
 import 'package:glitcher/screens/login_page.dart';
@@ -19,7 +20,6 @@ class HomePage extends StatefulWidget {
   final VoidCallback onSignedOut;
   final String userId;
 
-
   @override
   State<StatefulWidget> createState() => _HomePageState(auth);
 }
@@ -32,6 +32,7 @@ class _HomePageState extends State<HomePage> {
 
   String profileImageUrl;
 
+  dynamic body = HomeBody();
 
   void loadUserData(String uid) async {
     await _firestore.collection('users').document(uid).get().then((onValue) {
@@ -44,16 +45,13 @@ class _HomePageState extends State<HomePage> {
 
   FirebaseUser currentUser;
 
-
   _HomePageState(auth);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       //AppBar
       appBar: AppBar(
-
         leading: Builder(
-
             builder: (context) => Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: InkWell(
@@ -63,7 +61,9 @@ class _HomePageState extends State<HomePage> {
                         shape: BoxShape.circle,
                         image: DecorationImage(
                           fit: BoxFit.fill,
-                          image: profileImageUrl != null ? NetworkImage(profileImageUrl) : AssetImage('assets/images/default_profile.png'),
+                          image: profileImageUrl != null
+                              ? NetworkImage(profileImageUrl)
+                              : AssetImage('assets/images/default_profile.png'),
                         ),
                       ),
                     ),
@@ -72,18 +72,22 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Theme.of(context).primaryColorDark,
         title: Text('Home'),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.filter_list),
-            onPressed: () {
-              setState(() {
-                Statics.filterPanel = !Statics.filterPanel;
-              });
-            },
-          ),
+          body == HomeBody()
+              ? IconButton(
+                  icon: Icon(Icons.filter_list),
+                  onPressed: () {
+                    setState(() {
+                      Statics.filterPanel = !Statics.filterPanel;
+                    });
+                  },
+                )
+              : Container(),
         ],
       ),
       //MainBody
-      body: HomeBody(),
+
+      body: body,
+
       drawer: Drawer(
         // The sidebar/Drawer
         child: Container(
@@ -99,7 +103,8 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ProfileScreen(userId: this.currentUser.uid)));
+                              builder: (context) =>
+                                  ProfileScreen(userId: this.currentUser.uid)));
                     },
                     child: Container(
                       width: 75.0,
@@ -108,7 +113,9 @@ class _HomePageState extends State<HomePage> {
                         shape: BoxShape.circle,
                         image: DecorationImage(
                           fit: BoxFit.fitHeight,
-                          image: profileImageUrl != null ? NetworkImage(profileImageUrl) : AssetImage('assets/images/default_profile.png'),
+                          image: profileImageUrl != null
+                              ? NetworkImage(profileImageUrl)
+                              : AssetImage('assets/images/default_profile.png'),
                         ),
                       ),
                     ),
@@ -133,7 +140,6 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                 ),
-
                 Container(
                   width: double.infinity,
                   color: Colors.grey,
@@ -145,11 +151,12 @@ class _HomePageState extends State<HomePage> {
                     child: Column(
                       children: <Widget>[
                         ListTile(
-                          onTap: (){
+                          onTap: () {
                             Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                            builder: (context) => ProfileScreen(userId: this.currentUser.uid)));
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ProfileScreen(
+                                        userId: this.currentUser.uid)));
                           },
                           title: Text(
                             'Profile',
@@ -207,14 +214,26 @@ class _HomePageState extends State<HomePage> {
                             style: TextStyle(color: Colors.black54),
                           ),
                         ),
-                        FlatButton(
-                          child: ListTile(
-                            title: Text(
-                              'Log Out',
-                              style: TextStyle(color: Colors.black54),
-                            ),
+
+                        ListTile(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Chats()));
+                          },
+                          title: Text(
+                            'Chats',
+                            style: TextStyle(color: Colors.black54),
                           ),
-                          onPressed: () async {
+                          leading: Icon(
+                            Icons.chat_bubble,
+                            color: Colors.grey,
+                          ),
+                        ),
+
+                        ListTile(
+                          onTap: () async {
                             try {
                               await widget.auth.signOut();
                               widget.onSignedOut();
@@ -222,7 +241,32 @@ class _HomePageState extends State<HomePage> {
                               print(e);
                             }
                           },
+                          title: Text(
+                            'Chats',
+                            style: TextStyle(color: Colors.black54),
+                          ),
+                          leading: Icon(
+                            Icons.chat_bubble,
+                            color: Colors.grey,
+                          ),
                         ),
+
+//                        FlatButton(
+//                          child: ListTile(
+//                            title: Text(
+//                              'Log Out',
+//                              style: TextStyle(color: Colors.black54),
+//                            ),
+//                          ),
+//                          onPressed: () async {
+//                            try {
+//                              await widget.auth.signOut();
+//                              widget.onSignedOut();
+//                            } catch (e) {
+//                              print(e);
+//                            }
+//                          },
+//                        ),
                       ],
                     ),
                   ),
@@ -268,18 +312,21 @@ class _HomePageState extends State<HomePage> {
             )),
       ),
 
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => NewPost(
-                        currentUser: currentUser,
-                      )));
-        },
-        child: Icon(Icons.edit),
-        backgroundColor: Theme.of(context).accentColor,
-      ),
+      floatingActionButton: body == HomeBody()
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => NewPost(
+                              currentUser: currentUser,
+                            )));
+              },
+              child: Icon(Icons.edit),
+              backgroundColor: Theme.of(context).accentColor,
+            )
+          : null,
+
       //BottomnavBar
       bottomNavigationBar: Container(
         height: 50.0,
@@ -289,7 +336,11 @@ class _HomePageState extends State<HomePage> {
           children: <Widget>[
             IconButton(
               icon: Icon(Icons.home),
-              onPressed: () {},
+              onPressed: () {
+                setState(() {
+                  body = HomeBody();
+                });
+              },
             ),
             IconButton(
               icon: Icon(Icons.search),
@@ -300,8 +351,13 @@ class _HomePageState extends State<HomePage> {
               onPressed: null,
             ),
             IconButton(
-              icon: Icon(Icons.mail),
-              onPressed: null,
+              color: Colors.grey,
+              icon: Icon(Icons.chat_bubble),
+              onPressed: () {
+                setState(() {
+                  body = Chats();
+                });
+              },
             ),
           ],
         ),
@@ -315,7 +371,7 @@ class _HomePageState extends State<HomePage> {
     getCurrentUser();
   }
 
-  void getCurrentUser() async{
+  void getCurrentUser() async {
     this.currentUser = await Auth().getCurrentUser();
     loadUserData(currentUser.uid);
   }

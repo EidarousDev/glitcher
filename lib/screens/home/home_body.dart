@@ -402,7 +402,7 @@ class _HomeBodyState extends State<HomeBody> {
     }
   }
 
-  void loadUserData(String uid) async {
+  Future loadUserData(String uid) async {
     await _firestore.collection('users').document(uid).get().then((onValue) {
       setState(() {
         profileImages.add(onValue.data['profile_url']);
