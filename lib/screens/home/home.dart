@@ -7,8 +7,6 @@ import 'package:glitcher/utils/auth.dart';
 import 'package:glitcher/screens/login_page.dart';
 import 'package:glitcher/screens/new_post.dart';
 import 'package:glitcher/screens/profile_screen.dart';
-import 'package:glitcher/utils/auth.dart';
-import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/utils/statics.dart';
 
 class HomePage extends StatefulWidget {
@@ -90,166 +88,168 @@ class _HomePageState extends State<HomePage> {
 
       drawer: Drawer(
         // The sidebar/Drawer
-        child: Container(
-            color: Theme.of(context).primaryColor,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 40.0, 0.0, 8.0),
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  ProfileScreen(userId: this.currentUser.uid)));
-                    },
-                    child: Container(
-                      width: 75.0,
-                      height: 75.0,
-                      decoration: new BoxDecoration(
-                        shape: BoxShape.circle,
-                        image: DecorationImage(
-                          fit: BoxFit.fitHeight,
-                          image: profileImageUrl != null
-                              ? NetworkImage(profileImageUrl)
-                              : AssetImage('assets/images/default_profile.png'),
+        child: SingleChildScrollView(
+          child: Container(
+              color: Theme.of(context).primaryColor,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16.0, 40.0, 0.0, 8.0),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ProfileScreen(
+                                    userId: this.currentUser.uid)));
+                      },
+                      child: Container(
+                        width: 75.0,
+                        height: 75.0,
+                        decoration: new BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                            fit: BoxFit.fitHeight,
+                            image: profileImageUrl != null
+                                ? NetworkImage(profileImageUrl)
+                                : AssetImage(
+                                    'assets/images/default_profile.png'),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                        child: Text(
-                          username != null ? username : '',
-                          style: TextStyle(
-                              color: Colors.black54,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20),
-                        ),
-                      ),
-                      Icon(Icons.arrow_drop_down)
-                    ],
-                  ),
-                ),
-                Container(
-                  width: double.infinity,
-                  color: Colors.grey,
-                  height: 0.5,
-                ),
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
-                    child: Column(
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        ListTile(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ProfileScreen(
-                                        userId: this.currentUser.uid)));
-                          },
-                          title: Text(
-                            'Profile',
-                            style: TextStyle(color: Colors.black54),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                          child: Text(
+                            username != null ? username : '',
+                            style: TextStyle(
+                                color: Colors.black54,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20),
                           ),
-                          leading: Icon(
-                            Icons.person,
+                        ),
+                        Icon(Icons.arrow_drop_down)
+                      ],
+                    ),
+                  ),
+                  Container(
+                    width: double.infinity,
+                    color: Colors.grey,
+                    height: 0.5,
+                  ),
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+                      child: Column(
+                        children: <Widget>[
+                          ListTile(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ProfileScreen(
+                                          userId: this.currentUser.uid)));
+                            },
+                            title: Text(
+                              'Profile',
+                              style: TextStyle(color: Colors.black54),
+                            ),
+                            leading: Icon(
+                              Icons.person,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          ListTile(
+                            title: Text(
+                              'Lists',
+                              style: TextStyle(color: Colors.black54),
+                            ),
+                            leading: Icon(
+                              Icons.list,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          ListTile(
+                            title: Text(
+                              'Bookmarks',
+                              style: TextStyle(color: Colors.black54),
+                            ),
+                            leading: Icon(
+                              Icons.bookmark_border,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          ListTile(
+                            title: Text(
+                              'Moments',
+                              style: TextStyle(color: Colors.black54),
+                            ),
+                            leading: Icon(
+                              Icons.apps,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          Container(
+                            width: double.infinity,
                             color: Colors.grey,
+                            height: 0.5,
                           ),
-                        ),
-                        ListTile(
-                          title: Text(
-                            'Lists',
-                            style: TextStyle(color: Colors.black54),
+                          ListTile(
+                            title: Text(
+                              'Settings and Privacy',
+                              style: TextStyle(color: Colors.black54),
+                            ),
                           ),
-                          leading: Icon(
-                            Icons.list,
-                            color: Colors.grey,
+                          ListTile(
+                            title: Text(
+                              'Help center',
+                              style: TextStyle(color: Colors.black54),
+                            ),
                           ),
-                        ),
-                        ListTile(
-                          title: Text(
-                            'Bookmarks',
-                            style: TextStyle(color: Colors.black54),
-                          ),
-                          leading: Icon(
-                            Icons.bookmark_border,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        ListTile(
-                          title: Text(
-                            'Moments',
-                            style: TextStyle(color: Colors.black54),
-                          ),
-                          leading: Icon(
-                            Icons.apps,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        Container(
-                          width: double.infinity,
-                          color: Colors.grey,
-                          height: 0.5,
-                        ),
-                        ListTile(
-                          title: Text(
-                            'Settings and Privacy',
-                            style: TextStyle(color: Colors.black54),
-                          ),
-                        ),
-                        ListTile(
-                          title: Text(
-                            'Help center',
-                            style: TextStyle(color: Colors.black54),
-                          ),
-                        ),
 
-                        ListTile(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Chats()));
-                          },
-                          title: Text(
-                            'Chats',
-                            style: TextStyle(color: Colors.black54),
+                          ListTile(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Chats()));
+                            },
+                            title: Text(
+                              'Chats',
+                              style: TextStyle(color: Colors.black54),
+                            ),
+                            leading: Icon(
+                              Icons.chat_bubble,
+                              color: Colors.grey,
+                            ),
                           ),
-                          leading: Icon(
-                            Icons.chat_bubble,
-                            color: Colors.grey,
-                          ),
-                        ),
 
-                        ListTile(
-                          onTap: () async {
-                            try {
-                              await widget.auth.signOut();
-                              widget.onSignedOut();
-                            } catch (e) {
-                              print(e);
-                            }
-                          },
-                          title: Text(
-                            'Chats',
-                            style: TextStyle(color: Colors.black54),
+                          ListTile(
+                            onTap: () async {
+                              try {
+                                await widget.auth.signOut();
+                                widget.onSignedOut();
+                              } catch (e) {
+                                print(e);
+                              }
+                            },
+                            title: Text(
+                              'Chats',
+                              style: TextStyle(color: Colors.black54),
+                            ),
+                            leading: Icon(
+                              Icons.chat_bubble,
+                              color: Colors.grey,
+                            ),
                           ),
-                          leading: Icon(
-                            Icons.chat_bubble,
-                            color: Colors.grey,
-                          ),
-                        ),
 
 //                        FlatButton(
 //                          child: ListTile(
@@ -267,49 +267,50 @@ class _HomePageState extends State<HomePage> {
 //                            }
 //                          },
 //                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                Container(
-                  width: double.infinity,
-                  color: Colors.grey,
-                  height: 0.5,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      SizedBox(
-                        height: 30.0,
-                        width: 30.0,
-                        child: IconButton(
-                          padding: new EdgeInsets.all(0.0),
-                          icon: Icon(
-                            Icons.wb_sunny,
-                            size: 32.0,
-                          ),
-                          onPressed: () {},
-                        ),
-                      ),
-                      SizedBox(
-                        height: 30.0,
-                        width: 30.0,
-                        child: IconButton(
-                          padding: new EdgeInsets.all(0.0),
-                          icon: Icon(
-                            Icons.camera_alt,
-                            size: 32.0,
-                          ),
-                          onPressed: () {},
-                        ),
-                      ),
-                    ],
+                  Container(
+                    width: double.infinity,
+                    color: Colors.grey,
+                    height: 0.5,
                   ),
-                )
-              ],
-            )),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        SizedBox(
+                          height: 30.0,
+                          width: 30.0,
+                          child: IconButton(
+                            padding: new EdgeInsets.all(0.0),
+                            icon: Icon(
+                              Icons.wb_sunny,
+                              size: 32.0,
+                            ),
+                            onPressed: () {},
+                          ),
+                        ),
+                        SizedBox(
+                          height: 30.0,
+                          width: 30.0,
+                          child: IconButton(
+                            padding: new EdgeInsets.all(0.0),
+                            icon: Icon(
+                              Icons.camera_alt,
+                              size: 32.0,
+                            ),
+                            onPressed: () {},
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              )),
+        ),
       ),
 
       floatingActionButton: body == HomeBody()
