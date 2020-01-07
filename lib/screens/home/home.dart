@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:glitcher/screens/chats.dart';
 import 'package:glitcher/screens/home/home_body.dart';
 import 'package:glitcher/utils/auth.dart';
+import 'package:glitcher/screens/login_page.dart';
 import 'package:glitcher/screens/new_post.dart';
 import 'package:glitcher/screens/profile_screen.dart';
 import 'package:glitcher/utils/statics.dart';
@@ -50,34 +51,34 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         leading: Builder(
             builder: (context) => Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: InkWell(
-                onTap: () => Scaffold.of(context).openDrawer(),
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      fit: BoxFit.fill,
-                      image: profileImageUrl != null
-                          ? NetworkImage(profileImageUrl)
-                          : AssetImage('assets/images/default_profile.png'),
+                  padding: const EdgeInsets.all(8.0),
+                  child: InkWell(
+                    onTap: () => Scaffold.of(context).openDrawer(),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          fit: BoxFit.fill,
+                          image: profileImageUrl != null
+                              ? NetworkImage(profileImageUrl)
+                              : AssetImage('assets/images/default_profile.png'),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            )),
+                )),
         backgroundColor: Theme.of(context).primaryColorDark,
         title: Text('Home'),
         actions: <Widget>[
           body == HomeBody()
               ? IconButton(
-            icon: Icon(Icons.filter_list),
-            onPressed: () {
-              setState(() {
-                Statics.filterPanel = !Statics.filterPanel;
-              });
-            },
-          )
+                  icon: Icon(Icons.filter_list),
+                  onPressed: () {
+                    setState(() {
+                      Statics.filterPanel = !Statics.filterPanel;
+                    });
+                  },
+                )
               : Container(),
         ],
       ),
@@ -114,7 +115,7 @@ class _HomePageState extends State<HomePage> {
                             image: profileImageUrl != null
                                 ? NetworkImage(profileImageUrl)
                                 : AssetImage(
-                                'assets/images/default_profile.png'),
+                                    'assets/images/default_profile.png'),
                           ),
                         ),
                       ),
@@ -314,17 +315,17 @@ class _HomePageState extends State<HomePage> {
 
       floatingActionButton: body == HomeBody()
           ? FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => NewPost(
-                    currentUser: currentUser,
-                  )));
-        },
-        child: Icon(Icons.edit),
-        backgroundColor: Theme.of(context).accentColor,
-      )
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => NewPost(
+                              currentUser: currentUser,
+                            )));
+              },
+              child: Icon(Icons.edit),
+              backgroundColor: Theme.of(context).accentColor,
+            )
           : null,
 
       //BottomnavBar

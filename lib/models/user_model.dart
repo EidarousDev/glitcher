@@ -12,13 +12,13 @@ class User {
 
   User(
       {this.id,
-        this.name,
-        this.username,
-        this.profileImageUrl,
-        this.email,
-        this.description,
-        this.followersCount,
-        this.followingCount});
+      this.name,
+      this.username,
+      this.profileImageUrl,
+      this.email,
+      this.description,
+      this.followersCount,
+      this.followingCount});
 
   factory User.fromDoc(DocumentSnapshot doc) {
     return User(

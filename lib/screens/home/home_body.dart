@@ -18,6 +18,7 @@ import 'package:glitcher/utils/statics.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:soundpool/soundpool.dart';
+import 'package:dropdown_formfield/dropdown_formfield.dart';
 
 class HomeBody extends StatefulWidget {
   @override
@@ -46,7 +47,7 @@ class _HomeBodyState extends State<HomeBody> {
   FirebaseUser currentUser;
   String selectedCategory = "";
   GlobalKey<AutoCompleteTextFieldState<String>> autocompleteKey =
-  new GlobalKey();
+      new GlobalKey();
 
   int allOrFollowing = 0;
 
@@ -126,7 +127,7 @@ class _HomeBodyState extends State<HomeBody> {
         });
       }
       this.lastVisiblePostSnapShot =
-      snap.documents[snap.documents.length - 1].data['timestamp'];
+          snap.documents[snap.documents.length - 1].data['timestamp'];
     });
 
     for (int j = 0; j < postsIDs.length; j++) {
@@ -174,7 +175,7 @@ class _HomeBodyState extends State<HomeBody> {
         });
       }
       this.lastVisiblePostSnapShot =
-      snap.documents[snap.documents.length - 1].data['timestamp'];
+          snap.documents[snap.documents.length - 1].data['timestamp'];
     });
 
     for (int j = 0; j < postsIDs.length; j++) {
@@ -234,7 +235,7 @@ class _HomeBodyState extends State<HomeBody> {
         });
       }
       this.lastVisiblePostSnapShot =
-      snap.documents[snap.documents.length - 1].data['timestamp'];
+          snap.documents[snap.documents.length - 1].data['timestamp'];
     });
 
     for (int j = 0; j < postsIDs.length; j++) {
@@ -265,19 +266,19 @@ class _HomeBodyState extends State<HomeBody> {
         .limit(10)
         .getDocuments()
         .then((snap) {
-      for (int i = 0; i < snap.documents.length; i++) {
-        setState(() {
-          this.posts.add(snap.documents[i]);
-          loadUserData(snap.documents[i].data['owner']);
+          for (int i = 0; i < snap.documents.length; i++) {
+            setState(() {
+              this.posts.add(snap.documents[i]);
+              loadUserData(snap.documents[i].data['owner']);
 
-          if (snap.documents[i].data['video'] != null) {
-            playVideo(snap.documents[i].data['video']);
+              if (snap.documents[i].data['video'] != null) {
+                playVideo(snap.documents[i].data['video']);
+              }
+            });
           }
+          this.lastVisiblePostSnapShot =
+              snap.documents[snap.documents.length - 1].data['timestamp'];
         });
-      }
-      this.lastVisiblePostSnapShot =
-      snap.documents[snap.documents.length - 1].data['timestamp'];
-    });
 
     for (int j = 0; j < postsIDs.length; j++) {
       DocumentSnapshot likedSnapshot = await postsRef
@@ -306,19 +307,19 @@ class _HomeBodyState extends State<HomeBody> {
         .where('category', isEqualTo: selectedCategory)
         .getDocuments()
         .then((snap) {
-      for (int i = 0; i < snap.documents.length; i++) {
-        setState(() {
-          this.posts.add(snap.documents[i]);
-          loadUserData(snap.documents[i].data['owner']);
+          for (int i = 0; i < snap.documents.length; i++) {
+            setState(() {
+              this.posts.add(snap.documents[i]);
+              loadUserData(snap.documents[i].data['owner']);
 
-          if (snap.documents[i].data['video'] != null) {
-            playVideo(snap.documents[i].data['video']);
+              if (snap.documents[i].data['video'] != null) {
+                playVideo(snap.documents[i].data['video']);
+              }
+            });
           }
+          this.lastVisiblePostSnapShot =
+              snap.documents[snap.documents.length - 1].data['timestamp'];
         });
-      }
-      this.lastVisiblePostSnapShot =
-      snap.documents[snap.documents.length - 1].data['timestamp'];
-    });
 
     for (int j = 0; j < postsIDs.length; j++) {
       DocumentSnapshot likedSnapshot = await postsRef
@@ -347,19 +348,19 @@ class _HomeBodyState extends State<HomeBody> {
         .where('owner', whereIn: following)
         .getDocuments()
         .then((snap) {
-      for (int i = 0; i < snap.documents.length; i++) {
-        setState(() {
-          this.posts.add(snap.documents[i]);
-          loadUserData(snap.documents[i].data['owner']);
+          for (int i = 0; i < snap.documents.length; i++) {
+            setState(() {
+              this.posts.add(snap.documents[i]);
+              loadUserData(snap.documents[i].data['owner']);
 
-          if (snap.documents[i].data['video'] != null) {
-            playVideo(snap.documents[i].data['video']);
+              if (snap.documents[i].data['video'] != null) {
+                playVideo(snap.documents[i].data['video']);
+              }
+            });
           }
+          this.lastVisiblePostSnapShot =
+              snap.documents[snap.documents.length - 1].data['timestamp'];
         });
-      }
-      this.lastVisiblePostSnapShot =
-      snap.documents[snap.documents.length - 1].data['timestamp'];
-    });
 
     for (int j = 0; j < postsIDs.length; j++) {
       DocumentSnapshot likedSnapshot = await postsRef
@@ -420,103 +421,103 @@ class _HomeBodyState extends State<HomeBody> {
               padding: const EdgeInsets.all(8.0),
               child: Statics.filterPanel
                   ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  SizedBox(
-                    height: 10,
-                  ),
-                  CupertinoSegmentedControl(
-                    children: {0: Text('All'), 1: Text('Following')},
-                    onValueChanged: (int value) {
-                      setState(() {
-                        if (value == 0) {
-                          loadPosts();
-                        } else if (value == 1) {
-                          loadFollowingPosts();
-                        }
-                        allOrFollowing = value;
-                      });
-                    },
-                    groupValue: allOrFollowing,
-                  ),
-                  (allOrFollowing == 0)
-                      ? Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Expanded(
-                        flex: 4,
-                        child: AutoCompleteTextField<String>(
-                          clearOnSubmit: false,
-                          key: autocompleteKey,
-                          suggestions: Constants.categories,
-                          decoration: InputDecoration(
-                              icon: Icon(Icons.videogame_asset),
-                              hintText: "Category"),
-                          itemFilter: (item, query) {
-                            return item
-                                .toLowerCase()
-                                .startsWith(query.toLowerCase());
-                          },
-                          itemSorter: (a, b) {
-                            return a.compareTo(b);
-                          },
-                          itemSubmitted: (item) {
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        SizedBox(
+                          height: 10,
+                        ),
+                        CupertinoSegmentedControl(
+                          children: {0: Text('All'), 1: Text('Following')},
+                          onValueChanged: (int value) {
                             setState(() {
-                              selectedCategory = item;
-                              loadCategorizedPosts();
+                              if (value == 0) {
+                                loadPosts();
+                              } else if (value == 1) {
+                                loadFollowingPosts();
+                              }
+                              allOrFollowing = value;
                             });
                           },
-                          onFocusChanged: (hasFocus) {},
-                          itemBuilder: (context, item) {
-                            return Column(
-                              crossAxisAlignment:
-                              CrossAxisAlignment.stretch,
-                              mainAxisAlignment:
-                              MainAxisAlignment.center,
-                              children: <Widget>[
-                                Container(
-                                    color: Colors.grey.shade300,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(
-                                          10.0),
-                                      child: Text(item),
-                                    )),
-                                Container(
-                                  width: double.infinity,
-                                  color: Colors.grey,
-                                  height: .5,
-                                )
-                              ],
-                            );
-                          },
+                          groupValue: allOrFollowing,
                         ),
-                      ),
-                      IconButton(
-                        color: Colors.blue,
-                        icon: Icon(Icons.close),
-                        onPressed: () {
-                          loadPosts();
-                          selectedCategory = null;
-                        },
-                      ),
-                    ],
-                  )
-                      : Container()
-                ],
-              )
+                        (allOrFollowing == 0)
+                            ? Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Expanded(
+                                    flex: 4,
+                                    child: AutoCompleteTextField<String>(
+                                      clearOnSubmit: false,
+                                      key: autocompleteKey,
+                                      suggestions: Constants.categories,
+                                      decoration: InputDecoration(
+                                          icon: Icon(Icons.videogame_asset),
+                                          hintText: "Category"),
+                                      itemFilter: (item, query) {
+                                        return item
+                                            .toLowerCase()
+                                            .startsWith(query.toLowerCase());
+                                      },
+                                      itemSorter: (a, b) {
+                                        return a.compareTo(b);
+                                      },
+                                      itemSubmitted: (item) {
+                                        setState(() {
+                                          selectedCategory = item;
+                                          loadCategorizedPosts();
+                                        });
+                                      },
+                                      onFocusChanged: (hasFocus) {},
+                                      itemBuilder: (context, item) {
+                                        return Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            Container(
+                                                color: Colors.grey.shade300,
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      10.0),
+                                                  child: Text(item),
+                                                )),
+                                            Container(
+                                              width: double.infinity,
+                                              color: Colors.grey,
+                                              height: .5,
+                                            )
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  IconButton(
+                                    color: Colors.blue,
+                                    icon: Icon(Icons.close),
+                                    onPressed: () {
+                                      loadPosts();
+                                      selectedCategory = null;
+                                    },
+                                  ),
+                                ],
+                              )
+                            : Container()
+                      ],
+                    )
                   : Container(),
             ),
             Statics.filterPanel
                 ? Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Container(
-                width: double.infinity,
-                color: Colors.grey,
-                height: 1,
-              ),
-            )
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Container(
+                      width: double.infinity,
+                      color: Colors.grey,
+                      height: 1,
+                    ),
+                  )
                 : Container(),
             Container(
               color: Theme.of(context).primaryColor,
@@ -601,11 +602,11 @@ class _HomeBodyState extends State<HomeBody> {
                       child: post.imageUrl == null
                           ? null
                           : Container(
-                        width: double.infinity,
-                        child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
-                            child: Image.network(post.imageUrl)),
-                      ),
+                              width: double.infinity,
+                              child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: Image.network(post.imageUrl)),
+                            ),
                     ),
                     Container(
                       child: post.video == null ? null : playerWidget,
@@ -614,22 +615,22 @@ class _HomeBodyState extends State<HomeBody> {
                       child: post.youtubeId == null
                           ? null
                           : YoutubePlayer(
-                        context: context,
-                        videoId: post.youtubeId,
-                        flags: YoutubePlayerFlags(
-                          autoPlay: false,
-                          showVideoProgressIndicator: true,
-                        ),
-                        videoProgressIndicatorColor: Colors.red,
-                        progressColors: ProgressColors(
-                          playedColor: Colors.red,
-                          handleColor: Colors.redAccent,
-                        ),
-                        onPlayerInitialized: (controller) {
-                          _youtubeController = controller;
-                          _youtubeController.addListener(listener);
-                        },
-                      ),
+                              context: context,
+                              videoId: post.youtubeId,
+                              flags: YoutubePlayerFlags(
+                                autoPlay: false,
+                                showVideoProgressIndicator: true,
+                              ),
+                              videoProgressIndicatorColor: Colors.red,
+                              progressColors: ProgressColors(
+                                playedColor: Colors.red,
+                                handleColor: Colors.redAccent,
+                              ),
+                              onPlayerInitialized: (controller) {
+                                _youtubeController = controller;
+                                _youtubeController.addListener(listener);
+                              },
+                            ),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(8, 8, 16, 8),
@@ -719,10 +720,10 @@ class _HomeBodyState extends State<HomeBody> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) => NewComment(
-                                              postId: post.id,
-                                              commentsNo:
-                                              post.commentsCount,
-                                            )));
+                                                  postId: post.id,
+                                                  commentsNo:
+                                                      post.commentsCount,
+                                                )));
                                   },
                                 ),
                               ),

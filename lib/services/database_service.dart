@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:glitcher/Models/user_model.dart';
 import 'package:glitcher/models/post_model.dart';
+import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/utils/constants.dart';
 
 class DatabaseService {
@@ -11,7 +11,7 @@ class DatabaseService {
         .limit(10)
         .getDocuments();
     List<Post> posts =
-    postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+        postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
     return posts;
   }
 
