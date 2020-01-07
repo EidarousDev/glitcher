@@ -1,6 +1,7 @@
 import 'dart:math';
 Random random = Random();
-List names = [
+
+final List names = [
   "Ling Waldner",
   "Gricelda Barrera",
   "Lenard Milton",

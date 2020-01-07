@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/utils/auth.dart';
 import 'package:glitcher/widgets/chat_item.dart';
 import 'package:glitcher/utils/data.dart';
 
@@ -11,10 +14,98 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin,
     AutomaticKeepAliveClientMixin{
   TabController _tabController;
 
+  Firestore _firestore = Firestore.instance;
+  var following = [];
+  var followers = [];
+  Set friends = Set();
+  List<ChatItem> chats = [];
+
+  FirebaseUser currentUser;
+
+  void getCurrentUser() async {
+    this.currentUser = await Auth().getCurrentUser();
+    loadFollowing();
+  }
+
+  Future<Set> getFriends() async{
+    Set followingSet = Set();
+    Set followerSet = Set();
+
+    for(int i = 0; i < following.length; i++){
+      followingSet.add(following[i]);
+    }
+
+    for(int j = 0; j < followers.length; j++){
+      followerSet.add(followers[j]);
+    }
+    friends = followingSet.intersection(followerSet);
+
+    for(int i = 0; i < friends.length; i++){
+      await loadUserData(friends.elementAt(i));
+    }
+
+    return friends;
+  }
+
+  void loadFollowing() async{
+    if (following.length == 0) {
+      await _firestore
+          .collection('users')
+          .document(currentUser.uid)
+          .collection('following')
+          .getDocuments()
+          .then((snap) {
+        for (int i = 0; i < snap.documents.length; i++) {
+          this.following.add(snap.documents[i].documentID);
+        }
+        loadFollowers();
+      });
+    }
+  }
+
+  void loadFollowers() async{
+    if (followers.length == 0) {
+      await _firestore
+          .collection('users')
+          .document(currentUser.uid)
+          .collection('followers')
+          .getDocuments()
+          .then((snap) {
+        for (int i = 0; i < snap.documents.length; i++) {
+          this.followers.add(snap.documents[i].documentID);
+        }
+        getFriends();
+      });
+    }
+  }
+
+  Future<ChatItem> loadUserData(String uid) async {
+    ChatItem chatItem;
+    await _firestore.collection('users').document(uid).get().then((onValue) {
+      setState(() {
+        chatItem = ChatItem(
+          key: ValueKey(uid),
+          dp: onValue.data['profile_url'],
+          name: onValue.data['username'],
+          isOnline: true,
+          msg: 'Last Message',
+          time: FieldValue.serverTimestamp().toString(),
+          counter: 0,
+        );
+        chats.add(chatItem);
+      });
+    });
+
+    return chatItem;
+  }
+
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(vsync: this, initialIndex: 0, length: 2);
+
+    getCurrentUser();
   }
 
   @override
@@ -38,15 +129,8 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin,
             },
             itemCount: chats.length,
             itemBuilder: (BuildContext context, int index) {
-              Map chat = chats[index];
-              return ChatItem(
-                dp: chat['dp'],
-                name: chat['name'],
-                isOnline: chat['isOnline'],
-                counter: chat['counter'],
-                msg: chat['msg'],
-                time: chat['time'],
-              );
+              ChatItem chat = chats[index];
+              return chat;
             },
           ),
           ListView.separated(

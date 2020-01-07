@@ -1,19 +1,163 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/utils/auth.dart';
 import 'package:glitcher/utils/data.dart';
 import 'dart:math';
 
 import 'package:glitcher/widgets/chat_bubble.dart';
-
-
+import 'package:glitcher/widgets/chat_item.dart';
 
 class Conversation extends StatefulWidget {
+  final String otherUid;
+
+  Conversation({this.otherUid});
+
   @override
-  _ConversationState createState() => _ConversationState();
+  _ConversationState createState() => _ConversationState(otherUid: otherUid);
 }
 
 class _ConversationState extends State<Conversation> {
+  Firestore _firestore = Firestore.instance;
   static Random random = Random();
-  String name = names[random.nextInt(10)];
+  String name;
+  String profileImage;
+  final String otherUid;
+  FirebaseUser currentUser;
+
+  String messageText;
+
+  var messages;
+
+  _ConversationState({this.otherUid});
+
+  void getCurrentUser() async {
+    this.currentUser = await Auth().getCurrentUser();
+
+    streamMessages();
+  }
+
+  Future<ChatItem> loadUserData(String uid) async {
+    ChatItem chatItem;
+    await _firestore.collection('users').document(uid).get().then((onValue) {
+      setState(() {
+        name = onValue.data['username'];
+        profileImage = onValue.data['profile_url'];
+
+        chatItem = ChatItem(
+          key: ValueKey(uid),
+          dp: onValue.data['profile_url'],
+          name: onValue.data['username'],
+          isOnline: true,
+          msg: 'Last Message',
+          time: FieldValue.serverTimestamp().toString(),
+          counter: 0,
+        );
+        chats.add(chatItem);
+      });
+    });
+
+    return chatItem;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getCurrentUser();
+
+    loadUserData(otherUid);
+  }
+
+  void sendMessage() async {
+    await _firestore
+        .collection('chats')
+        .document(currentUser.uid)
+        .collection('conversations')
+        .document(otherUid)
+        .collection('messages')
+        .add({
+      'sender': currentUser.uid,
+      'text': messageText,
+      'timestamp': FieldValue.serverTimestamp(),
+      'type': 'text'
+    });
+
+    await _firestore
+        .collection('chats')
+        .document(otherUid)
+        .collection('conversations')
+        .document(currentUser.uid)
+        .collection('messages')
+        .add({
+      'sender': currentUser.uid,
+      'text': messageText,
+      'timestamp': FieldValue.serverTimestamp(),
+      'type': 'text'
+    });
+  }
+
+  void streamMessages() async {
+    await for (var snapshot in _firestore
+        .collection('chats')
+        .document(currentUser.uid)
+        .collection('conversations')
+        .document(otherUid)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .snapshots()) {
+      setState(() {
+        messages = snapshot.documents;
+      });
+    }
+    ;
+  }
+
+
+
+  String formatTimestamp(Timestamp timestamp) {
+    var now = Timestamp.now().toDate();
+    var date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
+    var diff = now.difference(date);
+    var time = '';
+
+    if (diff.inSeconds <= 60) {
+      time = 'now';
+    }
+    else if(diff.inMinutes > 0 && diff.inMinutes < 60){
+      if(diff.inMinutes == 1){
+        time = 'A minute ago';
+      }
+      else{
+        time = diff.inMinutes.toString() + ' minutes ago';
+      }
+    }
+
+    else if(diff.inHours > 0 && diff.inHours < 24){
+      if(diff.inHours == 1){
+        time = 'An hour ago';
+      }
+      else{
+        time = diff.inHours.toString() + ' hours ago';
+      }
+    }
+
+    else if (diff.inDays > 0 && diff.inDays < 7) {
+      if (diff.inDays == 1) {
+        time = 'Yesterday';
+      } else {
+        time = diff.inDays.toString() + ' DAYS AGO';
+      }
+    } else {
+      if (diff.inDays == 7) {
+        time = 'A WEEK AGO';
+      } else {
+        time = timestamp.toDate().toString();
+      }
+    }
+
+    return time;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,29 +166,29 @@ class _ConversationState extends State<Conversation> {
           icon: Icon(
             Icons.keyboard_backspace,
           ),
-          onPressed: ()=>Navigator.pop(context),
+          onPressed: () => Navigator.pop(context),
         ),
         titleSpacing: 0,
         title: InkWell(
           child: Row(
-
             children: <Widget>[
               Padding(
                 padding: EdgeInsets.only(left: 0.0, right: 10.0),
-                child: CircleAvatar(
-                  backgroundImage: AssetImage(
-                    "assets/cm${random.nextInt(10)}.jpeg",
-                  ),
-                ),
+                child: profileImage != null
+                    ? CircleAvatar(
+                        backgroundImage: NetworkImage(
+                          profileImage,
+                        ),
+                      )
+                    : Container(),
               ),
-
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     SizedBox(height: 15.0),
                     Text(
-                      name,
+                      name != null ? name : '',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
@@ -63,49 +207,47 @@ class _ConversationState extends State<Conversation> {
               ),
             ],
           ),
-
-          onTap: (){},
+          onTap: () {},
         ),
         actions: <Widget>[
           IconButton(
             icon: Icon(
               Icons.more_horiz,
             ),
-            onPressed: (){},
+            onPressed: () {},
           ),
         ],
       ),
-
-
       body: Container(
         height: MediaQuery.of(context).size.height,
         child: Column(
           children: <Widget>[
             SizedBox(height: 10),
-            Flexible(
-              child: ListView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 10),
-                itemCount: conversation.length,
-                reverse: true,
-                itemBuilder: (BuildContext context, int index) {
-                  Map msg = conversation[index];
-                  return ChatBubble(
-                    message: msg['type'] == "text"
-                        ?messages[random.nextInt(10)]
-                        :"assets/cm${random.nextInt(10)}.jpeg",
-                    username: msg["username"],
-                    time: msg["time"],
-                    type: msg['type'],
-                    replyText: msg["replyText"],
-                    isMe: msg['isMe'],
-                    isGroup: msg['isGroup'],
-                    isReply: msg['isReply'],
-                    replyName: name,
-                  );
-                },
-              ),
-            ),
-
+            messages != null
+                ? Flexible(
+                    child: ListView.builder(
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      itemCount: messages.length,
+                      reverse: true,
+                      itemBuilder: (BuildContext context, int index) {
+                        Map msg = messages[index].data;
+                        return ChatBubble(
+                          message: msg['type'] == "text"
+                              ? msg['text']
+                              : msg['image'],
+                          username: name,
+                          time: formatTimestamp(msg['timestamp']),
+                          type: msg['type'],
+                          replyText: null,
+                          isMe: msg['sender'] == currentUser.uid,
+                          isGroup: false,
+                          isReply: false,
+                          replyName: null,
+                        );
+                      },
+                    ),
+                  )
+                : Container(),
             Align(
               alignment: Alignment.bottomCenter,
               child: Container(
@@ -133,11 +275,13 @@ class _ConversationState extends State<Conversation> {
                             Icons.add,
                             color: Theme.of(context).accentColor,
                           ),
-                          onPressed: (){},
+                          onPressed: () {},
                         ),
-
                         contentPadding: EdgeInsets.all(0),
                         title: TextField(
+                          onChanged: (value) {
+                            messageText = value;
+                          },
                           style: TextStyle(
                             fontSize: 15.0,
                             color: Theme.of(context).textTheme.title.color,
@@ -146,10 +290,14 @@ class _ConversationState extends State<Conversation> {
                             contentPadding: EdgeInsets.all(10.0),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(5.0),
-                              borderSide: BorderSide(color: Theme.of(context).primaryColor,),
+                              borderSide: BorderSide(
+                                color: Theme.of(context).primaryColor,
+                              ),
                             ),
                             enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Theme.of(context).primaryColor,),
+                              borderSide: BorderSide(
+                                color: Theme.of(context).primaryColor,
+                              ),
                               borderRadius: BorderRadius.circular(5.0),
                             ),
                             hintText: "Write your message...",
@@ -160,14 +308,14 @@ class _ConversationState extends State<Conversation> {
                           ),
                           maxLines: null,
                         ),
-
-
                         trailing: IconButton(
                           icon: Icon(
-                            Icons.mic,
+                            Icons.send,
                             color: Theme.of(context).accentColor,
                           ),
-                          onPressed: (){},
+                          onPressed: () async {
+                            sendMessage();
+                          },
                         ),
                       ),
                     ),
@@ -175,11 +323,9 @@ class _ConversationState extends State<Conversation> {
                 ),
               ),
             ),
-
           ],
         ),
       ),
-
     );
   }
 }

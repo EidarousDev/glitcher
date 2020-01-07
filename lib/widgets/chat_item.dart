@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:glitcher/screens/conversation.dart';
 
-
 class ChatItem extends StatefulWidget {
-
   final String dp;
   final String name;
   final String time;
@@ -35,12 +33,11 @@ class _ChatItemState extends State<ChatItem> {
         leading: Stack(
           children: <Widget>[
             CircleAvatar(
-              backgroundImage: AssetImage(
+              backgroundImage: NetworkImage(
                 "${widget.dp}",
               ),
               radius: 25,
             ),
-
             Positioned(
               bottom: 0.0,
               left: 6.0,
@@ -54,9 +51,7 @@ class _ChatItemState extends State<ChatItem> {
                 child: Center(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: widget.isOnline
-                          ?Colors.greenAccent
-                          :Colors.grey,
+                      color: widget.isOnline ? Colors.greenAccent : Colors.grey,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     height: 7,
@@ -65,10 +60,8 @@ class _ChatItemState extends State<ChatItem> {
                 ),
               ),
             ),
-
           ],
         ),
-
         title: Text(
           "${widget.name}",
           style: TextStyle(
@@ -87,39 +80,40 @@ class _ChatItemState extends State<ChatItem> {
                 fontSize: 11,
               ),
             ),
-
             SizedBox(height: 5),
             widget.counter == 0
-                ?SizedBox()
-                :Container(
-              padding: EdgeInsets.all(1),
-              decoration: BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              constraints: BoxConstraints(
-                minWidth: 11,
-                minHeight: 11,
-              ),
-              child: Padding(
-                padding: EdgeInsets.only(top: 1, left: 5, right: 5),
-                child:Text(
-                  "${widget.counter}",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
+                ? SizedBox()
+                : Container(
+                    padding: EdgeInsets.all(1),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    constraints: BoxConstraints(
+                      minWidth: 11,
+                      minHeight: 11,
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 1, left: 5, right: 5),
+                      child: Text(
+                        "${widget.counter}",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
           ],
         ),
-        onTap: (){
+        onTap: () {
           Navigator.of(context, rootNavigator: true).push(
             MaterialPageRoute(
-              builder: (BuildContext context){
-                return Conversation();
+              builder: (BuildContext context) {
+                ValueKey key = this.widget.key;
+                String uid = key.value;
+                return Conversation(otherUid: uid);
               },
             ),
           );
