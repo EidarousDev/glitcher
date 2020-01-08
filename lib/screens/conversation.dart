@@ -1,12 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/auth.dart';
-import 'package:glitcher/utils/data.dart';
-import 'dart:math';
 
 import 'package:glitcher/widgets/chat_bubble.dart';
-import 'package:glitcher/widgets/chat_item.dart';
 
 class Conversation extends StatefulWidget {
   final String otherUid;
@@ -19,15 +18,18 @@ class Conversation extends StatefulWidget {
 
 class _ConversationState extends State<Conversation> {
   Firestore _firestore = Firestore.instance;
-  static Random random = Random();
-  String name;
-  String profileImage;
+//  static Random random = Random();
+//  String name;
+//  String profileImage;
+  User otherUser;
   final String otherUid;
   FirebaseUser currentUser;
 
   String messageText;
 
   var messages;
+
+  TextEditingController messageController = TextEditingController();
 
   _ConversationState({this.otherUid});
 
@@ -37,27 +39,13 @@ class _ConversationState extends State<Conversation> {
     streamMessages();
   }
 
-  Future<ChatItem> loadUserData(String uid) async {
-    ChatItem chatItem;
-    await _firestore.collection('users').document(uid).get().then((onValue) {
-      setState(() {
-        name = onValue.data['username'];
-        profileImage = onValue.data['profile_url'];
+  void loadUserData(String uid) async {
+    User user;
+    user = await DatabaseService.getUserWithId(uid);
 
-        chatItem = ChatItem(
-          key: ValueKey(uid),
-          dp: onValue.data['profile_url'],
-          name: onValue.data['username'],
-          isOnline: true,
-          msg: 'Last Message',
-          time: FieldValue.serverTimestamp().toString(),
-          counter: 0,
-        );
-        chats.add(chatItem);
-      });
+    setState(() {
+      otherUser = user;
     });
-
-    return chatItem;
   }
 
   @override
@@ -69,6 +57,8 @@ class _ConversationState extends State<Conversation> {
   }
 
   void sendMessage() async {
+    messageController.clear();
+
     await _firestore
         .collection('chats')
         .document(currentUser.uid)
@@ -94,6 +84,7 @@ class _ConversationState extends State<Conversation> {
       'timestamp': FieldValue.serverTimestamp(),
       'type': 'text'
     });
+
   }
 
   void streamMessages() async {
@@ -174,10 +165,10 @@ class _ConversationState extends State<Conversation> {
             children: <Widget>[
               Padding(
                 padding: EdgeInsets.only(left: 0.0, right: 10.0),
-                child: profileImage != null
+                child: otherUser.profileImageUrl != null
                     ? CircleAvatar(
                         backgroundImage: NetworkImage(
-                          profileImage,
+                          otherUser.profileImageUrl,
                         ),
                       )
                     : Container(),
@@ -188,7 +179,7 @@ class _ConversationState extends State<Conversation> {
                   children: <Widget>[
                     SizedBox(height: 15.0),
                     Text(
-                      name != null ? name : '',
+                      otherUser.username != null ? otherUser.username : '',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
@@ -196,7 +187,7 @@ class _ConversationState extends State<Conversation> {
                     ),
                     SizedBox(height: 5),
                     Text(
-                      "Online",
+                      otherUser != null ? otherUser.online == 'online' ? 'online' : formatTimestamp(otherUser.online) : '',
                       style: TextStyle(
                         fontWeight: FontWeight.w400,
                         fontSize: 11,
@@ -235,7 +226,7 @@ class _ConversationState extends State<Conversation> {
                           message: msg['type'] == "text"
                               ? msg['text']
                               : msg['image'],
-                          username: name,
+                          username: otherUser.username,
                           time: formatTimestamp(msg['timestamp']),
                           type: msg['type'],
                           replyText: null,
@@ -279,6 +270,7 @@ class _ConversationState extends State<Conversation> {
                         ),
                         contentPadding: EdgeInsets.all(0),
                         title: TextField(
+                          controller: messageController,
                           onChanged: (value) {
                             messageText = value;
                           },

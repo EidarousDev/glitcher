@@ -87,9 +87,9 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin,
           key: ValueKey(uid),
           dp: onValue.data['profile_url'],
           name: onValue.data['username'],
-          isOnline: true,
+          isOnline: onValue.data['online'] == 'online',
           msg: 'Last Message',
-          time: FieldValue.serverTimestamp().toString(),
+          time: onValue.data['online'] == 'online' ? 'online' : formatTimestamp(onValue.data['online']),
           counter: 0,
         );
         chats.add(chatItem);
@@ -163,6 +163,50 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin,
       ),
 
     );
+  }
+
+  String formatTimestamp(Timestamp timestamp) {
+    var now = Timestamp.now().toDate();
+    var date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
+    var diff = now.difference(date);
+    var time = '';
+
+    if (diff.inSeconds <= 60) {
+      time = 'now';
+    }
+    else if(diff.inMinutes > 0 && diff.inMinutes < 60){
+      if(diff.inMinutes == 1){
+        time = 'A minute ago';
+      }
+      else{
+        time = diff.inMinutes.toString() + ' minutes ago';
+      }
+    }
+
+    else if(diff.inHours > 0 && diff.inHours < 24){
+      if(diff.inHours == 1){
+        time = 'An hour ago';
+      }
+      else{
+        time = diff.inHours.toString() + ' hours ago';
+      }
+    }
+
+    else if (diff.inDays > 0 && diff.inDays < 7) {
+      if (diff.inDays == 1) {
+        time = 'Yesterday';
+      } else {
+        time = diff.inDays.toString() + ' DAYS AGO';
+      }
+    } else {
+      if (diff.inDays == 7) {
+        time = 'A WEEK AGO';
+      } else {
+        time = timestamp.toDate().toString();
+      }
+    }
+
+    return time;
   }
 
   @override

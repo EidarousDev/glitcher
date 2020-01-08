@@ -9,6 +9,7 @@ class User {
   final String description;
   final int followersCount;
   final int followingCount;
+  final dynamic online;
 
   User(
       {this.id,
@@ -18,7 +19,8 @@ class User {
       this.email,
       this.description,
       this.followersCount,
-      this.followingCount});
+      this.followingCount,
+      this.online});
 
   factory User.fromDoc(DocumentSnapshot doc) {
     return User(
@@ -30,6 +32,7 @@ class User {
       description: doc['description'] ?? '',
       followersCount: doc['followers'],
       followingCount: doc['following'],
+      online: doc['online']
     );
   }
 }
