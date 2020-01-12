@@ -67,7 +67,9 @@ class _HomePageState extends State<HomePage> {
                   ),
                 )),
         backgroundColor: Theme.of(context).primaryColorDark,
-        title: body is HomeBody ? Text('Home') : body is Chats ? Text('Chats'): Text(''),
+        title: body is HomeBody
+            ? Text('Home')
+            : body is Chats ? Text('Chats') : Text(''),
         actions: <Widget>[
           body is HomeBody
               ? IconButton(
@@ -86,16 +88,15 @@ class _HomePageState extends State<HomePage> {
       body: body,
 
       drawer: Drawer(
-        // The sidebar/Drawer
-        child: Container(
-            color: Theme.of(context).primaryColor,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 40.0, 0.0, 8.0),
-                  child: InkWell(
+        child: ListView(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(18.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  InkWell(
                     onTap: () {
                       Navigator.push(
                           context,
@@ -103,210 +104,133 @@ class _HomePageState extends State<HomePage> {
                               builder: (context) =>
                                   ProfileScreen(userId: this.currentUser.uid)));
                     },
-                    child: Container(
-                      width: 75.0,
-                      height: 75.0,
-                      decoration: new BoxDecoration(
-                        shape: BoxShape.circle,
-                        image: DecorationImage(
-                          fit: BoxFit.fitHeight,
-                          image: profileImageUrl != null
-                              ? NetworkImage(profileImageUrl)
-                              : AssetImage('assets/images/default_profile.png'),
-                        ),
-                      ),
+                    child: CircleAvatar(
+                      radius: 35.0,
+                      backgroundColor: Colors.grey,
+                      backgroundImage: profileImageUrl != null
+                          ? NetworkImage(profileImageUrl)
+                          : AssetImage('assets/images/default_profile.png'),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                  child: Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                        child: Text(
-                          username != null ? username : '',
-                          style: TextStyle(
-                              color: Colors.black54,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20),
-                        ),
+                      Text(
+                        username != null ? username : '',
+                        style: TextStyle(
+                            color: Colors.black54,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20),
                       ),
                       Icon(Icons.arrow_drop_down)
                     ],
                   ),
-                ),
-                Container(
-                  width: double.infinity,
-                  color: Colors.grey,
-                  height: 0.5,
-                ),
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
-                    child: Column(
-                      children: <Widget>[
-                        ListTile(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ProfileScreen(
-                                        userId: this.currentUser.uid)));
-                          },
-                          title: Text(
-                            'Profile',
-                            style: TextStyle(color: Colors.black54),
-                          ),
-                          leading: Icon(
-                            Icons.person,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        ListTile(
-                          title: Text(
-                            'Lists',
-                            style: TextStyle(color: Colors.black54),
-                          ),
-                          leading: Icon(
-                            Icons.list,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        ListTile(
-                          title: Text(
-                            'Bookmarks',
-                            style: TextStyle(color: Colors.black54),
-                          ),
-                          leading: Icon(
-                            Icons.bookmark_border,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        ListTile(
-                          title: Text(
-                            'Moments',
-                            style: TextStyle(color: Colors.black54),
-                          ),
-                          leading: Icon(
-                            Icons.apps,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        Container(
-                          width: double.infinity,
-                          color: Colors.grey,
-                          height: 0.5,
-                        ),
-                        ListTile(
-                          title: Text(
-                            'Settings and Privacy',
-                            style: TextStyle(color: Colors.black54),
-                          ),
-                        ),
-                        ListTile(
-                          title: Text(
-                            'Help center',
-                            style: TextStyle(color: Colors.black54),
-                          ),
-                        ),
-
-                        ListTile(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Chats()));
-                          },
-                          title: Text(
-                            'Chats',
-                            style: TextStyle(color: Colors.black54),
-                          ),
-                          leading: Icon(
-                            Icons.chat_bubble,
-                            color: Colors.grey,
-                          ),
-                        ),
-
-                        ListTile(
-                          onTap: () async {
-                            try {
-                              await widget.auth.signOut();
-                              widget.onSignedOut();
-                            } catch (e) {
-                              print(e);
-                            }
-                          },
-                          title: Text(
-                            'Sign Out',
-                            style: TextStyle(color: Colors.black54),
-                          ),
-                          leading: Icon(
-                            Icons.power_settings_new,
-                            color: Colors.grey,
-                          ),
-                        ),
-
-//                        FlatButton(
-//                          child: ListTile(
-//                            title: Text(
-//                              'Log Out',
-//                              style: TextStyle(color: Colors.black54),
-//                            ),
-//                          ),
-//                          onPressed: () async {
-//                            try {
-//                              await widget.auth.signOut();
-//                              widget.onSignedOut();
-//                            } catch (e) {
-//                              print(e);
-//                            }
-//                          },
-//                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                  width: double.infinity,
-                  color: Colors.grey,
-                  height: 0.5,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      SizedBox(
-                        height: 30.0,
-                        width: 30.0,
-                        child: IconButton(
-                          padding: new EdgeInsets.all(0.0),
-                          icon: Icon(
-                            Icons.wb_sunny,
-                            size: 32.0,
-                          ),
-                          onPressed: () {},
-                        ),
-                      ),
-                      SizedBox(
-                        height: 30.0,
-                        width: 30.0,
-                        child: IconButton(
-                          padding: new EdgeInsets.all(0.0),
-                          icon: Icon(
-                            Icons.camera_alt,
-                            size: 32.0,
-                          ),
-                          onPressed: () {},
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              ],
-            )),
+                ],
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              color: Colors.grey,
+              height: 0.5,
+            ),
+            ListTile(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            ProfileScreen(userId: this.currentUser.uid)));
+              },
+              title: Text(
+                'Profile',
+                style: TextStyle(color: Colors.black54),
+              ),
+              leading: Icon(
+                Icons.person,
+                color: Colors.grey,
+              ),
+            ),
+            ListTile(
+              title: Text(
+                'Lists',
+                style: TextStyle(color: Colors.black54),
+              ),
+              leading: Icon(
+                Icons.list,
+                color: Colors.grey,
+              ),
+            ),
+            ListTile(
+              title: Text(
+                'Bookmarks',
+                style: TextStyle(color: Colors.black54),
+              ),
+              leading: Icon(
+                Icons.bookmark_border,
+                color: Colors.grey,
+              ),
+            ),
+            ListTile(
+              title: Text(
+                'Moments',
+                style: TextStyle(color: Colors.black54),
+              ),
+              leading: Icon(
+                Icons.apps,
+                color: Colors.grey,
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              color: Colors.grey,
+              height: 0.5,
+            ),
+            ListTile(
+              title: Text(
+                'Settings and Privacy',
+                style: TextStyle(color: Colors.black54),
+              ),
+            ),
+            ListTile(
+              title: Text(
+                'Help center',
+                style: TextStyle(color: Colors.black54),
+              ),
+            ),
+            ListTile(
+              onTap: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => Chats()));
+              },
+              title: Text(
+                'Chats',
+                style: TextStyle(color: Colors.black54),
+              ),
+              leading: Icon(
+                Icons.chat_bubble,
+                color: Colors.grey,
+              ),
+            ),
+            ListTile(
+              onTap: () async {
+                try {
+                  await widget.auth.signOut();
+                  widget.onSignedOut();
+                } catch (e) {
+                  print(e);
+                }
+              },
+              title: Text(
+                'Sign Out',
+                style: TextStyle(color: Colors.black54),
+              ),
+              leading: Icon(
+                Icons.power_settings_new,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
       ),
 
       floatingActionButton: body is HomeBody

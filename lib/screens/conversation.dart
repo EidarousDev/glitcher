@@ -84,7 +84,6 @@ class _ConversationState extends State<Conversation> {
       'timestamp': FieldValue.serverTimestamp(),
       'type': 'text'
     });
-
   }
 
   void streamMessages() async {
@@ -100,39 +99,30 @@ class _ConversationState extends State<Conversation> {
         messages = snapshot.documents;
       });
     }
-    ;
   }
-
-
 
   String formatTimestamp(Timestamp timestamp) {
     var now = Timestamp.now().toDate();
-    var date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
+    var date = new DateTime.fromMillisecondsSinceEpoch(
+        timestamp.millisecondsSinceEpoch);
     var diff = now.difference(date);
     var time = '';
 
     if (diff.inSeconds <= 60) {
       time = 'now';
-    }
-    else if(diff.inMinutes > 0 && diff.inMinutes < 60){
-      if(diff.inMinutes == 1){
+    } else if (diff.inMinutes > 0 && diff.inMinutes < 60) {
+      if (diff.inMinutes == 1) {
         time = 'A minute ago';
-      }
-      else{
+      } else {
         time = diff.inMinutes.toString() + ' minutes ago';
       }
-    }
-
-    else if(diff.inHours > 0 && diff.inHours < 24){
-      if(diff.inHours == 1){
+    } else if (diff.inHours > 0 && diff.inHours < 24) {
+      if (diff.inHours == 1) {
         time = 'An hour ago';
-      }
-      else{
+      } else {
         time = diff.inHours.toString() + ' hours ago';
       }
-    }
-
-    else if (diff.inDays > 0 && diff.inDays < 7) {
+    } else if (diff.inDays > 0 && diff.inDays < 7) {
       if (diff.inDays == 1) {
         time = 'Yesterday';
       } else {
@@ -187,7 +177,11 @@ class _ConversationState extends State<Conversation> {
                     ),
                     SizedBox(height: 5),
                     Text(
-                      otherUser != null ? otherUser.online == 'online' ? 'online' : formatTimestamp(otherUser.online) : '',
+                      otherUser != null
+                          ? otherUser.online == 'online'
+                              ? 'online'
+                              : formatTimestamp(otherUser.online)
+                          : '',
                       style: TextStyle(
                         fontWeight: FontWeight.w400,
                         fontSize: 11,

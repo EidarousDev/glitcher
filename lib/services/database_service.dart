@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/utils/constants.dart';
@@ -22,5 +23,20 @@ class DatabaseService {
       return User.fromDoc(userDocSnapshot);
     }
     return User();
+  }
+
+  // This function is used to get the recent messages (unfiltered)
+  static Future<List<Message>> getMessages(
+      String userId, String otherUserId) async {
+    QuerySnapshot msgSnapshot = await chatsRef
+        .document(userId)
+        .collection('conversations')
+        .document(otherUserId)
+        .collection('messages')
+        .orderBy('timestamp', descending: false)
+        .getDocuments();
+    List<Message> messages =
+        msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
+    return messages;
   }
 }

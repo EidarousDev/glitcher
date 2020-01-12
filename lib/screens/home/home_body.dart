@@ -38,7 +38,7 @@ class _HomeBodyState extends State<HomeBody> {
 
   Soundpool pool = Soundpool(streamType: StreamType.ring);
   AssetsAudioPlayer assetsAudioPlayer = AssetsAudioPlayer();
-  YoutubePlayerController _youtubeController = YoutubePlayerController();
+  YoutubePlayerController _youtubeController;
   bool _isPlaying;
   VideoPlayerController videoPlayerController;
   ChewieController chewieController;
@@ -63,7 +63,7 @@ class _HomeBodyState extends State<HomeBody> {
     chewieController = ChewieController(
       videoPlayerController: videoPlayerController,
       aspectRatio: videoPlayerController.value.aspectRatio,
-      autoPlay: true,
+      autoPlay: false,
       looping: false,
     );
 
@@ -91,19 +91,20 @@ class _HomeBodyState extends State<HomeBody> {
       //_showThankYouDialog();
     }
     if (mounted) {
-      setState(() {
-        //_playerStatus = _youtubeController.value.playerState.toString();
-        //_errorCode = _youtubeController.value.errorCode.toString();
-      });
+//      setState(() {
+//        //_playerStatus = _youtubeController.value.playerState.toString();
+//        //_errorCode = _youtubeController.value.errorCode.toString();
+//      });
     }
   }
 
   @override
   void dispose() {
     if (videoPlayerController != null) videoPlayerController.dispose();
+    if (_youtubeController != null) _youtubeController.dispose();
+    if (_scrollController != null) _scrollController.dispose();
 
     if (chewieController != null) chewieController.dispose();
-
     super.dispose();
   }
 
@@ -619,6 +620,7 @@ class _HomeBodyState extends State<HomeBody> {
                               flags: YoutubePlayerFlags(
                                 autoPlay: false,
                                 showVideoProgressIndicator: true,
+                                forceHideAnnotation: true,
                               ),
                               videoProgressIndicatorColor: Colors.red,
                               progressColors: ProgressColors(
