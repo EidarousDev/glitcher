@@ -2,9 +2,12 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 
 abstract class BaseAuth {
+  Future<String> signInWithEmailAndPassword(String email, String password);
   Future<String> signIn(String email, String password);
 
   Future<String> signUp(String username, String email, String password);
+
+  Future<String> currentUser();
 
   Future<FirebaseUser> getCurrentUser();
 
@@ -27,6 +30,15 @@ class Auth implements BaseAuth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   @override
+  Future<String> signInWithEmailAndPassword(
+      String email, String password) async {
+    final FirebaseUser user = (await _firebaseAuth.signInWithEmailAndPassword(
+            email: email, password: password))
+        .user;
+    return user?.uid;
+  }
+
+  @override
   Future<String> signIn(String email, String password) async {
     FirebaseUser user = (await _firebaseAuth.signInWithEmailAndPassword(
             email: email, password: password))
@@ -47,6 +59,12 @@ class Auth implements BaseAuth {
       print("An error occured while trying to send email        verification");
       print(e.message);
     }
+  }
+
+  @override
+  Future<String> currentUser() async {
+    final FirebaseUser user = await _firebaseAuth.currentUser();
+    return user?.uid;
   }
 
   Future<FirebaseUser> getCurrentUser() async {

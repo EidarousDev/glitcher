@@ -9,12 +9,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/screens/new_comment.dart';
-import 'package:glitcher/screens/profile_screen.dart';
+import 'package:glitcher/screens/posts/new_comment.dart';
+import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/utils/auth.dart';
+import 'package:glitcher/services/auth.dart';
+import 'package:glitcher/services/share_link.dart';
 import 'package:glitcher/utils/constants.dart';
 import 'package:glitcher/utils/statics.dart';
+import 'package:share/share.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:soundpool/soundpool.dart';
@@ -24,7 +26,7 @@ class HomeBody extends StatefulWidget {
   _HomeBodyState createState() => _HomeBodyState();
 }
 
-class _HomeBodyState extends State<HomeBody> {
+class _HomeBodyState extends State<HomeBody> with WidgetsBindingObserver {
   List<Post> _posts = [];
   var posts = [];
   var postsIDs = [];
@@ -634,9 +636,9 @@ class _HomeBodyState extends State<HomeBody> {
                             ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 8, 16, 8),
+                      padding: const EdgeInsets.fromLTRB(8, 8, 32, 8),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -717,14 +719,11 @@ class _HomeBodyState extends State<HomeBody> {
                                     color: Colors.grey,
                                   ),
                                   onPressed: () {
-                                    Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => NewComment(
-                                                  postId: post.id,
-                                                  commentsNo:
-                                                      post.commentsCount,
-                                                )));
+                                    Navigator.of(context).pushNamed('/post',
+                                        arguments: {
+                                          'postId': post.id,
+                                          'commentsNo': post.commentsCount
+                                        });
                                   },
                                 ),
                               ),
@@ -750,30 +749,13 @@ class _HomeBodyState extends State<HomeBody> {
                                     size: 18.0,
                                     color: Colors.black54,
                                   ),
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    sharePost(
+                                        post.id, post.text, post.imageUrl);
+                                  },
                                 ),
                               ),
-                              SizedBox(
-                                  height: 14.0,
-                                  width: 18.0,
-                                  child: Text(
-                                    retweets[0],
-                                    style: TextStyle(color: Colors.black54),
-                                  )),
                             ],
-                          ),
-                          SizedBox(
-                            height: 14.0,
-                            width: 10.0,
-                            child: IconButton(
-                              padding: new EdgeInsets.all(0.0),
-                              icon: Icon(
-                                Icons.share,
-                                size: 18.0,
-                                color: Colors.grey,
-                              ),
-                              onPressed: () {},
-                            ),
                           ),
                         ],
                       ),
@@ -794,6 +776,12 @@ class _HomeBodyState extends State<HomeBody> {
         )
       ],
     );
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    videoPlayerController.dispose();
+    _youtubeController.dispose();
   }
 
   @override
@@ -820,5 +808,12 @@ class _HomeBodyState extends State<HomeBody> {
     });
 
     _setupFeed();
+  }
+
+  void sharePost(String postId, String postText, String imageUrl) async {
+    var postLink = await DynamicLinks.createDynamicLink(
+        {'postId': postId, 'postText': postText, 'imageUrl': imageUrl});
+    Share.share('Check out: $postText : $postLink');
+    print('Check out: $postText : $postLink');
   }
 }

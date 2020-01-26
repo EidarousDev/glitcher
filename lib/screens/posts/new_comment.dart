@@ -4,16 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:glitcher/screens/home/home.dart';
 import 'package:glitcher/screens/home/home_body.dart';
 import 'package:glitcher/utils/Loader.dart';
-import 'package:glitcher/utils/auth.dart';
+import 'package:glitcher/services/auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class NewComment extends StatefulWidget {
   NewComment currentUser;
-  String postId;
-  int commentsNo;
-  NewComment({this.postId, this.commentsNo});
+  final String postId;
+  final int commentsNo;
+  NewComment({@required this.postId, this.commentsNo});
   @override
   _NewCommentState createState() =>
       _NewCommentState(postId: postId, commentsNo: commentsNo);
@@ -98,15 +98,15 @@ class _NewCommentState extends State<NewComment> {
         .limit(3)
         .getDocuments()
         .then((snap) {
-      for (int i = 0; i < snap.documents.length; i++) {
-        setState(() {
-          this.comments.add(snap.documents[i]);
-          loadCommenterData(snap.documents[i].data['commenter']);
+          for (int i = 0; i < snap.documents.length; i++) {
+            setState(() {
+              this.comments.add(snap.documents[i]);
+              loadCommenterData(snap.documents[i].data['commenter']);
+            });
+          }
+          this.lastVisibleCommentSnapShot =
+              snap.documents[snap.documents.length - 1].data['timestamp'];
         });
-      }
-      this.lastVisibleCommentSnapShot =
-      snap.documents[snap.documents.length - 1].data['timestamp'];
-    });
   }
 
   void loadPosterData(String uid) async {
@@ -407,9 +407,8 @@ class _NewCommentState extends State<NewComment> {
               height: 200,
               child: getList(),
             ),
-
             GestureDetector(
-              onTap: (){
+              onTap: () {
                 nextComments();
               },
               child: Padding(
@@ -423,7 +422,6 @@ class _NewCommentState extends State<NewComment> {
                 ),
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextField(

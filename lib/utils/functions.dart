@@ -3,6 +3,53 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:glitcher/screens/home/home.dart';
 import 'package:glitcher/screens/login_page.dart';
 
+void twoButtonsDialog(BuildContext context, confirmFunction,
+    {bool isBarrierDismissible = true,
+    String headerText = "Confirm",
+    String bodyText = "Are you sure you want to do this?",
+    String cancelBtn = "CANCEL",
+    String yestBtn = "YES"}) {
+  showDialog(
+    context: context,
+    barrierDismissible: isBarrierDismissible,
+    builder: (BuildContext context) {
+      // return object of type Dialog
+      return AlertDialog(
+        title: new Text(headerText),
+        content: new Text(bodyText),
+        actions: <Widget>[
+          new FlatButton(
+            child: new Text(cancelBtn),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          new FlatButton(
+            child: new Text(yestBtn),
+            onPressed: () async {
+              confirmFunction();
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void moveUserTo(
+    {BuildContext context,
+    Widget widget,
+    String routeId,
+    FirebaseUser currentUser}) {
+  Navigator.of(context).push<String>(
+    new MaterialPageRoute(
+      settings: RouteSettings(name: '/$routeId'),
+      builder: (context) => widget,
+    ),
+  );
+}
+
 class Functions {
   static FirebaseUser currentUser;
   static final _auth = FirebaseAuth.instance;
@@ -19,19 +66,6 @@ class Functions {
     } catch (e) {
       print(e);
     }
-  }
-
-  static void moveUserTo(
-      {BuildContext context,
-      Widget widget,
-      String routeId,
-      FirebaseUser currentUser}) {
-    Navigator.of(context).push<String>(
-      new MaterialPageRoute(
-        settings: RouteSettings(name: '/$routeId'),
-        builder: (context) => widget,
-      ),
-    );
   }
 
   /* Alert Error - SnackBar */

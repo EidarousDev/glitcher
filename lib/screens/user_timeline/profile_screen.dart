@@ -4,7 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:glitcher/screens/fullscreen_overaly.dart';
 import 'package:glitcher/utils/Loader.dart';
 import 'package:glitcher/utils/app_util.dart';
-import 'package:glitcher/utils/auth.dart';
+import 'package:glitcher/services/auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -501,10 +501,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       'timestamp': timestamp,
     });
 
-    await _firestore
-        .collection('users')
-        .document(userId)
-        .updateData({
+    await _firestore.collection('users').document(userId).updateData({
       'followers': ++_followers,
     });
 
@@ -513,14 +510,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await _firestore
         .collection('users')
         .document(currentUser.uid)
-        .get().then((onValue){
-          following = onValue.data['following'];
+        .get()
+        .then((onValue) {
+      following = onValue.data['following'];
     });
 
-    await _firestore
-        .collection('users')
-        .document(currentUser.uid)
-        .updateData({
+    await _firestore.collection('users').document(currentUser.uid).updateData({
       'following': ++following,
     });
 
@@ -543,7 +538,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void unfollowUser() async {
-
     await _firestore
         .collection('users')
         .document(currentUser.uid)
@@ -556,14 +550,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await _firestore
         .collection('users')
         .document(currentUser.uid)
-        .get().then((onValue){
+        .get()
+        .then((onValue) {
       following = onValue.data['following'];
     });
 
-    await _firestore
-        .collection('users')
-        .document(currentUser.uid)
-        .updateData({
+    await _firestore.collection('users').document(currentUser.uid).updateData({
       'following': --following,
     });
 
@@ -574,10 +566,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         .document(currentUser.uid)
         .delete();
 
-    await _firestore
-        .collection('users')
-        .document(userId)
-        .updateData({
+    await _firestore.collection('users').document(userId).updateData({
       'followers': --_followers,
     });
 
@@ -618,12 +607,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       }
                     : () {
                         unfollowUser();
-
                       },
       ),
     );
   }
-
-
 }
-

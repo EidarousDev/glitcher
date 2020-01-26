@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/screens/login_page.dart';
-import 'package:glitcher/utils/auth.dart';
+import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/screens/home/home.dart';
+import 'package:glitcher/services/auth_provider.dart';
 
 enum AuthStatus {
   NOT_DETERMINED,
@@ -10,12 +12,8 @@ enum AuthStatus {
 }
 
 class RootPage extends StatefulWidget {
-  RootPage({this.auth});
-
-  final BaseAuth auth;
-
   @override
-  State<StatefulWidget> createState() => new _RootPageState();
+  State<StatefulWidget> createState() => _RootPageState();
 }
 
 class _RootPageState extends State<RootPage> {
@@ -24,40 +22,39 @@ class _RootPageState extends State<RootPage> {
   bool emailVerified;
 
   @override
-  void initState() {
-    super.initState();
-
-    widget.auth.getCurrentUser().then((user) {
-      setState(() {
-        if (user != null && user.isEmailVerified) {
-          _userId = user?.uid;
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final BaseAuth auth = AuthProvider.of(context).auth;
+    auth.getCurrentUser().then((FirebaseUser user) {
+      if (user?.uid != null && user.isEmailVerified) {
+        _userId = user?.uid;
+        setState(() {
           authStatus = AuthStatus.LOGGED_IN;
-        } else {
+        });
+      } else {
+        setState(() {
           authStatus = AuthStatus.NOT_LOGGED_IN;
-        }
-//        authStatus =
-//            user?.uid == null ? AuthStatus.NOT_LOGGED_IN : AuthStatus.LOGGED_IN;
-      });
+        });
+      }
     });
     print('authStatus = $authStatus');
   }
 
-  void loginCallback() {
-    widget.auth.getCurrentUser().then((user) {
-      setState(() {
-        _userId = user.uid.toString();
-      });
-    });
+  void _signedIn() {
     setState(() {
       authStatus = AuthStatus.LOGGED_IN;
     });
   }
 
-  void logoutCallback() {
+  void _signedOut() {
     setState(() {
       authStatus = AuthStatus.NOT_LOGGED_IN;
-      _userId = "";
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   Widget buildWaitingScreen() {
@@ -74,23 +71,15 @@ class _RootPageState extends State<RootPage> {
     switch (authStatus) {
       case AuthStatus.NOT_DETERMINED:
         return buildWaitingScreen();
-        break;
       case AuthStatus.NOT_LOGGED_IN:
-        return new LoginPage(
-          auth: widget.auth,
+        return LoginPage(
+          onSignedIn: _signedIn,
         );
-        break;
       case AuthStatus.LOGGED_IN:
-        if (_userId.length > 0 && _userId != null) {
-          return new HomePage(
-            userId: _userId,
-            auth: widget.auth,
-          );
-        } else
-          return buildWaitingScreen();
-        break;
-      default:
-        return buildWaitingScreen();
+        return HomePage(
+          onSignedOut: _signedOut,
+        );
     }
+    return null;
   }
 }

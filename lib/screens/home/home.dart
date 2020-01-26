@@ -1,28 +1,32 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
-import 'package:glitcher/screens/chats.dart';
+import 'package:glitcher/common_widgets/platform_alert_dialog.dart';
+import 'package:glitcher/constants/strings.dart';
+import 'package:glitcher/screens/chats/chats.dart';
 import 'package:glitcher/screens/home/home_body.dart';
-import 'package:glitcher/utils/auth.dart';
-import 'package:glitcher/screens/new_post.dart';
-import 'package:glitcher/screens/profile_screen.dart';
+import 'package:glitcher/screens/login_page.dart';
+import 'package:glitcher/root_page.dart';
+import 'package:glitcher/services/auth.dart';
+import 'package:glitcher/screens/posts/new_post.dart';
+import 'package:glitcher/screens/user_timeline/profile_screen.dart';
+import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/utils/statics.dart';
+import 'package:glitcher/utils/functions.dart';
 
 class HomePage extends StatefulWidget {
   static const String id = 'home_page';
-  HomePage({Key key, this.auth, this.userId, this.onSignedOut})
-      : super(key: key);
+  HomePage({Key key, this.userId, this.onSignedOut}) : super(key: key);
 
-  final BaseAuth auth;
   final VoidCallback onSignedOut;
   final String userId;
 
   @override
-  State<StatefulWidget> createState() => _HomePageState(auth);
+  State<StatefulWidget> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  //final _auth = FirebaseAuth.instance;
   Firestore _firestore = Firestore.instance;
 
   String username;
@@ -42,7 +46,8 @@ class _HomePageState extends State<HomePage> {
 
   FirebaseUser currentUser;
 
-  _HomePageState(auth);
+  _HomePageState();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -212,13 +217,8 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             ListTile(
-              onTap: () async {
-                try {
-                  await widget.auth.signOut();
-                  widget.onSignedOut();
-                } catch (e) {
-                  print(e);
-                }
+              onTap: () {
+                _signOut(context);
               },
               title: Text(
                 'Sign Out',
@@ -290,6 +290,22 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     getCurrentUser();
+    _retrieveDynamicLink();
+  }
+
+  Future<void> _retrieveDynamicLink() async {
+    final PendingDynamicLinkData data =
+        await FirebaseDynamicLinks.instance.getInitialLink();
+    final Uri deepLink = data?.link;
+
+    if (deepLink != null) {
+      // to get the parameters we sent
+      // to get what link it is use deepLink.path
+      print('test link $deepLink.path');
+      String postId = deepLink.queryParameters['postId'];
+      // perform your navigation operations here
+      Navigator.of(context).pushNamed('/post', arguments: {'postId': postId});
+    }
   }
 
   void getCurrentUser() async {
@@ -297,12 +313,19 @@ class _HomePageState extends State<HomePage> {
     loadUserData(currentUser.uid);
   }
 
-  void moveUserTo({Widget widget, String routeId, FirebaseUser currentUser}) {
-    Navigator.of(context).push<String>(
-      new MaterialPageRoute(
-        settings: RouteSettings(name: '/$routeId'),
-        builder: (context) => widget,
-      ),
-    );
+  logOutCallback() async {
+//    moveUserTo(
+//        context: context, widget: RootPage(auth: new Auth()), routeId: '/');
+  }
+
+  Future<void> _signOut(BuildContext context) async {
+    try {
+      final BaseAuth auth = AuthProvider.of(context).auth;
+      await auth.signOut();
+      widget.onSignedOut();
+      //moveUserTo(context: context, widget: LoginPage());
+    } catch (e) {
+      print('Sign out: $e');
+    }
   }
 }

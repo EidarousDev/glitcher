@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'dart:io';
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/utils/Loader.dart';
 import 'package:glitcher/utils/functions.dart';
-import 'package:glitcher/utils/auth.dart';
+import 'package:glitcher/services/auth.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:glitcher/screens/home/home.dart';
@@ -17,13 +15,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class LoginPage extends StatefulWidget {
   static const String id = 'login_screen';
 
-  LoginPage({Key key, this.auth, this.onSignedIn}) : super(key: key);
+  LoginPage({Key key, this.onSignedIn}) : super(key: key);
 
-  final BaseAuth auth;
   final VoidCallback onSignedIn;
 
   @override
-  _LoginPageState createState() => new _LoginPageState();
+  _LoginPageState createState() => _LoginPageState();
 }
 
 enum FormMode { LOGIN, SIGNUP }
@@ -31,9 +28,9 @@ enum authProblems { EmailExists, UserNotFound, PasswordNotValid, NetworkError }
 
 class _LoginPageState extends State<LoginPage>
     with SingleTickerProviderStateMixin {
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  String _email, _password, _confirmPassword, _username;
+  String _email = '', _password = '', _confirmPassword = '', _username = '';
   String _errorMsgEmail, _errorMsgUsername;
 
   String userId = "";
@@ -53,7 +50,7 @@ class _LoginPageState extends State<LoginPage>
   bool _obscureTextLogin = true;
   bool _obscureTextSignup = true;
   bool _obscureTextSignupConfirm = true;
-  bool _loading;
+  bool _loading = false;
 
   TextEditingController signupEmailController = TextEditingController();
   TextEditingController signupNameController = TextEditingController();
@@ -245,6 +242,8 @@ class _LoginPageState extends State<LoginPage>
   }
 
   Future _signUp() async {
+    final BaseAuth auth = AuthProvider.of(context).auth;
+
     //print(_email + ' : ' + _password);
     setState(() {
       _loading = true;
@@ -269,12 +268,12 @@ class _LoginPageState extends State<LoginPage>
           _password == _confirmPassword) {
         // Validation Passed
         try {
-          userId = await widget.auth.signUp(_username, _email, _password);
+          userId = await auth.signUp(_username, _email, _password);
           addUserToDatabase(userId);
           //widget.auth.sendEmailVerification();
           //showVerifyEmailSentDialog(context);
           print('Signed up user: $userId');
-//        Functions.moveUserTo(
+//        moveUserTo(
 //            context: context, widget: HomePage(), routeId: HomePage.id);
           showVerifyEmailSentDialog(context);
         } catch (signUpError) {
@@ -324,16 +323,17 @@ class _LoginPageState extends State<LoginPage>
   }
 
   Future _login() async {
+    final BaseAuth auth = AuthProvider.of(context).auth;
+
     //print(mEmail + ' : ' + mPassword);
     setState(() {
       _loading = true;
     });
     //print('Should be true: $_loading');
     try {
-      userId = await widget.auth.signIn(_email, _password);
+      userId = await auth.signInWithEmailAndPassword(_email, _password);
       //print('Signed in: $userId');
-      Functions.moveUserTo(
-          context: context, widget: HomePage(), routeId: HomePage.id);
+      moveUserTo(context: context, widget: HomePage(), routeId: HomePage.id);
     } catch (e) {
       // Email or Password Incorrect
       Functions.showInSnackBar(
@@ -394,6 +394,8 @@ class _LoginPageState extends State<LoginPage>
   }
 
   Widget _buildSignIn(BuildContext context) {
+    final BaseAuth auth = AuthProvider.of(context).auth;
+
     return Container(
       padding: EdgeInsets.only(top: 23.0),
       child: Column(

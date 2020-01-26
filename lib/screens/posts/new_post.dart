@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart' as prefix0;
 import 'package:glitcher/utils/Loader.dart';
-import 'package:glitcher/utils/auth.dart';
+import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/utils/constants.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
@@ -45,7 +45,8 @@ class _NewPostState extends State<NewPost> {
   var _firestore = Firestore.instance;
 
   String selectedCategory = "";
-  GlobalKey<AutoCompleteTextFieldState<String>> autocompleteKey = new GlobalKey();
+  GlobalKey<AutoCompleteTextFieldState<String>> autocompleteKey =
+      new GlobalKey();
 
   @override
   void initState() {
@@ -54,7 +55,7 @@ class _NewPostState extends State<NewPost> {
   }
 
   void playVideo() {
-    videoPlayerController = VideoPlayerController.file(_video) ;
+    videoPlayerController = VideoPlayerController.file(_video);
     chewieController = ChewieController(
       videoPlayerController: videoPlayerController,
       aspectRatio: videoPlayerController.value.aspectRatio,
@@ -65,21 +66,21 @@ class _NewPostState extends State<NewPost> {
     playerWidget = Chewie(
       controller: chewieController,
     );
-    videoPlayerController..addListener(() {
-      final bool isPlaying = videoPlayerController.value.isPlaying;
-      if (isPlaying != _isPlaying) {
-        setState(() {
-          _isPlaying = isPlaying;
-        });
-      }
-    });
-    videoPlayerController..initialize().then((_) {
-      // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-      setState(() {
+    videoPlayerController
+      ..addListener(() {
+        final bool isPlaying = videoPlayerController.value.isPlaying;
+        if (isPlaying != _isPlaying) {
+          setState(() {
+            _isPlaying = isPlaying;
+          });
+        }
       });
-    });
+    videoPlayerController
+      ..initialize().then((_) {
+        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+        setState(() {});
+      });
   }
-
 
   void listener() {
     if (_youtubeController.value.playerState == PlayerState.ENDED) {
@@ -156,9 +157,7 @@ class _NewPostState extends State<NewPost> {
       await uploadFile('images', _image);
     }
 
-    await _firestore
-        .collection('posts')
-        .add({
+    await _firestore.collection('posts').add({
       'owner': currentUser.uid,
       'text': text,
       'youtubeId': _youtubeId,
@@ -168,7 +167,7 @@ class _NewPostState extends State<NewPost> {
       'dislikes': 0,
       'comments': 0,
       'timestamp': FieldValue.serverTimestamp(),
-      'category':  selectedCategory
+      'category': selectedCategory
     }).then((_) {
       setState(() {
         _loading = false;
@@ -177,7 +176,7 @@ class _NewPostState extends State<NewPost> {
     });
   }
 
-  void getCurrentUser() async{
+  void getCurrentUser() async {
     this.currentUser = await Auth().getCurrentUser();
   }
 
@@ -239,9 +238,7 @@ class _NewPostState extends State<NewPost> {
                     ],
                   )
                 : Container(),
-            _video != null
-                ? playerWidget
-                : Container(),
+            _video != null ? playerWidget : Container(),
             _youtubeId != null
                 ? YoutubePlayer(
                     context: context,
@@ -318,25 +315,27 @@ class _NewPostState extends State<NewPost> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: AutoCompleteTextField<String>(
-
                 clearOnSubmit: false,
                 key: autocompleteKey,
-                 suggestions: Constants.categories,
+                suggestions: Constants.categories,
                 decoration: InputDecoration(
-                  icon: Icon(Icons.videogame_asset),
-                  hintText: "Category"
-                ),
-                itemFilter: (item, query){return item.toLowerCase().startsWith(query.toLowerCase());},
-                itemSorter: (a, b){return a.compareTo(b);},
-                itemSubmitted: (item){
-                  selectedCategory = item;
-
+                    icon: Icon(Icons.videogame_asset), hintText: "Category"),
+                itemFilter: (item, query) {
+                  return item.toLowerCase().startsWith(query.toLowerCase());
                 },
-                onFocusChanged: (hasFocus){},
-                itemBuilder: (context, item){return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(item),
-                );},
+                itemSorter: (a, b) {
+                  return a.compareTo(b);
+                },
+                itemSubmitted: (item) {
+                  selectedCategory = item;
+                },
+                onFocusChanged: (hasFocus) {},
+                itemBuilder: (context, item) {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(item),
+                  );
+                },
               ),
             ),
 //            DropDownField(

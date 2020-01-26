@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:glitcher/utils/auth.dart';
+import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/widgets/chat_item.dart';
 import 'package:glitcher/utils/data.dart';
 
@@ -10,8 +10,8 @@ class Chats extends StatefulWidget {
   _ChatsState createState() => _ChatsState();
 }
 
-class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin,
-    AutomaticKeepAliveClientMixin{
+class _ChatsState extends State<Chats>
+    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   TabController _tabController;
 
   Firestore _firestore = Firestore.instance;
@@ -27,27 +27,27 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin,
     loadFollowing();
   }
 
-  Future<Set> getFriends() async{
+  Future<Set> getFriends() async {
     Set followingSet = Set();
     Set followerSet = Set();
 
-    for(int i = 0; i < following.length; i++){
+    for (int i = 0; i < following.length; i++) {
       followingSet.add(following[i]);
     }
 
-    for(int j = 0; j < followers.length; j++){
+    for (int j = 0; j < followers.length; j++) {
       followerSet.add(followers[j]);
     }
     friends = followingSet.intersection(followerSet);
 
-    for(int i = 0; i < friends.length; i++){
+    for (int i = 0; i < friends.length; i++) {
       await loadUserData(friends.elementAt(i));
     }
 
     return friends;
   }
 
-  void loadFollowing() async{
+  void loadFollowing() async {
     if (following.length == 0) {
       await _firestore
           .collection('users')
@@ -63,7 +63,7 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin,
     }
   }
 
-  void loadFollowers() async{
+  void loadFollowers() async {
     if (followers.length == 0) {
       await _firestore
           .collection('users')
@@ -89,7 +89,9 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin,
           name: onValue.data['username'],
           isOnline: onValue.data['online'] == 'online',
           msg: 'Last Message',
-          time: onValue.data['online'] == 'online' ? 'online' : formatTimestamp(onValue.data['online']),
+          time: onValue.data['online'] == 'online'
+              ? 'online'
+              : formatTimestamp(onValue.data['online']),
           counter: 0,
         );
         chats.add(chatItem);
@@ -98,7 +100,6 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin,
 
     return chatItem;
   }
-
 
   @override
   void initState() {
@@ -161,38 +162,31 @@ class _ChatsState extends State<Chats> with SingleTickerProviderStateMixin,
           ),
         ],
       ),
-
     );
   }
 
   String formatTimestamp(Timestamp timestamp) {
     var now = Timestamp.now().toDate();
-    var date = new DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
+    var date = new DateTime.fromMillisecondsSinceEpoch(
+        timestamp.millisecondsSinceEpoch);
     var diff = now.difference(date);
     var time = '';
 
     if (diff.inSeconds <= 60) {
       time = 'now';
-    }
-    else if(diff.inMinutes > 0 && diff.inMinutes < 60){
-      if(diff.inMinutes == 1){
+    } else if (diff.inMinutes > 0 && diff.inMinutes < 60) {
+      if (diff.inMinutes == 1) {
         time = 'A minute ago';
-      }
-      else{
+      } else {
         time = diff.inMinutes.toString() + ' minutes ago';
       }
-    }
-
-    else if(diff.inHours > 0 && diff.inHours < 24){
-      if(diff.inHours == 1){
+    } else if (diff.inHours > 0 && diff.inHours < 24) {
+      if (diff.inHours == 1) {
         time = 'An hour ago';
-      }
-      else{
+      } else {
         time = diff.inHours.toString() + ' hours ago';
       }
-    }
-
-    else if (diff.inDays > 0 && diff.inDays < 7) {
+    } else if (diff.inDays > 0 && diff.inDays < 7) {
       if (diff.inDays == 1) {
         time = 'Yesterday';
       } else {

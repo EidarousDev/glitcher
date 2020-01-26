@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:glitcher/screens/conversation.dart';
+import 'package:glitcher/screens/chats/conversation.dart';
 
 class ChatItem extends StatefulWidget {
   final String dp;

@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 
-import 'auth.dart';
+import '../services/auth.dart';
 
 class LifecycleManager extends StatefulWidget {
   @override
@@ -47,7 +47,7 @@ class _LifecycleManagerState extends State<LifecycleManager>
     updateOnlineUserState();
   }
 
-  void updateOnlineUserState() async{
+  void updateOnlineUserState() async {
     if (_lastLifecycleState == AppLifecycleState.inactive ||
         _lastLifecycleState == AppLifecycleState.paused) {
       await _firestore
