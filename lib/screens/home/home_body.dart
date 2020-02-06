@@ -10,6 +10,7 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/posts/new_comment.dart';
+import 'package:glitcher/screens/posts/post_item.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/auth.dart';
@@ -86,18 +87,6 @@ class _HomeBodyState extends State<HomeBody> with WidgetsBindingObserver {
         // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
         setState(() {});
       });
-  }
-
-  void listener() {
-    if (_youtubeController.value.playerState == PlayerState.ENDED) {
-      //_showThankYouDialog();
-    }
-    if (mounted) {
-//      setState(() {
-//        //_playerStatus = _youtubeController.value.playerState.toString();
-//        //_errorCode = _youtubeController.value.errorCode.toString();
-//      });
-    }
   }
 
   @override
@@ -407,7 +396,7 @@ class _HomeBodyState extends State<HomeBody> with WidgetsBindingObserver {
                 return SizedBox.shrink();
               }
               User author = snapshot.data;
-              return _buildPost(post, author);
+              return PostItem(post: post, author: author);
             });
       },
     );
@@ -538,246 +527,6 @@ class _HomeBodyState extends State<HomeBody> with WidgetsBindingObserver {
     });
   }
 
-  _buildPost(Post post, User author) {
-    return Column(
-      children: <Widget>[
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            GestureDetector(
-              onTap: () {
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            ProfileScreen(userId: post.authorId)));
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: CircleAvatar(
-                  radius: 25.0,
-                  backgroundColor: Colors.grey,
-                  backgroundImage: author.profileImageUrl.isEmpty
-                      ? AssetImage('assets/images/default_profile.png')
-                      : CachedNetworkImageProvider(author.profileImageUrl),
-                ),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            Text(
-                              author.username ?? '',
-                              style: TextStyle(
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Icon(
-                          Icons.arrow_drop_down,
-                          color: Colors.grey,
-                        )
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 0.0, bottom: 8.0),
-                      child: Text(
-                        post.text ?? '',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      child: post.imageUrl == null
-                          ? null
-                          : Container(
-                              width: double.infinity,
-                              child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  child: Image.network(post.imageUrl)),
-                            ),
-                    ),
-                    Container(
-                      child: post.video == null ? null : playerWidget,
-                    ),
-                    Container(
-                      child: post.youtubeId == null
-                          ? null
-                          : YoutubePlayer(
-                              context: context,
-                              videoId: post.youtubeId,
-                              flags: YoutubePlayerFlags(
-                                autoPlay: false,
-                                showVideoProgressIndicator: true,
-                                forceHideAnnotation: true,
-                              ),
-                              videoProgressIndicatorColor: Colors.red,
-                              progressColors: ProgressColors(
-                                playedColor: Colors.red,
-                                handleColor: Colors.redAccent,
-                              ),
-                              onPlayerInitialized: (controller) {
-                                _youtubeController = controller;
-                                _youtubeController.addListener(listener);
-                              },
-                            ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 8, 32, 8),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              SizedBox(
-                                height: 14.0,
-                                width: 18.0,
-                                child: IconButton(
-                                  padding: new EdgeInsets.all(0.0),
-                                  icon: Icon(
-                                    FontAwesome.getIconData('thumbs-o-up'),
-                                    size: 18.0,
-                                    color: Colors.blue,
-                                  ),
-                                  onPressed: () async {
-                                    assetsAudioPlayer.open(AssetsAudio(
-                                      asset: "like_sound.mp3",
-                                      folder: "assets/sounds/",
-                                    ));
-                                    assetsAudioPlayer.play();
-
-                                    //Likes Handling was here
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                  height: 14.0,
-                                  width: 18.0,
-                                  child: Text(
-                                    post.likesCount.toString(),
-                                    style: TextStyle(color: Colors.grey),
-                                  )),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              SizedBox(
-                                height: 14.0,
-                                width: 18.0,
-                                child: IconButton(
-                                  padding: new EdgeInsets.all(0.0),
-                                  icon: Icon(
-                                    FontAwesome.getIconData('thumbs-o-down'),
-                                    size: 18.0,
-                                    color: Colors.black54,
-                                  ),
-                                  onPressed: () {
-                                    assetsAudioPlayer.open(AssetsAudio(
-                                      asset: "dislike_sound.mp3",
-                                      folder: "assets/sounds/",
-                                    ));
-                                    assetsAudioPlayer.play();
-                                    //Dislikes Handling was here
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                  height: 14.0,
-                                  width: 18.0,
-                                  child: Text(
-                                    post.disLikesCount.toString(),
-                                    style: TextStyle(color: Colors.grey),
-                                  )),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              SizedBox(
-                                height: 14.0,
-                                width: 18.0,
-                                child: IconButton(
-                                  padding: new EdgeInsets.all(0.0),
-                                  icon: Icon(
-                                    Icons.chat_bubble_outline,
-                                    size: 18.0,
-                                    color: Colors.grey,
-                                  ),
-                                  onPressed: () {
-                                    Navigator.of(context).pushNamed('/post',
-                                        arguments: {
-                                          'postId': post.id,
-                                          'commentsNo': post.commentsCount
-                                        });
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                  height: 14.0,
-                                  width: 18.0,
-                                  child: Text(
-                                    post.commentsCount.toString(),
-                                    style: TextStyle(color: Colors.black54),
-                                  )),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              SizedBox(
-                                height: 14.0,
-                                width: 18.0,
-                                child: IconButton(
-                                  padding: new EdgeInsets.all(0.0),
-                                  icon: Icon(
-                                    Icons.replay,
-                                    size: 18.0,
-                                    color: Colors.black54,
-                                  ),
-                                  onPressed: () {
-                                    sharePost(
-                                        post.id, post.text, post.imageUrl);
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          ],
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Container(
-            width: double.infinity,
-            color: Colors.grey,
-            height: .5,
-          ),
-        )
-      ],
-    );
-  }
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     videoPlayerController.dispose();
@@ -808,12 +557,5 @@ class _HomeBodyState extends State<HomeBody> with WidgetsBindingObserver {
     });
 
     _setupFeed();
-  }
-
-  void sharePost(String postId, String postText, String imageUrl) async {
-    var postLink = await DynamicLinks.createDynamicLink(
-        {'postId': postId, 'postText': postText, 'imageUrl': imageUrl});
-    Share.share('Check out: $postText : $postLink');
-    print('Check out: $postText : $postLink');
   }
 }

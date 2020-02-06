@@ -1,5 +1,13 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/utils/constants.dart';
+
+Future<FirebaseUser> getCurrentUser() async {
+  FirebaseUser currentUser = await Auth().getCurrentUser();
+  return currentUser;
+}
 
 abstract class BaseAuth {
   Future<String> signInWithEmailAndPassword(String email, String password);
@@ -24,6 +32,8 @@ abstract class BaseAuth {
   Future<void> deleteUser();
 
   Future<void> sendPasswordResetMail(String email);
+
+  Future<User> loadUserData();
 }
 
 class Auth implements BaseAuth {
@@ -124,5 +134,14 @@ class Auth implements BaseAuth {
     print('===========>' + email);
     await _firebaseAuth.sendPasswordResetEmail(email: email);
     return null;
+  }
+
+  Future<User> loadUserData() async {
+    final FirebaseUser user = await auth.currentUser();
+    final uid = user.uid;
+    //print('currentUserID: $uid');
+    // here you write the codes to input the data into firestore
+    User loggedInUser = await DatabaseService.getUserWithId(uid);
+    return loggedInUser;
   }
 }

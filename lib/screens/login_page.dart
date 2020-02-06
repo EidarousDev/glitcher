@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:glitcher/screens/app_page.dart';
 import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/utils/Loader.dart';
 import 'package:glitcher/utils/functions.dart';
@@ -333,7 +334,7 @@ class _LoginPageState extends State<LoginPage>
     try {
       userId = await auth.signInWithEmailAndPassword(_email, _password);
       //print('Signed in: $userId');
-      moveUserTo(context: context, widget: HomePage(), routeId: HomePage.id);
+      Navigator.of(context).pushReplacementNamed('/home');
     } catch (e) {
       // Email or Password Incorrect
       Functions.showInSnackBar(

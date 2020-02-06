@@ -1,15 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/screens/app_page.dart';
 import 'package:glitcher/screens/login_page.dart';
 import 'package:glitcher/services/auth.dart';
-import 'package:glitcher/screens/home/home.dart';
-import 'package:glitcher/services/auth_provider.dart';
-
-enum AuthStatus {
-  NOT_DETERMINED,
-  NOT_LOGGED_IN,
-  LOGGED_IN,
-}
+import 'package:glitcher/utils/constants.dart';
 
 class RootPage extends StatefulWidget {
   @override
@@ -17,38 +11,17 @@ class RootPage extends StatefulWidget {
 }
 
 class _RootPageState extends State<RootPage> {
-  AuthStatus authStatus = AuthStatus.NOT_DETERMINED;
-  String _userId = "";
   bool emailVerified;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final BaseAuth auth = AuthProvider.of(context).auth;
-    auth.getCurrentUser().then((FirebaseUser user) {
-      if (user?.uid != null && user.isEmailVerified) {
-        _userId = user?.uid;
-        setState(() {
-          authStatus = AuthStatus.LOGGED_IN;
-        });
-      } else {
-        setState(() {
-          authStatus = AuthStatus.NOT_LOGGED_IN;
-        });
-      }
-    });
-    print('authStatus = $authStatus');
+    authAssignment();
   }
 
   void _signedIn() {
     setState(() {
       authStatus = AuthStatus.LOGGED_IN;
-    });
-  }
-
-  void _signedOut() {
-    setState(() {
-      authStatus = AuthStatus.NOT_LOGGED_IN;
     });
   }
 
@@ -76,10 +49,25 @@ class _RootPageState extends State<RootPage> {
           onSignedIn: _signedIn,
         );
       case AuthStatus.LOGGED_IN:
-        return HomePage(
-          onSignedOut: _signedOut,
-        );
+        return AppPage();
     }
     return null;
+  }
+
+  Future authAssignment() async {
+    await Auth().getCurrentUser().then((FirebaseUser user) {
+      if (user?.uid != null && user.isEmailVerified) {
+        Constants.currentUser = user;
+        Constants.currentUserID = user?.uid;
+        setState(() {
+          authStatus = AuthStatus.LOGGED_IN;
+        });
+      } else {
+        setState(() {
+          authStatus = AuthStatus.NOT_LOGGED_IN;
+        });
+      }
+    });
+    print('authStatus = $authStatus');
   }
 }

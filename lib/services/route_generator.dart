@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:glitcher/root_page.dart';
+import 'package:glitcher/screens/app_page.dart';
 import 'package:glitcher/screens/posts/new_comment.dart';
+import 'package:glitcher/screens/posts/new_post.dart';
 
 class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -10,6 +12,10 @@ class RouteGenerator {
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(builder: (_) => RootPage());
+      case '/home':
+        return MaterialPageRoute(builder: (_) => AppPage());
+      case '/new-post':
+        return MaterialPageRoute(builder: (_) => NewPost());
       case '/post':
         // Validation of correct data type
         return MaterialPageRoute(

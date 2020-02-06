@@ -50,7 +50,8 @@ class _NewCommentState extends State<NewComment> {
   Chewie playerWidget;
 
   String _youtubeId;
-  YoutubePlayerController _youtubeController = YoutubePlayerController();
+  //TODO: Fix YouTube Player
+  //YoutubePlayerController _youtubeController = YoutubePlayerController();
   var _scrollController = ScrollController();
 
   @override
@@ -172,9 +173,9 @@ class _NewCommentState extends State<NewComment> {
   }
 
   void listener() {
-    if (_youtubeController.value.playerState == PlayerState.ENDED) {
-      //_showThankYouDialog();
-    }
+//    if (_youtubeController.value.playerState == PlayerState.ENDED) {
+//      //_showThankYouDialog();
+//    }
     if (mounted) {
       setState(() {
         //_playerStatus = _youtubeController.value.playerState.toString();
@@ -375,26 +376,28 @@ class _NewCommentState extends State<NewComment> {
                                 child: _video == null ? null : playerWidget,
                               ),
                               Container(
-                                child: _youtubeId == null
-                                    ? null
-                                    : YoutubePlayer(
-                                        context: context,
-                                        videoId: _youtubeId,
-                                        flags: YoutubePlayerFlags(
-                                          autoPlay: false,
-                                          showVideoProgressIndicator: true,
-                                        ),
-                                        videoProgressIndicatorColor: Colors.red,
-                                        progressColors: ProgressColors(
-                                          playedColor: Colors.red,
-                                          handleColor: Colors.redAccent,
-                                        ),
-                                        onPlayerInitialized: (controller) {
-                                          _youtubeController = controller;
-                                          _youtubeController
-                                              .addListener(listener);
-                                        },
-                                      ),
+                                child: null,
+//TODO: Fix YouTube Player
+//                                _youtubeId == null
+//                                    ? null
+//                                    : YoutubePlayer(
+//                                        context: context,
+//                                        videoId: _youtubeId,
+//                                        flags: YoutubePlayerFlags(
+//                                          autoPlay: false,
+//                                          showVideoProgressIndicator: true,
+//                                        ),
+//                                        videoProgressIndicatorColor: Colors.red,
+//                                        progressColors: ProgressColors(
+//                                          playedColor: Colors.red,
+//                                          handleColor: Colors.redAccent,
+//                                        ),
+//                                        onPlayerInitialized: (controller) {
+//                                          _youtubeController = controller;
+//                                          _youtubeController
+//                                              .addListener(listener);
+//                                        },
+//                                      ),
                               ),
                             ],
                           ),

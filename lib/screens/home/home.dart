@@ -12,8 +12,10 @@ import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/screens/posts/new_post.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:glitcher/services/auth_provider.dart';
+import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/statics.dart';
 import 'package:glitcher/utils/functions.dart';
+import 'package:glitcher/utils/constants.dart';
 
 class HomePage extends StatefulWidget {
   static const String id = 'home_page';
@@ -27,8 +29,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Firestore _firestore = Firestore.instance;
-
   String username;
 
   String profileImageUrl;
@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> {
   dynamic body = HomeBody();
 
   void loadUserData(String uid) async {
-    await _firestore.collection('users').document(uid).get().then((onValue) {
+    await firestore.collection('users').document(uid).get().then((onValue) {
       setState(() {
         username = onValue.data['username'];
         profileImageUrl = onValue.data['profile_url'];
@@ -107,7 +107,7 @@ class _HomePageState extends State<HomePage> {
                           context,
                           MaterialPageRoute(
                               builder: (context) =>
-                                  ProfileScreen(userId: this.currentUser.uid)));
+                                  ProfileScreen(currentUser.uid)));
                     },
                     child: CircleAvatar(
                       radius: 35.0,
@@ -143,8 +143,7 @@ class _HomePageState extends State<HomePage> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) =>
-                            ProfileScreen(userId: this.currentUser.uid)));
+                        builder: (context) => ProfileScreen(currentUser.uid)));
               },
               title: Text(
                 'Profile',
@@ -236,12 +235,8 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: body is HomeBody
           ? FloatingActionButton(
               onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => NewPost(
-                              currentUser: currentUser,
-                            )));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => NewPost()));
               },
               child: Icon(Icons.edit),
               backgroundColor: Theme.of(context).accentColor,
@@ -309,7 +304,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   void getCurrentUser() async {
-    this.currentUser = await Auth().getCurrentUser();
+    setState(() async {
+      currentUser = await Auth().getCurrentUser();
+    });
     loadUserData(currentUser.uid);
   }
 

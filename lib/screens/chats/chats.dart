@@ -113,6 +113,43 @@ class _ChatsState extends State<Chats>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
+      appBar: AppBar(
+//        elevation: 4,
+        leading: IconButton(
+          icon: Icon(
+            Icons.keyboard_backspace,
+          ),
+          onPressed: () {},
+        ),
+        title: TextField(
+          decoration: InputDecoration.collapsed(
+            hintText: 'Search',
+          ),
+        ),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(
+              Icons.filter_list,
+            ),
+            onPressed: () {},
+          ),
+        ],
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: Theme.of(context).accentColor,
+          labelColor: Theme.of(context).accentColor,
+          unselectedLabelColor: Theme.of(context).textTheme.caption.color,
+          isScrollable: false,
+          tabs: <Widget>[
+            Tab(
+              text: "Message",
+            ),
+            Tab(
+              text: "Groups",
+            ),
+          ],
+        ),
+      ),
       body: TabBarView(
         controller: _tabController,
         children: <Widget>[

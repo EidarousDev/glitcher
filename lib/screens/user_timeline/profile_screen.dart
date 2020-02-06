@@ -12,12 +12,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 enum ScreenState { to_edit, to_follow, to_save, to_unfollow }
 
 class ProfileScreen extends StatefulWidget {
-  String userId;
+  final String userId;
 
-  ProfileScreen({this.userId});
+  ProfileScreen(this.userId);
 
   @override
-  _ProfileScreenState createState() => _ProfileScreenState(userId: userId);
+  _ProfileScreenState createState() => _ProfileScreenState(userId);
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
@@ -47,7 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   FirebaseUser currentUser;
 
-  _ProfileScreenState({this.userId});
+  _ProfileScreenState(this.userId);
 
   @override
   void initState() {
@@ -99,6 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       _loading = true;
     });
+    print('profileUserID = ${widget.userId}');
     await _firestore.collection('users').document(userId).get().then((onValue) {
       setState(() {
         userData = onValue.data;

@@ -1,7 +1,20 @@
+import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:glitcher/screens/home/home.dart';
 import 'package:glitcher/screens/login_page.dart';
+
+import 'constants.dart';
+
+void changeTheme(BuildContext context) {
+  if (currentTheme == AvailableThemes.LIGHT_THEME) {
+    DynamicTheme.of(context).setThemeData(Constants.darkTheme);
+    currentTheme = AvailableThemes.DARK_THEME;
+  } else {
+    DynamicTheme.of(context).setThemeData(Constants.lightTheme);
+    currentTheme = AvailableThemes.LIGHT_THEME;
+  }
+}
 
 void twoButtonsDialog(BuildContext context, confirmFunction,
     {bool isBarrierDismissible = true,

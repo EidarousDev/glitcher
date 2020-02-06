@@ -1,3 +1,4 @@
+import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -7,6 +8,7 @@ import 'package:glitcher/root_page.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/services/route_generator.dart';
+import 'package:glitcher/utils/constants.dart';
 import 'package:glitcher/utils/lifecycle_manager.dart';
 
 void main() {
@@ -32,28 +34,18 @@ class MyApp extends StatelessWidget {
     retrieveDynamicLink(context);
     return AuthProvider(
       auth: Auth(),
-      child: MaterialApp(
-        title: Strings.appName,
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-            primaryColor: Color(0xffffffff),
-            primaryColorDark: Colors.white70,
-            accentColor: Color(0xff1CA1F1),
-            iconTheme: IconThemeData(color: Color(0xff1CA1F1))),
-        initialRoute: '/',
-        onGenerateRoute: RouteGenerator.generateRoute,
-      ),
+      child: DynamicTheme(
+          defaultBrightness: Brightness.dark,
+          data: (brightness) => Constants.darkTheme,
+          themedWidgetBuilder: (context, theme) {
+            return MaterialApp(
+              title: Strings.appName,
+              debugShowCheckedModeBanner: false,
+              theme: theme,
+              initialRoute: '/',
+              onGenerateRoute: RouteGenerator.generateRoute,
+            );
+          }),
     );
-//    return LifecycleManager(
-//      child: MaterialApp(
-//          title: 'Glitcher',
-//          debugShowCheckedModeBanner: false,
-//          theme: ThemeData(
-//              primaryColor: Color(0xffffffff),
-//              primaryColorDark: Colors.white70,
-//              accentColor: Color(0xff1CA1F1),
-//              iconTheme: IconThemeData(color: Color(0xff1CA1F1))),
-//          home: new RootPage(auth: new Auth())),
-//    );
   }
 }

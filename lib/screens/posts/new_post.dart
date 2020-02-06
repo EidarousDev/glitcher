@@ -17,8 +17,6 @@ import 'package:chewie/chewie.dart';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 
 class NewPost extends StatefulWidget {
-  FirebaseUser currentUser;
-  NewPost({this.currentUser});
   @override
   _NewPostState createState() => _NewPostState();
 }
@@ -36,7 +34,8 @@ class _NewPostState extends State<NewPost> {
   //YoutubePlayer
   bool _showYoutubeUrl = false;
   String _youtubeId;
-  YoutubePlayerController _youtubeController = YoutubePlayerController();
+  //TODO: Fix YouTube Player
+  //YoutubePlayerController _youtubeController = YoutubePlayerController();
   final uTubeTextController = TextEditingController();
   final mainTextController = TextEditingController();
 
@@ -83,9 +82,9 @@ class _NewPostState extends State<NewPost> {
   }
 
   void listener() {
-    if (_youtubeController.value.playerState == PlayerState.ENDED) {
-      //_showThankYouDialog();
-    }
+//    if (_youtubeController.value.playerState == PlayerState.ENDED) {
+//      //_showThankYouDialog();
+//    }
     if (mounted) {
       setState(() {
         //_playerStatus = _youtubeController.value.playerState.toString();
@@ -239,25 +238,27 @@ class _NewPostState extends State<NewPost> {
                   )
                 : Container(),
             _video != null ? playerWidget : Container(),
-            _youtubeId != null
-                ? YoutubePlayer(
-                    context: context,
-                    videoId: _youtubeId,
-                    flags: YoutubePlayerFlags(
-                      autoPlay: false,
-                      showVideoProgressIndicator: true,
-                    ),
-                    videoProgressIndicatorColor: Colors.red,
-                    progressColors: ProgressColors(
-                      playedColor: Colors.red,
-                      handleColor: Colors.redAccent,
-                    ),
-                    onPlayerInitialized: (controller) {
-                      _youtubeController = controller;
-                      _youtubeController.addListener(listener);
-                    },
-                  )
-                : Container(),
+            //TODO: Fix the YouTube Player
+            Container(),
+//            _youtubeId != null
+//                ? YoutubePlayer(
+//                    context: context,
+//                    videoId: _youtubeId,
+//                    flags: YoutubePlayerFlags(
+//                      autoPlay: false,
+//                      showVideoProgressIndicator: true,
+//                    ),
+//                    videoProgressIndicatorColor: Colors.red,
+//                    progressColors: ProgressColors(
+//                      playedColor: Colors.red,
+//                      handleColor: Colors.redAccent,
+//                    ),
+//                    onPlayerInitialized: (controller) {
+//                      _youtubeController = controller;
+//                      _youtubeController.addListener(listener);
+//                    },
+//                  )
+//                : Container(),
             _image != null ? Image.file(_image) : Container(),
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
