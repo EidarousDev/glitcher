@@ -1,6 +1,7 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:glitcher/models/post_model.dart';
@@ -30,6 +31,11 @@ class _PostItemState extends State<PostItem> {
   ChewieController chewieController;
   Chewie playerWidget;
 
+  bool isLiked = false;
+  bool isDisliked = false;
+  var likes = [];
+  var dislikes = [];
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -42,6 +48,7 @@ class _PostItemState extends State<PostItem> {
   }
 
   _buildPost(Post post, User author) {
+    initLikes(post);
     return Column(
       children: <Widget>[
         Row(
@@ -170,10 +177,16 @@ class _PostItemState extends State<PostItem> {
                 width: 18.0,
                 child: IconButton(
                   padding: new EdgeInsets.all(0.0),
-                  icon: Icon(
-                    FontAwesome.getIconData('thumbs-o-up'),
-                    size: 18.0,
-                  ),
+                  icon: isLiked
+                      ? Icon(
+                          FontAwesome.getIconData('thumbs-up'),
+                          size: 18.0,
+                          color: Colors.blue,
+                        )
+                      : Icon(
+                          FontAwesome.getIconData('thumbs-o-up'),
+                          size: 18.0,
+                        ),
                   onPressed: () async {
                     assetsAudioPlayer.open(AssetsAudio(
                       asset: "like_sound.mp3",
@@ -181,7 +194,7 @@ class _PostItemState extends State<PostItem> {
                     ));
                     assetsAudioPlayer.play();
 
-                    //Likes Handling was here
+                    likeBtnHandler(post);
                   },
                 ),
               ),
@@ -206,17 +219,23 @@ class _PostItemState extends State<PostItem> {
                 width: 18.0,
                 child: IconButton(
                   padding: new EdgeInsets.all(0.0),
-                  icon: Icon(
-                    FontAwesome.getIconData('thumbs-o-down'),
-                    size: 18.0,
-                  ),
+                  icon: isDisliked
+                      ? Icon(
+                          FontAwesome.getIconData('thumbs-down'),
+                          size: 18.0,
+                          color: Colors.blue,
+                        )
+                      : Icon(
+                          FontAwesome.getIconData('thumbs-o-down'),
+                          size: 18.0,
+                        ),
                   onPressed: () {
                     assetsAudioPlayer.open(AssetsAudio(
                       asset: "dislike_sound.mp3",
                       folder: "assets/sounds/",
                     ));
                     assetsAudioPlayer.play();
-                    //Dislikes Handling was here
+                    dislikeBtnHandler(post);
                   },
                 ),
               ),
@@ -319,5 +338,99 @@ class _PostItemState extends State<PostItem> {
 //        //_errorCode = _youtubeController.value.errorCode.toString();
 //      });
     }
+  }
+
+  void likeBtnHandler(Post post) {
+    if (isLiked) {
+      setState(() {
+        isLiked = false;
+        post.likesCount--;
+      });
+      postsRef
+          .document(post.id)
+          .collection('likes')
+          .document(Constants.currentUserID)
+          .delete();
+      postsRef.document(post.id).updateData({'likes': post.likesCount});
+    } else {
+      if (isDisliked) {
+        setState(() {
+          isDisliked = false;
+          post.disLikesCount--;
+        });
+        postsRef
+            .document(post.id)
+            .collection('dislikes')
+            .document(Constants.currentUserID)
+            .delete();
+        postsRef.document(post.id).updateData({'dislikes': post.disLikesCount});
+      }
+      setState(() {
+        isLiked = true;
+        post.likesCount++;
+      });
+      postsRef
+          .document(post.id)
+          .collection('likes')
+          .document(Constants.currentUserID)
+          .setData({'timestamp': FieldValue.serverTimestamp()});
+      postsRef.document(post.id).updateData({'likes': post.likesCount});
+    }
+  }
+
+  void dislikeBtnHandler(Post post) {
+    if (isDisliked) {
+      setState(() {
+        isDisliked = false;
+        post.disLikesCount--;
+      });
+      postsRef
+          .document(post.id)
+          .collection('dislikes')
+          .document(Constants.currentUserID)
+          .delete();
+      postsRef.document(post.id).updateData({'dislikes': post.disLikesCount});
+    } else {
+      if (isLiked) {
+        setState(() {
+          isLiked = false;
+          post.likesCount--;
+        });
+        postsRef
+            .document(post.id)
+            .collection('likes')
+            .document(Constants.currentUserID)
+            .delete();
+        postsRef.document(post.id).updateData({'likes': post.likesCount});
+      }
+      setState(() {
+        isDisliked = true;
+        post.disLikesCount++;
+      });
+      postsRef
+          .document(post.id)
+          .collection('dislikes')
+          .document(Constants.currentUserID)
+          .setData({'timestamp': FieldValue.serverTimestamp()});
+      postsRef.document(post.id).updateData({'dislikes': post.disLikesCount});
+    }
+  }
+
+  void initLikes(Post post) async {
+    DocumentSnapshot likedSnapshot = await postsRef
+        .document(post.id)
+        .collection('likes')
+        ?.document(Constants.currentUserID)
+        ?.get();
+    DocumentSnapshot dislikedSnapshot = await postsRef
+        .document(post.id)
+        .collection('dislikes')
+        ?.document(Constants.currentUserID)
+        ?.get();
+
+    setState(() {
+      isLiked = likedSnapshot.exists;
+      isDisliked = dislikedSnapshot.exists;
+    });
   }
 }

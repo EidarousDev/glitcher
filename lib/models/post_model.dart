@@ -5,8 +5,8 @@ class Post {
   final String imageUrl;
   final String category;
   final String text;
-  final int likesCount;
-  final int disLikesCount;
+  int likesCount;
+  int disLikesCount;
   final int commentsCount;
   final String authorId;
   final String video;
