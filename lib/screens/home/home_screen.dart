@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/font_awesome.dart';
 import 'package:flutter_icons/ionicons.dart';
@@ -30,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Post> _posts = [];
   var _scrollController = ScrollController();
   FirebaseUser currentUser;
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
   @override
   Widget build(BuildContext context) {
@@ -382,6 +384,30 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     loadUserData();
     _setupFeed();
+
+    _firebaseMessaging.requestNotificationPermissions(IosNotificationSettings());
+
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async{
+
+        },
+        onResume: (Map<String, dynamic> message) async{
+          final SnackBar snackBar = SnackBar(
+            content: Text(message['notification']['title']),
+            action: SnackBarAction(
+              label: 'GO',
+              onPressed: (){},
+            ),
+          );
+          Scaffold.of(context).showSnackBar(snackBar);
+
+        },
+        onLaunch: (Map<String, dynamic> message) async{
+
+        }
+
+      );
+
   }
 
   void loadUserData() async {

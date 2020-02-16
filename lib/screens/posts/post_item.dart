@@ -1,4 +1,3 @@
-import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,6 +8,10 @@ import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:glitcher/services/share_link.dart';
 import 'package:glitcher/utils/constants.dart';
+import 'package:glitcher/utils/sound_manager.dart';
+import 'package:permission/permission.dart';
+import 'package:permission_handler/permission_handler.dart' as perm;
+import 'package:permission/permission.dart' as p;
 import 'package:share/share.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -26,7 +29,6 @@ class PostItem extends StatefulWidget {
 class _PostItemState extends State<PostItem> {
   YoutubePlayerController _youtubeController;
   bool _isPlaying;
-  AssetsAudioPlayer assetsAudioPlayer = AssetsAudioPlayer();
   VideoPlayerController videoPlayerController;
   ChewieController chewieController;
   Chewie playerWidget;
@@ -35,6 +37,10 @@ class _PostItemState extends State<PostItem> {
   bool isDisliked = false;
   var likes = [];
   var dislikes = [];
+
+  SoundManager soundManager = SoundManager();
+
+  var _permissionStatus = [];
 
   @override
   Widget build(BuildContext context) {
@@ -188,12 +194,13 @@ class _PostItemState extends State<PostItem> {
                           size: 18.0,
                         ),
                   onPressed: () async {
-                    assetsAudioPlayer.open(AssetsAudio(
-                      asset: "like_sound.mp3",
-                      folder: "assets/sounds/",
-                    ));
-                    assetsAudioPlayer.play();
-
+                    _checkStoragePermission();
+                    if (_permissionStatus.length > 0) {
+                      soundManager.playLocal("assets/sounds/like_sound.mp3");
+                    }
+                    else{
+                      _requestStoragePermission();
+                    }
                     likeBtnHandler(post);
                   },
                 ),
@@ -230,11 +237,13 @@ class _PostItemState extends State<PostItem> {
                           size: 18.0,
                         ),
                   onPressed: () {
-                    assetsAudioPlayer.open(AssetsAudio(
-                      asset: "dislike_sound.mp3",
-                      folder: "assets/sounds/",
-                    ));
-                    assetsAudioPlayer.play();
+                    _checkStoragePermission();
+                    if (_permissionStatus.contains('Storage')) {
+                      soundManager.playLocal("assets/sounds/dislike_sound.mp3");
+                    }
+                    else{
+                      _requestStoragePermission();
+                    }
                     dislikeBtnHandler(post);
                   },
                 ),
@@ -317,6 +326,14 @@ class _PostItemState extends State<PostItem> {
         ),
       ],
     );
+  }
+
+  _checkStoragePermission() async{
+    _permissionStatus = await p.Permission.getPermissionsStatus([PermissionName.Storage]);
+  }
+
+  _requestStoragePermission() async{
+    var permissionNames = await Permission.requestPermissions([PermissionName.Storage]);
   }
 
   // Sharing a post with a shortened url

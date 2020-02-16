@@ -1,4 +1,8 @@
-import 'package:assets_audio_player/assets_audio_player.dart';
+import 'dart:async';
+import 'dart:io';
+
+import 'package:audioplayer/audioplayer.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
@@ -40,7 +44,7 @@ class _HomeBodyState extends State<HomeBody> with WidgetsBindingObserver {
   var dislikes = [];
 
   Soundpool pool = Soundpool(streamType: StreamType.ring);
-  AssetsAudioPlayer assetsAudioPlayer = AssetsAudioPlayer();
+  //AssetsAudioPlayer assetsAudioPlayer = AssetsAudioPlayer();
   YoutubePlayerController _youtubeController;
   bool _isPlaying;
   VideoPlayerController videoPlayerController;
