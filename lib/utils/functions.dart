@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:glitcher/screens/home/home.dart';
 import 'package:glitcher/screens/login_page.dart';
+import 'package:glitcher/utils/sound_manager.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'constants.dart';
 
@@ -14,6 +19,28 @@ void changeTheme(BuildContext context) {
     DynamicTheme.of(context).setThemeData(Constants.lightTheme);
     currentTheme = AvailableThemes.LIGHT_THEME;
   }
+}
+
+// Play audio
+void playSound(String fileName) {
+  SoundManager soundManager = new SoundManager();
+  soundManager.playLocal(fileName).then((onValue) {
+    //do something?
+  });
+}
+
+// Pick Image
+Future<File> pickImage(ImageSource source) async {
+  File selected = await ImagePicker.pickImage(source: source);
+  return selected; // Assign it later to File imageFile variable usign setState((){});.
+}
+
+// Crop Image
+Future<File> cropImage(File imageFile) async {
+  File cropped = await ImageCropper.cropImage(
+      sourcePath: imageFile.path, compressQuality: 50);
+  return cropped ??
+      imageFile; // Assign it later to File imageFile variable usign setState((){});.
 }
 
 void twoButtonsDialog(BuildContext context, confirmFunction,

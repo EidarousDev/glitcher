@@ -25,9 +25,9 @@ dependencies:
   youtube_player_flutter: ^6.0.3+2
   cloud_firestore: ^0.12.9+5
   toast: ^0.1.5
+  audioplayer: ^0.5.2
   modal_progress_hud: ^0.1.3
   soundpool: ^0.5.3
-  assets_audio_player: ^1.0.1
   dropdownfield: ^1.0.3
   autocomplete_textfield: ^1.7.3
   dropdown_formfield: ^0.1.1
@@ -38,6 +38,9 @@ dependencies:
   badges: ^1.1.0
   dynamic_theme: ^1.0.0
   permission: ^0.1.5
+  random_string: ^2.0.1
+  flutter_image_compress: ^0.6.5+1
+  image_cropper: ^1.2.1
 
 
 dev_dependencies:

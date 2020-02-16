@@ -1,8 +1,11 @@
-import 'package:dropdownfield/dropdownfield.dart';
+import 'dart:io';
+
+import 'package:glitcher/utils/functions.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart' as prefix0;
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:glitcher/utils/Loader.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/utils/constants.dart';
@@ -12,7 +15,7 @@ import 'package:video_player/video_player.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:toast/toast.dart';
+import 'package:random_string/random_string.dart';
 import 'package:chewie/chewie.dart';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 
@@ -31,6 +34,8 @@ class _NewPostState extends State<NewPost> {
   Chewie playerWidget;
   FirebaseUser currentUser;
 
+  var $ranFileName; // Random File Name
+
   //YoutubePlayer
   bool _showYoutubeUrl = false;
   String _youtubeId;
@@ -40,8 +45,6 @@ class _NewPostState extends State<NewPost> {
   final mainTextController = TextEditingController();
 
   bool _loading = false;
-
-  var _firestore = Firestore.instance;
 
   String selectedCategory = "";
   GlobalKey<AutoCompleteTextFieldState<String>> autocompleteKey =
@@ -108,15 +111,6 @@ class _NewPostState extends State<NewPost> {
     });
   }
 
-  Future chooseImage() async {
-    clearVars();
-    await ImagePicker.pickImage(source: ImageSource.gallery).then((image) {
-      setState(() {
-        _image = image;
-      });
-    });
-  }
-
   Future chooseVideo() async {
     clearVars();
     await ImagePicker.pickVideo(source: ImageSource.gallery).then((video) {
@@ -130,12 +124,17 @@ class _NewPostState extends State<NewPost> {
   Future uploadFile(String parentFolder, var fileName) async {
     if (fileName == null) return;
 
+    setState(() {
+      this.$ranFileName =
+          p.basename(fileName.path) + '_' + randomAlphaNumeric(5);
+    });
     print((fileName));
+    print('fileNameRandomized = ' + this.$ranFileName);
 
     StorageReference storageReference = FirebaseStorage.instance
         .ref()
-        .child('$parentFolder/${p.basename(fileName.path)}');
-    StorageUploadTask uploadTask = storageReference.putFile(fileName);
+        .child('$parentFolder/' + this.$ranFileName);
+    StorageUploadTask uploadTask = storageReference.putFile(this.$ranFileName);
     await uploadTask.onComplete;
     print('File Uploaded');
     await storageReference.getDownloadURL().then((fileURL) {
@@ -156,7 +155,7 @@ class _NewPostState extends State<NewPost> {
       await uploadFile('images', _image);
     }
 
-    await _firestore.collection('posts').add({
+    await firestore.collection('posts').add({
       'owner': currentUser.uid,
       'text': text,
       'youtubeId': _youtubeId,
@@ -306,7 +305,11 @@ class _NewPostState extends State<NewPost> {
                           textColor: Colors.white,
                           color: Colors.blue,
                           onPressed: () {
-                            chooseImage();
+                            clearVars();
+                            setState(() {
+                              _image = pickImage(ImageSource.gallery);
+                              _image = cropImage(_image);
+                            });
                           })),
                   flex: 1,
                 ),
@@ -386,5 +389,27 @@ class _NewPostState extends State<NewPost> {
         ],
       ),
     );
+  }
+
+  // 2. compress file and get file.
+  Future<File> compressAndGetFile(File file, String targetPath) async {
+    var result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      targetPath,
+      quality: 88,
+      rotate: 180,
+    );
+
+    StorageReference storageReference = FirebaseStorage.instance
+        .ref()
+        .child('compressed_images/' + this.$ranFileName);
+    StorageUploadTask uploadTask = storageReference.putFile(this.$ranFileName);
+    await uploadTask.onComplete;
+    print('Compressed File Uploaded');
+
+    print(file.lengthSync());
+    print(result.lengthSync());
+
+    return result;
   }
 }
