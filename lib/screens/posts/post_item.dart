@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -8,13 +7,11 @@ import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:glitcher/services/share_link.dart';
 import 'package:glitcher/utils/constants.dart';
-import 'package:glitcher/utils/sound_manager.dart';
-import 'package:permission/permission.dart';
-import 'package:permission_handler/permission_handler.dart' as perm;
-import 'package:permission/permission.dart' as p;
+import 'package:glitcher/utils/functions.dart';
 import 'package:share/share.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:glitcher/utils/sound_manager.dart';
 
 class PostItem extends StatefulWidget {
   final Post post;
@@ -37,10 +34,6 @@ class _PostItemState extends State<PostItem> {
   bool isDisliked = false;
   var likes = [];
   var dislikes = [];
-
-  SoundManager soundManager = SoundManager();
-
-  var _permissionStatus = [];
 
   @override
   Widget build(BuildContext context) {
@@ -178,39 +171,40 @@ class _PostItemState extends State<PostItem> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              SizedBox(
-                height: 14.0,
-                width: 18.0,
-                child: IconButton(
-                  padding: new EdgeInsets.all(0.0),
-                  icon: isLiked
-                      ? Icon(
-                          FontAwesome.getIconData('thumbs-up'),
-                          size: 18.0,
-                          color: Colors.blue,
-                        )
-                      : Icon(
-                          FontAwesome.getIconData('thumbs-o-up'),
-                          size: 18.0,
-                        ),
-                  onPressed: () async {
-                    _checkStoragePermission();
-                    if (_permissionStatus.length > 0) {
-                      soundManager.playLocal("assets/sounds/like_sound.mp3");
-                    }
-                    else{
-                      _requestStoragePermission();
-                    }
-                    likeBtnHandler(post);
-                  },
+              InkWell(
+                child: Row(
+                  children: <Widget>[
+                    SizedBox(
+                      height: 14.0,
+                      width: 18.0,
+                      child: IconButton(
+                        padding: new EdgeInsets.all(0.0),
+                        icon: isLiked
+                            ? Icon(
+                                FontAwesome.getIconData('thumbs-up'),
+                                size: 18.0,
+                                color: Colors.blue,
+                              )
+                            : Icon(
+                                FontAwesome.getIconData('thumbs-o-up'),
+                                size: 18.0,
+                              ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: Text(
+                        post.likesCount.toString(),
+                      ),
+                    ),
+                  ],
                 ),
+                onTap: () async {
+                  playSound('like_sound.mp3');
+                  likeBtnHandler(post);
+                },
               ),
-              SizedBox(
-                  height: 14.0,
-                  width: 18.0,
-                  child: Text(
-                    post.likesCount.toString(),
-                  )),
               SizedBox(
                 width: 1.0,
                 height: inlineBreak,
@@ -221,39 +215,40 @@ class _PostItemState extends State<PostItem> {
                           : Constants.darkLineBreak),
                 ),
               ),
-              SizedBox(
-                height: 14.0,
-                width: 18.0,
-                child: IconButton(
-                  padding: new EdgeInsets.all(0.0),
-                  icon: isDisliked
-                      ? Icon(
-                          FontAwesome.getIconData('thumbs-down'),
-                          size: 18.0,
-                          color: Colors.blue,
-                        )
-                      : Icon(
-                          FontAwesome.getIconData('thumbs-o-down'),
-                          size: 18.0,
-                        ),
-                  onPressed: () {
-                    _checkStoragePermission();
-                    if (_permissionStatus.contains('Storage')) {
-                      soundManager.playLocal("assets/sounds/dislike_sound.mp3");
-                    }
-                    else{
-                      _requestStoragePermission();
-                    }
-                    dislikeBtnHandler(post);
-                  },
+              InkWell(
+                child: Row(
+                  children: <Widget>[
+                    SizedBox(
+                      height: 14.0,
+                      width: 18.0,
+                      child: IconButton(
+                        padding: new EdgeInsets.all(0.0),
+                        icon: isDisliked
+                            ? Icon(
+                                FontAwesome.getIconData('thumbs-down'),
+                                size: 18.0,
+                                color: Colors.blue,
+                              )
+                            : Icon(
+                                FontAwesome.getIconData('thumbs-o-down'),
+                                size: 18.0,
+                              ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: Text(
+                        post.disLikesCount.toString(),
+                      ),
+                    ),
+                  ],
                 ),
+                onTap: () async {
+                  playSound('dislike_sound.mp3');
+                  dislikeBtnHandler(post);
+                },
               ),
-              SizedBox(
-                  height: 14.0,
-                  width: 18.0,
-                  child: Text(
-                    post.disLikesCount.toString(),
-                  )),
               SizedBox(
                 width: 1.0,
                 height: inlineBreak,
@@ -297,19 +292,21 @@ class _PostItemState extends State<PostItem> {
                           : Constants.darkLineBreak),
                 ),
               ),
-              SizedBox(
-                height: 14.0,
-                width: 18.0,
-                child: IconButton(
-                  padding: new EdgeInsets.all(0.0),
-                  icon: Icon(
-                    Icons.replay,
-                    size: 18.0,
+              InkWell(
+                child: SizedBox(
+                  height: 14.0,
+                  width: 18.0,
+                  child: IconButton(
+                    padding: new EdgeInsets.all(0.0),
+                    icon: Icon(
+                      Icons.share,
+                      size: 18.0,
+                    ),
                   ),
-                  onPressed: () {
-                    sharePost(post.id, post.text, post.imageUrl);
-                  },
                 ),
+                onTap: () {
+                  sharePost(post.id, post.text, post.imageUrl);
+                },
               ),
             ],
           ),
@@ -326,14 +323,6 @@ class _PostItemState extends State<PostItem> {
         ),
       ],
     );
-  }
-
-  _checkStoragePermission() async{
-    _permissionStatus = await p.Permission.getPermissionsStatus([PermissionName.Storage]);
-  }
-
-  _requestStoragePermission() async{
-    var permissionNames = await Permission.requestPermissions([PermissionName.Storage]);
   }
 
   // Sharing a post with a shortened url

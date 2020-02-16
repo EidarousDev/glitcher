@@ -12,7 +12,7 @@ class SoundManager {
     final dir = await getApplicationDocumentsDirectory();
     final file = new File("${dir.path}/$localFileName");
     if (!(await file.exists())) {
-      final soundData = await rootBundle.load("assets/$localFileName");
+      final soundData = await rootBundle.load("assets/sounds/$localFileName");
       final bytes = soundData.buffer.asUint8List();
       await file.writeAsBytes(bytes, flush: true);
     }
