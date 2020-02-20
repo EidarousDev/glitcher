@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -14,8 +17,10 @@ import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/constants.dart';
 import 'package:glitcher/utils/functions.dart';
+import 'dart:io';
 
 import '../app_page.dart';
 
@@ -31,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Post> _posts = [];
   var _scrollController = ScrollController();
   FirebaseUser currentUser;
-  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  FirebaseMessaging _fcm = FirebaseMessaging();
 
   @override
   Widget build(BuildContext context) {
@@ -385,29 +390,21 @@ class _HomeScreenState extends State<HomeScreen> {
     loadUserData();
     _setupFeed();
 
-    _firebaseMessaging.requestNotificationPermissions(IosNotificationSettings());
+    NotificationHandler notificationHandler = NotificationHandler();
+    notificationHandler.receiveNotification(context);
+  }
 
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async{
+  void _saveDeviceToken() async {
+    String uid = currentUser.uid;
+    String token = await _fcm.getToken();
 
-        },
-        onResume: (Map<String, dynamic> message) async{
-          final SnackBar snackBar = SnackBar(
-            content: Text(message['notification']['title']),
-            action: SnackBarAction(
-              label: 'GO',
-              onPressed: (){},
-            ),
-          );
-          Scaffold.of(context).showSnackBar(snackBar);
-
-        },
-        onLaunch: (Map<String, dynamic> message) async{
-
-        }
-
-      );
-
+    if (token != null) {
+      var tokenRef =
+          usersRef.document(uid).collection('tokens').document(token);
+      await tokenRef.setData({
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    }
   }
 
   void loadUserData() async {
@@ -415,7 +412,7 @@ class _HomeScreenState extends State<HomeScreen> {
     //print('currentUserID: ${currentUser.uid}');
     // here you write the codes to input the data into firestore
     loggedInUser = await DatabaseService.getUserWithId(currentUser.uid);
-
+    _saveDeviceToken();
     setState(() {
       profileImageUrl = loggedInUser.profileImageUrl;
       username = loggedInUser.username;

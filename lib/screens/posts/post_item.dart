@@ -5,6 +5,8 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
+import 'package:glitcher/services/auth.dart';
+import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/services/share_link.dart';
 import 'package:glitcher/utils/constants.dart';
 import 'package:glitcher/utils/functions.dart';
@@ -34,6 +36,8 @@ class _PostItemState extends State<PostItem> {
   bool isDisliked = false;
   var likes = [];
   var dislikes = [];
+  NotificationHandler notificationHandler = NotificationHandler();
+
 
   @override
   Widget build(BuildContext context) {
@@ -346,6 +350,12 @@ class _PostItemState extends State<PostItem> {
     }
   }
 
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   void likeBtnHandler(Post post) {
     if (isLiked) {
       setState(() {
@@ -381,7 +391,11 @@ class _PostItemState extends State<PostItem> {
           .document(Constants.currentUserID)
           .setData({'timestamp': FieldValue.serverTimestamp()});
       postsRef.document(post.id).updateData({'likes': post.likesCount});
+
+      notificationHandler.sendNotification(post.authorId, 'New Like', 'Someone likes your post');
+
     }
+
   }
 
   void dislikeBtnHandler(Post post) {
