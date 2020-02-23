@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/screens/app_page.dart';
 import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/utils/Loader.dart';
+import 'package:glitcher/utils/constants.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:flutter/services.dart';
@@ -19,6 +22,7 @@ class LoginPage extends StatefulWidget {
   LoginPage({Key key, this.onSignedIn}) : super(key: key);
 
   final VoidCallback onSignedIn;
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -58,6 +62,8 @@ class _LoginPageState extends State<LoginPage>
   TextEditingController signupPasswordController = TextEditingController();
   TextEditingController signupConfirmPasswordController =
       TextEditingController();
+
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
   PageController _pageController;
 
@@ -155,6 +161,14 @@ class _LoginPageState extends State<LoginPage>
     super.dispose();
   }
 
+  _saveDeviceToken()async{
+    String token = await _firebaseMessaging.getToken();
+    if(token != null){
+      usersRef.document(userId).updateData({'token': token, 'platform': Platform.operatingSystem});
+
+    }
+  }
+
   @override
   void initState() {
     _errorMsgEmail = "";
@@ -166,6 +180,8 @@ class _LoginPageState extends State<LoginPage>
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+
+    _saveDeviceToken();
 
     _pageController = PageController();
   }

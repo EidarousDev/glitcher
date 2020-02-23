@@ -1,3 +1,8 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:audioplayer/audioplayer.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
@@ -14,7 +19,6 @@ import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/share_link.dart';
-import 'package:glitcher/utils/sound_manager.dart';
 import 'package:glitcher/utils/constants.dart';
 import 'package:glitcher/utils/statics.dart';
 import 'package:share/share.dart';
@@ -40,7 +44,7 @@ class _HomeBodyState extends State<HomeBody> with WidgetsBindingObserver {
   var dislikes = [];
 
   Soundpool pool = Soundpool(streamType: StreamType.ring);
-  SoundManager soundManager = new SoundManager();
+  //AssetsAudioPlayer assetsAudioPlayer = AssetsAudioPlayer();
   YoutubePlayerController _youtubeController;
   bool _isPlaying;
   VideoPlayerController videoPlayerController;
