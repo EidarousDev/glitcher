@@ -1,11 +1,8 @@
-import 'dart:io';
-
+import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/functions.dart';
-import 'package:image_cropper/image_cropper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:glitcher/utils/Loader.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/utils/constants.dart';
@@ -121,12 +118,26 @@ class _NewPostState extends State<NewPost> {
     });
   }
 
+  Future chooseImage() async {
+    clearVars();
+    await ImagePicker.pickImage(
+            source: ImageSource.gallery,
+            imageQuality: 52,
+            maxHeight: 400,
+            maxWidth: 600)
+        .then((image) {
+      setState(() {
+        _image = image;
+      });
+    });
+  }
+
   Future uploadFile(String parentFolder, var fileName) async {
     if (fileName == null) return;
 
     setState(() {
       this.$ranFileName =
-          p.basename(fileName.path) + '_' + randomAlphaNumeric(5);
+          randomAlphaNumeric(5) + '_' + p.basename(fileName.path);
     });
     print((fileName));
     print('fileNameRandomized = ' + this.$ranFileName);
@@ -134,7 +145,7 @@ class _NewPostState extends State<NewPost> {
     StorageReference storageReference = FirebaseStorage.instance
         .ref()
         .child('$parentFolder/' + this.$ranFileName);
-    StorageUploadTask uploadTask = storageReference.putFile(this.$ranFileName);
+    StorageUploadTask uploadTask = storageReference.putFile(fileName);
     await uploadTask.onComplete;
     print('File Uploaded');
     await storageReference.getDownloadURL().then((fileURL) {
@@ -152,6 +163,7 @@ class _NewPostState extends State<NewPost> {
     if (_video != null) {
       await uploadFile('videos', _video);
     } else if (_image != null) {
+      //await compressAndUploadFile(_image, 'glitchertemp.jpg');
       await uploadFile('images', _image);
     }
 
@@ -169,8 +181,9 @@ class _NewPostState extends State<NewPost> {
     }).then((_) {
       setState(() {
         _loading = false;
-        Navigator.pop(context);
+        //Navigator.pop(context);
       });
+      pushHomeScreen(context);
     });
   }
 
@@ -179,66 +192,71 @@ class _NewPostState extends State<NewPost> {
   }
 
   Widget _buildWidget() {
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: mainTextController,
-                decoration: new InputDecoration.collapsed(
-                    hintText: 'What\'s in your mind?'),
-                minLines: 1,
-                maxLines: 5,
-                autocorrect: true,
-                autofocus: true,
+    return WillPopScope(
+      onWillPop: () {
+        pushHomeScreen(context);
+        return;
+      },
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: mainTextController,
+                  decoration: new InputDecoration.collapsed(
+                      hintText: 'What\'s in your mind?'),
+                  minLines: 1,
+                  maxLines: 5,
+                  autocorrect: true,
+                  autofocus: true,
+                ),
               ),
-            ),
-            SizedBox(
-              height: 15,
-            ),
-            _showYoutubeUrl
-                ? Row(
-                    children: <Widget>[
-                      Expanded(
-                        flex: 11,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextField(
-                            controller: uTubeTextController,
-                            decoration: new InputDecoration.collapsed(
-                                hintText: 'Paste YOUTUBE Url here'),
+              SizedBox(
+                height: 15,
+              ),
+              _showYoutubeUrl
+                  ? Row(
+                      children: <Widget>[
+                        Expanded(
+                          flex: 11,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: TextField(
+                              controller: uTubeTextController,
+                              decoration: new InputDecoration.collapsed(
+                                  hintText: 'Paste YOUTUBE Url here'),
+                            ),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Container(
-                          margin: EdgeInsets.only(right: 3),
-                          child: RaisedButton(
-                              child: Text('OK'),
-                              textColor: Colors.white,
-                              color: Colors.blue,
-                              onPressed: () {
-                                setState(() {
-                                  _youtubeId = YoutubePlayer.convertUrlToId(
-                                      uTubeTextController.text);
-                                  _showYoutubeUrl = false;
-                                  _video = null;
-                                  _image = null;
-                                });
-                              }),
-                        ),
-                      )
-                    ],
-                  )
-                : Container(),
-            _video != null ? playerWidget : Container(),
-            //TODO: Fix the YouTube Player
-            Container(),
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            margin: EdgeInsets.only(right: 3),
+                            child: RaisedButton(
+                                child: Text('OK'),
+                                textColor: Colors.white,
+                                color: Colors.blue,
+                                onPressed: () {
+                                  setState(() {
+                                    _youtubeId = YoutubePlayer.convertUrlToId(
+                                        uTubeTextController.text);
+                                    _showYoutubeUrl = false;
+                                    _video = null;
+                                    _image = null;
+                                  });
+                                }),
+                          ),
+                        )
+                      ],
+                    )
+                  : Container(),
+              _video != null ? playerWidget : Container(),
+              //TODO: Fix the YouTube Player
+              Container(),
 //            _youtubeId != null
 //                ? YoutubePlayer(
 //                    context: context,
@@ -258,90 +276,90 @@ class _NewPostState extends State<NewPost> {
 //                    },
 //                  )
 //                : Container(),
-            _image != null ? Image.file(_image) : Container(),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Expanded(
-                  child: Container(
-                    margin: EdgeInsets.symmetric(horizontal: 10),
-                    child: RaisedButton(
-                        child: Icon(FontAwesome.getIconData("file-video-o")),
-                        textColor: Colors.white,
-                        color: Colors.blue,
-                        onPressed: () {
-                          chooseVideo();
-                        }),
-                  ),
-                  flex: 1,
-                ),
-                SizedBox(
-                  width: 20,
-                ),
-                Expanded(
-                  child: Container(
-                    margin: EdgeInsets.symmetric(horizontal: 10),
-                    child: RaisedButton(
-                        child: Icon(FontAwesome.getIconData("youtube")),
-                        textColor: Colors.white,
-                        color: Colors.blue,
-                        onPressed: () {
-                          setState(() {
-                            _showYoutubeUrl = true;
-                          });
-                        }),
-                  ),
-                  flex: 1,
-                ),
-                SizedBox(
-                  width: 20,
-                ),
-                Expanded(
-                  child: Container(
+              _image != null ? Image.file(_image) : Container(),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    child: Container(
                       margin: EdgeInsets.symmetric(horizontal: 10),
                       child: RaisedButton(
-                          child: Icon(FontAwesome.getIconData("image")),
+                          child: Icon(FontAwesome.getIconData("file-video-o")),
                           textColor: Colors.white,
                           color: Colors.blue,
                           onPressed: () {
-                            clearVars();
+                            chooseVideo();
+                          }),
+                    ),
+                    flex: 1,
+                  ),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 10),
+                      child: RaisedButton(
+                          child: Icon(FontAwesome.getIconData("youtube")),
+                          textColor: Colors.white,
+                          color: Colors.blue,
+                          onPressed: () {
                             setState(() {
-                              _image = pickImage(ImageSource.gallery);
-                              _image = cropImage(_image);
+                              _showYoutubeUrl = true;
                             });
-                          })),
-                  flex: 1,
-                ),
-              ],
-            ),
-
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: AutoCompleteTextField<String>(
-                clearOnSubmit: false,
-                key: autocompleteKey,
-                suggestions: Constants.categories,
-                decoration: InputDecoration(
-                    icon: Icon(Icons.videogame_asset), hintText: "Category"),
-                itemFilter: (item, query) {
-                  return item.toLowerCase().startsWith(query.toLowerCase());
-                },
-                itemSorter: (a, b) {
-                  return a.compareTo(b);
-                },
-                itemSubmitted: (item) {
-                  selectedCategory = item;
-                },
-                onFocusChanged: (hasFocus) {},
-                itemBuilder: (context, item) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(item),
-                  );
-                },
+                          }),
+                    ),
+                    flex: 1,
+                  ),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Expanded(
+                    child: Container(
+                        margin: EdgeInsets.symmetric(horizontal: 10),
+                        child: RaisedButton(
+                            child: Icon(FontAwesome.getIconData("image")),
+                            textColor: Colors.white,
+                            color: Colors.blue,
+                            onPressed: () {
+                              PermissionsService().requestStoragePermission(
+                                  onPermissionDenied: () {
+                                print('Permission has been denied');
+                              });
+                              chooseImage();
+                            })),
+                    flex: 1,
+                  ),
+                ],
               ),
-            ),
+
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: AutoCompleteTextField<String>(
+                  clearOnSubmit: false,
+                  key: autocompleteKey,
+                  suggestions: Constants.categories,
+                  decoration: InputDecoration(
+                      icon: Icon(Icons.videogame_asset), hintText: "Category"),
+                  itemFilter: (item, query) {
+                    return item.toLowerCase().startsWith(query.toLowerCase());
+                  },
+                  itemSorter: (a, b) {
+                    return a.compareTo(b);
+                  },
+                  itemSubmitted: (item) {
+                    selectedCategory = item;
+                  },
+                  onFocusChanged: (hasFocus) {},
+                  itemBuilder: (context, item) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(item),
+                    );
+                  },
+                ),
+              ),
 //            DropDownField(
 //                value: selectedCategory,
 //                strict: true,
@@ -354,17 +372,18 @@ class _NewPostState extends State<NewPost> {
 //                }
 //            ),
 
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 10),
-              child: RaisedButton(
-                  child: Text('Publish'),
-                  textColor: Colors.white,
-                  color: Colors.blue,
-                  onPressed: () {
-                    uploadPost(mainTextController.text);
-                  }),
-            )
-          ],
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 10),
+                child: RaisedButton(
+                    child: Text('Publish'),
+                    textColor: Colors.white,
+                    color: Colors.blue,
+                    onPressed: () {
+                      uploadPost(mainTextController.text);
+                    }),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -374,7 +393,12 @@ class _NewPostState extends State<NewPost> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: true,
         title: Text('New Post'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => pushHomeScreen(context),
+        ),
       ),
       body: Stack(
         alignment: Alignment(0, 0),
@@ -391,25 +415,32 @@ class _NewPostState extends State<NewPost> {
     );
   }
 
-  // 2. compress file and get file.
-  Future<File> compressAndGetFile(File file, String targetPath) async {
-    var result = await FlutterImageCompress.compressAndGetFile(
-      file.absolute.path,
-      targetPath,
-      quality: 88,
-      rotate: 180,
-    );
-
-    StorageReference storageReference = FirebaseStorage.instance
-        .ref()
-        .child('compressed_images/' + this.$ranFileName);
-    StorageUploadTask uploadTask = storageReference.putFile(this.$ranFileName);
-    await uploadTask.onComplete;
-    print('Compressed File Uploaded');
-
-    print(file.lengthSync());
-    print(result.lengthSync());
-
-    return result;
-  }
+//  // 2. compress file and get file.
+//  compressAndUploadFile(File file, String targetPath) async {
+//    var result = await FlutterImageCompress.compressAndGetFile(
+//      file.absolute.path,
+//      targetPath,
+//      quality: 50,
+//      rotate: 270,
+//    );
+//
+//    print((result));
+//
+//    setState(() {
+//      this.$ranFileName = randomAlphaNumeric(5) + p.basename(file.path);
+//    });
+//    print((file));
+//    print('fileNameRandomized = ' + this.$ranFileName);
+//
+//    StorageReference storageReference = FirebaseStorage.instance
+//        .ref()
+//        .child('compressed_images/' + this.$ranFileName);
+//
+//    StorageUploadTask uploadTask = storageReference.putFile(result);
+//    await uploadTask.onComplete;
+//    print('Compressed File Uploaded');
+//
+//    print(file.lengthSync());
+//    return result;
+//  }
 }

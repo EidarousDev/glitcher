@@ -3,6 +3,7 @@ import 'package:glitcher/root_page.dart';
 import 'package:glitcher/screens/app_page.dart';
 import 'package:glitcher/screens/posts/new_comment.dart';
 import 'package:glitcher/screens/posts/new_post.dart';
+import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 
 class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -16,6 +17,12 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => AppPage());
       case '/new-post':
         return MaterialPageRoute(builder: (_) => NewPost());
+      case '/user-profile':
+        return MaterialPageRoute(
+          builder: (_) => ProfileScreen(
+            args['userId'],
+          ),
+        );
       case '/post':
         // Validation of correct data type
         return MaterialPageRoute(

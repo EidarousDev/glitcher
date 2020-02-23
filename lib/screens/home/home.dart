@@ -13,9 +13,11 @@ import 'package:glitcher/screens/posts/new_post.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/statics.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/utils/constants.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class HomePage extends StatefulWidget {
   static const String id = 'home_page';
@@ -80,6 +82,10 @@ class _HomePageState extends State<HomePage> {
               ? IconButton(
                   icon: Icon(Icons.filter_list),
                   onPressed: () {
+                    PermissionsService().requestContactsPermission(
+                        onPermissionDenied: () {
+                      print('Permission has been denied');
+                    });
                     setState(() {
                       Statics.filterPanel = !Statics.filterPanel;
                     });
@@ -286,6 +292,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     getCurrentUser();
     _retrieveDynamicLink();
+    //checkPermission(PermissionGroup.storage);
   }
 
   Future<void> _retrieveDynamicLink() async {
@@ -325,4 +332,31 @@ class _HomePageState extends State<HomePage> {
       print('Sign out: $e');
     }
   }
+
+  requestPermission(List<PermissionGroup> permissionGroup) async {
+    var permissions =
+        await PermissionHandler().requestPermissions(permissionGroup);
+    print('permission result is: ${permissions.toString()}');
+  }
+
+  checkPermission(PermissionGroup permissionGroup) async {
+    var permissionStatus =
+        await PermissionHandler().checkPermissionStatus(permissionGroup);
+    if (permissionStatus != PermissionStatus.granted) {
+      requestPermission([permissionGroup]);
+    }
+    print('permissionStatus: ${permissionStatus.toString()}');
+  }
+//
+//    print('permission result is: ${permissionStatus.toString()}');
+//  }
+//
+//  getPermissionStatus(Permission getPermission) async {
+//    setState(() async {
+//      permissionStatus =
+//          await SimplePermissions.getPermissionStatus(getPermission);
+//    });
+//
+//    print('permission result is: ${permissionStatus.toString()}');
+//  }
 }
