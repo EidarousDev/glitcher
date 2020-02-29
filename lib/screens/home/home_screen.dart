@@ -1,9 +1,6 @@
-import 'dart:async';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/font_awesome.dart';
 import 'package:flutter_icons/ionicons.dart';
@@ -18,10 +15,10 @@ import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/services/notification_handler.dart';
+import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/constants.dart';
 import 'package:glitcher/utils/functions.dart';
-import 'dart:io';
+import 'package:glitcher/utils/bottom_reach_extension.dart';
 
 import '../app_page.dart';
 
@@ -30,14 +27,16 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   User loggedInUser;
   String username;
   String profileImageUrl = '';
   List<Post> _posts = [];
-  var _scrollController = ScrollController();
+  ScrollController _scrollController;
   FirebaseUser currentUser;
-  FirebaseMessaging _fcm = FirebaseMessaging();
+  Timestamp lastVisiblePostSnapShot;
+  bool _noMorePosts = false;
+  bool _isFetching = false;
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +66,12 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(
               Icons.filter_list,
             ),
-            onPressed: () {},
+            onPressed: () {
+              PermissionsService().requestContactsPermission(
+                  onPermissionDenied: () {
+                print('Permission has been denied');
+              });
+            },
           ),
         ],
       ),
@@ -118,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     onTap: () {
-                      Navigator.of(context).pushNamed('/new-post');
+                      Navigator.of(context).pushReplacementNamed('/new-post');
                     },
                   ),
                 ),
@@ -383,32 +387,63 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   _setupFeed() async {
+    //print('what\'s happening?');
     List<Post> posts = await DatabaseService.getPosts();
     setState(() {
       _posts = posts;
+      this.lastVisiblePostSnapShot = posts.last.timestamp;
     });
   }
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // set up listener here
+    _scrollController = ScrollController();
+    _scrollController.addListener(() {
+      print('are we even here?!');
+      if (_scrollController.offset >=
+              _scrollController.position.maxScrollExtent &&
+          !_scrollController.position.outOfRange) {
+        setState(() {
+          print('reached the bottom');
+        });
+      } else if (_scrollController.offset <=
+              _scrollController.position.minScrollExtent &&
+          !_scrollController.position.outOfRange) {
+        setState(() {
+          print("reached the top");
+        });
+      } else {
+        setState(() {
+          print('were here');
+        });
+      }
+    });
     loadUserData();
     _setupFeed();
-
-    NotificationHandler notificationHandler = NotificationHandler();
-    notificationHandler.receiveNotification(context);
   }
 
-  void _saveDeviceToken() async {
-    String uid = currentUser.uid;
-    String token = await _fcm.getToken();
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
-    if (token != null) {
-      var tokenRef =
-          usersRef.document(uid).collection('tokens').document(token);
-      await tokenRef.setData({
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // user returned to our app
+      _setupFeed();
+    } else if (state == AppLifecycleState.inactive) {
+      // app is inactive
+      _setupFeed();
+    } else if (state == AppLifecycleState.paused) {
+      // user is about quit our app temporally
+      _setupFeed();
+    } else if (state == AppLifecycleState.detached) {
+      // app suspended (not used in iOS)
     }
   }
 
@@ -417,11 +452,34 @@ class _HomeScreenState extends State<HomeScreen> {
     //print('currentUserID: ${currentUser.uid}');
     // here you write the codes to input the data into firestore
     loggedInUser = await DatabaseService.getUserWithId(currentUser.uid);
-    _saveDeviceToken();
+
     setState(() {
       profileImageUrl = loggedInUser.profileImageUrl;
       username = loggedInUser.username;
       print('profileImageUrl = $profileImageUrl and username = $username');
     });
+  }
+
+  void nextPosts() async {
+    dynamic posts = await DatabaseService.getNextPosts(lastVisiblePostSnapShot);
+    setState(() {
+      _posts.add(posts);
+      this.lastVisiblePostSnapShot = posts.last.timestamp;
+    });
+  }
+
+  void _scrollListener() async {
+    //if (_noMorePosts) return;
+    print('reached 1120 posts!');
+
+    if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent &&
+        _isFetching == false) {
+      _isFetching = true;
+      print('reached 10 posts!');
+      nextPosts();
+      _isFetching = false;
+    }
+    print('reached 1000 posts!');
   }
 }

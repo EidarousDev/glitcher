@@ -27,6 +27,19 @@ class DatabaseService {
     return notifications;
   }
 
+  // This function is used to get the recent posts (unfiltered)
+  static Future<List<Post>> getNextPosts(
+      Timestamp lastVisiblePostSnapShot) async {
+    QuerySnapshot postSnapshot = await postsRef
+        .orderBy('timestamp', descending: true)
+        .startAfter([lastVisiblePostSnapShot])
+        .limit(10)
+        .getDocuments();
+    List<Post> posts =
+        postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+    return posts;
+  }
+
   // This function is used to get the author info of each post
   static Future<User> getUserWithId(String userId) async {
     DocumentSnapshot userDocSnapshot = await usersRef.document(userId).get();

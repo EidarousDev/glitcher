@@ -31,6 +31,7 @@ class _PostItemState extends State<PostItem> {
   VideoPlayerController videoPlayerController;
   ChewieController chewieController;
   Chewie playerWidget;
+  String dropdownValue = 'Edit';
 
   bool isLiked = false;
   bool isDisliked = false;
@@ -43,10 +44,7 @@ class _PostItemState extends State<PostItem> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 5),
-      child: InkWell(
-        child: _buildPost(widget.post, widget.author),
-        onTap: () {},
-      ),
+      child: _buildPost(widget.post, widget.author),
     );
   }
 
@@ -60,10 +58,9 @@ class _PostItemState extends State<PostItem> {
           children: <Widget>[
             GestureDetector(
               onTap: () {
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ProfileScreen(post.authorId)));
+                Navigator.of(context).pushNamed('/user-profile', arguments: {
+                  'userId': post.authorId,
+                });
               },
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -88,15 +85,39 @@ class _PostItemState extends State<PostItem> {
                       children: <Widget>[
                         Row(
                           children: <Widget>[
-                            Text('@${author.username}' ?? '',
+                            InkWell(
+                              child: Text('@${author.username}' ?? '',
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Constants.darkPrimary)),
+                              onTap: () {
+                                Navigator.of(context)
+                                    .pushNamed('/user-profile', arguments: {
+                                  'userId': author.id,
+                                });
+                              },
+                            ),
+                            Text(' -> ',
                                 style: TextStyle(
                                   fontSize: 12,
                                 )),
+                            InkWell(
+                              child: Text('${post.category}' ?? '',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Constants.darkPrimary,
+                                  )),
+                              onTap: () {
+                                Navigator.of(context)
+                                    .pushNamed('/user-profile', arguments: {
+                                  'userId': author.id,
+                                });
+                              },
+                            ),
                           ],
                         ),
-                        Icon(
-                          Icons.arrow_drop_down,
-                        )
+                        dropDownBtn()
                       ],
                     ),
                     Padding(
@@ -113,9 +134,13 @@ class _PostItemState extends State<PostItem> {
                           ? null
                           : Container(
                               width: double.infinity,
+                              height: 200.0,
                               child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8.0),
-                                  child: Image.network(post.imageUrl)),
+                                  child: Image.network(
+                                    post.imageUrl,
+                                    fit: BoxFit.fill,
+                                  )),
                             ),
                     ),
                     Container(
@@ -452,5 +477,43 @@ class _PostItemState extends State<PostItem> {
       isLiked = likedSnapshot.exists;
       isDisliked = dislikedSnapshot.exists;
     });
+  }
+
+  Widget dropDownBtn() {
+    if (Constants.currentUserID == widget.post.authorId) {
+      return specialBtns();
+    }
+    return Container();
+  }
+
+  Widget specialBtns() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8.0, 0, 0, 16.0),
+      child: Row(
+        children: <Widget>[
+          InkWell(
+              child: Icon(
+                Icons.report_problem,
+                size: 22.0,
+                color: Constants.darkAccent,
+              ),
+              onTap: () {}),
+          InkWell(
+              child: Icon(
+                Icons.delete_forever,
+                size: 22.0,
+                color: Constants.darkAccent,
+              ),
+              onTap: () {}),
+          InkWell(
+              child: Icon(
+                Icons.edit,
+                size: 22.0,
+                color: Constants.darkAccent,
+              ),
+              onTap: () {}),
+        ],
+      ),
+    );
   }
 }

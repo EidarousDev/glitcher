@@ -9,6 +9,7 @@ import 'package:glitcher/screens/login_page.dart';
 import 'package:glitcher/utils/sound_manager.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart';
 
 import 'constants.dart';
 
@@ -31,17 +32,22 @@ void playSound(String fileName) {
 }
 
 // Pick Image
-Future<File> pickImage(ImageSource source) async {
+pickImage(ImageSource source) async {
   File selected = await ImagePicker.pickImage(source: source);
   return selected; // Assign it later to File imageFile variable usign setState((){});.
 }
 
 // Crop Image
-Future<File> cropImage(File imageFile) async {
+cropImage(File imageFile) async {
   File cropped = await ImageCropper.cropImage(
       sourcePath: imageFile.path, compressQuality: 50);
   return cropped ??
       imageFile; // Assign it later to File imageFile variable usign setState((){});.
+}
+
+/// push Home Screen and kill the current screen
+void pushHomeScreen(BuildContext context) {
+  Navigator.of(context).pushReplacementNamed('/home');
 }
 
 void twoButtonsDialog(BuildContext context, confirmFunction,

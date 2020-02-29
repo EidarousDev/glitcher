@@ -14,8 +14,6 @@ import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/constants.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
-import 'package:permission/permission.dart';
-
 import 'chats/chats.dart';
 
 class AppPage extends StatefulWidget {
@@ -107,7 +105,6 @@ class _AppPageState extends State<AppPage> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: 2);
-    checkPermissions();
     _retrieveDynamicLink();
     getUser();
   }
@@ -144,23 +141,5 @@ class _AppPageState extends State<AppPage> {
     setState(() {
       this._page = page;
     });
-  }
-
-  Future checkPermissions() async {
-    var permissions = await Permission.getPermissionsStatus([
-      PermissionName.Storage,
-      PermissionName.Internet,
-      PermissionName.Camera,
-      PermissionName.Microphone
-    ]);
-    print('permissions:$permissions');
-    var permissionNames = await Permission.requestPermissions([
-      PermissionName.Storage,
-      PermissionName.Internet,
-      PermissionName.Camera,
-      PermissionName.Microphone
-    ]);
-    print('permissionNames:$permissionNames');
-    Permission.openSettings;
   }
 }
