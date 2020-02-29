@@ -1,19 +1,15 @@
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:glitcher/constants/strings.dart';
-import 'dart:ui' as ui;
-import 'package:glitcher/root_page.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/services/route_generator.dart';
 import 'package:glitcher/utils/constants.dart';
-import 'package:glitcher/utils/lifecycle_manager.dart';
 
 void main() {
-  RenderErrorBox.backgroundColor = Colors.transparent;
-  RenderErrorBox.textStyle = ui.TextStyle(color: Colors.transparent);
+  /*RenderErrorBox.backgroundColor = Colors.transparent;
+  RenderErrorBox.textStyle = ui.TextStyle(color: Colors.transparent);*/
   runApp(MyApp());
 }
 

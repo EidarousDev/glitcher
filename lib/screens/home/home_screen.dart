@@ -3,24 +3,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/font_awesome.dart';
-import 'package:flutter_icons/ionicons.dart';
 import 'package:glitcher/common_widgets/card_icon_text.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/root_page.dart';
 import 'package:glitcher/screens/chats/chats.dart';
 import 'package:glitcher/screens/notifications/notifications_screen.dart';
 import 'package:glitcher/screens/posts/post_item.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
-import 'package:glitcher/services/auth.dart';
-import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/constants.dart';
 import 'package:glitcher/utils/functions.dart';
-import 'package:glitcher/utils/bottom_reach_extension.dart';
-
-import '../app_page.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -32,22 +25,31 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String username;
   String profileImageUrl = '';
   List<Post> _posts = [];
-  ScrollController _scrollController;
   FirebaseUser currentUser;
   Timestamp lastVisiblePostSnapShot;
   bool _noMorePosts = false;
   bool _isFetching = false;
+
+  ScrollController _scrollController;
+  double _scrollPosition;
+
+  _scrollListener() {
+    setState(() {
+      _scrollPosition = _scrollController.position.pixels;
+    });
+    print('Position $_scrollPosition pixels');
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: Builder(
-            builder: (context) => Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: InkWell(
-                    onTap: () => Scaffold.of(context).openDrawer(),
-                    child: Icon(IconData(58311, fontFamily: 'MaterialIcons')),
+          builder: (context) => Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: InkWell(
+              onTap: () => Scaffold.of(context).openDrawer(),
+              child: Icon(IconData(58311, fontFamily: 'MaterialIcons')),
 //                    CachedNetworkImage(
 //                      imageUrl: profileImageUrl,
 //                      imageBuilder: (context, imageProvider) => CircleAvatar(
@@ -57,8 +59,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 //                          CircularProgressIndicator(),
 //                      errorWidget: (context, url, error) => Icon(Icons.error),
 //                    ),
-                  ),
-                )),
+            ),
+          ),
+        ),
         title: Text("Feeds"),
         centerTitle: true,
         actions: <Widget>[
@@ -339,9 +342,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
             ),
             ListTile(
-              onTap: (){
+              onTap: () {
                 Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => NotificationsScreen()));
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => NotificationsScreen()));
               },
               title: Text(
                 'Help center',
@@ -397,30 +402,32 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void initState() {
+    _scrollController = ScrollController();
+    _scrollController.addListener(_scrollListener);
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // set up listener here
-    _scrollController = ScrollController();
-    _scrollController.addListener(() {
-      print('are we even here?!');
-      if (_scrollController.offset >=
-              _scrollController.position.maxScrollExtent &&
-          !_scrollController.position.outOfRange) {
-        setState(() {
-          print('reached the bottom');
-        });
-      } else if (_scrollController.offset <=
-              _scrollController.position.minScrollExtent &&
-          !_scrollController.position.outOfRange) {
-        setState(() {
-          print("reached the top");
-        });
-      } else {
-        setState(() {
-          print('were here');
-        });
-      }
-    });
+//    // set up listener here
+//    _scrollController = ScrollController();
+//    _scrollController.addListener(() {
+//      print('are we even here?!');
+//      if (_scrollController.offset >=
+//              _scrollController.position.maxScrollExtent &&
+//          !_scrollController.position.outOfRange) {
+//        setState(() {
+//          print('reached the bottom');
+//        });
+//      } else if (_scrollController.offset <=
+//              _scrollController.position.minScrollExtent &&
+//          !_scrollController.position.outOfRange) {
+//        setState(() {
+//          print("reached the top");
+//        });
+//      } else {
+//        setState(() {
+//          print('were here');
+//        });
+//      }
+//    });
     loadUserData();
     _setupFeed();
   }
@@ -468,18 +475,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     });
   }
 
-  void _scrollListener() async {
-    //if (_noMorePosts) return;
-    print('reached 1120 posts!');
-
-    if (_scrollController.position.pixels ==
-            _scrollController.position.maxScrollExtent &&
-        _isFetching == false) {
-      _isFetching = true;
-      print('reached 10 posts!');
-      nextPosts();
-      _isFetching = false;
-    }
-    print('reached 1000 posts!');
-  }
+//  void _scrollListener() async {
+//    //if (_noMorePosts) return;
+//    print('reached 1120 posts!');
+//
+//    if (_scrollController.position.pixels ==
+//            _scrollController.position.maxScrollExtent &&
+//        _isFetching == false) {
+//      _isFetching = true;
+//      print('reached 10 posts!');
+//      nextPosts();
+//      _isFetching = false;
+//    }
+//    print('reached 1000 posts!');
+//  }
 }

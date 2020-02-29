@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/screens/user_timeline/profile_screen.dart';
-import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/services/share_link.dart';
 import 'package:glitcher/utils/constants.dart';
@@ -38,7 +36,6 @@ class _PostItemState extends State<PostItem> {
   var likes = [];
   var dislikes = [];
   NotificationHandler notificationHandler = NotificationHandler();
-
 
   @override
   Widget build(BuildContext context) {
@@ -207,6 +204,7 @@ class _PostItemState extends State<PostItem> {
                       height: 14.0,
                       width: 18.0,
                       child: IconButton(
+                        onPressed: () {},
                         padding: new EdgeInsets.all(0.0),
                         icon: isLiked
                             ? Icon(
@@ -251,6 +249,7 @@ class _PostItemState extends State<PostItem> {
                       height: 14.0,
                       width: 18.0,
                       child: IconButton(
+                        onPressed: () {},
                         padding: new EdgeInsets.all(0.0),
                         icon: isDisliked
                             ? Icon(
@@ -326,6 +325,7 @@ class _PostItemState extends State<PostItem> {
                   height: 14.0,
                   width: 18.0,
                   child: IconButton(
+                    onPressed: () {},
                     padding: new EdgeInsets.all(0.0),
                     icon: Icon(
                       Icons.share,
@@ -375,7 +375,6 @@ class _PostItemState extends State<PostItem> {
     }
   }
 
-
   @override
   void initState() {
     super.initState();
@@ -417,10 +416,9 @@ class _PostItemState extends State<PostItem> {
           .setData({'timestamp': FieldValue.serverTimestamp()});
       postsRef.document(post.id).updateData({'likes': post.likesCount});
 
-      notificationHandler.sendNotification(post.authorId, 'New Like', 'Someone likes your post', post.id);
-
+      notificationHandler.sendNotification(
+          post.authorId, 'New Like', 'Someone liked your post', post.id);
     }
-
   }
 
   void dislikeBtnHandler(Post post) {

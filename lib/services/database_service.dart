@@ -18,12 +18,15 @@ class DatabaseService {
   }
 
   static Future<List<Notification>> getNotifications() async {
-    QuerySnapshot notificationSnapshot = await usersRef.document(Constants.currentUserID).collection('notifications')
+    QuerySnapshot notificationSnapshot = await usersRef
+        .document(Constants.currentUserID)
+        .collection('notifications')
         .orderBy('timestamp', descending: true)
         .limit(10)
         .getDocuments();
-    List<Notification> notifications =
-    notificationSnapshot.documents.map((doc) => Notification.fromDoc(doc)).toList();
+    List<Notification> notifications = notificationSnapshot.documents
+        .map((doc) => Notification.fromDoc(doc))
+        .toList();
     return notifications;
   }
 

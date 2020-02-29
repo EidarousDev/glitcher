@@ -1,19 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/font_awesome.dart';
-import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/screens/home/home_body.dart';
 import 'package:glitcher/screens/home/home_screen.dart';
 import 'package:glitcher/screens/notifications/notifications_screen.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:badges/badges.dart';
-import 'package:glitcher/services/auth.dart';
-import 'package:glitcher/services/auth_provider.dart';
-import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/constants.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-import 'package:dynamic_theme/dynamic_theme.dart';
 import 'chats/chats.dart';
 
 class AppPage extends StatefulWidget {
@@ -29,7 +21,7 @@ class _AppPageState extends State<AppPage> {
   int _page = 2;
   String username;
   String profileImageUrl;
-  User user;
+  FirebaseUser user = Constants.currentUser;
 
   @override
   Widget build(BuildContext context) {
@@ -75,12 +67,17 @@ class _AppPageState extends State<AppPage> {
               title: Container(height: 0.0),
             ),
             BottomNavigationBarItem(
-              icon: user.notificationsNumber > 0 ? Badge(
-                badgeContent: Text(user.notificationsNumber.toString()),
-                child: Icon(Icons.notifications),
-                toAnimate: true,
-                animationType: BadgeAnimationType.scale,
-              ): Icon(Icons.notifications),
+              // ignore: null_aware_before_operator
+              icon: Constants.loggedInUser?.notificationsNumber > 0
+                  ? Badge(
+                      badgeContent: Text(Constants
+                          .loggedInUser?.notificationsNumber
+                          .toString()),
+                      child: Icon(Icons.notifications),
+                      toAnimate: true,
+                      animationType: BadgeAnimationType.scale,
+                    )
+                  : Icon(Icons.notifications),
               title: Container(height: 0.0),
             ),
             BottomNavigationBarItem(
@@ -104,16 +101,9 @@ class _AppPageState extends State<AppPage> {
   @override
   void initState() {
     super.initState();
+    print('Constants.loggedInUser: ${Constants.loggedInUser}');
     _pageController = PageController(initialPage: 2);
     _retrieveDynamicLink();
-    getUser();
-  }
-
-  getUser() async{
-    User user  = await DatabaseService.getUserWithId(Constants.currentUserID);
-    setState(() {
-      this.user = user;
-    });
   }
 
   Future<void> _retrieveDynamicLink() async {

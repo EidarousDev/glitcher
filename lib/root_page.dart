@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/app_page.dart';
 import 'package:glitcher/screens/login_page.dart';
 import 'package:glitcher/services/auth.dart';
+import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/constants.dart';
 
 class RootPage extends StatefulWidget {
@@ -55,19 +57,21 @@ class _RootPageState extends State<RootPage> {
   }
 
   Future authAssignment() async {
-    await Auth().getCurrentUser().then((FirebaseUser user) {
-      if (user?.uid != null && user.isEmailVerified) {
+    FirebaseUser user = await Auth().getCurrentUser();
+
+    if (user?.uid != null && user.isEmailVerified) {
+      User loggedInUser = await DatabaseService.getUserWithId(user?.uid);
+      setState(() {
+        Constants.loggedInUser = loggedInUser;
         Constants.currentUser = user;
         Constants.currentUserID = user?.uid;
-        setState(() {
-          authStatus = AuthStatus.LOGGED_IN;
-        });
-      } else {
-        setState(() {
-          authStatus = AuthStatus.NOT_LOGGED_IN;
-        });
-      }
-    });
+        authStatus = AuthStatus.LOGGED_IN;
+      });
+    } else {
+      setState(() {
+        authStatus = AuthStatus.NOT_LOGGED_IN;
+      });
+    }
     print('authStatus = $authStatus');
   }
 }

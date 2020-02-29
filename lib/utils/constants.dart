@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:glitcher/models/user_model.dart';
 
 final auth = FirebaseAuth.instance;
 final firestore = Firestore.instance;
@@ -28,6 +29,7 @@ final double inlineBreak = 32.0;
 class Constants {
   static FirebaseUser currentUser;
   static String currentUserID;
+  static User loggedInUser;
   static const categories = [
     'Uncategorized',
     'Brawl Stars',
