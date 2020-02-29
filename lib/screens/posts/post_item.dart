@@ -417,7 +417,7 @@ class _PostItemState extends State<PostItem> {
       postsRef.document(post.id).updateData({'likes': post.likesCount});
 
       notificationHandler.sendNotification(
-          post.authorId, 'New Like', 'Someone liked your post', post.id);
+          post.authorId, 'New Post Like', 'likes your post', post.id);
     }
   }
 

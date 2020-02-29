@@ -1,10 +1,17 @@
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/home/home_screen.dart';
 import 'package:glitcher/screens/notifications/notifications_screen.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:badges/badges.dart';
+import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/constants.dart';
 import 'chats/chats.dart';
 
@@ -21,7 +28,7 @@ class _AppPageState extends State<AppPage> {
   int _page = 2;
   String username;
   String profileImageUrl;
-  FirebaseUser user = Constants.currentUser;
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
   @override
   Widget build(BuildContext context) {
@@ -104,6 +111,8 @@ class _AppPageState extends State<AppPage> {
     print('Constants.loggedInUser: ${Constants.loggedInUser}');
     _pageController = PageController(initialPage: 2);
     _retrieveDynamicLink();
+    userListener();
+    _saveDeviceToken();
   }
 
   Future<void> _retrieveDynamicLink() async {
@@ -127,9 +136,32 @@ class _AppPageState extends State<AppPage> {
     _pageController.dispose();
   }
 
+  userListener(){
+    usersRef.snapshots().listen((querySnapshot) {
+      querySnapshot.documentChanges.forEach((change) {
+        setState(() {
+          if(change.document.documentID == Constants.currentUserID){
+            Constants.loggedInUser = User.fromDoc(change.document);
+          }
+        });
+      });
+    });
+  }
+
   void onPageChanged(int page) {
     setState(() {
       this._page = page;
+      if(page == 3){//notification screen
+        NotificationHandler().clearNotificationsNumber();
+      }
     });
+  }
+
+  _saveDeviceToken()async{
+    String token = await _firebaseMessaging.getToken();
+    if(token != null){
+      usersRef.document(Constants.currentUserID).updateData({'token': token, 'platform': Platform.operatingSystem});
+
+    }
   }
 }

@@ -14,7 +14,6 @@ class NotificationsScreen extends StatefulWidget {
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
   List<notification_model.Notification> _notifications = [];
-  List<NotificationItem> _notificationItems = [];
   ScrollController _scrollController = ScrollController();
 
   @override

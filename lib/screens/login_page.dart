@@ -63,7 +63,7 @@ class _LoginPageState extends State<LoginPage>
   TextEditingController signupConfirmPasswordController =
       TextEditingController();
 
-  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+
 
   PageController _pageController;
 
@@ -161,13 +161,7 @@ class _LoginPageState extends State<LoginPage>
     super.dispose();
   }
 
-  _saveDeviceToken()async{
-    String token = await _firebaseMessaging.getToken();
-    if(token != null){
-      usersRef.document(userId).updateData({'token': token, 'platform': Platform.operatingSystem});
 
-    }
-  }
 
   @override
   void initState() {
@@ -181,7 +175,7 @@ class _LoginPageState extends State<LoginPage>
       DeviceOrientation.portraitDown,
     ]);
 
-    _saveDeviceToken();
+
 
     _pageController = PageController();
   }

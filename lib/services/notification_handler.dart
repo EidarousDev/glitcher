@@ -121,4 +121,9 @@ class NotificationHandler {
         platformChannelSpecifics,
         payload: json.encode(message));
   }
+
+  clearNotificationsNumber() async{
+    await DatabaseService.getUserWithId(Constants.currentUserID);
+    usersRef.document(Constants.currentUserID).updateData({'notificationsNumber': 0});
+  }
 }
