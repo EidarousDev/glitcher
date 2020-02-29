@@ -160,8 +160,7 @@ class _AppPageState extends State<AppPage> {
   _saveDeviceToken()async{
     String token = await _firebaseMessaging.getToken();
     if(token != null){
-      usersRef.document(Constants.currentUserID).updateData({'token': token, 'platform': Platform.operatingSystem});
-
+      usersRef.document(Constants.currentUserID).collection('tokens').document(token).setData({'modifiedAt': FieldValue.serverTimestamp()} );
     }
   }
 }
