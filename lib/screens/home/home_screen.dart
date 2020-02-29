@@ -12,6 +12,7 @@ import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/root_page.dart';
 import 'package:glitcher/screens/chats/chats.dart';
+import 'package:glitcher/screens/notifications/notifications_screen.dart';
 import 'package:glitcher/screens/posts/post_item.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:glitcher/services/auth.dart';
@@ -334,6 +335,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             ListTile(
+              onTap: (){
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => NotificationsScreen()));
+              },
               title: Text(
                 'Help center',
               ),

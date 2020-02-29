@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/services/auth.dart';
+import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/chat_item.dart';
 import 'package:glitcher/utils/data.dart';
 
@@ -91,7 +92,7 @@ class _ChatsState extends State<Chats>
           msg: 'Last Message',
           time: onValue.data['online'] == 'online'
               ? 'online'
-              : formatTimestamp(onValue.data['online']),
+              : Functions.formatTimestamp(onValue.data['online']),
           counter: 0,
         );
         chats.add(chatItem);
@@ -202,43 +203,7 @@ class _ChatsState extends State<Chats>
     );
   }
 
-  String formatTimestamp(Timestamp timestamp) {
-    var now = Timestamp.now().toDate();
-    var date = new DateTime.fromMillisecondsSinceEpoch(
-        timestamp.millisecondsSinceEpoch);
-    var diff = now.difference(date);
-    var time = '';
 
-    if (diff.inSeconds <= 60) {
-      time = 'now';
-    } else if (diff.inMinutes > 0 && diff.inMinutes < 60) {
-      if (diff.inMinutes == 1) {
-        time = 'A minute ago';
-      } else {
-        time = diff.inMinutes.toString() + ' minutes ago';
-      }
-    } else if (diff.inHours > 0 && diff.inHours < 24) {
-      if (diff.inHours == 1) {
-        time = 'An hour ago';
-      } else {
-        time = diff.inHours.toString() + ' hours ago';
-      }
-    } else if (diff.inDays > 0 && diff.inDays < 7) {
-      if (diff.inDays == 1) {
-        time = 'Yesterday';
-      } else {
-        time = diff.inDays.toString() + ' DAYS AGO';
-      }
-    } else {
-      if (diff.inDays == 7) {
-        time = 'A WEEK AGO';
-      } else {
-        time = timestamp.toDate().toString();
-      }
-    }
-
-    return time;
-  }
 
   @override
   bool get wantKeepAlive => true;

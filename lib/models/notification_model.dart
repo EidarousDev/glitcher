@@ -8,16 +8,17 @@ class Notification {
   final bool seen;
   final Timestamp timestamp;
   final String sender;
+  final String postId;
 
   Notification(
       {this.id,
-        this.title,
-        this.body,
-        this.icon,
-        this.seen,
-        this.timestamp,
-        this.sender
-      });
+      this.title,
+      this.body,
+      this.icon,
+      this.seen,
+      this.timestamp,
+      this.sender,
+      this.postId});
 
   factory Notification.fromDoc(DocumentSnapshot doc) {
     return Notification(
@@ -27,7 +28,7 @@ class Notification {
         icon: doc['icon'],
         seen: doc['seen'],
         timestamp: doc['timestamp'],
-        sender: doc['sender']
-    );
+        sender: doc['sender'],
+        postId: doc['postId']);
   }
 }

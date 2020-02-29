@@ -236,7 +236,8 @@ class _LoginPageState extends State<LoginPage>
       'username': _username,
       'description': 'Write something about yourself',
       'followers': 0,
-      'following': 0
+      'following': 0,
+      'notificationsNumber': 0
     };
 
     _firestore.collection('users').document(id).setData(userMap);

@@ -392,7 +392,7 @@ class _PostItemState extends State<PostItem> {
           .setData({'timestamp': FieldValue.serverTimestamp()});
       postsRef.document(post.id).updateData({'likes': post.likesCount});
 
-      notificationHandler.sendNotification(post.authorId, 'New Like', 'Someone likes your post');
+      notificationHandler.sendNotification(post.authorId, 'New Like', 'Someone likes your post', post.id);
 
     }
 

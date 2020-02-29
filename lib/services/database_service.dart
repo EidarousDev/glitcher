@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:glitcher/models/message_model.dart';
+import 'package:glitcher/models/notification_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/utils/constants.dart';
@@ -14,6 +15,16 @@ class DatabaseService {
     List<Post> posts =
         postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
     return posts;
+  }
+
+  static Future<List<Notification>> getNotifications() async {
+    QuerySnapshot notificationSnapshot = await usersRef.document(Constants.currentUserID).collection('notifications')
+        .orderBy('timestamp', descending: true)
+        .limit(10)
+        .getDocuments();
+    List<Notification> notifications =
+    notificationSnapshot.documents.map((doc) => Notification.fromDoc(doc)).toList();
+    return notifications;
   }
 
   // This function is used to get the author info of each post

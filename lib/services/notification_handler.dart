@@ -6,6 +6,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/constants.dart';
 
 class NotificationHandler {
@@ -24,6 +26,7 @@ class NotificationHandler {
     _fcm.configure(
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");
+        makeNotificationSeen(message['data']['id']);
 
         final SnackBar snackBar = SnackBar(
           content: Text(
@@ -44,27 +47,45 @@ class NotificationHandler {
       },
       onLaunch: (Map<String, dynamic> message) async {
         print("onLaunch: $message");
-        // TODO optional
+        makeNotificationSeen(message['data']['id']);
+        Navigator.of(context).pushNamed('/post', arguments: {
+          'postId': message['data']['postId'],
+          'commentsNo': 5
+        });
       },
       onResume: (Map<String, dynamic> message) async {
         print("onResume: $message");
-        // TODO optional
+        makeNotificationSeen(message['data']['id']);
+        Navigator.of(context).pushNamed('/post', arguments: {
+          'postId': message['data']['postId'],
+          'commentsNo': 5
+        });
       },
     );
   }
 
-  void sendNotification(String receiverId, String title, String body) {
+  void sendNotification (String receiverId, String title, String body, String postId) async{
     usersRef.document(receiverId).collection('notifications').add({
       'title': title,
       'body': body,
       'seen': false,
       'timestamp': FieldValue.serverTimestamp(),
-      'sender': Constants.currentUserID
+      'sender': Constants.currentUserID,
+      'postId': postId
+    });
+
+    //To increment notificationsNumber
+    User user = await DatabaseService.getUserWithId(receiverId);
+    usersRef.document(receiverId).updateData({'notificationsNumber': user.notificationsNumber + 1});
+  }
+
+  void makeNotificationSeen(String notificationId) {
+    usersRef.document(Constants.currentUserID).collection('notifications').document(notificationId).updateData({
+      'seen': true,
     });
   }
 
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   void configLocalNotification() {
     var initializationSettingsAndroid =
@@ -84,10 +105,11 @@ class NotificationHandler {
           : 'com.eidarousdev.glitcher',
       'glitcher',
       'your channel description',
-      playSound: true,
       enableVibration: true,
       importance: Importance.Max,
       priority: Priority.High,
+      autoCancel: true
+      
     );
     var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
     var platformChannelSpecifics = new NotificationDetails(

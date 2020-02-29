@@ -8,6 +8,7 @@ import 'package:glitcher/screens/chats/chats.dart';
 import 'package:glitcher/screens/home/home_body.dart';
 import 'package:glitcher/screens/login_page.dart';
 import 'package:glitcher/root_page.dart';
+import 'package:glitcher/screens/notifications/notifications_screen.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/screens/posts/new_post.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
@@ -196,6 +197,10 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             ListTile(
+              onTap: (){
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => NotificationsScreen()));
+              },
               title: Text(
                 'Help center',
                 style: TextStyle(color: Colors.black54),
@@ -264,7 +269,11 @@ class _HomePageState extends State<HomePage> {
             ),
             IconButton(
               icon: Icon(Icons.notifications),
-              onPressed: null,
+              onPressed: (){
+                setState(() {
+                  body = NotificationsScreen();
+                });
+              },
             ),
             IconButton(
               color: Colors.grey,
