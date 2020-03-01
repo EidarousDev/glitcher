@@ -470,11 +470,13 @@ class _PostItemState extends State<PostItem> {
         .collection('dislikes')
         ?.document(Constants.currentUserID)
         ?.get();
-
-    setState(() {
-      isLiked = likedSnapshot.exists;
-      isDisliked = dislikedSnapshot.exists;
-    });
+    //Solves the problem setState() called after dispose()
+    if (mounted) {
+      setState(() {
+        isLiked = likedSnapshot.exists;
+        isDisliked = dislikedSnapshot.exists;
+      });
+    }
   }
 
   Widget dropDownBtn() {

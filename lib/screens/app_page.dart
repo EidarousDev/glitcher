@@ -136,11 +136,11 @@ class _AppPageState extends State<AppPage> {
     _pageController.dispose();
   }
 
-  userListener(){
+  userListener() {
     usersRef.snapshots().listen((querySnapshot) {
       querySnapshot.documentChanges.forEach((change) {
         setState(() {
-          if(change.document.documentID == Constants.currentUserID){
+          if (change.document.documentID == Constants.currentUserID) {
             Constants.loggedInUser = User.fromDoc(change.document);
           }
         });
@@ -151,16 +151,22 @@ class _AppPageState extends State<AppPage> {
   void onPageChanged(int page) {
     setState(() {
       this._page = page;
-      if(page == 3){//notification screen
+      if (page == 3) {
+        //notification screen
         NotificationHandler().clearNotificationsNumber();
       }
     });
   }
 
-  _saveDeviceToken()async{
+  _saveDeviceToken() async {
     String token = await _firebaseMessaging.getToken();
-    if(token != null){
-      usersRef.document(Constants.currentUserID).collection('tokens').document(token).setData({'modifiedAt': FieldValue.serverTimestamp()} );
+    if (token != null) {
+      usersRef
+          .document(Constants.currentUserID)
+          .collection('tokens')
+          .document(token)
+          .setData({'modifiedAt': FieldValue.serverTimestamp()});
     }
+    print('token = $token');
   }
 }
