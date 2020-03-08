@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/notification_model.dart';
@@ -88,5 +89,30 @@ class DatabaseService {
     List<Comment> comments =
         commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
     return comments;
+  }
+
+  static getGames() async{
+    QuerySnapshot gameSnapshot = await gamesRef
+        .orderBy('fullName', descending: true)
+        .limit(10)
+        .getDocuments();
+    List<Game> games = gameSnapshot.documents
+        .map((doc) => Game.fromDoc(doc))
+        .toList();
+    return games;
+  }
+
+  static getGameNames() async{
+    Constants.games = [];
+    QuerySnapshot gameSnapshot = await gamesRef
+        .orderBy('fullName', descending: true)
+        .getDocuments();
+    List<Game> games = gameSnapshot.documents
+            .map((doc) => Game.fromDoc(doc))
+            .toList();
+
+    for(var game in games){
+      Constants.games.add(game.fullName);
+    }
   }
 }

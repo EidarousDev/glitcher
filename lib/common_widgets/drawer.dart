@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/screens/chats/chats.dart';
+import 'package:glitcher/screens/games/games_screen.dart';
 import 'package:glitcher/screens/notifications/notifications_screen.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:glitcher/utils/constants.dart';
@@ -82,8 +83,14 @@ class _BuildDrawerState extends State<BuildDrawer> {
             ),
           ),
           ListTile(
+            onTap: (){
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => GamesScreen()));
+            },
             title: Text(
-              'Lists',
+              'Games',
             ),
             leading: Icon(
               Icons.list,

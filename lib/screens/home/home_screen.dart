@@ -191,31 +191,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ],
             ),
           ),
-          SizedBox(
-            height: 1.0,
-            width: double.infinity,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                  color: currentTheme == AvailableThemes.LIGHT_THEME
-                      ? Constants.lightLineBreak
-                      : Constants.darkLineBreak),
-            ),
-          ),
-          SizedBox(
-            height: 14.0,
-            width: double.infinity,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                  color: currentTheme == AvailableThemes.LIGHT_THEME
-                      ? Constants.lightLineBreak
-                      : Constants.darkLineBreak),
-            ),
-          ),
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
-              itemCount: _posts.length,
               scrollDirection: Axis.vertical,
+              itemCount: _posts.length,
               shrinkWrap: true,
               itemBuilder: (BuildContext context, int index) {
                 Post post = _posts[index];
