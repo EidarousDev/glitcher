@@ -63,8 +63,6 @@ class _LoginPageState extends State<LoginPage>
   TextEditingController signupConfirmPasswordController =
       TextEditingController();
 
-
-
   PageController _pageController;
 
   Color left = Colors.black;
@@ -161,8 +159,6 @@ class _LoginPageState extends State<LoginPage>
     super.dispose();
   }
 
-
-
   @override
   void initState() {
     _errorMsgEmail = "";
@@ -174,8 +170,6 @@ class _LoginPageState extends State<LoginPage>
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-
-
 
     _pageController = PageController();
   }
@@ -345,7 +339,7 @@ class _LoginPageState extends State<LoginPage>
     try {
       userId = await auth.signInWithEmailAndPassword(_email, _password);
       //print('Signed in: $userId');
-      Navigator.of(context).pushReplacementNamed('/home');
+      Navigator.of(context).pushReplacementNamed('/');
     } catch (e) {
       // Email or Password Incorrect
       Functions.showInSnackBar(

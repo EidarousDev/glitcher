@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/notification_model.dart';
 import 'package:glitcher/models/post_model.dart';
@@ -15,6 +16,15 @@ class DatabaseService {
     List<Post> posts =
         postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
     return posts;
+  }
+
+  // Get Post info of a specific post
+  static Future<Post> getPostWithId(String postId) async {
+    DocumentSnapshot postDocSnapshot = await postsRef.document(postId).get();
+    if (postDocSnapshot.exists) {
+      return Post.fromDoc(postDocSnapshot);
+    }
+    return Post();
   }
 
   static Future<List<Notification>> getNotifications() async {
@@ -65,5 +75,18 @@ class DatabaseService {
     List<Message> messages =
         msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
     return messages;
+  }
+
+  // Get Comments of a specific post
+  static Future<List<Comment>> getComments(String postId) async {
+    QuerySnapshot commentSnapshot = await postsRef
+        .document(postId)
+        .collection('comments')
+        .orderBy('timestamp', descending: true)
+        .limit(10)
+        .getDocuments();
+    List<Comment> comments =
+        commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
+    return comments;
   }
 }
