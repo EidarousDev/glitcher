@@ -1,3 +1,4 @@
+import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -29,7 +30,6 @@ class _NewPostState extends State<NewPost> {
   VideoPlayerController videoPlayerController;
   ChewieController chewieController;
   Chewie playerWidget;
-  FirebaseUser currentUser;
 
   var $ranFileName; // Random File Name
 
@@ -50,7 +50,7 @@ class _NewPostState extends State<NewPost> {
   @override
   void initState() {
     super.initState();
-    getCurrentUser();
+    DatabaseService.getGameNames();
   }
 
   void playVideo() {
@@ -168,7 +168,7 @@ class _NewPostState extends State<NewPost> {
     }
 
     await firestore.collection('posts').add({
-      'owner': currentUser.uid,
+      'owner': Constants.currentUserID,
       'text': text,
       'youtubeId': _youtubeId,
       'video': _video != null ? _uploadedFileURL : null,
@@ -187,9 +187,6 @@ class _NewPostState extends State<NewPost> {
     });
   }
 
-  void getCurrentUser() async {
-    this.currentUser = await Auth().getCurrentUser();
-  }
 
   Widget _buildWidget() {
     return WillPopScope(
@@ -339,9 +336,9 @@ class _NewPostState extends State<NewPost> {
                 child: AutoCompleteTextField<String>(
                   clearOnSubmit: false,
                   key: autocompleteKey,
-                  suggestions: Constants.categories,
+                  suggestions: Constants.games,
                   decoration: InputDecoration(
-                      icon: Icon(Icons.videogame_asset), hintText: "Category"),
+                      icon: Icon(Icons.videogame_asset), hintText: "Game"),
                   itemFilter: (item, query) {
                     return item.toLowerCase().startsWith(query.toLowerCase());
                   },

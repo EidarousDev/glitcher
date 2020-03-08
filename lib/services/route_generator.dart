@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:glitcher/root_page.dart';
 import 'package:glitcher/screens/app_page.dart';
+import 'package:glitcher/screens/games/new_game.dart';
 import 'package:glitcher/screens/posts/new_comment.dart';
 import 'package:glitcher/screens/posts/new_post.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
@@ -34,6 +35,8 @@ class RouteGenerator {
         // If args is not of the correct type, return an error page.
         // You can also throw an exception while in development.
         return _errorRoute();
+      case '/new-game':
+        return MaterialPageRoute(builder: (_) => NewGame());
       default:
         // If there is no such named route in the switch statement, e.g. /third
         return _errorRoute();

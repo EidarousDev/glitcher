@@ -446,7 +446,7 @@ class _HomeBodyState extends State<HomeBody> with WidgetsBindingObserver {
                                     child: AutoCompleteTextField<String>(
                                       clearOnSubmit: false,
                                       key: autocompleteKey,
-                                      suggestions: Constants.categories,
+                                      suggestions: Constants.games,
                                       decoration: InputDecoration(
                                           icon: Icon(Icons.videogame_asset),
                                           hintText: "Category"),

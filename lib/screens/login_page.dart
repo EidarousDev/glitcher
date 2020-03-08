@@ -345,7 +345,7 @@ class _LoginPageState extends State<LoginPage>
     try {
       userId = await auth.signInWithEmailAndPassword(_email, _password);
       //print('Signed in: $userId');
-      Navigator.of(context).pushReplacementNamed('/home');
+      Navigator.of(context).pushReplacementNamed('/');
     } catch (e) {
       // Email or Password Incorrect
       Functions.showInSnackBar(

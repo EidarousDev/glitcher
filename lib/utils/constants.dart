@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/user_model.dart';
 
 final auth = FirebaseAuth.instance;
@@ -10,6 +11,7 @@ final storageRef = FirebaseStorage.instance.ref();
 final postsRef = firestore.collection('posts');
 final usersRef = firestore.collection('users');
 final chatsRef = firestore.collection('chats');
+final gamesRef = firestore.collection('games');
 
 enum AvailableThemes {
   LIGHT_THEME,
@@ -30,11 +32,12 @@ class Constants {
   static FirebaseUser currentUser;
   static String currentUserID;
   static User loggedInUser;
-  static const categories = [
-    'Uncategorized',
-    'Brawl Stars',
-    'COD Mobile',
-    'Batman: Arkham Knight'
+  static List<String> games = [];
+  static const genres = [
+    'Action',
+    'Sports',
+    'Racing',
+    'Fighting'
   ];
 
   //Colors for theme
