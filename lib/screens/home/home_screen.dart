@@ -37,6 +37,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Constants.darkBG,
         leading: Builder(
           builder: (context) => Padding(
             padding: const EdgeInsets.all(8.0),
@@ -74,7 +75,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       body: Column(
         children: <Widget>[
           Row(
+            
             children: <Widget>[
+              
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: CircleAvatar(
@@ -145,8 +148,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   text: "Image",
                   color: currentTheme == AvailableThemes.LIGHT_THEME
                       ? Constants.lightLineBreak
-                      : Constants.darkLineBreak,
-                  ccolor: Colors.blue,
+                      : Constants.darkCardBG,
+                  ccolor: Constants.darkPrimary,
                 )),
                 SizedBox(
                   height: 25,
@@ -165,8 +168,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   text: "Video",
                   color: currentTheme == AvailableThemes.LIGHT_THEME
                       ? Constants.lightLineBreak
-                      : Constants.darkLineBreak,
-                  ccolor: Colors.greenAccent,
+                      : Constants.darkCardBG,
+                  ccolor: Constants.darkPrimary,
                 )),
                 SizedBox(
                   height: 25,
@@ -185,10 +188,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   text: "YouTube",
                   color: currentTheme == AvailableThemes.LIGHT_THEME
                       ? Constants.lightLineBreak
-                      : Constants.darkLineBreak,
-                  ccolor: Colors.pink,
+                      : Constants.darkCardBG,
+                  ccolor: Constants.darkPrimary,
                 )),
               ],
+            ),
+          ),
+          SizedBox(
+            height: 8.0,
+            width: double.infinity,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                  color: currentTheme == AvailableThemes.LIGHT_THEME
+                      ? Constants.lightLineBreak
+                      : Constants.darkLineBreak),
             ),
           ),
           Expanded(

@@ -48,9 +48,10 @@ class _AppPageState extends State<AppPage> {
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
             // sets the background color of the `BottomNavigationBar`
-            canvasColor: Theme.of(context).primaryColor,
+            canvasColor: Theme.of(context).backgroundColor,
             // sets the active color of the `BottomNavigationBar` if `Brightness` is light
-            primaryColor: Theme.of(context).accentColor,
+            primaryColor: Theme.of(context).primaryColor,
+            accentColor: Constants.darkPrimary,
             textTheme: Theme.of(context).textTheme),
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
