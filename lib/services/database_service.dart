@@ -91,28 +91,37 @@ class DatabaseService {
     return comments;
   }
 
-  static getGames() async{
+  static getGames() async {
     QuerySnapshot gameSnapshot = await gamesRef
         .orderBy('fullName', descending: true)
         .limit(10)
         .getDocuments();
-    List<Game> games = gameSnapshot.documents
-        .map((doc) => Game.fromDoc(doc))
-        .toList();
+    List<Game> games =
+        gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
     return games;
   }
 
-  static getGameNames() async{
+  static getGameNames() async {
     Constants.games = [];
-    QuerySnapshot gameSnapshot = await gamesRef
-        .orderBy('fullName', descending: true)
-        .getDocuments();
-    List<Game> games = gameSnapshot.documents
-            .map((doc) => Game.fromDoc(doc))
-            .toList();
+    QuerySnapshot gameSnapshot =
+        await gamesRef.orderBy('fullName', descending: true).getDocuments();
+    List<Game> games =
+        gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
 
-    for(var game in games){
+    for (var game in games) {
       Constants.games.add(game.fullName);
     }
+  }
+
+  // This function is used to submit/add a comment
+  static void addComment(String postId, String commentText) async {
+    await postsRef.document(postId).collection('comments').add({
+      'commenter': Constants.currentUserID,
+      'text': commentText,
+      'timestamp': FieldValue.serverTimestamp()
+    });
+    await postsRef
+        .document(postId)
+        .updateData({'comments': FieldValue.increment(1)});
   }
 }

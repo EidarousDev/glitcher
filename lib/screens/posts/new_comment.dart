@@ -1,16 +1,12 @@
 import 'package:chewie/chewie.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/screens/home/home.dart';
-import 'package:glitcher/screens/home/home_body.dart';
 import 'package:glitcher/screens/posts/comment_item.dart';
-import 'package:glitcher/screens/posts/post_item.dart';
+import 'package:glitcher/screens/posts/comment_post_item.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/Loader.dart';
-import 'package:glitcher/services/auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:glitcher/utils/constants.dart';
 import 'package:video_player/video_player.dart';
@@ -24,7 +20,8 @@ class NewComment extends StatefulWidget {
   _NewCommentState createState() => _NewCommentState();
 }
 
-class _NewCommentState extends State<NewComment> {
+class _NewCommentState extends State<NewComment>
+    with SingleTickerProviderStateMixin {
   /// Post Data
   Post _currentPost;
 
@@ -45,7 +42,7 @@ class _NewCommentState extends State<NewComment> {
   var commenterProfileimages = [];
 
   /// Submit Comment Data
-  String commentText;
+  String _commentText;
 
   /// Screen Controllers
   final mainTextController = TextEditingController();
@@ -65,9 +62,43 @@ class _NewCommentState extends State<NewComment> {
   /// @param youtubeId for posts with an Embedded YouTube Video
   String _youtubeId;
 
+  AnimationController _animationController;
+  Animation _animation;
+  FocusNode _focusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
+
+    ///Set up listener here
+    _scrollController.addListener(() {
+      if (_scrollController.offset >=
+              _scrollController.position.maxScrollExtent &&
+          !_scrollController.position.outOfRange) {
+        print('reached the bottom');
+        //nextComments();
+      } else if (_scrollController.offset <=
+              _scrollController.position.minScrollExtent &&
+          !_scrollController.position.outOfRange) {
+        print("reached the top");
+      } else {}
+    });
+
+    /// Set up animation listener
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+    _animation = Tween(begin: 300.0, end: 50.0).animate(_animationController)
+      ..addListener(() {
+        setState(() {});
+      });
+
+    _focusNode.addListener(() {
+      if (_focusNode.hasFocus) {
+        _animationController.forward();
+      } else {
+        _animationController.reverse();
+      }
+    });
     loadPostData();
   }
 
@@ -75,6 +106,8 @@ class _NewCommentState extends State<NewComment> {
   void dispose() {
     //videoPlayerController.dispose();
     //chewieController.dispose();
+    _animationController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -126,138 +159,105 @@ class _NewCommentState extends State<NewComment> {
     }
   }
 
-  Future uploadComment(String text) async {
+  Future uploadComment() async {
+    print('posting Comment...');
     setState(() {
       _loading = true;
     });
-    commentText = mainTextController.text;
-    await firestore
-        .collection('posts')
-        .document(widget.postId)
-        .collection('comments')
-        .add({
-      'commenter': Constants.currentUserID,
-      'text': commentText,
-      'timestamp': FieldValue.serverTimestamp()
-    }).then((_) {
-      setState(() {
-        _loading = false;
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => HomePage()));
-      });
-    });
 
-    await firestore
-        .collection('posts')
-        .document(widget.postId)
-        .updateData({'comments': widget.commentsNo + 1});
+    DatabaseService.addComment(widget.postId, _commentText);
+
+    setState(() {
+      _loading = false;
+    });
   }
 
   Widget getList() {
-    return ListView.builder(
-      controller: _scrollController,
-      itemCount: _comments.length,
-      scrollDirection: Axis.vertical,
-      shrinkWrap: true,
-      itemBuilder: (BuildContext context, int index) {
-        Comment comment = _comments[index];
-        return FutureBuilder(
-            future: DatabaseService.getUserWithId(comment.commenterID),
-            builder: (BuildContext context, AsyncSnapshot snapshot) {
-              if (!snapshot.hasData) {
-                return SizedBox.shrink();
-              }
-              User commenter = snapshot.data;
-              print('commenter: $commenter and comment: $comment');
-              return CommentItem(
-                comment: comment,
-                commenter: commenter,
+    return Flexible(
+      fit: FlexFit.loose,
+      child: StreamBuilder<QuerySnapshot>(
+        stream: postsRef
+            .document(widget.postId)
+            .collection('comments')
+            ?.snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return new Text('Loading...');
+            default:
+              return ListView.builder(
+                controller: _scrollController,
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                itemCount: _comments.length,
+                itemBuilder: (BuildContext context, int index) {
+                  Comment comment = _comments[index];
+                  return FutureBuilder(
+                      future:
+                          DatabaseService.getUserWithId(comment.commenterID),
+                      builder: (BuildContext context, AsyncSnapshot snapshot) {
+                        if (!snapshot.hasData) {
+                          return SizedBox.shrink();
+                        }
+                        User commenter = snapshot.data;
+                        print('commenter: $commenter and comment: $comment');
+                        return CommentItem(
+                          comment: comment,
+                          commenter: commenter,
+                        );
+                      });
+                },
               );
-            });
-      },
+          }
+        },
+      ),
     );
   }
 
   Widget _buildWidget() {
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            PostItem(post: _currentPost, author: _author),
-            SizedBox(
-              height: 1,
-              width: double.infinity,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                    color: currentTheme == AvailableThemes.LIGHT_THEME
-                        ? Constants.lightLineBreak
-                        : Constants.darkLineBreak),
-              ),
-            ),
-            Container(
-              height: 200,
-              child: getList(),
-            ),
-            GestureDetector(
-              onTap: () {
-                //nextComments();
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Align(
-                  child: Text(
-                    'Load more',
-                    style: TextStyle(color: Colors.blue),
-                  ),
-                  alignment: Alignment.center,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: mainTextController,
-                decoration: new InputDecoration.collapsed(
-                    hintText: 'What\'s in your mind?'),
-                minLines: 1,
-                maxLines: 5,
-                autocorrect: true,
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 10),
-              child: RaisedButton(
-                  child: Text('Post Comment'),
-                  textColor: Colors.white,
-                  color: Colors.blue,
-                  onPressed: () {
-                    uploadComment(mainTextController.text);
-                  }),
-            )
-          ],
-        ),
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        CommentPostItem(post: _currentPost, author: _author),
+        getList(),
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomPadding: true,
       appBar: AppBar(
         title: Text('New Comment'),
       ),
-      body: Column(
-        children: <Widget>[
-          _loading
-              ? Center(child: LoaderTwo())
-              : Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 10.0, horizontal: 0),
-                  child: _buildWidget(),
-                ),
-        ],
+      body: new InkWell(
+        // to dismiss the keyboard when the user tabs out of the TextField
+        splashColor: Colors.transparent,
+        onTap: () {
+          FocusScope.of(context).requestFocus(FocusNode());
+        },
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          scrollDirection: Axis.vertical,
+          child: _loading ? Center(child: LoaderTwo()) : _buildWidget(),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(
+          Icons.comment,
+          color: Constants.darkGrey,
+        ),
+        onPressed: () {
+          Navigator.of(context).pushNamed('/add-comment', arguments: {
+            'username': _author.name,
+            'userId': _author.id,
+            'postId': widget.postId,
+          });
+        },
       ),
     );
   }
@@ -265,8 +265,9 @@ class _NewCommentState extends State<NewComment> {
   void loadPostData() async {
     _currentPost = await DatabaseService.getPostWithId(widget.postId);
     _author = await DatabaseService.getUserWithId(_currentPost.authorId);
-    //print('currentPost = $_currentPost and author= $_author');
+    print('currentPost = $_currentPost and author= $_author');
     loadComments();
+    print('comments.length = ${_comments.length}');
     _loading = false;
   }
 }

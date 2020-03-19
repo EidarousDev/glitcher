@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/user_model.dart';
 
 final auth = FirebaseAuth.instance;
@@ -32,18 +31,15 @@ class Constants {
   static FirebaseUser currentUser;
   static String currentUserID;
   static User loggedInUser;
+  static String loggedInProfileImageURL;
   static List<String> games = [];
-  static const genres = [
-    'Action',
-    'Sports',
-    'Racing',
-    'Fighting'
-  ];
+  static const genres = ['Action', 'Sports', 'Racing', 'Fighting'];
 
   //Colors for theme
   static Color lightPrimary = Color(0xffdbd8e3);
   static const Color darkPrimary = Color(0xffca3e47);
   static Color darkPrimarySwatch = Colors.indigo;
+  static Color darkGrey = Color(0xff878681);
   static Color lightAccent = Color(0xff065471);
   static Color darkAccent = Color(0xff393e46);
   static Color lightBG = Color(0xffeeeeee);

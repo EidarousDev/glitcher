@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/constants.dart';
-import 'package:glitcher/widgets/comment_bubble.dart';
+import 'package:glitcher/utils/functions.dart';
 
 class CommentItem extends StatefulWidget {
   final Comment comment;
@@ -21,48 +20,71 @@ class _CommentItemState extends State<CommentItem> {
     print(
         'user: ${widget.commenter.username} and comment: ${widget.comment.text} ');
     return SafeArea(
-      child: Row(
+      child: Column(
         children: <Widget>[
-          CircleAvatar(
-            radius: 25.0,
-            backgroundColor: Colors.grey,
-            backgroundImage: widget.commenter.profileImageUrl != null
-                ? NetworkImage(widget.commenter.profileImageUrl)
-                : AssetImage('assets/images/default_profile.png'),
+          ListTile(
+            leading: InkWell(
+                child: widget.commenter.profileImageUrl != null
+                    ? CircleAvatar(
+                        radius: 30.0,
+                        backgroundImage: NetworkImage(widget.commenter
+                            .profileImageUrl), // no matter how big it is, it won't overflow
+                      )
+                    : CircleAvatar(
+                        backgroundImage:
+                            AssetImage('assets/images/default_profile.png'),
+                      ),
+                onTap: () {
+                  Navigator.of(context).pushNamed('/user-profile', arguments: {
+                    'userId': widget.comment.commenterID,
+                  });
+                }),
+            title: InkWell(
+              child: widget.commenter.name == null
+                  ? ''
+                  : RichText(
+                      text: TextSpan(
+                        // Note: Styles for TextSpans must be explicitly defined.
+                        // Child text spans will inherit styles from parent
+                        style: TextStyle(
+                          fontSize: 15.0,
+                          color: Constants.darkPrimary,
+                        ),
+                        children: <TextSpan>[
+                          TextSpan(text: '${widget.commenter.name}'),
+                          TextSpan(
+                              text: ' @${widget.commenter.username}',
+                              style: TextStyle(color: Constants.darkGrey)),
+                          TextSpan(
+                              text:
+                                  ' - ${Functions.formatCommentsTimestamp(widget.comment.timestamp)}',
+                              style: TextStyle(color: Constants.darkAccent)),
+                        ],
+                      ),
+                    ),
+              onTap: () {
+                Navigator.of(context).pushNamed('/user-profile', arguments: {
+                  'userId': widget.comment.commenterID,
+                });
+              },
+            ),
+            subtitle: widget.comment.text == null
+                ? ''
+                : Wrap(
+                    children: <Widget>[Text('${widget.comment.text}')],
+                  ),
+            isThreeLine: true,
           ),
-          Align(
-            alignment: Alignment
-                .topLeft, //Change this to Alignment.topRight or Alignment.topLeft
-            child: CustomPaint(
-              painter: CommentBubble(
-                  color: currentTheme == AvailableThemes.LIGHT_THEME
-                      ? Constants.lightAccent
-                      : Constants.darkAccent,
-                  alignment: Alignment.bottomLeft),
-              child: Container(
-                padding: EdgeInsets.fromLTRB(8.0, 4.0, 4.0, 4.0),
-                margin: EdgeInsets.all(10),
-                child: Column(
-                  children: <Widget>[
-                    InkWell(
-                      child: Text('@${widget.commenter.username}',
-                          style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: Constants.darkPrimary)),
-                      onTap: () {
-                        Navigator.of(context)
-                            .pushNamed('/user-profile', arguments: {
-                          'userId': widget.comment.commenterID,
-                        });
-                      },
-                    ),
-                    SizedBox(
-                      height: 8.0,
-                    ),
-                    Text(widget.comment.text),
-                  ],
-                ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: SizedBox(
+              height: 1.0,
+              width: double.infinity,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                    color: currentTheme == AvailableThemes.LIGHT_THEME
+                        ? Constants.lightLineBreak
+                        : Constants.darkLineBreak),
               ),
             ),
           ),
