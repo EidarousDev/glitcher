@@ -87,7 +87,7 @@ class _PostItemState extends State<PostItem> {
                                   style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
-                                      color: Constants.darkPrimary)),
+                                      color: Colors.white)),
                               onTap: () {
                                 Navigator.of(context)
                                     .pushNamed('/user-profile', arguments: {
@@ -193,7 +193,7 @@ class _PostItemState extends State<PostItem> {
           height: inlineBreak,
           color: currentTheme == AvailableThemes.LIGHT_THEME
               ? Constants.lightPrimary
-              : Constants.darkAccent,
+              : Constants.darkCardBG,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
@@ -201,22 +201,17 @@ class _PostItemState extends State<PostItem> {
                 child: Row(
                   children: <Widget>[
                     SizedBox(
-                      height: 14.0,
-                      width: 18.0,
-                      child: IconButton(
-                        onPressed: () {},
-                        padding: new EdgeInsets.all(0.0),
-                        icon: isLiked
+                      child: 
+                        isLiked
                             ? Icon(
                                 FontAwesome.getIconData('thumbs-up'),
-                                size: 18.0,
-                                color: Colors.blue,
+                                size: Constants.cardBtnSize,
+                                color: Constants.darkPrimary,
                               )
                             : Icon(
                                 FontAwesome.getIconData('thumbs-o-up'),
-                                size: 18.0,
+                                size: Constants.cardBtnSize,
                               ),
-                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(
@@ -246,22 +241,16 @@ class _PostItemState extends State<PostItem> {
                 child: Row(
                   children: <Widget>[
                     SizedBox(
-                      height: 14.0,
-                      width: 18.0,
-                      child: IconButton(
-                        onPressed: () {},
-                        padding: new EdgeInsets.all(0.0),
-                        icon: isDisliked
+                      child:  isDisliked
                             ? Icon(
                                 FontAwesome.getIconData('thumbs-down'),
-                                size: 18.0,
-                                color: Colors.blue,
+                                size: Constants.cardBtnSize,
+                                color: Constants.darkPrimary,
                               )
                             : Icon(
                                 FontAwesome.getIconData('thumbs-o-down'),
-                                size: 18.0,
+                                size: Constants.cardBtnSize,
                               ),
-                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(
@@ -287,29 +276,31 @@ class _PostItemState extends State<PostItem> {
                           : Constants.darkLineBreak),
                 ),
               ),
-              SizedBox(
-                height: 14.0,
-                width: 18.0,
-                child: IconButton(
-                  padding: new EdgeInsets.all(0.0),
-                  icon: Icon(
+              InkWell(
+                child: Row(
+                  children: <Widget>[
+                    SizedBox(
+                      child: Icon(
                     Icons.chat_bubble_outline,
-                    size: 18.0,
+                    size: Constants.cardBtnSize,
                   ),
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/post', arguments: {
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: Text(
+                        post.commentsCount.toString(),
+                      ),
+                    ),
+                  ],
+                ),
+                onTap: () {
+                  Navigator.of(context).pushNamed('/post', arguments: {
                       'postId': post.id,
                       'commentsNo': post.commentsCount
                     });
-                  },
-                ),
+                },
               ),
-              SizedBox(
-                  height: 14.0,
-                  width: 18.0,
-                  child: Text(
-                    post.commentsCount.toString(),
-                  )),
               SizedBox(
                 width: 1.0,
                 height: inlineBreak,
@@ -322,16 +313,10 @@ class _PostItemState extends State<PostItem> {
               ),
               InkWell(
                 child: SizedBox(
-                  height: 14.0,
-                  width: 18.0,
-                  child: IconButton(
-                    onPressed: () {},
-                    padding: new EdgeInsets.all(0.0),
-                    icon: Icon(
+                  child: Icon(
                       Icons.share,
-                      size: 18.0,
+                      size: Constants.cardBtnSize,
                     ),
-                  ),
                 ),
                 onTap: () {
                   sharePost(post.id, post.text, post.imageUrl);
