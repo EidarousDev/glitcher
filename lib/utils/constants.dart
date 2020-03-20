@@ -28,7 +28,6 @@ AuthStatus authStatus = AuthStatus.NOT_DETERMINED;
 final double inlineBreak = 45.0;
 
 class Constants {
-
   static FirebaseUser currentUser;
   static String currentUserID;
   static User loggedInUser;

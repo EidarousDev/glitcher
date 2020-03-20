@@ -214,7 +214,7 @@ class _CommentPostItemState extends State<CommentPostItem> {
                   ],
                 ),
                 onTap: () async {
-                  playSound('like_sound.mp3');
+                  //playSound('like_sound.mp3');
                   likeBtnHandler(post);
                 },
               ),
@@ -259,7 +259,7 @@ class _CommentPostItemState extends State<CommentPostItem> {
                   ],
                 ),
                 onTap: () async {
-                  playSound('dislike_sound.mp3');
+                  //playSound('dislike_sound.mp3');
                   dislikeBtnHandler(post);
                 },
               ),

@@ -75,9 +75,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       body: Column(
         children: <Widget>[
           Row(
-            
             children: <Widget>[
-              
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: CircleAvatar(
@@ -253,18 +251,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
 
     ///Set up listener here
-    _scrollController.addListener(() {
-      if (_scrollController.offset >=
-              _scrollController.position.maxScrollExtent &&
-          !_scrollController.position.outOfRange) {
-        print('reached the bottom');
-        nextPosts();
-      } else if (_scrollController.offset <=
-              _scrollController.position.minScrollExtent &&
-          !_scrollController.position.outOfRange) {
-        print("reached the top");
-      } else {}
-    });
+    _scrollController
+      ..addListener(() {
+        if (_scrollController.offset >=
+                _scrollController.position.maxScrollExtent &&
+            !_scrollController.position.outOfRange) {
+          print('reached the bottom');
+          nextPosts();
+        } else if (_scrollController.offset <=
+                _scrollController.position.minScrollExtent &&
+            !_scrollController.position.outOfRange) {
+          print("reached the top");
+        } else {}
+      });
     loadUserData();
     _setupFeed();
   }
@@ -272,6 +271,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _scrollController
+        .dispose(); // it is a good practice to dispose the controller
     super.dispose();
   }
 

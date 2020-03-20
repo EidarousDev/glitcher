@@ -28,6 +28,18 @@ class DatabaseService {
     return Post();
   }
 
+  // Get Post Meta Info of a specific post
+  static Future<Map> getPostMeta(String postId) async {
+    var postMeta = Map();
+    DocumentSnapshot postDocSnapshot = await postsRef.document(postId).get();
+    if (postDocSnapshot.exists) {
+      postMeta['likes'] = postDocSnapshot.data['likes'];
+      postMeta['dislikes'] = postDocSnapshot.data['dislikes'];
+      postMeta['comments'] = postDocSnapshot.data['dislikes'];
+    }
+    return postMeta;
+  }
+
   static Future<List<Notification>> getNotifications() async {
     QuerySnapshot notificationSnapshot = await usersRef
         .document(Constants.currentUserID)

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:glitcher/screens/home/home.dart';
 import 'package:glitcher/screens/login_page.dart';
-import 'package:glitcher/utils/sound_manager.dart';
+//import 'package:glitcher/utils/sound_manager.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -24,12 +24,12 @@ void changeTheme(BuildContext context) {
 }
 
 // Play audio
-void playSound(String fileName) {
-  SoundManager soundManager = new SoundManager();
-  soundManager.playLocal(fileName).then((onValue) {
-    //do something?
-  });
-}
+//void playSound(String fileName) {
+//  SoundManager soundManager = new SoundManager();
+//  soundManager.playLocal(fileName).then((onValue) {
+//    //do something?
+//  });
+//}
 
 // Pick Image
 pickImage(ImageSource source) async {
