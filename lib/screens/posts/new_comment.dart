@@ -1,151 +1,126 @@
 import 'package:chewie/chewie.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:glitcher/screens/home/home.dart';
-import 'package:glitcher/screens/home/home_body.dart';
+import 'package:glitcher/models/comment_model.dart';
+import 'package:glitcher/models/post_model.dart';
+import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/screens/posts/comment_item.dart';
+import 'package:glitcher/screens/posts/comment_post_item.dart';
+import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/Loader.dart';
-import 'package:glitcher/services/auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:glitcher/utils/constants.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class NewComment extends StatefulWidget {
-  NewComment currentUser;
   final String postId;
   final int commentsNo;
   NewComment({@required this.postId, this.commentsNo});
   @override
-  _NewCommentState createState() =>
-      _NewCommentState(postId: postId, commentsNo: commentsNo);
+  _NewCommentState createState() => _NewCommentState();
 }
 
-class _NewCommentState extends State<NewComment> {
-  var comments = [];
-  var lastVisibleCommentSnapShot;
-  var _postText;
+class _NewCommentState extends State<NewComment>
+    with SingleTickerProviderStateMixin {
+  /// Post Data
+  Post _currentPost;
 
-  var profileImage;
-
+  /// author Data
+  /// @param authorAvatar for profileImageURL;
+  /// @param authorUsername;
+  /// @param author for User object;
+  User _author; // The owner of the post
+  //var profileImage;
   String username;
 
+  /// Comments Data
+  var _comments = [];
+  var lastVisibleCommentSnapShot;
+
+  /// Commenters Data
+  var commenters = [];
   var commenterProfileimages = [];
 
-  var commenters = [];
+  /// Submit Comment Data
+  String _commentText;
 
-  _NewCommentState({this.postId, this.commentsNo});
-
-  FirebaseUser currentUser;
+  /// Screen Controllers
   final mainTextController = TextEditingController();
-  bool _loading = false;
-  var _firestore = Firestore.instance;
-  String commentText;
-  String postId;
-  int commentsNo;
-
-  var _image;
-  var _video;
-  bool _isPlaying;
+  var _scrollController = ScrollController();
   VideoPlayerController videoPlayerController;
   ChewieController chewieController;
-  Chewie playerWidget;
-
-  String _youtubeId;
   //TODO: Fix YouTube Player
   //YoutubePlayerController _youtubeController = YoutubePlayerController();
-  var _scrollController = ScrollController();
+
+  /// Value Checkers
+  bool _loading = true;
+  bool _isPlaying = false;
+
+  /// Instantiating required Widgets
+  Chewie playerWidget;
+
+  /// @param youtubeId for posts with an Embedded YouTube Video
+  String _youtubeId;
+
+  AnimationController _animationController;
+  Animation _animation;
+  FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
 
-    getCurrentUser();
-    loadPost(postId);
+    ///Set up listener here
+    _scrollController.addListener(() {
+      if (_scrollController.offset >=
+              _scrollController.position.maxScrollExtent &&
+          !_scrollController.position.outOfRange) {
+        print('reached the bottom');
+        //nextComments();
+      } else if (_scrollController.offset <=
+              _scrollController.position.minScrollExtent &&
+          !_scrollController.position.outOfRange) {
+        print("reached the top");
+      } else {}
+    });
+
+    /// Set up animation listener
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+    _animation = Tween(begin: 300.0, end: 50.0).animate(_animationController)
+      ..addListener(() {
+        setState(() {});
+      });
+
+    _focusNode.addListener(() {
+      if (_focusNode.hasFocus) {
+        _animationController.forward();
+      } else {
+        _animationController.reverse();
+      }
+    });
+    loadPostData();
   }
 
   @override
   void dispose() {
-    videoPlayerController.dispose();
-    chewieController.dispose();
+    //videoPlayerController.dispose();
+    //chewieController.dispose();
+    _animationController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   void loadComments() async {
-    await _firestore
-        .collection("posts")
-        .document(postId)
-        .collection('comments')
-        .orderBy("timestamp")
-        .limit(3)
-        .getDocuments()
-        .then((snap) {
-      for (int i = 0; i < snap.documents.length; i++) {
-        setState(() {
-          this.comments.add(snap.documents[i]);
-          loadCommenterData(snap.documents[i].data['commenter']);
-        });
-      }
-      this.lastVisibleCommentSnapShot =
-          snap.documents[snap.documents.length - 1].data['timestamp'];
-    });
-  }
-
-  nextComments() async {
-    await _firestore
-        .collection("posts")
-        .document(postId)
-        .collection('comments')
-        .orderBy("timestamp")
-        .startAfter([this.lastVisibleCommentSnapShot])
-        .limit(3)
-        .getDocuments()
-        .then((snap) {
-          for (int i = 0; i < snap.documents.length; i++) {
-            setState(() {
-              this.comments.add(snap.documents[i]);
-              loadCommenterData(snap.documents[i].data['commenter']);
-            });
-          }
-          this.lastVisibleCommentSnapShot =
-              snap.documents[snap.documents.length - 1].data['timestamp'];
-        });
-  }
-
-  void loadPosterData(String uid) async {
-    await _firestore.collection('users').document(uid).get().then((onValue) {
-      setState(() {
-        profileImage = onValue.data['profile_url'];
-        username = onValue.data['username'];
-      });
-    });
-  }
-
-  void loadCommenterData(String uid) async {
-    await _firestore.collection('users').document(uid).get().then((onValue) {
-      setState(() {
-        commenterProfileimages.add(onValue.data['profile_url']);
-        commenters.add(onValue.data['username']);
-      });
-    });
-  }
-
-  void loadPost(String uid) async {
-    await _firestore.collection('posts').document(postId).get().then((onValue) {
-      setState(() {
-        _image = onValue.data['image'];
-        _video = onValue.data['video'];
-        _youtubeId = onValue.data['youtubeId'];
-        _postText = onValue.data['text'];
-        loadPosterData(onValue.data['owner']);
-        loadComments();
-        if (_video != null) {
-          playVideo();
-        }
-      });
+    List<Comment> comments = await DatabaseService.getComments(widget.postId);
+    setState(() {
+      _comments = comments;
+      this.lastVisibleCommentSnapShot = comments.last.timestamp;
     });
   }
 
   void playVideo() {
-    videoPlayerController = VideoPlayerController.file(_video);
+    videoPlayerController = VideoPlayerController.file(_currentPost.video);
     chewieController = ChewieController(
       videoPlayerController: videoPlayerController,
       aspectRatio: videoPlayerController.value.aspectRatio,
@@ -184,293 +159,115 @@ class _NewCommentState extends State<NewComment> {
     }
   }
 
-  Future uploadComment(String text) async {
+  Future uploadComment() async {
+    print('posting Comment...');
     setState(() {
       _loading = true;
     });
-    commentText = mainTextController.text;
-    await _firestore
-        .collection('posts')
-        .document(postId)
-        .collection('comments')
-        .add({
-      'commenter': currentUser.uid,
-      'text': commentText,
-      'timestamp': FieldValue.serverTimestamp()
-    }).then((_) {
-      setState(() {
-        _loading = false;
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => HomePage()));
-      });
+
+    DatabaseService.addComment(widget.postId, _commentText);
+
+    setState(() {
+      _loading = false;
     });
-
-    await _firestore
-        .collection('posts')
-        .document(postId)
-        .updateData({'comments': commentsNo + 1});
-  }
-
-  void getCurrentUser() async {
-    this.currentUser = await Auth().getCurrentUser();
   }
 
   Widget getList() {
-    return ListView.builder(
-        controller: _scrollController,
-        itemCount: comments.length,
-        itemBuilder: (context, index) => Column(
-              children: <Widget>[
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        width: 40.0,
-                        height: 40.0,
-                        decoration: new BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                            fit: BoxFit.fitHeight,
-                            image: NetworkImage(commenterProfileimages[index]),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Row(
-                                  children: <Widget>[
-                                    Text(
-                                      commenters[index],
-                                      style: TextStyle(
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Icon(
-                                  Icons.arrow_drop_down,
-                                  color: Colors.grey,
-                                )
-                              ],
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(top: 0.0, bottom: 8.0),
-                              child: Text(
-                                comments.length > 0
-                                    ? comments[index].data['text']
-                                    : '',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Container(
-                    width: double.infinity,
-                    color: Colors.grey,
-                    height: .5,
-                  ),
-                )
-              ],
-            ));
+    return Flexible(
+      fit: FlexFit.loose,
+      child: StreamBuilder<QuerySnapshot>(
+        stream: postsRef
+            .document(widget.postId)
+            .collection('comments')
+            ?.snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return new Text('Loading...');
+            default:
+              return ListView.builder(
+                controller: _scrollController,
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                itemCount: _comments.length,
+                itemBuilder: (BuildContext context, int index) {
+                  Comment comment = _comments[index];
+                  return FutureBuilder(
+                      future:
+                          DatabaseService.getUserWithId(comment.commenterID),
+                      builder: (BuildContext context, AsyncSnapshot snapshot) {
+                        if (!snapshot.hasData) {
+                          return SizedBox.shrink();
+                        }
+                        User commenter = snapshot.data;
+                        print('commenter: $commenter and comment: $comment');
+                        return CommentItem(
+                          comment: comment,
+                          commenter: commenter,
+                        );
+                      });
+                },
+              );
+          }
+        },
+      ),
+    );
   }
 
   Widget _buildWidget() {
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            profileImage != null
-                ? Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Container(
-                          width: 60.0,
-                          height: 60.0,
-                          decoration: new BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: DecorationImage(
-                              fit: BoxFit.fitHeight,
-                              image: NetworkImage(profileImage),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Row(
-                                    children: <Widget>[
-                                      Text(
-                                        username,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Icon(
-                                    Icons.arrow_drop_down,
-                                    color: Colors.grey,
-                                  )
-                                ],
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    top: 0.0, bottom: 8.0),
-                                child: Text(
-                                  _postText,
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                child: _image == null
-                                    ? null
-                                    : Container(
-                                        width: double.infinity,
-                                        child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                            child: Image.network(_image)),
-                                      ),
-                              ),
-                              Container(
-                                child: _video == null ? null : playerWidget,
-                              ),
-                              Container(
-                                child: null,
-//TODO: Fix YouTube Player
-//                                _youtubeId == null
-//                                    ? null
-//                                    : YoutubePlayer(
-//                                        context: context,
-//                                        videoId: _youtubeId,
-//                                        flags: YoutubePlayerFlags(
-//                                          autoPlay: false,
-//                                          showVideoProgressIndicator: true,
-//                                        ),
-//                                        videoProgressIndicatorColor: Colors.red,
-//                                        progressColors: ProgressColors(
-//                                          playedColor: Colors.red,
-//                                          handleColor: Colors.redAccent,
-//                                        ),
-//                                        onPlayerInitialized: (controller) {
-//                                          _youtubeController = controller;
-//                                          _youtubeController
-//                                              .addListener(listener);
-//                                        },
-//                                      ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    ],
-                  )
-                : Container(),
-            Container(
-              height: 200,
-              child: getList(),
-            ),
-            GestureDetector(
-              onTap: () {
-                nextComments();
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Align(
-                  child: Text(
-                    'Load more',
-                    style: TextStyle(color: Colors.blue),
-                  ),
-                  alignment: Alignment.center,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: mainTextController,
-                decoration: new InputDecoration.collapsed(
-                    hintText: 'What\'s in your mind?'),
-                minLines: 1,
-                maxLines: 5,
-                autocorrect: true,
-                autofocus: true,
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 10),
-              child: RaisedButton(
-                  child: Text('Post Comment'),
-                  textColor: Colors.white,
-                  color: Colors.blue,
-                  onPressed: () {
-                    uploadComment(mainTextController.text);
-                  }),
-            )
-          ],
-        ),
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        CommentPostItem(post: _currentPost, author: _author),
+        getList(),
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomPadding: true,
       appBar: AppBar(
         title: Text('New Comment'),
       ),
-      body: Stack(
-        alignment: Alignment(0, 0),
-        children: <Widget>[
-          _buildWidget(),
-          _loading
-              ? LoaderTwo()
-              : Container(
-                  width: 0,
-                  height: 0,
-                ),
-        ],
+      body: new InkWell(
+        // to dismiss the keyboard when the user tabs out of the TextField
+        splashColor: Colors.transparent,
+        onTap: () {
+          FocusScope.of(context).requestFocus(FocusNode());
+        },
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          scrollDirection: Axis.vertical,
+          child: _loading ? Center(child: LoaderTwo()) : _buildWidget(),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(
+          Icons.comment,
+          color: Constants.darkGrey,
+        ),
+        onPressed: () {
+          Navigator.of(context).pushNamed('/add-comment', arguments: {
+            'username': _author.name,
+            'userId': _author.id,
+            'postId': widget.postId,
+          });
+        },
       ),
     );
+  }
+
+  void loadPostData() async {
+    _currentPost = await DatabaseService.getPostWithId(widget.postId);
+    _author = await DatabaseService.getUserWithId(_currentPost.authorId);
+    print('currentPost = $_currentPost and author= $_author');
+    loadComments();
+    print('comments.length = ${_comments.length}');
+    _loading = false;
   }
 }

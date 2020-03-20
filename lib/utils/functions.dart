@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:glitcher/screens/home/home.dart';
 import 'package:glitcher/screens/login_page.dart';
-import 'package:glitcher/utils/sound_manager.dart';
+//import 'package:glitcher/utils/sound_manager.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart';
+import 'package:intl/intl.dart';
 
 import 'constants.dart';
 
@@ -24,12 +24,12 @@ void changeTheme(BuildContext context) {
 }
 
 // Play audio
-void playSound(String fileName) {
-  SoundManager soundManager = new SoundManager();
-  soundManager.playLocal(fileName).then((onValue) {
-    //do something?
-  });
-}
+//void playSound(String fileName) {
+//  SoundManager soundManager = new SoundManager();
+//  soundManager.playLocal(fileName).then((onValue) {
+//    //do something?
+//  });
+//}
 
 // Pick Image
 pickImage(ImageSource source) async {
@@ -115,6 +115,26 @@ class Functions {
     }
   }
 
+  /* Alert Error - SnackBar */
+  static void showInSnackBar(BuildContext context,
+      GlobalKey<ScaffoldState> _scaffoldKey, String value) {
+    FocusScope.of(context).requestFocus(new FocusNode());
+    _scaffoldKey.currentState?.removeCurrentSnackBar();
+    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+      content: new Text(
+        value,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+            color: Colors.white,
+            fontSize: 16.0,
+            fontFamily: "WorkSansSemiBold"),
+      ),
+      backgroundColor: Colors.blue,
+      duration: Duration(seconds: 3),
+    ));
+  }
+
+  /// Format Time
   static String formatTimestamp(Timestamp timestamp) {
     var now = Timestamp.now().toDate();
     var date = new DateTime.fromMillisecondsSinceEpoch(
@@ -146,29 +166,45 @@ class Functions {
       if (diff.inDays == 7) {
         time = 'A WEEK AGO';
       } else {
-        time = timestamp.toDate().toString();
+        /// Show in Format => 21-05-2019 10:59 AM
+        final df = new DateFormat('dd-MM-yyyy hh:mm a');
+        time = df.format(date);
       }
     }
 
     return time;
   }
 
-  /* Alert Error - SnackBar */
-  static void showInSnackBar(BuildContext context,
-      GlobalKey<ScaffoldState> _scaffoldKey, String value) {
-    FocusScope.of(context).requestFocus(new FocusNode());
-    _scaffoldKey.currentState?.removeCurrentSnackBar();
-    _scaffoldKey.currentState.showSnackBar(new SnackBar(
-      content: new Text(
-        value,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-            color: Colors.white,
-            fontSize: 16.0,
-            fontFamily: "WorkSansSemiBold"),
-      ),
-      backgroundColor: Colors.blue,
-      duration: Duration(seconds: 3),
-    ));
+  /// Format Time For Comments
+  static String formatCommentsTimestamp(Timestamp timestamp) {
+    var now = Timestamp.now().toDate();
+    var date = new DateTime.fromMillisecondsSinceEpoch(
+        timestamp.millisecondsSinceEpoch);
+    var diff = now.difference(date);
+    var time = '';
+
+    if (diff.inSeconds <= 60) {
+      time = 'now';
+    } else if (diff.inMinutes > 0 && diff.inMinutes < 60) {
+      if (diff.inMinutes == 1) {
+        time = '1m';
+      } else {
+        time = diff.inMinutes.toString() + 'm';
+      }
+    } else if (diff.inHours > 0 && diff.inHours < 24) {
+      if (diff.inHours == 1) {
+        time = '1h';
+      } else {
+        time = diff.inHours.toString() + 'h';
+      }
+    } else if (diff.inDays > 0) {
+      if (diff.inDays == 1) {
+        time = '1d';
+      } else {
+        time = diff.inDays.toString() + 'd';
+      }
+    }
+
+    return time;
   }
 }

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:glitcher/models/game_model.dart';
+import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/notification_model.dart';
 import 'package:glitcher/models/post_model.dart';
@@ -16,6 +17,27 @@ class DatabaseService {
     List<Post> posts =
         postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
     return posts;
+  }
+
+  // Get Post info of a specific post
+  static Future<Post> getPostWithId(String postId) async {
+    DocumentSnapshot postDocSnapshot = await postsRef.document(postId).get();
+    if (postDocSnapshot.exists) {
+      return Post.fromDoc(postDocSnapshot);
+    }
+    return Post();
+  }
+
+  // Get Post Meta Info of a specific post
+  static Future<Map> getPostMeta(String postId) async {
+    var postMeta = Map();
+    DocumentSnapshot postDocSnapshot = await postsRef.document(postId).get();
+    if (postDocSnapshot.exists) {
+      postMeta['likes'] = postDocSnapshot.data['likes'];
+      postMeta['dislikes'] = postDocSnapshot.data['dislikes'];
+      postMeta['comments'] = postDocSnapshot.data['dislikes'];
+    }
+    return postMeta;
   }
 
   static Future<List<Notification>> getNotifications() async {
@@ -68,28 +90,50 @@ class DatabaseService {
     return messages;
   }
 
-  static getGames() async{
+  // Get Comments of a specific post
+  static Future<List<Comment>> getComments(String postId) async {
+    QuerySnapshot commentSnapshot = await postsRef
+        .document(postId)
+        .collection('comments')
+        .orderBy('timestamp', descending: true)
+        .limit(10)
+        .getDocuments();
+    List<Comment> comments =
+        commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
+    return comments;
+  }
+
+  static getGames() async {
     QuerySnapshot gameSnapshot = await gamesRef
         .orderBy('fullName', descending: true)
         .limit(10)
         .getDocuments();
-    List<Game> games = gameSnapshot.documents
-        .map((doc) => Game.fromDoc(doc))
-        .toList();
+    List<Game> games =
+        gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
     return games;
   }
 
-  static getGameNames() async{
+  static getGameNames() async {
     Constants.games = [];
-    QuerySnapshot gameSnapshot = await gamesRef
-        .orderBy('fullName', descending: true)
-        .getDocuments();
-    List<Game> games = gameSnapshot.documents
-            .map((doc) => Game.fromDoc(doc))
-            .toList();
+    QuerySnapshot gameSnapshot =
+        await gamesRef.orderBy('fullName', descending: true).getDocuments();
+    List<Game> games =
+        gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
 
-    for(var game in games){
+    for (var game in games) {
       Constants.games.add(game.fullName);
     }
+  }
+
+  // This function is used to submit/add a comment
+  static void addComment(String postId, String commentText) async {
+    await postsRef.document(postId).collection('comments').add({
+      'commenter': Constants.currentUserID,
+      'text': commentText,
+      'timestamp': FieldValue.serverTimestamp()
+    });
+    await postsRef
+        .document(postId)
+        .updateData({'comments': FieldValue.increment(1)});
   }
 }

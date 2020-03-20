@@ -9,7 +9,7 @@ class Post {
   int disLikesCount;
   final int commentsCount;
   final String authorId;
-  final String video;
+  var video;
   final String youtubeId;
   final Timestamp timestamp;
 

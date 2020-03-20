@@ -48,23 +48,20 @@ class NotificationHandler {
       onLaunch: (Map<String, dynamic> message) async {
         print("onLaunch: $message");
         makeNotificationSeen(message['data']['id']);
-        Navigator.of(context).pushNamed('/post', arguments: {
-          'postId': message['data']['postId'],
-          'commentsNo': 5
-        });
+        Navigator.of(context).pushNamed('/post',
+            arguments: {'postId': message['data']['postId'], 'commentsNo': 5});
       },
       onResume: (Map<String, dynamic> message) async {
         print("onResume: $message");
         makeNotificationSeen(message['data']['id']);
-        Navigator.of(context).pushNamed('/post', arguments: {
-          'postId': message['data']['postId'],
-          'commentsNo': 5
-        });
+        Navigator.of(context).pushNamed('/post',
+            arguments: {'postId': message['data']['postId'], 'commentsNo': 5});
       },
     );
   }
 
-  void sendNotification (String receiverId, String title, String body, String postId) async{
+  void sendNotification(
+      String receiverId, String title, String body, String postId) async {
     usersRef.document(receiverId).collection('notifications').add({
       'title': title,
       'body': body,
@@ -76,16 +73,23 @@ class NotificationHandler {
 
     //To increment notificationsNumber
     User user = await DatabaseService.getUserWithId(receiverId);
-    usersRef.document(receiverId).updateData({'notificationsNumber': user.notificationsNumber + 1});
+    usersRef
+        .document(receiverId)
+        .updateData({'notificationsNumber': FieldValue.increment(1)});
   }
 
   void makeNotificationSeen(String notificationId) {
-    usersRef.document(Constants.currentUserID).collection('notifications').document(notificationId).updateData({
+    usersRef
+        .document(Constants.currentUserID)
+        .collection('notifications')
+        .document(notificationId)
+        .updateData({
       'seen': true,
     });
   }
 
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   void configLocalNotification() {
     var initializationSettingsAndroid =
@@ -100,17 +104,15 @@ class NotificationHandler {
     configLocalNotification();
 
     var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
-      Platform.isAndroid
-          ? 'com.eidarousdev.glitcher'
-          : 'com.eidarousdev.glitcher',
-      'glitcher',
-      'your channel description',
-      enableVibration: true,
-      importance: Importance.Max,
-      priority: Priority.High,
-      autoCancel: true
-      
-    );
+        Platform.isAndroid
+            ? 'com.eidarousdev.glitcher'
+            : 'com.eidarousdev.glitcher',
+        'glitcher',
+        'your channel description',
+        enableVibration: true,
+        importance: Importance.Max,
+        priority: Priority.High,
+        autoCancel: true);
     var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
     var platformChannelSpecifics = new NotificationDetails(
         androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
@@ -122,8 +124,10 @@ class NotificationHandler {
         payload: json.encode(message));
   }
 
-  clearNotificationsNumber() async{
+  clearNotificationsNumber() async {
     await DatabaseService.getUserWithId(Constants.currentUserID);
-    usersRef.document(Constants.currentUserID).updateData({'notificationsNumber': 0});
+    usersRef
+        .document(Constants.currentUserID)
+        .updateData({'notificationsNumber': 0});
   }
 }
