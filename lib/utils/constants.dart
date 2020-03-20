@@ -25,7 +25,7 @@ enum AuthStatus {
 }
 AuthStatus authStatus = AuthStatus.NOT_DETERMINED;
 
-final double inlineBreak = 45.0;
+final double inlineBreak = 32.0;
 
 class Constants {
   static FirebaseUser currentUser;
@@ -33,11 +33,16 @@ class Constants {
   static User loggedInUser;
   static String loggedInProfileImageURL;
   static List<String> games = [];
-  static const genres = ['Action', 'Sports', 'Racing', 'Fighting'];
+  static const genres = [
+    'Action',
+    'Sports',
+    'Racing',
+    'Fighting'
+  ];
 
   //Colors for theme
   static Color lightPrimary = Color(0xffdbd8e3);
-  static const Color darkPrimary = Color(0xffc74f57);
+  static const Color darkPrimary = Color(0xffca3e47);
   static Color darkPrimarySwatch = Colors.indigo;
   static Color darkGrey = Color(0xff878681);
   static Color darkPrimaryTappedBtn = Color(0xff88caff);
@@ -45,11 +50,10 @@ class Constants {
   static Color lightAccent = Color(0xff065471);
   static Color darkAccent = Color(0xff393e46);
   static Color lightBG = Color(0xffeeeeee);
-  static Color darkBG = Color(0xff212832);
-  static Color darkCardBG = Color(0xff222e3f);
+  static Color darkBG = Color(0xff222831);
   static Color badgeColor = Colors.red;
   static Color lightLineBreak = Colors.grey[300];
-  static Color darkLineBreak = darkBG;
+  static Color darkLineBreak = Colors.grey[900];
   static Color lightInLineBreak = Colors.blueGrey[200];
 
   static ThemeData lightTheme = ThemeData(
@@ -76,13 +80,13 @@ class Constants {
     primaryColor: darkPrimary,
     primarySwatch: darkPrimarySwatch,
     accentColor: darkAccent,
-    scaffoldBackgroundColor: darkCardBG,
+    scaffoldBackgroundColor: darkBG,
     cursorColor: darkAccent,
     appBarTheme: AppBarTheme(
       elevation: 0,
       textTheme: TextTheme(
         title: TextStyle(
-          color: Colors.white,
+          color: lightBG,
           fontSize: 18.0,
           fontWeight: FontWeight.w800,
         ),
