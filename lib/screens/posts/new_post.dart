@@ -50,7 +50,6 @@ class _NewPostState extends State<NewPost> {
   @override
   void initState() {
     super.initState();
-    DatabaseService.getGameNames();
   }
 
   void playVideo() {

@@ -99,30 +99,43 @@ class DatabaseService {
         .limit(10)
         .getDocuments();
     List<Comment> comments =
-        commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
+    commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
     return comments;
   }
 
-  static getGames() async {
+  static getGames() async{
     QuerySnapshot gameSnapshot = await gamesRef
-        .orderBy('fullName', descending: true)
-        .limit(10)
+        .orderBy('fullName', descending: false)
+        .limit(6)
         .getDocuments();
-    List<Game> games =
-        gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
+    List<Game> games = gameSnapshot.documents
+        .map((doc) => Game.fromDoc(doc))
+        .toList();
     return games;
   }
 
-  static getGameNames() async {
-    Constants.games = [];
-    QuerySnapshot gameSnapshot =
-        await gamesRef.orderBy('fullName', descending: true).getDocuments();
+  static Future<List<Game>> getNextGames(
+      String lastVisibleGameSnapShot) async {
+    QuerySnapshot gameSnapshot = await gamesRef
+        .orderBy('fullName', descending: false)
+        .startAfter([lastVisibleGameSnapShot])
+        .limit(10)
+        .getDocuments();
     List<Game> games =
-        gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
+    gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
+    return games;
+  }
 
-    for (var game in games) {
-      Constants.games.add(game.fullName);
-    }
+  static searchGames(text) async{
+
+    QuerySnapshot gameSnapshot = await gamesRef
+        .where('search', arrayContains: text)
+        .orderBy('fullName', descending: false)
+        .getDocuments();
+    List<Game> games = gameSnapshot.documents
+        .map((doc) => Game.fromDoc(doc))
+        .toList();
+    return games;
   }
 
   // This function is used to submit/add a comment
@@ -135,5 +148,19 @@ class DatabaseService {
     await postsRef
         .document(postId)
         .updateData({'comments': FieldValue.increment(1)});
+  }
+
+  static followGame(String gameId) async{
+    DocumentSnapshot gameDocSnapshot = await usersRef.document(Constants.currentUserID).collection('followedGames').document(gameId).get();
+    if(!gameDocSnapshot.exists){
+      await usersRef.document(Constants.currentUserID).collection('followedGames').document(gameId).setData({'followedAt': FieldValue.serverTimestamp()});
+    }
+  }
+
+  static unFollowGame(String gameId) async{
+    DocumentSnapshot gameDocSnapshot = await usersRef.document(Constants.currentUserID).collection('followedGames').document(gameId).get();
+    if(gameDocSnapshot.exists){
+      await usersRef.document(Constants.currentUserID).collection('followedGames').document(gameId).delete();
+    }
   }
 }

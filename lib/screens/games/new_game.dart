@@ -1,4 +1,5 @@
 import 'package:dropdownfield/dropdownfield.dart';
+import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:flutter/material.dart';
@@ -106,6 +107,7 @@ class _NewGameState extends State<NewGame> {
       'genre': genre,
       'image': _image != null ? _uploadedFileURL : null,
       'timestamp': FieldValue.serverTimestamp(),
+      'search': searchList(fullName)
     }).then((_) {
       setState(() {
         _loading = false;
@@ -115,6 +117,13 @@ class _NewGameState extends State<NewGame> {
     });
   }
 
+  searchList(String text){
+    List<String> list = [];
+    for(int i = 1; i <= text.length; i++){
+      list.add(text.substring(0, i).toLowerCase());
+    }
+    return list;
+  }
 
   Widget _buildWidget() {
     return WillPopScope(

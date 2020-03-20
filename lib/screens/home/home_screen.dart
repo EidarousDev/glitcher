@@ -14,7 +14,6 @@ import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/constants.dart';
-import 'package:glitcher/utils/functions.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -72,139 +71,149 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
         ],
       ),
-      body: Column(
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: CircleAvatar(
-                  radius: 25.0,
-                  backgroundColor: Colors.grey,
-                  backgroundImage: profileImageUrl != null
-                      ? CachedNetworkImageProvider(profileImageUrl)
-                      : AssetImage('assets/images/default_profile.png'),
-                ),
-              ),
-              Expanded(
-                child: InkWell(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      height: 40,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        border: Border.all(
-                            color: currentTheme == AvailableThemes.LIGHT_THEME
-                                ? Constants.lightAccent
-                                : Constants.darkPrimary,
-                            width: 1),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 22.0),
-                        child: TextField(
-                          decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: "What's on your mind?",
-                              enabled: false,
-                              hintStyle: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  color: currentTheme ==
-                                          AvailableThemes.LIGHT_THEME
-                                      ? Constants.lightAccent
-                                      : Constants.darkPrimary)),
+      body: CustomScrollView(
+        controller: _scrollController,
+        physics: const AlwaysScrollableScrollPhysics (),
+        slivers: <Widget>[
+          SliverAppBar(
+            pinned: false,
+            expandedHeight: 120,
+            leading: Container(),
+            flexibleSpace: Container(
+              height: 120,
+              color: Constants.darkBG,
+              child: Column(
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CircleAvatar(
+                          radius: 25.0,
+                          backgroundColor: Colors.grey,
+                          backgroundImage: profileImageUrl != null
+                              ? CachedNetworkImageProvider(profileImageUrl)
+                              : AssetImage('assets/images/default_profile.png'),
                         ),
                       ),
+                      Expanded(
+                        child: InkWell(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              height: 40,
+                              decoration: BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(20)),
+                                border: Border.all(
+                                    color: currentTheme ==
+                                            AvailableThemes.LIGHT_THEME
+                                        ? Constants.lightAccent
+                                        : Constants.darkPrimary,
+                                    width: 1),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 22.0),
+                                child: TextField(
+                                  decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      hintText: "What's on your mind?",
+                                      enabled: false,
+                                      hintStyle: TextStyle(
+                                          fontWeight: FontWeight.w400,
+                                          color: currentTheme ==
+                                                  AvailableThemes.LIGHT_THEME
+                                              ? Constants.lightAccent
+                                              : Constants.darkPrimary)),
+                                ),
+                              ),
+                            ),
+                          ),
+                          onTap: () {
+                            Navigator.of(context)
+                                .pushReplacementNamed('/new-post');
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 1,
+                    width: double.infinity,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                          color: currentTheme == AvailableThemes.LIGHT_THEME
+                              ? Constants.lightLineBreak
+                              : Constants.darkLineBreak),
                     ),
                   ),
-                  onTap: () {
-                    Navigator.of(context).pushReplacementNamed('/new-post');
-                  },
-                ),
+                  Center(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Expanded(
+                            child: CardIconText(
+                          tStyle: TextStyle(fontWeight: FontWeight.bold),
+                          icon: FontAwesome.getIconData("image"),
+                          text: "Image",
+                          color: currentTheme == AvailableThemes.LIGHT_THEME
+                              ? Constants.lightLineBreak
+                              : Constants.darkLineBreak,
+                          ccolor: Colors.blue,
+                        )),
+                        SizedBox(
+                          height: 25,
+                          width: 1.0,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                                color:
+                                    currentTheme == AvailableThemes.LIGHT_THEME
+                                        ? Constants.lightLineBreak
+                                        : Constants.darkLineBreak),
+                          ),
+                        ),
+                        Expanded(
+                            child: CardIconText(
+                          tStyle: TextStyle(fontWeight: FontWeight.bold),
+                          icon: FontAwesome.getIconData("file-video-o"),
+                          text: "Video",
+                          color: currentTheme == AvailableThemes.LIGHT_THEME
+                              ? Constants.lightLineBreak
+                              : Constants.darkLineBreak,
+                          ccolor: Colors.greenAccent,
+                        )),
+                        SizedBox(
+                          height: 25,
+                          width: 1.0,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                                color:
+                                    currentTheme == AvailableThemes.LIGHT_THEME
+                                        ? Constants.lightLineBreak
+                                        : Constants.darkLineBreak),
+                          ),
+                        ),
+                        Expanded(
+                            child: CardIconText(
+                          tStyle: TextStyle(fontWeight: FontWeight.bold),
+                          icon: FontAwesome.getIconData("youtube"),
+                          text: "YouTube",
+                          color: currentTheme == AvailableThemes.LIGHT_THEME
+                              ? Constants.lightLineBreak
+                              : Constants.darkLineBreak,
+                          ccolor: Colors.pink,
+                        )),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          SizedBox(
-            height: 1,
-            width: double.infinity,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                  color: currentTheme == AvailableThemes.LIGHT_THEME
-                      ? Constants.lightLineBreak
-                      : Constants.darkLineBreak),
             ),
           ),
-          Center(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Expanded(
-                    child: CardIconText(
-                  tStyle: TextStyle(fontWeight: FontWeight.bold),
-                  icon: FontAwesome.getIconData("image"),
-                  text: "Image",
-                  color: currentTheme == AvailableThemes.LIGHT_THEME
-                      ? Constants.lightLineBreak
-                      : Constants.darkCardBG,
-                  ccolor: Constants.darkPrimary,
-                )),
-                SizedBox(
-                  height: 25,
-                  width: 1.0,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                        color: currentTheme == AvailableThemes.LIGHT_THEME
-                            ? Constants.lightLineBreak
-                            : Constants.darkLineBreak),
-                  ),
-                ),
-                Expanded(
-                    child: CardIconText(
-                  tStyle: TextStyle(fontWeight: FontWeight.bold),
-                  icon: FontAwesome.getIconData("file-video-o"),
-                  text: "Video",
-                  color: currentTheme == AvailableThemes.LIGHT_THEME
-                      ? Constants.lightLineBreak
-                      : Constants.darkCardBG,
-                  ccolor: Constants.darkPrimary,
-                )),
-                SizedBox(
-                  height: 25,
-                  width: 1.0,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                        color: currentTheme == AvailableThemes.LIGHT_THEME
-                            ? Constants.lightLineBreak
-                            : Constants.darkLineBreak),
-                  ),
-                ),
-                Expanded(
-                    child: CardIconText(
-                  tStyle: TextStyle(fontWeight: FontWeight.bold),
-                  icon: FontAwesome.getIconData("youtube"),
-                  text: "YouTube",
-                  color: currentTheme == AvailableThemes.LIGHT_THEME
-                      ? Constants.lightLineBreak
-                      : Constants.darkCardBG,
-                  ccolor: Constants.darkPrimary,
-                )),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: 8.0,
-            width: double.infinity,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                  color: currentTheme == AvailableThemes.LIGHT_THEME
-                      ? Constants.lightLineBreak
-                      : Constants.darkLineBreak),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
+          SliverList(delegate: SliverChildListDelegate([
+            ListView.builder(
+              physics: NeverScrollableScrollPhysics(),
               scrollDirection: Axis.vertical,
               itemCount: _posts.length,
               shrinkWrap: true,
@@ -221,7 +230,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     });
               },
             ),
-          ),
+          ]))
         ],
       ),
       floatingActionButton: FloatingActionButton(
