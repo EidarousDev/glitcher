@@ -93,7 +93,7 @@ class _PostItemState extends State<PostItem> {
               },
             ),
             subtitle: InkWell(
-              child: Text('↳ ${post.category}' ?? '',
+              child: Text('↳ ${post.game}' ?? '',
                   style: TextStyle(
                     fontSize: 14,
                     color: Constants.darkGrey,

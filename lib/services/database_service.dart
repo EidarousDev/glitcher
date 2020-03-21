@@ -19,6 +19,7 @@ class DatabaseService {
     return posts;
   }
 
+
   // Get Post info of a specific post
   static Future<Post> getPostWithId(String postId) async {
     DocumentSnapshot postDocSnapshot = await postsRef.document(postId).get();
@@ -40,6 +41,45 @@ class DatabaseService {
     return postMeta;
   }
 
+  // This function is used to get the recent posts (unfiltered)
+  static Future<List<Post>> getNextPosts(
+      Timestamp lastVisiblePostSnapShot) async {
+    QuerySnapshot postSnapshot = await postsRef
+        .orderBy('timestamp', descending: true)
+        .startAfter([lastVisiblePostSnapShot])
+        .limit(10)
+        .getDocuments();
+    List<Post> posts =
+    postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+    return posts;
+  }
+
+  // This function is used to get the recent posts (filtered by a certain game)
+  static Future<List<Post>> getGamePosts(String gameName) async {
+    QuerySnapshot postSnapshot = await postsRef
+        .where('game', isEqualTo: gameName)
+        .orderBy('timestamp', descending: true)
+        .limit(10)
+        .getDocuments();
+    List<Post> posts =
+    postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+    return posts;
+  }
+
+  // This function is used to get the recent posts (filtered by a certain game)
+  static Future<List<Post>> getNextGamePosts(
+      Timestamp lastVisiblePostSnapShot, String gameName) async {
+    QuerySnapshot postSnapshot = await postsRef
+        .where('game', isEqualTo: gameName)
+        .orderBy('timestamp', descending: true)
+        .startAfter([lastVisiblePostSnapShot])
+        .limit(10)
+        .getDocuments();
+    List<Post> posts =
+    postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+    return posts;
+  }
+
   static Future<List<Notification>> getNotifications() async {
     QuerySnapshot notificationSnapshot = await usersRef
         .document(Constants.currentUserID)
@@ -53,18 +93,6 @@ class DatabaseService {
     return notifications;
   }
 
-  // This function is used to get the recent posts (unfiltered)
-  static Future<List<Post>> getNextPosts(
-      Timestamp lastVisiblePostSnapShot) async {
-    QuerySnapshot postSnapshot = await postsRef
-        .orderBy('timestamp', descending: true)
-        .startAfter([lastVisiblePostSnapShot])
-        .limit(10)
-        .getDocuments();
-    List<Post> posts =
-        postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
-    return posts;
-  }
 
   // This function is used to get the author info of each post
   static Future<User> getUserWithId(String userId) async {
@@ -114,6 +142,20 @@ class DatabaseService {
     return games;
   }
 
+  static getGameNames() async{
+    Constants.games = [];
+    QuerySnapshot gameSnapshot = await gamesRef
+        .orderBy('fullName', descending: true)
+        .getDocuments();
+    List<Game> games = gameSnapshot.documents
+        .map((doc) => Game.fromDoc(doc))
+        .toList();
+
+    for(var game in games){
+      Constants.games.add(game.fullName);
+    }
+  }
+
   static Future<List<Game>> getNextGames(
       String lastVisibleGameSnapShot) async {
     QuerySnapshot gameSnapshot = await gamesRef
@@ -126,8 +168,7 @@ class DatabaseService {
     return games;
   }
 
-  static searchGames(text) async{
-
+  static Future<List> searchGames(text) async{
     QuerySnapshot gameSnapshot = await gamesRef
         .where('search', arrayContains: text)
         .orderBy('fullName', descending: false)
@@ -157,10 +198,12 @@ class DatabaseService {
     }
   }
 
-  static unFollowGame(String gameId) async{
+   static unFollowGame(String gameId) async{
     DocumentSnapshot gameDocSnapshot = await usersRef.document(Constants.currentUserID).collection('followedGames').document(gameId).get();
     if(gameDocSnapshot.exists){
       await usersRef.document(Constants.currentUserID).collection('followedGames').document(gameId).delete();
     }
   }
+
+
 }

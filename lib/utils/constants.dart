@@ -95,4 +95,6 @@ class Constants {
   );
 
   static final double cardBtnSize = 25.0;
+
+  static Color darkCardBG = Color(0xff222831);
 }

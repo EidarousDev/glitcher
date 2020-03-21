@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Post {
   final String id;
   final String imageUrl;
-  final String category;
+  final String game;
   final String text;
   int likesCount;
   int disLikesCount;
@@ -15,7 +15,7 @@ class Post {
 
   Post({
     this.id,
-    this.category,
+    this.game,
     this.imageUrl,
     this.text,
     this.likesCount,
@@ -30,7 +30,7 @@ class Post {
   factory Post.fromDoc(DocumentSnapshot doc) {
     return Post(
       id: doc.documentID,
-      category: doc['category'],
+      game: doc['game'],
       imageUrl: doc['image'],
       text: doc['text'],
       likesCount: doc['likes'],

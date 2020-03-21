@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:glitcher/root_page.dart';
 import 'package:glitcher/screens/app_page.dart';
+import 'package:glitcher/screens/games/game_screen.dart';
 import 'package:glitcher/screens/games/new_game.dart';
 import 'package:glitcher/screens/posts/add_comment.dart';
 import 'package:glitcher/screens/posts/new_comment.dart';
@@ -47,6 +48,14 @@ class RouteGenerator {
             profileImageUrl: args['profileImageUrl'],
           ),
         );
+
+      case '/game-screen':
+        return MaterialPageRoute(
+          builder: (_) => GameScreen(
+            game: args['game'],
+          ),
+        );
+
       case '/new-game':
         return MaterialPageRoute(builder: (_) => NewGame());
       default:

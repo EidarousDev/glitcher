@@ -79,7 +79,7 @@ class _CommentPostItemState extends State<CommentPostItem> {
             },
           ),
           subtitle: InkWell(
-            child: Text('↳ ${post.category}' ?? '',
+            child: Text('↳ ${post.game}' ?? '',
                 style: TextStyle(
                   fontSize: 14,
                   color: Constants.darkGrey,

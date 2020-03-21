@@ -1,3 +1,5 @@
+import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/functions.dart';
@@ -43,13 +45,16 @@ class _NewPostState extends State<NewPost> {
 
   bool _loading = false;
 
-  String selectedCategory = "";
+  String selectedGame = "";
   GlobalKey<AutoCompleteTextFieldState<String>> autocompleteKey =
       new GlobalKey();
+
+  var _typeAheadController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    DatabaseService.getGameNames();
   }
 
   void playVideo() {
@@ -176,7 +181,7 @@ class _NewPostState extends State<NewPost> {
       'dislikes': 0,
       'comments': 0,
       'timestamp': FieldValue.serverTimestamp(),
-      'category': selectedCategory
+      'game': selectedGame
     }).then((_) {
       setState(() {
         _loading = false;
@@ -332,41 +337,39 @@ class _NewPostState extends State<NewPost> {
 
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: AutoCompleteTextField<String>(
-                  clearOnSubmit: false,
-                  key: autocompleteKey,
-                  suggestions: Constants.games,
-                  decoration: InputDecoration(
-                      icon: Icon(Icons.videogame_asset), hintText: "Game"),
-                  itemFilter: (item, query) {
-                    return item.toLowerCase().startsWith(query.toLowerCase());
+                child: TypeAheadFormField(
+                  textFieldConfiguration: TextFieldConfiguration(
+                      controller: this._typeAheadController,
+                      decoration: InputDecoration(
+                          labelText: 'Game name'
+                      )
+                  ),
+                  suggestionsCallback: (pattern) {
+                    return DatabaseService.searchGames(pattern);
                   },
-                  itemSorter: (a, b) {
-                    return a.compareTo(b);
-                  },
-                  itemSubmitted: (item) {
-                    selectedCategory = item;
-                  },
-                  onFocusChanged: (hasFocus) {},
-                  itemBuilder: (context, item) {
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(item),
+                  itemBuilder: (context, suggestion) {
+                    Game game = suggestion as Game;
+
+                    return ListTile(
+                      title: Text(game.fullName),
                     );
                   },
+
+                  onSuggestionSelected: (suggestion) {
+                    this._typeAheadController.text = (suggestion as Game).fullName;
+                    setState(() {
+                      selectedGame = _typeAheadController.text;
+                    });
+                  },
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'Please select a city';
+                    }
+                    return '';
+                  },
+                  onSaved: (value) => this.selectedGame = value,
                 ),
               ),
-//            DropDownField(
-//                value: selectedCategory,
-//                strict: true,
-//                icon: Icon(Icons.category),
-//                items: categories,
-//                setter: (dynamic newValue) {
-//                  setState(() {
-//                    selectedCategory = newValue;
-//                  });
-//                }
-//            ),
 
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 10),
