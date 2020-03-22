@@ -65,6 +65,8 @@ class _RootPageState extends State<RootPage> {
         Constants.loggedInUser = loggedInUser;
         Constants.currentUser = user;
         Constants.currentUserID = user?.uid;
+        DatabaseService.getFollowedGames();
+        DatabaseService.getFollowing();
         authStatus = AuthStatus.LOGGED_IN;
       });
     } else {

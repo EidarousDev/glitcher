@@ -19,7 +19,6 @@ class DatabaseService {
     return posts;
   }
 
-
   // Get Post info of a specific post
   static Future<Post> getPostWithId(String postId) async {
     DocumentSnapshot postDocSnapshot = await postsRef.document(postId).get();
@@ -50,6 +49,34 @@ class DatabaseService {
         .limit(10)
         .getDocuments();
     List<Post> posts =
+        postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+    return posts;
+  }
+
+  // This function is used to get the recent posts (filtered by followed games)
+  static Future<List<Post>> getNextPostsFilteredByFollowedGames(
+      Timestamp lastVisiblePostSnapShot) async {
+    QuerySnapshot postSnapshot = await postsRef
+        .where('game', whereIn: Constants.followedGamesNames)
+        .orderBy('timestamp', descending: true)
+        .startAfter([lastVisiblePostSnapShot])
+        .limit(10)
+        .getDocuments();
+    List<Post> posts =
+    postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+    return posts;
+  }
+
+  // This function is used to get the recent posts (filtered by followed gamers)
+  static Future<List<Post>> getNextPostsFilteredByFollowing(
+      Timestamp lastVisiblePostSnapShot) async {
+    QuerySnapshot postSnapshot = await postsRef
+        .where('owner', whereIn: Constants.followingIds)
+        .orderBy('timestamp', descending: true)
+        .startAfter([lastVisiblePostSnapShot])
+        .limit(10)
+        .getDocuments();
+    List<Post> posts =
     postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
     return posts;
   }
@@ -62,7 +89,7 @@ class DatabaseService {
         .limit(10)
         .getDocuments();
     List<Post> posts =
-    postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+        postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
     return posts;
   }
 
@@ -76,7 +103,29 @@ class DatabaseService {
         .limit(10)
         .getDocuments();
     List<Post> posts =
-    postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+        postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+    return posts;
+  }
+
+  static Future<List<Post>> getPostsFilteredByFollowedGames() async {
+    QuerySnapshot postSnapshot = await postsRef
+        .where('game', whereIn: Constants.followedGamesNames)
+        .orderBy('timestamp', descending: true)
+        .limit(10)
+        .getDocuments();
+    List<Post> posts =
+        postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+    return posts;
+  }
+
+  static Future<List<Post>> getPostsFilteredByFollowing() async {
+    QuerySnapshot postSnapshot = await postsRef
+        .where('owner', whereIn: Constants.followingIds)
+        .orderBy('timestamp', descending: true)
+        .limit(10)
+        .getDocuments();
+    List<Post> posts =
+        postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
     return posts;
   }
 
@@ -93,7 +142,6 @@ class DatabaseService {
     return notifications;
   }
 
-
   // This function is used to get the author info of each post
   static Future<User> getUserWithId(String userId) async {
     DocumentSnapshot userDocSnapshot = await usersRef.document(userId).get();
@@ -101,6 +149,29 @@ class DatabaseService {
       return User.fromDoc(userDocSnapshot);
     }
     return User();
+  }
+
+  static getFollowing() async {
+    QuerySnapshot following = await usersRef
+        .document(Constants.currentUserID)
+        .collection('following')
+        .getDocuments();
+
+    for (DocumentSnapshot doc in following.documents) {
+      Constants.followingIds.add(doc.documentID);
+    }
+  }
+
+  static getFollowedGames() async {
+    QuerySnapshot followedGames = await usersRef
+        .document(Constants.currentUserID)
+        .collection('followedGames')
+        .getDocuments();
+
+    for (DocumentSnapshot doc in followedGames.documents) {
+      Game game = await getGameWithId(doc.documentID);
+      Constants.followedGamesNames.add(game.fullName);
+    }
   }
 
   // This function is used to get the recent messages (unfiltered)
@@ -127,55 +198,59 @@ class DatabaseService {
         .limit(10)
         .getDocuments();
     List<Comment> comments =
-    commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
+        commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
     return comments;
   }
 
-  static getGames() async{
+  // This function is used to get the author info of each post
+  static Future<Game> getGameWithId(String gameId) async {
+    DocumentSnapshot gameDocSnapshot = await gamesRef.document(gameId).get();
+    if (gameDocSnapshot.exists) {
+      return Game.fromDoc(gameDocSnapshot);
+    }
+    return Game();
+  }
+
+  static getGames() async {
     QuerySnapshot gameSnapshot = await gamesRef
         .orderBy('fullName', descending: false)
         .limit(6)
         .getDocuments();
-    List<Game> games = gameSnapshot.documents
-        .map((doc) => Game.fromDoc(doc))
-        .toList();
+    List<Game> games =
+        gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
     return games;
   }
 
-  static getGameNames() async{
+  static getGameNames() async {
     Constants.games = [];
-    QuerySnapshot gameSnapshot = await gamesRef
-        .orderBy('fullName', descending: true)
-        .getDocuments();
-    List<Game> games = gameSnapshot.documents
-        .map((doc) => Game.fromDoc(doc))
-        .toList();
+    QuerySnapshot gameSnapshot =
+        await gamesRef.orderBy('fullName', descending: true).getDocuments();
+    List<Game> games =
+        gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
 
-    for(var game in games){
+    for (var game in games) {
       Constants.games.add(game.fullName);
     }
   }
 
-  static Future<List<Game>> getNextGames(
-      String lastVisibleGameSnapShot) async {
+  static Future<List<Game>> getNextGames(String lastVisibleGameSnapShot) async {
     QuerySnapshot gameSnapshot = await gamesRef
         .orderBy('fullName', descending: false)
         .startAfter([lastVisibleGameSnapShot])
         .limit(10)
         .getDocuments();
     List<Game> games =
-    gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
+        gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
     return games;
   }
 
-  static Future<List> searchGames(text) async{
+  static Future<List> searchGames(text) async {
     QuerySnapshot gameSnapshot = await gamesRef
         .where('search', arrayContains: text)
         .orderBy('fullName', descending: false)
         .getDocuments();
-    List<Game> games = gameSnapshot.documents
-        .map((doc) => Game.fromDoc(doc))
-        .toList();
+    List<Game> games =
+        gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
     return games;
   }
 
@@ -191,19 +266,33 @@ class DatabaseService {
         .updateData({'comments': FieldValue.increment(1)});
   }
 
-  static followGame(String gameId) async{
-    DocumentSnapshot gameDocSnapshot = await usersRef.document(Constants.currentUserID).collection('followedGames').document(gameId).get();
-    if(!gameDocSnapshot.exists){
-      await usersRef.document(Constants.currentUserID).collection('followedGames').document(gameId).setData({'followedAt': FieldValue.serverTimestamp()});
+  static followGame(String gameId) async {
+    DocumentSnapshot gameDocSnapshot = await usersRef
+        .document(Constants.currentUserID)
+        .collection('followedGames')
+        .document(gameId)
+        .get();
+    if (!gameDocSnapshot.exists) {
+      await usersRef
+          .document(Constants.currentUserID)
+          .collection('followedGames')
+          .document(gameId)
+          .setData({'followedAt': FieldValue.serverTimestamp()});
     }
   }
 
-   static unFollowGame(String gameId) async{
-    DocumentSnapshot gameDocSnapshot = await usersRef.document(Constants.currentUserID).collection('followedGames').document(gameId).get();
-    if(gameDocSnapshot.exists){
-      await usersRef.document(Constants.currentUserID).collection('followedGames').document(gameId).delete();
+  static unFollowGame(String gameId) async {
+    DocumentSnapshot gameDocSnapshot = await usersRef
+        .document(Constants.currentUserID)
+        .collection('followedGames')
+        .document(gameId)
+        .get();
+    if (gameDocSnapshot.exists) {
+      await usersRef
+          .document(Constants.currentUserID)
+          .collection('followedGames')
+          .document(gameId)
+          .delete();
     }
   }
-
-
 }

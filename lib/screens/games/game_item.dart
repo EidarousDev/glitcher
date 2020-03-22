@@ -124,6 +124,7 @@ class _GameItemState extends State<GameItem> {
         Scaffold.of(context).showSnackBar(snackBar);
       });
     }
+    DatabaseService.getFollowedGames();
   }
 
   checkStates() async {

@@ -40,6 +40,9 @@ class Constants {
     'Fighting'
   ];
 
+  static List<String> followingIds = [];
+  static List<String> followedGamesNames = [];
+
   //Colors for theme
   static Color lightPrimary = Color(0xffdbd8e3);
   static const Color darkPrimary = Color(0xffca3e47);

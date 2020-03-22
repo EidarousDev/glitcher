@@ -1,3 +1,4 @@
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -28,9 +29,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   FirebaseUser currentUser;
   Timestamp lastVisiblePostSnapShot;
   bool _noMorePosts = false;
-  bool _isFetching = false;
+//  bool _isFetching = false;
+//  bool arePostsFilteredByFollowedGames = false;
+//  bool arePostsFilteredByFollowing = false;
+//  int gamersFilterRadio = -1;
+  int gamersOrGames = 0;
 
   ScrollController _scrollController = ScrollController();
+
+  bool isFiltering = false;
+
+  double sliverAppBarHeight = 120;
 
   @override
   Widget build(BuildContext context) {
@@ -60,30 +69,139 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         actions: <Widget>[
           IconButton(
             icon: Icon(
-              Icons.filter_list,
+              FontAwesome.getIconData('filter'),
             ),
             onPressed: () {
-              PermissionsService().requestContactsPermission(
-                  onPermissionDenied: () {
-                print('Permission has been denied');
+              setState(() {
+                isFiltering = !isFiltering;
+                if (isFiltering) {
+                  sliverAppBarHeight = 280;
+                } else {
+                  sliverAppBarHeight = 120;
+                }
               });
+//              PermissionsService().requestContactsPermission(
+//                  onPermissionDenied: () {
+//                print('Permission has been denied');
+//              });
             },
           ),
         ],
       ),
       body: CustomScrollView(
         controller: _scrollController,
-        physics: const AlwaysScrollableScrollPhysics (),
+        physics: const AlwaysScrollableScrollPhysics(),
         slivers: <Widget>[
           SliverAppBar(
-            pinned: false,
-            expandedHeight: 120,
+            expandedHeight: sliverAppBarHeight,
             leading: Container(),
             flexibleSpace: Container(
-              height: 120,
+              height: sliverAppBarHeight,
               color: Constants.darkBG,
               child: Column(
                 children: <Widget>[
+                  isFiltering
+                      ? Padding(
+                          padding: const EdgeInsets.only(left: 10, top: 2, right: 10),
+                          child: Container(
+                            child: Column(
+                              children: <Widget>[
+                                //                          Row(
+//                            children: <Widget>[
+//                              Text('Gamers:'),
+//                              Radio(
+//                                  value: 0,
+//                                  groupValue: gamersFilterRadio,
+//                                  onChanged: (value) {
+//                                    setState(() {
+//                                      arePostsFilteredByFollowing = false;
+//                                      gamersFilterRadio = value;
+//                                    });
+//                                  }),
+//                              Text(
+//                                'All',
+//                              ),
+//                              Radio(
+//                                  value: 1,
+//                                  groupValue: gamersFilterRadio,
+//                                  onChanged: (value) {
+//                                    setState(() {
+//                                      arePostsFilteredByFollowing = true;
+//                                      gamersFilterRadio = value;
+//                                    });
+//                                  }),
+//                              Text(
+//                                'Following',
+//                              ),
+//                            ],
+//                          ),
+                                Text(
+                                  'Filter by:',
+                                  style: TextStyle(fontSize: 18),
+                                ),
+                                Row(
+                                  children: <Widget>[
+                                    Radio(
+                                        value: 0,
+                                        groupValue: gamersOrGames,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            //arePostsFilteredByFollowedGames = false;
+                                            gamersOrGames = value;
+                                          });
+                                        }),
+                                    Text(
+                                      'All',
+                                    ),
+                                    Radio(
+                                        value: 1,
+                                        groupValue: gamersOrGames,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            //arePostsFilteredByFollowedGames = false;
+                                            gamersOrGames = value;
+                                          });
+                                        }),
+                                    Text(
+                                      'Gamers',
+                                    ),
+                                    Radio(
+                                        value: 2,
+                                        groupValue: gamersOrGames,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            //arePostsFilteredByFollowedGames = true;
+                                            gamersOrGames = value;
+                                          });
+                                        }),
+                                    Text(
+                                      'Games',
+                                    ),
+                                  ],
+                                ),
+                                Align(
+                                  alignment: Alignment.bottomRight,
+                                  child: MaterialButton(
+                                    color: Constants.darkPrimary,
+                                    child: Text('Filter'),
+                                    onPressed: () {
+                                      _setupFeed();
+                                    },
+                                  ),
+                                ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Divider(
+                                    height: 1,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        )
+                      : Container(),
                   Row(
                     children: <Widget>[
                       Padding(
@@ -211,7 +329,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
             ),
           ),
-          SliverList(delegate: SliverChildListDelegate([
+          SliverList(
+              delegate: SliverChildListDelegate([
             ListView.builder(
               physics: NeverScrollableScrollPhysics(),
               scrollDirection: Axis.vertical,
@@ -246,12 +365,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   _setupFeed() async {
-    //print('what\'s happening?');
-    List<Post> posts = await DatabaseService.getPosts();
-    setState(() {
-      _posts = posts;
-      this.lastVisiblePostSnapShot = posts.last.timestamp;
-    });
+    List<Post> posts;
+
+    if (gamersOrGames == 0) {
+      posts = await DatabaseService.getPosts();
+      setState(() {
+        _posts = posts;
+        this.lastVisiblePostSnapShot = posts.last.timestamp;
+      });
+    } else if (gamersOrGames == 1) {
+      posts = await DatabaseService.getPostsFilteredByFollowing();
+      setState(() {
+        _posts = posts;
+        this.lastVisiblePostSnapShot = posts.last.timestamp;
+      });
+    } else if (gamersOrGames == 2) {
+      posts = await DatabaseService.getPostsFilteredByFollowedGames();
+      setState(() {
+        _posts = posts;
+        this.lastVisiblePostSnapShot = posts.last.timestamp;
+      });
+    }
   }
 
   @override
@@ -315,7 +449,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void nextPosts() async {
-    var posts = await DatabaseService.getNextPosts(lastVisiblePostSnapShot);
+    var posts;
+    if(gamersOrGames == 0){
+      posts = await DatabaseService.getNextPosts(lastVisiblePostSnapShot);
+    }
+    else if(gamersOrGames == 1){
+      posts = await DatabaseService.getNextPostsFilteredByFollowing(lastVisiblePostSnapShot);
+    }
+    else if(gamersOrGames == 2){
+      posts = await DatabaseService.getNextPostsFilteredByFollowedGames(lastVisiblePostSnapShot);
+    }
     if (posts.length > 0) {
       setState(() {
         posts.forEach((element) => _posts.add(element));
