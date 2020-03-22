@@ -75,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               setState(() {
                 isFiltering = !isFiltering;
                 if (isFiltering) {
-                  sliverAppBarHeight = 280;
+                  sliverAppBarHeight = 320;
                 } else {
                   sliverAppBarHeight = 120;
                 }
