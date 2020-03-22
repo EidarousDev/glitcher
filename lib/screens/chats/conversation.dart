@@ -1,11 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/auth.dart';
-import 'package:glitcher/utils/constants.dart';
-
 import 'package:glitcher/widgets/chat_bubble.dart';
 
 class Conversation extends StatefulWidget {
@@ -17,7 +16,7 @@ class Conversation extends StatefulWidget {
   _ConversationState createState() => _ConversationState(otherUid: otherUid);
 }
 
-class _ConversationState extends State<Conversation> {
+class _ConversationState extends State<Conversation> with WidgetsBindingObserver{
   Firestore _firestore = Firestore.instance;
 //  static Random random = Random();
 //  String name;
@@ -31,6 +30,8 @@ class _ConversationState extends State<Conversation> {
   var messages;
 
   TextEditingController messageController = TextEditingController();
+
+  var seen = false;
 
   _ConversationState({this.otherUid});
 
@@ -52,8 +53,10 @@ class _ConversationState extends State<Conversation> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     getCurrentUser();
     otherUserListener();
+    listenIfMessagesSeen();
     loadUserData(otherUid);
   }
 
@@ -62,12 +65,12 @@ class _ConversationState extends State<Conversation> {
 
     await _firestore
         .collection('chats')
-        .document(currentUser.uid)
+        .document(Constants.currentUserID)
         .collection('conversations')
         .document(otherUid)
         .collection('messages')
         .add({
-      'sender': currentUser.uid,
+      'sender': Constants.currentUserID,
       'text': messageText,
       'timestamp': FieldValue.serverTimestamp(),
       'type': 'text'
@@ -77,20 +80,22 @@ class _ConversationState extends State<Conversation> {
         .collection('chats')
         .document(otherUid)
         .collection('conversations')
-        .document(currentUser.uid)
+        .document(Constants.currentUserID)
         .collection('messages')
         .add({
-      'sender': currentUser.uid,
+      'sender': Constants.currentUserID,
       'text': messageText,
       'timestamp': FieldValue.serverTimestamp(),
       'type': 'text'
     });
+
+    makeMessagesUnseen();
   }
 
   void streamMessages() async {
     await for (var snapshot in _firestore
         .collection('chats')
-        .document(currentUser.uid)
+        .document(Constants.currentUserID)
         .collection('conversations')
         .document(otherUid)
         .collection('messages')
@@ -98,18 +103,40 @@ class _ConversationState extends State<Conversation> {
         .snapshots()) {
       setState(() {
         messages = snapshot.documents;
+        if(snapshot.documents.first.data['sender'] == otherUid){
+          print('made seen');
+          makeMessagesSeen();
+        }
       });
     }
+  }
+
+  listenIfMessagesSeen(){
+    _firestore
+        .collection('chats')
+        .document(Constants.currentUserID)
+        .collection('conversations')
+        .document(otherUid)
+        .collection('messages').snapshots().listen((querySnapshot) {
+      querySnapshot.documentChanges.forEach((change) {
+        if (change.document.documentID == 'seen') {
+          setState(() {
+            seen = change.document.data['isSeen'];
+            print('seen');
+          });
+        }
+      });
+    });
   }
 
   otherUserListener() {
     usersRef.snapshots().listen((querySnapshot) {
       querySnapshot.documentChanges.forEach((change) {
-        setState(() {
-          if (change.document.documentID == otherUid) {
+        if (change.document.documentID == otherUid) {
+          setState(() {
             otherUser = User.fromDoc(change.document);
-          }
-        });
+          });
+        }
       });
     });
   }
@@ -150,6 +177,25 @@ class _ConversationState extends State<Conversation> {
     }
 
     return time;
+  }
+
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    updateOnlineUserState(state);
+  }
+
+  void updateOnlineUserState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused) {
+      await usersRef
+          .document(Constants.currentUserID)
+          .updateData({'online': FieldValue.serverTimestamp()});
+    } else if (state == AppLifecycleState.resumed) {
+      await usersRef
+          .document(Constants.currentUserID)
+          .updateData({'online': 'online'});
+    }
   }
 
   @override
@@ -193,7 +239,7 @@ class _ConversationState extends State<Conversation> {
                       otherUser != null
                           ? otherUser.online == 'online'
                               ? 'online'
-                              : formatTimestamp(otherUser.online)
+                              : 'offline'
                           : '',
                       style: TextStyle(
                         fontWeight: FontWeight.w400,
@@ -237,15 +283,20 @@ class _ConversationState extends State<Conversation> {
                           time: formatTimestamp(msg['timestamp']),
                           type: msg['type'],
                           replyText: null,
-                          isMe: msg['sender'] == currentUser.uid,
+                          isMe: msg['sender'] == Constants.currentUserID,
                           isGroup: false,
                           isReply: false,
                           replyName: null,
                         );
                       },
                     ),
+
                   )
                 : Container(),
+            Align(alignment: Alignment.bottomRight, child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(seen? 'seen' : ''),
+            )),
             Align(
               alignment: Alignment.bottomCenter,
               child: Container(
@@ -327,4 +378,49 @@ class _ConversationState extends State<Conversation> {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  void makeMessagesSeen() async{
+    await _firestore
+        .collection('chats')
+        .document(Constants.currentUserID)
+        .collection('conversations')
+        .document(otherUid)
+        .collection('messages')
+        .document('seen').setData({'isSeen' : true});
+
+    await _firestore
+        .collection('chats')
+        .document(otherUid)
+        .collection('conversations')
+        .document(Constants.currentUserID)
+        .collection('messages')
+        .document('seen').setData({'isSeen' : true});
+
+  }
+  void makeMessagesUnseen() async{
+    await _firestore
+        .collection('chats')
+        .document(Constants.currentUserID)
+        .collection('conversations')
+        .document(otherUid)
+        .collection('messages')
+        .document('seen').updateData({'isSeen' : false});
+
+    await _firestore
+        .collection('chats')
+        .document(otherUid)
+        .collection('conversations')
+        .document(Constants.currentUserID)
+        .collection('messages')
+        .document('seen').updateData({'isSeen' : false});
+
+  }
+
+
 }

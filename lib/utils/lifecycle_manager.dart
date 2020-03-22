@@ -43,7 +43,6 @@ class _LifecycleManagerState extends State<LifecycleManager>
     setState(() {
       _lastLifecycleState = state;
     });
-
     updateOnlineUserState();
   }
 

@@ -404,6 +404,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    updateOnlineUserState(state);
     if (state == AppLifecycleState.resumed) {
       // user returned to our app
       _setupFeed();
@@ -415,6 +416,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       _setupFeed();
     } else if (state == AppLifecycleState.detached) {
       // app suspended (not used in iOS)
+    }
+  }
+
+  void updateOnlineUserState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused) {
+      await usersRef
+          .document(Constants.currentUserID)
+          .updateData({'online': FieldValue.serverTimestamp()});
+    } else if (state == AppLifecycleState.resumed) {
+      await usersRef
+          .document(Constants.currentUserID)
+          .updateData({'online': 'online'});
     }
   }
 

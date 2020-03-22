@@ -19,7 +19,7 @@ class AppPage extends StatefulWidget {
   _AppPageState createState() => _AppPageState();
 }
 
-class _AppPageState extends State<AppPage> {
+class _AppPageState extends State<AppPage>{
   PageController _pageController;
   int _page = 2;
   String username;
@@ -144,6 +144,7 @@ class _AppPageState extends State<AppPage> {
       });
     });
   }
+
 
   void onPageChanged(int page) {
     //Solves the problem setState() called after dispose()
