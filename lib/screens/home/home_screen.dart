@@ -106,35 +106,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           child: Container(
                             child: Column(
                               children: <Widget>[
-                                //                          Row(
-//                            children: <Widget>[
-//                              Text('Gamers:'),
-//                              Radio(
-//                                  value: 0,
-//                                  groupValue: gamersFilterRadio,
-//                                  onChanged: (value) {
-//                                    setState(() {
-//                                      arePostsFilteredByFollowing = false;
-//                                      gamersFilterRadio = value;
-//                                    });
-//                                  }),
-//                              Text(
-//                                'All',
-//                              ),
-//                              Radio(
-//                                  value: 1,
-//                                  groupValue: gamersFilterRadio,
-//                                  onChanged: (value) {
-//                                    setState(() {
-//                                      arePostsFilteredByFollowing = true;
-//                                      gamersFilterRadio = value;
-//                                    });
-//                                  }),
-//                              Text(
-//                                'Following',
-//                              ),
-//                            ],
-//                          ),
                                 Text(
                                   'Filter by:',
                                   style: TextStyle(fontSize: 18),
@@ -151,8 +122,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                           });
                                         }),
                                     Text(
-                                      'All',
+                                      'Recent Posts',
                                     ),
+                                  ],
+                                ),
+
+                                Row(
+                                  children: <Widget>[
                                     Radio(
                                         value: 1,
                                         groupValue: gamersOrGames,
@@ -163,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                           });
                                         }),
                                     Text(
-                                      'Gamers',
+                                      'Followed Gamers',
                                     ),
                                     Radio(
                                         value: 2,
@@ -175,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                           });
                                         }),
                                     Text(
-                                      'Games',
+                                      'Followed Games',
                                     ),
                                   ],
                                 ),
@@ -186,6 +162,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                     child: Text('Filter'),
                                     onPressed: () {
                                       _setupFeed();
+                                      setState(() {
+                                        isFiltering = false;
+                                      });
                                     },
                                   ),
                                 ),

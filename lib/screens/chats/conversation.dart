@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/auth.dart';
+import 'package:glitcher/utils/constants.dart';
 
 import 'package:glitcher/widgets/chat_bubble.dart';
 
@@ -52,7 +53,7 @@ class _ConversationState extends State<Conversation> {
   void initState() {
     super.initState();
     getCurrentUser();
-
+    otherUserListener();
     loadUserData(otherUid);
   }
 
@@ -99,6 +100,18 @@ class _ConversationState extends State<Conversation> {
         messages = snapshot.documents;
       });
     }
+  }
+
+  otherUserListener() {
+    usersRef.snapshots().listen((querySnapshot) {
+      querySnapshot.documentChanges.forEach((change) {
+        setState(() {
+          if (change.document.documentID == otherUid) {
+            otherUser = User.fromDoc(change.document);
+          }
+        });
+      });
+    });
   }
 
   String formatTimestamp(Timestamp timestamp) {
