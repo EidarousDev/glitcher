@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:glitcher/screens/app_page.dart';
 import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/utils/Loader.dart';
-import 'package:glitcher/utils/constants.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:flutter/services.dart';

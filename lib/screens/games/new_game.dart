@@ -1,11 +1,10 @@
 import 'package:dropdownfield/dropdownfield.dart';
-import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:glitcher/utils/Loader.dart';
-import 'package:glitcher/utils/constants.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter_icons/flutter_icons.dart';
@@ -32,13 +31,12 @@ class _NewGameState extends State<NewGame> {
 
   bool _loading = false;
   GlobalKey<AutoCompleteTextFieldState<String>> autocompleteKey =
-  new GlobalKey();
+      new GlobalKey();
 
   @override
   void initState() {
     super.initState();
   }
-
 
   @override
   void dispose() {
@@ -51,15 +49,13 @@ class _NewGameState extends State<NewGame> {
     });
   }
 
-
-
   Future chooseImage() async {
     clearVars();
     await ImagePicker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 52,
-        maxHeight: 400,
-        maxWidth: 600)
+            source: ImageSource.gallery,
+            imageQuality: 52,
+            maxHeight: 400,
+            maxWidth: 600)
         .then((image) {
       setState(() {
         _image = image;
@@ -90,12 +86,13 @@ class _NewGameState extends State<NewGame> {
     });
   }
 
-  Future uploadGame(String fullName, String shortName, String description, String genre) async {
+  Future uploadGame(String fullName, String shortName, String description,
+      String genre) async {
     setState(() {
       _loading = true;
     });
 
-  if (_image != null) {
+    if (_image != null) {
       //await compressAndUploadFile(_image, 'glitchertemp.jpg');
       await uploadFile('images', _image);
     }
@@ -117,9 +114,9 @@ class _NewGameState extends State<NewGame> {
     });
   }
 
-  searchList(String text){
+  searchList(String text) {
     List<String> list = [];
-    for(int i = 1; i <= text.length; i++){
+    for (int i = 1; i <= text.length; i++) {
       list.add(text.substring(0, i).toLowerCase());
     }
     return list;
@@ -149,7 +146,9 @@ class _NewGameState extends State<NewGame> {
                   autofocus: true,
                 ),
               ),
-              Divider(height: .5,),
+              Divider(
+                height: .5,
+              ),
               Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: TextField(
@@ -162,32 +161,37 @@ class _NewGameState extends State<NewGame> {
                   autofocus: true,
                 ),
               ),
-              Divider(height: .5,),
+              Divider(
+                height: .5,
+              ),
               Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: TextField(
                   controller: descriptionTextController,
                   decoration: new InputDecoration.collapsed(
-                      hintText: 'Game description, ex: An open world game developed by Rockstar studio...'),
+                      hintText:
+                          'Game description, ex: An open world game developed by Rockstar studio...'),
                   minLines: 1,
                   maxLines: 5,
                   autocorrect: true,
                   autofocus: true,
                 ),
               ),
-              Divider(height: .5,),
-              Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: DropDownField(
-                  hintText: 'Game genre',
-                  items: Constants.genres,
-                  controller: genreTextController,
-                  required: true,
-                  value: genreTextController.text,
-                )
+              Divider(
+                height: .5,
               ),
-              Divider(height: .5,),
-
+              Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: DropDownField(
+                    hintText: 'Game genre',
+                    items: Constants.genres,
+                    controller: genreTextController,
+                    required: true,
+                    value: genreTextController.text,
+                  )),
+              Divider(
+                height: .5,
+              ),
               _image != null ? Image.file(_image) : Container(),
               Container(
                   margin: EdgeInsets.symmetric(horizontal: 10),
@@ -198,12 +202,10 @@ class _NewGameState extends State<NewGame> {
                       onPressed: () {
                         PermissionsService().requestStoragePermission(
                             onPermissionDenied: () {
-                              print('Permission has been denied');
-                            });
+                          print('Permission has been denied');
+                        });
                         chooseImage();
                       })),
-
-
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 10),
                 child: RaisedButton(
@@ -211,7 +213,11 @@ class _NewGameState extends State<NewGame> {
                     textColor: Colors.white,
                     color: Colors.blue,
                     onPressed: () {
-                      uploadGame(fullNameTextController.text, shortNameTextController.text, descriptionTextController.text, genreTextController.text);
+                      uploadGame(
+                          fullNameTextController.text,
+                          shortNameTextController.text,
+                          descriptionTextController.text,
+                          genreTextController.text);
                     }),
               )
             ],
@@ -239,9 +245,9 @@ class _NewGameState extends State<NewGame> {
           _loading
               ? LoaderTwo()
               : Container(
-            width: 0,
-            height: 0,
-          ),
+                  width: 0,
+                  height: 0,
+                ),
         ],
       ),
     );

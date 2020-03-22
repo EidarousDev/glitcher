@@ -19,7 +19,7 @@ import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/share_link.dart';
-import 'package:glitcher/utils/constants.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/utils/statics.dart';
 import 'package:share/share.dart';
 import 'package:video_player/video_player.dart';

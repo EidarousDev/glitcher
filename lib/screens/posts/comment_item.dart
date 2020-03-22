@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/utils/constants.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/utils/functions.dart';
 
 class CommentItem extends StatefulWidget {

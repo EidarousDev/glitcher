@@ -5,7 +5,7 @@ import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/services/route_generator.dart';
-import 'package:glitcher/utils/constants.dart';
+import 'package:glitcher/constants/constants.dart';
 
 void main() {
   /*RenderErrorBox.backgroundColor = Colors.transparent;

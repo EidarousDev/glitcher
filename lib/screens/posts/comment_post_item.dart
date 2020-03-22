@@ -1,3 +1,4 @@
+import 'package:cache_image/cache_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,7 @@ import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/services/share_link.dart';
-import 'package:glitcher/utils/constants.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:share/share.dart';
 import 'package:video_player/video_player.dart';
@@ -51,16 +52,13 @@ class _CommentPostItemState extends State<CommentPostItem> {
         ListTile(
           contentPadding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
           leading: InkWell(
-              child: author.profileImageUrl != null
-                  ? CircleAvatar(
-                      radius: 30.0,
-                      backgroundImage: NetworkImage(author
-                          .profileImageUrl), // no matter how big it is, it won't overflow
-                    )
-                  : CircleAvatar(
-                      backgroundImage:
-                          AssetImage('assets/images/default_profile.png'),
-                    ),
+              child: CircleAvatar(
+                radius: 25.0,
+                backgroundColor: Colors.grey,
+                backgroundImage: Constants.loggedInProfileImageURL != null
+                    ? CacheImage(Constants.loggedInProfileImageURL)
+                    : AssetImage('assets/images/default_profile.png'),
+              ),
               onTap: () {
                 Navigator.of(context).pushNamed('/user-profile', arguments: {
                   'userId': post.authorId,

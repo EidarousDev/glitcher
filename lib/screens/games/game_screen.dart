@@ -1,20 +1,14 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/font_awesome.dart';
-import 'package:glitcher/common_widgets/card_icon_text.dart';
 import 'package:glitcher/common_widgets/drawer.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/screens/chats/chats.dart';
-import 'package:glitcher/screens/notifications/notifications_screen.dart';
 import 'package:glitcher/screens/posts/post_item.dart';
-import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
-import 'package:glitcher/utils/constants.dart';
+import 'package:glitcher/constants/constants.dart';
 
 class GameScreen extends StatefulWidget {
   GameScreen({this.game});
@@ -34,8 +28,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   var _posts = [];
   FirebaseUser currentUser;
   Timestamp lastVisiblePostSnapShot;
-  bool _noMorePosts = false;
-  bool _isFetching = false;
+  //bool _noMorePosts = false;
+  //bool _isFetching = false;
 
   ScrollController _scrollController = ScrollController();
 
@@ -50,7 +44,6 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
             child: InkWell(
               onTap: () => Scaffold.of(context).openDrawer(),
               child: Icon(IconData(58311, fontFamily: 'MaterialIcons')),
-
             ),
           ),
         ),
@@ -64,15 +57,15 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
             onPressed: () {
               PermissionsService().requestContactsPermission(
                   onPermissionDenied: () {
-                    print('Permission has been denied');
-                  });
+                print('Permission has been denied');
+              });
             },
           ),
         ],
       ),
       body: CustomScrollView(
         controller: _scrollController,
-        physics: const AlwaysScrollableScrollPhysics (),
+        physics: const AlwaysScrollableScrollPhysics(),
         slivers: <Widget>[
           SliverAppBar(
             pinned: false,
@@ -83,24 +76,47 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
               color: Constants.darkBG,
               child: Column(
                 children: <Widget>[
-                  SizedBox(height: 15,),
+                  SizedBox(
+                    height: 15,
+                  ),
                   Container(
-                    height: 100,
+                      height: 100,
                       width: 100,
                       child: Image.network(game.image)),
-                  SizedBox(height: 15,),
-                  Text(game.fullName, style: TextStyle(fontSize: 22),),
-                  SizedBox(height: 5,),
-                  Text(game.genre, style: TextStyle(fontSize: 12),),
-                  SizedBox(height: 20,),
-                  Text(game.description, style: TextStyle(fontSize: 12),),
-                  SizedBox(height: 10,),
-                  Container(height: 20, color: Constants.darkLineBreak,)
+                  SizedBox(
+                    height: 15,
+                  ),
+                  Text(
+                    game.fullName,
+                    style: TextStyle(fontSize: 22),
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Text(
+                    game.genre,
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    game.description,
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    height: 20,
+                    color: Constants.darkLineBreak,
+                  )
                 ],
               ),
             ),
           ),
-          SliverList(delegate: SliverChildListDelegate([
+          SliverList(
+              delegate: SliverChildListDelegate([
             ListView.builder(
               physics: NeverScrollableScrollPhysics(),
               scrollDirection: Axis.vertical,
@@ -152,12 +168,12 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     _scrollController
       ..addListener(() {
         if (_scrollController.offset >=
-            _scrollController.position.maxScrollExtent &&
+                _scrollController.position.maxScrollExtent &&
             !_scrollController.position.outOfRange) {
           print('reached the bottom');
           nextGamePosts();
         } else if (_scrollController.offset <=
-            _scrollController.position.minScrollExtent &&
+                _scrollController.position.minScrollExtent &&
             !_scrollController.position.outOfRange) {
           print("reached the top");
         } else {}
@@ -204,7 +220,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   }
 
   void nextGamePosts() async {
-    var posts = await DatabaseService.getNextGamePosts(lastVisiblePostSnapShot, game.fullName);
+    var posts = await DatabaseService.getNextGamePosts(
+        lastVisiblePostSnapShot, game.fullName);
     if (posts.length > 0) {
       setState(() {
         posts.forEach((element) => _posts.add(element));

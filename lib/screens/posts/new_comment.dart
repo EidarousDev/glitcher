@@ -8,7 +8,7 @@ import 'package:glitcher/screens/posts/comment_post_item.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/Loader.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:glitcher/utils/constants.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -113,10 +113,12 @@ class _NewCommentState extends State<NewComment>
 
   void loadComments() async {
     List<Comment> comments = await DatabaseService.getComments(widget.postId);
-    setState(() {
-      _comments = comments;
-      this.lastVisibleCommentSnapShot = comments.last.timestamp;
-    });
+    if (comments != null) {
+      setState(() {
+        _comments = comments;
+        this.lastVisibleCommentSnapShot = comments?.last?.timestamp;
+      });
+    }
   }
 
   void playVideo() {
@@ -178,7 +180,7 @@ class _NewCommentState extends State<NewComment>
       child: StreamBuilder<QuerySnapshot>(
         stream: postsRef
             .document(widget.postId)
-            .collection('comments')
+            ?.collection('comments')
             ?.snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) return new Text('Error: ${snapshot.error}');

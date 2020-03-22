@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:glitcher/models/notification_model.dart' as notification_model;
-import 'package:glitcher/screens/posts/new_comment.dart';
 import 'package:glitcher/services/notification_handler.dart';
-import 'package:glitcher/utils/constants.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/utils/functions.dart';
 
 class NotificationItem extends StatefulWidget {
@@ -39,7 +38,7 @@ class _NotificationItemState extends State<NotificationItem> {
 
   _buildItem(notification_model.Notification notification) {
     return Container(
-      color: notification.seen? Constants.darkBG : Constants.darkAccent,
+      color: notification.seen ? Constants.darkBG : Constants.darkAccent,
       child: Container(
         padding: EdgeInsets.all(7),
         child: ListTile(
@@ -62,8 +61,7 @@ class _NotificationItemState extends State<NotificationItem> {
             children: <Widget>[
               SizedBox(height: 10),
               Text(
-                "${Functions.formatTimestamp(widget.notification.timestamp)}"
-                ,
+                "${Functions.formatTimestamp(widget.notification.timestamp)}",
                 style: TextStyle(
                   fontWeight: FontWeight.w300,
                   fontSize: 11,
@@ -104,7 +102,6 @@ class _NotificationItemState extends State<NotificationItem> {
               'postId': this.widget.notification.postId,
               'commentsNo': 5
             });
-
           },
         ),
       ),

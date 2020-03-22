@@ -17,7 +17,7 @@ import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/statics.dart';
 import 'package:glitcher/utils/functions.dart';
-import 'package:glitcher/utils/constants.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class HomePage extends StatefulWidget {
@@ -203,9 +203,11 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             ListTile(
-              onTap: (){
+              onTap: () {
                 Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => NotificationsScreen()));
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => NotificationsScreen()));
               },
               title: Text(
                 'Help center',
@@ -275,7 +277,7 @@ class _HomePageState extends State<HomePage> {
             ),
             IconButton(
               icon: Icon(Icons.notifications),
-              onPressed: (){
+              onPressed: () {
                 setState(() {
                   body = NotificationsScreen();
                 });

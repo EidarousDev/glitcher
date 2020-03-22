@@ -3,12 +3,10 @@ import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/functions.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:glitcher/utils/Loader.dart';
-import 'package:glitcher/services/auth.dart';
-import 'package:glitcher/utils/constants.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:video_player/video_player.dart';
@@ -191,7 +189,6 @@ class _NewPostState extends State<NewPost> {
     });
   }
 
-
   Widget _buildWidget() {
     return WillPopScope(
       onWillPop: () {
@@ -340,10 +337,7 @@ class _NewPostState extends State<NewPost> {
                 child: TypeAheadFormField(
                   textFieldConfiguration: TextFieldConfiguration(
                       controller: this._typeAheadController,
-                      decoration: InputDecoration(
-                          labelText: 'Game name'
-                      )
-                  ),
+                      decoration: InputDecoration(labelText: 'Game name')),
                   suggestionsCallback: (pattern) {
                     return DatabaseService.searchGames(pattern);
                   },
@@ -354,9 +348,9 @@ class _NewPostState extends State<NewPost> {
                       title: Text(game.fullName),
                     );
                   },
-
                   onSuggestionSelected: (suggestion) {
-                    this._typeAheadController.text = (suggestion as Game).fullName;
+                    this._typeAheadController.text =
+                        (suggestion as Game).fullName;
                     setState(() {
                       selectedGame = _typeAheadController.text;
                     });

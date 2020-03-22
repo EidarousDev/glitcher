@@ -5,7 +5,7 @@ import 'package:glitcher/screens/app_page.dart';
 import 'package:glitcher/screens/login_page.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/utils/constants.dart';
+import 'package:glitcher/constants/constants.dart';
 
 class RootPage extends StatefulWidget {
   @override

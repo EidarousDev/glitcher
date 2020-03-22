@@ -1,7 +1,4 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -10,9 +7,8 @@ import 'package:glitcher/screens/home/home_screen.dart';
 import 'package:glitcher/screens/notifications/notifications_screen.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:badges/badges.dart';
-import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
-import 'package:glitcher/utils/constants.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'chats/chats.dart';
 
 class AppPage extends StatefulWidget {
@@ -150,13 +146,16 @@ class _AppPageState extends State<AppPage> {
   }
 
   void onPageChanged(int page) {
-    setState(() {
-      this._page = page;
-      if (page == 3) {
-        //notification screen
-        NotificationHandler().clearNotificationsNumber();
-      }
-    });
+    //Solves the problem setState() called after dispose()
+    if (mounted) {
+      setState(() {
+        this._page = page;
+        if (page == 3) {
+          //notification screen
+          NotificationHandler().clearNotificationsNumber();
+        }
+      });
+    }
   }
 
   _saveDeviceToken() async {

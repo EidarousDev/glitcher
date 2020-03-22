@@ -11,7 +11,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
-import 'constants.dart';
+import '../constants/constants.dart';
 
 void changeTheme(BuildContext context) {
   if (currentTheme == AvailableThemes.LIGHT_THEME) {

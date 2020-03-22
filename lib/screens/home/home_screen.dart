@@ -1,4 +1,4 @@
-
+import 'package:cache_image/cache_image.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,7 +14,8 @@ import 'package:glitcher/screens/posts/post_item.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
-import 'package:glitcher/utils/constants.dart';
+import 'package:glitcher/constants/constants.dart';
+import 'package:path_provider/path_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -24,7 +25,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   User loggedInUser;
   String username;
-  String profileImageUrl = '';
+  //String profileImageUrl = '';
   var _posts = [];
   FirebaseUser currentUser;
   Timestamp lastVisiblePostSnapShot;
@@ -102,7 +103,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 children: <Widget>[
                   isFiltering
                       ? Padding(
-                          padding: const EdgeInsets.only(left: 10, top: 2, right: 10),
+                          padding: const EdgeInsets.only(
+                              left: 10, top: 2, right: 10),
                           child: Container(
                             child: Column(
                               children: <Widget>[
@@ -189,8 +191,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         child: CircleAvatar(
                           radius: 25.0,
                           backgroundColor: Colors.grey,
-                          backgroundImage: profileImageUrl != null
-                              ? CachedNetworkImageProvider(profileImageUrl)
+                          backgroundImage: Constants.loggedInProfileImageURL !=
+                                  null
+                              ? CacheImage(Constants.loggedInProfileImageURL)
                               : AssetImage('assets/images/default_profile.png'),
                         ),
                       ),
@@ -422,22 +425,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     loggedInUser = await DatabaseService.getUserWithId(currentUser.uid);
 
     setState(() {
-      profileImageUrl = loggedInUser.profileImageUrl;
+      //profileImageUrl = loggedInUser.profileImageUrl;
+      Constants.loggedInProfileImageURL = loggedInUser.profileImageUrl;
       username = loggedInUser.username;
-      print('profileImageUrl = $profileImageUrl and username = $username');
+      print(
+          'profileImageUrl = ${Constants.loggedInProfileImageURL} and username = $username');
     });
   }
 
   void nextPosts() async {
     var posts;
-    if(gamersOrGames == 0){
+    if (gamersOrGames == 0) {
       posts = await DatabaseService.getNextPosts(lastVisiblePostSnapShot);
-    }
-    else if(gamersOrGames == 1){
-      posts = await DatabaseService.getNextPostsFilteredByFollowing(lastVisiblePostSnapShot);
-    }
-    else if(gamersOrGames == 2){
-      posts = await DatabaseService.getNextPostsFilteredByFollowedGames(lastVisiblePostSnapShot);
+    } else if (gamersOrGames == 1) {
+      posts = await DatabaseService.getNextPostsFilteredByFollowing(
+          lastVisiblePostSnapShot);
+    } else if (gamersOrGames == 2) {
+      posts = await DatabaseService.getNextPostsFilteredByFollowedGames(
+          lastVisiblePostSnapShot);
     }
     if (posts.length > 0) {
       setState(() {
@@ -445,5 +450,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         this.lastVisiblePostSnapShot = posts.last.timestamp;
       });
     }
+  }
+
+  void _refresh() {
+    getTemporaryDirectory().then((dir) {
+      dir.delete(recursive: true);
+    });
+    setState(() {});
   }
 }

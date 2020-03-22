@@ -5,7 +5,7 @@ import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/notification_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/utils/constants.dart';
+import 'package:glitcher/constants/constants.dart';
 
 class DatabaseService {
   // This function is used to get the recent posts (unfiltered)
@@ -63,7 +63,7 @@ class DatabaseService {
         .limit(10)
         .getDocuments();
     List<Post> posts =
-    postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+        postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
     return posts;
   }
 
@@ -77,7 +77,7 @@ class DatabaseService {
         .limit(10)
         .getDocuments();
     List<Post> posts =
-    postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+        postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
     return posts;
   }
 
@@ -194,9 +194,9 @@ class DatabaseService {
     QuerySnapshot commentSnapshot = await postsRef
         .document(postId)
         .collection('comments')
-        .orderBy('timestamp', descending: true)
-        .limit(10)
-        .getDocuments();
+        ?.orderBy('timestamp', descending: true)
+        ?.limit(10)
+        ?.getDocuments();
     List<Comment> comments =
         commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
     return comments;

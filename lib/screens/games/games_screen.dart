@@ -1,9 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/screens/games/game_item.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/models/game_model.dart';
-import 'package:glitcher/utils/constants.dart';
 
 class GamesScreen extends StatefulWidget {
   @override
@@ -115,15 +113,16 @@ class _GamesScreenState extends State<GamesScreen> {
   @override
   void initState() {
     super.initState();
+
     ///Set up listener here
     _scrollController.addListener(() {
       if (_scrollController.offset >=
-          _scrollController.position.maxScrollExtent &&
+              _scrollController.position.maxScrollExtent &&
           !_scrollController.position.outOfRange) {
         print('reached the bottom');
         nextGames();
       } else if (_scrollController.offset <=
-          _scrollController.position.minScrollExtent &&
+              _scrollController.position.minScrollExtent &&
           !_scrollController.position.outOfRange) {
         print("reached the top");
       } else {}
@@ -131,7 +130,7 @@ class _GamesScreenState extends State<GamesScreen> {
     _setupFeed();
   }
 
-  nextGames() async{
+  nextGames() async {
     var games = await DatabaseService.getNextGames(lastVisibleGameSnapShot);
     if (games.length > 0) {
       setState(() {
