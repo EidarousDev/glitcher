@@ -27,12 +27,9 @@ class ChatBubble extends StatefulWidget {
 
 class _ChatBubbleState extends State<ChatBubble> {
 
-
   List colors = Colors.primaries;
   static Random random = Random();
   int rNum = random.nextInt(18);
-
-
 
   @override
   Widget build(BuildContext context) {

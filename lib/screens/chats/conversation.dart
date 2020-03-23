@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/auth.dart';
@@ -16,48 +19,35 @@ class Conversation extends StatefulWidget {
   _ConversationState createState() => _ConversationState(otherUid: otherUid);
 }
 
-class _ConversationState extends State<Conversation> with WidgetsBindingObserver{
+class _ConversationState extends State<Conversation>
+    with WidgetsBindingObserver {
   Firestore _firestore = Firestore.instance;
 //  static Random random = Random();
 //  String name;
 //  String profileImage;
-  User otherUser;
+  User otherUser = User();
   final String otherUid;
-  FirebaseUser currentUser;
-
+  Timestamp firstVisibleGameSnapShot;
   String messageText;
 
-  var messages;
+  List<Message> _messages;
 
   TextEditingController messageController = TextEditingController();
 
   var seen = false;
 
+  StreamSubscription<QuerySnapshot> messagesSubscription;
+
+  ScrollController _scrollController = ScrollController();
+
   _ConversationState({this.otherUid});
-
-  void getCurrentUser() async {
-    this.currentUser = await Auth().getCurrentUser();
-
-    streamMessages();
-  }
 
   void loadUserData(String uid) async {
     User user;
     user = await DatabaseService.getUserWithId(uid);
-
     setState(() {
       otherUser = user;
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    getCurrentUser();
-    otherUserListener();
-    listenIfMessagesSeen();
-    loadUserData(otherUid);
   }
 
   void sendMessage() async {
@@ -92,44 +82,96 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
     makeMessagesUnseen();
   }
 
-  void streamMessages() async {
-    await for (var snapshot in _firestore
+  void getMessages() async {
+    var messages = await DatabaseService.getMessages(otherUid);
+    setState(() {
+      this._messages = messages;
+      this.firstVisibleGameSnapShot = messages.last.timestamp;
+    });
+  }
+
+  void getPrevMessages() async{
+    var messages;
+    messages = await DatabaseService.getPrevMessages(firstVisibleGameSnapShot, otherUid);
+
+    if (messages.length > 0) {
+      setState(() {
+        messages.forEach((element) => this._messages.add(element));
+        this.firstVisibleGameSnapShot = messages.last.timestamp;
+      });
+    }
+  }
+
+//  void streamMessages() async {
+//    await for (var snapshot in _firestore
+//        .collection('chats')
+//        .document(Constants.currentUserID)
+//        .collection('conversations')
+//        .document(otherUid)
+//        .collection('messages')
+//        .orderBy('timestamp', descending: true)
+//        .snapshots()) {
+//      setState(() {
+//        messages = snapshot.documents;
+//        if (snapshot.documents.first.data['sender'] == otherUid) {
+//          print('made seen');
+//          makeMessagesSeen();
+//        }
+//      });
+//    }
+//  }
+  void listenToMessagesChanges() async{
+    messagesSubscription = _firestore
         .collection('chats')
         .document(Constants.currentUserID)
         .collection('conversations')
         .document(otherUid)
         .collection('messages')
         .orderBy('timestamp', descending: true)
-        .snapshots()) {
-      setState(() {
-        messages = snapshot.documents;
-        if(snapshot.documents.first.data['sender'] == otherUid){
+        .snapshots()
+        .listen((querySnapshot) {
+      querySnapshot.documentChanges.forEach((change) {
+        if (change.type == DocumentChangeType.added) {
+          if (_messages != null) {
+            if (this.mounted) {
+              setState(() {
+                _messages.insert(0, Message.fromDoc(change.document));
+              });
+            }
+          }
+        }
+
+        if (Message.fromDoc(change.document).sender == otherUid) {
           print('made seen');
           makeMessagesSeen();
-        }
-      });
-    }
-  }
-
-  listenIfMessagesSeen(){
-    _firestore
-        .collection('chats')
-        .document(Constants.currentUserID)
-        .collection('conversations')
-        .document(otherUid)
-        .collection('messages').snapshots().listen((querySnapshot) {
-      querySnapshot.documentChanges.forEach((change) {
-        if (change.document.documentID == 'seen') {
-          setState(() {
-            seen = change.document.data['isSeen'];
-            print('seen');
-          });
         }
       });
     });
   }
 
-  otherUserListener() {
+  void listenIfMessagesSeen() {
+    _firestore
+        .collection('chats')
+        .document(Constants.currentUserID)
+        .collection('conversations')
+        .document(otherUid)
+        .collection('messages')
+        .snapshots()
+        .listen((querySnapshot) {
+      querySnapshot.documentChanges.forEach((change) {
+        if (change.document.documentID == 'seen') {
+          if (this.mounted) {
+            setState(() {
+              seen = change.document.data['isSeen'];
+              print('seen');
+            });
+          }
+        }
+      });
+    });
+  }
+
+  void otherUserListener() {
     usersRef.snapshots().listen((querySnapshot) {
       querySnapshot.documentChanges.forEach((change) {
         if (change.document.documentID == otherUid) {
@@ -179,15 +221,8 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
     return time;
   }
 
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    updateOnlineUserState(state);
-  }
-
   void updateOnlineUserState(AppLifecycleState state) async {
-    if (state == AppLifecycleState.inactive ||
-        state == AppLifecycleState.paused) {
+    if (state == AppLifecycleState.paused) {
       await usersRef
           .document(Constants.currentUserID)
           .updateData({'online': FieldValue.serverTimestamp()});
@@ -196,6 +231,96 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
           .document(Constants.currentUserID)
           .updateData({'online': 'online'});
     }
+  }
+
+  void makeMessagesSeen() async {
+//    await _firestore
+//        .collection('chats')
+//        .document(Constants.currentUserID)
+//        .collection('conversations')
+//        .document(otherUid)
+//        .collection('messages')
+//        .document('seen')
+//        .setData({'isSeen': true});
+
+    await _firestore
+        .collection('chats')
+        .document(otherUid)
+        .collection('conversations')
+        .document(Constants.currentUserID)
+        .collection('messages')
+        .document('seen')
+        .setData({'isSeen': true});
+  }
+
+  void makeMessagesUnseen() async {
+    await _firestore
+        .collection('chats')
+        .document(Constants.currentUserID)
+        .collection('conversations')
+        .document(otherUid)
+        .collection('messages')
+        .document('seen')
+        .updateData({'isSeen': false});
+
+    await _firestore
+        .collection('chats')
+        .document(otherUid)
+        .collection('conversations')
+        .document(Constants.currentUserID)
+        .collection('messages')
+        .document('seen')
+        .updateData({'isSeen': false});
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    updateOnlineUserState(state);
+    if (state == AppLifecycleState.resumed) {
+      // user returned to our app
+      messagesSubscription.resume();
+    } else if (state == AppLifecycleState.paused) {
+      // app is inactive
+      messagesSubscription.pause();
+    }
+    else if (state == AppLifecycleState.detached) {
+      // app suspended (not used in iOS)
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    getMessages();
+    listenToMessagesChanges();
+    otherUserListener();
+    listenIfMessagesSeen();
+    loadUserData(otherUid);
+
+    ///Set up listener here
+    _scrollController
+      ..addListener(() {
+        if (_scrollController.offset >=
+            _scrollController.position.maxScrollExtent &&
+            !_scrollController.position.outOfRange) {
+          print('reached the bottom');
+          getPrevMessages();
+        } else if (_scrollController.offset <=
+            _scrollController.position.minScrollExtent &&
+            !_scrollController.position.outOfRange) {
+          print("reached the top");
+        } else {}
+      });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    messagesSubscription.cancel();
+    _scrollController
+        .dispose();
+    super.dispose();
   }
 
   @override
@@ -216,10 +341,10 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
                 padding: EdgeInsets.only(left: 0.0, right: 10.0),
                 child: otherUser.profileImageUrl != null
                     ? CircleAvatar(
-                        backgroundImage: NetworkImage(
-                          otherUser.profileImageUrl,
-                        ),
-                      )
+                  backgroundImage: NetworkImage(
+                    otherUser.profileImageUrl,
+                  ),
+                )
                     : Container(),
               ),
               Expanded(
@@ -228,7 +353,7 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
                   children: <Widget>[
                     SizedBox(height: 15.0),
                     Text(
-                      otherUser.username != null ? otherUser.username : '',
+                      otherUser.username ?? '',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
@@ -237,9 +362,7 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
                     SizedBox(height: 5),
                     Text(
                       otherUser != null
-                          ? otherUser.online == 'online'
-                              ? 'online'
-                              : 'offline'
+                          ? otherUser.online == 'online' ? 'online' : 'offline'
                           : '',
                       style: TextStyle(
                         fontWeight: FontWeight.w400,
@@ -267,36 +390,38 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
         child: Column(
           children: <Widget>[
             SizedBox(height: 10),
-            messages != null
+            _messages != null
                 ? Flexible(
-                    child: ListView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      itemCount: messages.length,
-                      reverse: true,
-                      itemBuilder: (BuildContext context, int index) {
-                        Map msg = messages[index].data;
-                        return ChatBubble(
-                          message: msg['type'] == "text"
-                              ? msg['text']
-                              : msg['image'],
-                          username: otherUser.username,
-                          time: formatTimestamp(msg['timestamp']),
-                          type: msg['type'],
-                          replyText: null,
-                          isMe: msg['sender'] == Constants.currentUserID,
-                          isGroup: false,
-                          isReply: false,
-                          replyName: null,
-                        );
-                      },
-                    ),
-
-                  )
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                itemCount: _messages.length,
+                reverse: true,
+                itemBuilder: (BuildContext context, int index) {
+                  Message msg = _messages[index];
+                  return ChatBubble(
+                    message: msg.type == "text" ? msg.text : msg.image,
+                    username: otherUser.username,
+                    time: msg.timestamp != null
+                        ? formatTimestamp(msg.timestamp)
+                        : 'now',
+                    type: msg.type,
+                    replyText: null,
+                    isMe: msg.sender == Constants.currentUserID,
+                    isGroup: false,
+                    isReply: false,
+                    replyName: null,
+                  );
+                },
+              ),
+            )
                 : Container(),
-            Align(alignment: Alignment.bottomRight, child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(seen? 'seen' : ''),
-            )),
+            Align(
+                alignment: Alignment.bottomRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8.0, bottom: 8),
+                  child: Text(seen ? 'seen' : ''),
+                )),
             Align(
               alignment: Alignment.bottomCenter,
               child: Container(
@@ -378,49 +503,4 @@ class _ConversationState extends State<Conversation> with WidgetsBindingObserver
       ),
     );
   }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  void makeMessagesSeen() async{
-    await _firestore
-        .collection('chats')
-        .document(Constants.currentUserID)
-        .collection('conversations')
-        .document(otherUid)
-        .collection('messages')
-        .document('seen').setData({'isSeen' : true});
-
-    await _firestore
-        .collection('chats')
-        .document(otherUid)
-        .collection('conversations')
-        .document(Constants.currentUserID)
-        .collection('messages')
-        .document('seen').setData({'isSeen' : true});
-
-  }
-  void makeMessagesUnseen() async{
-    await _firestore
-        .collection('chats')
-        .document(Constants.currentUserID)
-        .collection('conversations')
-        .document(otherUid)
-        .collection('messages')
-        .document('seen').updateData({'isSeen' : false});
-
-    await _firestore
-        .collection('chats')
-        .document(otherUid)
-        .collection('conversations')
-        .document(Constants.currentUserID)
-        .collection('messages')
-        .document('seen').updateData({'isSeen' : false});
-
-  }
-
-
 }

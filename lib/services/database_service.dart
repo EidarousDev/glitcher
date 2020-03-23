@@ -6,6 +6,7 @@ import 'package:glitcher/models/notification_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/utils/data.dart';
 
 class DatabaseService {
   // This function is used to get the recent posts (unfiltered)
@@ -176,16 +177,32 @@ class DatabaseService {
 
   // This function is used to get the recent messages (unfiltered)
   static Future<List<Message>> getMessages(
-      String userId, String otherUserId) async {
+      String otherUserId) async {
     QuerySnapshot msgSnapshot = await chatsRef
-        .document(userId)
+        .document(Constants.currentUserID)
         .collection('conversations')
         .document(otherUserId)
         .collection('messages')
-        .orderBy('timestamp', descending: false)
+        .orderBy('timestamp', descending: true)
+        .limit(20)
         .getDocuments();
     List<Message> messages =
         msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
+    return messages;
+  }
+
+  static Future<List<Message>> getPrevMessages(Timestamp firstVisibleGameSnapShot, String otherUserId) async {
+    QuerySnapshot msgSnapshot = await chatsRef
+        .document(Constants.currentUserID)
+        .collection('conversations')
+        .document(otherUserId)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .startAfter([firstVisibleGameSnapShot])
+        .limit(20)
+        .getDocuments();
+    List<Message> messages =
+    msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
     return messages;
   }
 
