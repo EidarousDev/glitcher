@@ -1,11 +1,10 @@
-
 import 'package:flutter/material.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/notifications/notification_item.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/models/notification_model.dart' as notification_model;
 import 'package:glitcher/utils/functions.dart';
-
 
 class NotificationsScreen extends StatefulWidget {
   @override
@@ -20,14 +19,21 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: <Color>[Constants.darkCardBG, Constants.darkBG])),
+        ),
         leading: Builder(
             builder: (context) => Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: InkWell(
-                onTap: () => Scaffold.of(context).openDrawer(),
-                child: Icon(IconData(58311, fontFamily: 'MaterialIcons')),
-              ),
-            )),
+                  padding: const EdgeInsets.all(8.0),
+                  child: InkWell(
+                    onTap: () => Scaffold.of(context).openDrawer(),
+                    child: Icon(IconData(58311, fontFamily: 'MaterialIcons')),
+                  ),
+                )),
         title: Text("Notifications"),
         centerTitle: true,
       ),
@@ -38,7 +44,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           shrinkWrap: true,
           itemCount: _notifications.length,
           itemBuilder: (BuildContext context, int index) {
-            notification_model.Notification notification = _notifications[index];
+            notification_model.Notification notification =
+                _notifications[index];
 
             return FutureBuilder(
                 future: DatabaseService.getUserWithId(notification.sender),
@@ -49,9 +56,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   User sender = snapshot.data;
                   return Column(
                     children: <Widget>[
-                      NotificationItem(key: ValueKey(notification.id), notification: notification, image: sender.profileImageUrl, senderName: sender.username,
-                         counter: 0,),
-                      Divider(height: .5, color: Colors.grey)
+                      NotificationItem(
+                        key: ValueKey(notification.id),
+                        notification: notification,
+                        image: sender.profileImageUrl,
+                        senderName: sender.username,
+                        counter: 0,
+                      ),
+                      Divider(height: .5, color: Constants.darkLineBreak)
                     ],
                   );
                 });
@@ -62,15 +74,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   _setupFeed() async {
-    List<notification_model.Notification> notifications = await DatabaseService.getNotifications();
+    List<notification_model.Notification> notifications =
+        await DatabaseService.getNotifications();
     setState(() {
       _notifications = notifications;
     });
   }
 
-
-
-  loadUserData(String senderUserId)async {
+  loadUserData(String senderUserId) async {
     DatabaseService.getUserWithId(senderUserId);
   }
 

@@ -90,9 +90,10 @@ class _ConversationState extends State<Conversation>
     });
   }
 
-  void getPrevMessages() async{
+  void getPrevMessages() async {
     var messages;
-    messages = await DatabaseService.getPrevMessages(firstVisibleGameSnapShot, otherUid);
+    messages = await DatabaseService.getPrevMessages(
+        firstVisibleGameSnapShot, otherUid);
 
     if (messages.length > 0) {
       setState(() {
@@ -120,7 +121,7 @@ class _ConversationState extends State<Conversation>
 //      });
 //    }
 //  }
-  void listenToMessagesChanges() async{
+  void listenToMessagesChanges() async {
     messagesSubscription = _firestore
         .collection('chats')
         .document(Constants.currentUserID)
@@ -282,8 +283,7 @@ class _ConversationState extends State<Conversation>
     } else if (state == AppLifecycleState.paused) {
       // app is inactive
       messagesSubscription.pause();
-    }
-    else if (state == AppLifecycleState.detached) {
+    } else if (state == AppLifecycleState.detached) {
       // app suspended (not used in iOS)
     }
   }
@@ -302,12 +302,12 @@ class _ConversationState extends State<Conversation>
     _scrollController
       ..addListener(() {
         if (_scrollController.offset >=
-            _scrollController.position.maxScrollExtent &&
+                _scrollController.position.maxScrollExtent &&
             !_scrollController.position.outOfRange) {
           print('reached the bottom');
           getPrevMessages();
         } else if (_scrollController.offset <=
-            _scrollController.position.minScrollExtent &&
+                _scrollController.position.minScrollExtent &&
             !_scrollController.position.outOfRange) {
           print("reached the top");
         } else {}
@@ -318,8 +318,7 @@ class _ConversationState extends State<Conversation>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     messagesSubscription.cancel();
-    _scrollController
-        .dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -327,6 +326,13 @@ class _ConversationState extends State<Conversation>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: <Color>[Constants.darkCardBG, Constants.darkBG])),
+        ),
         leading: IconButton(
           icon: Icon(
             Icons.keyboard_backspace,
@@ -341,10 +347,10 @@ class _ConversationState extends State<Conversation>
                 padding: EdgeInsets.only(left: 0.0, right: 10.0),
                 child: otherUser.profileImageUrl != null
                     ? CircleAvatar(
-                  backgroundImage: NetworkImage(
-                    otherUser.profileImageUrl,
-                  ),
-                )
+                        backgroundImage: NetworkImage(
+                          otherUser.profileImageUrl,
+                        ),
+                      )
                     : Container(),
               ),
               Expanded(
@@ -392,42 +398,45 @@ class _ConversationState extends State<Conversation>
             SizedBox(height: 10),
             _messages != null
                 ? Flexible(
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: EdgeInsets.symmetric(horizontal: 10),
-                itemCount: _messages.length,
-                reverse: true,
-                itemBuilder: (BuildContext context, int index) {
-                  Message msg = _messages[index];
-                  return ChatBubble(
-                    message: msg.type == "text" ? msg.text : msg.image,
-                    username: otherUser.username,
-                    time: msg.timestamp != null
-                        ? formatTimestamp(msg.timestamp)
-                        : 'now',
-                    type: msg.type,
-                    replyText: null,
-                    isMe: msg.sender == Constants.currentUserID,
-                    isGroup: false,
-                    isReply: false,
-                    replyName: null,
-                  );
-                },
-              ),
-            )
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      itemCount: _messages.length,
+                      reverse: true,
+                      itemBuilder: (BuildContext context, int index) {
+                        Message msg = _messages[index];
+                        return ChatBubble(
+                          message: msg.type == "text" ? msg.text : msg.image,
+                          username: otherUser.username,
+                          time: msg.timestamp != null
+                              ? formatTimestamp(msg.timestamp)
+                              : 'now',
+                          type: msg.type,
+                          replyText: null,
+                          isMe: msg.sender == Constants.currentUserID,
+                          isGroup: false,
+                          isReply: false,
+                          replyName: null,
+                        );
+                      },
+                    ),
+                  )
                 : Container(),
             Align(
                 alignment: Alignment.bottomRight,
                 child: Padding(
                   padding: const EdgeInsets.only(right: 8.0, bottom: 8),
-                  child: Text(seen ? 'seen' : ''),
+                  child: Text(
+                    seen ? 'seen' : '',
+                    style: TextStyle(color: Colors.white70),
+                  ),
                 )),
             Align(
               alignment: Alignment.bottomCenter,
               child: Container(
 //                height: 140,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
+                  color: Constants.darkBG,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey[500],
@@ -447,38 +456,39 @@ class _ConversationState extends State<Conversation>
                         leading: IconButton(
                           icon: Icon(
                             Icons.add,
-                            color: Theme.of(context).accentColor,
+                            color: Colors.white70,
                           ),
                           onPressed: () {},
                         ),
                         contentPadding: EdgeInsets.all(0),
                         title: TextField(
+                          textCapitalization: TextCapitalization.sentences,
                           controller: messageController,
                           onChanged: (value) {
                             messageText = value;
                           },
                           style: TextStyle(
                             fontSize: 15.0,
-                            color: Theme.of(context).textTheme.title.color,
+                            color: Colors.white70,
                           ),
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.all(10.0),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(5.0),
                               borderSide: BorderSide(
-                                color: Theme.of(context).primaryColor,
+                                color: Constants.darkBG,
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
-                                color: Theme.of(context).primaryColor,
+                                color: Constants.darkBG,
                               ),
                               borderRadius: BorderRadius.circular(5.0),
                             ),
                             hintText: "Write your message...",
                             hintStyle: TextStyle(
                               fontSize: 15.0,
-                              color: Theme.of(context).textTheme.title.color,
+                              color: Colors.white70,
                             ),
                           ),
                           maxLines: null,
@@ -486,7 +496,7 @@ class _ConversationState extends State<Conversation>
                         trailing: IconButton(
                           icon: Icon(
                             Icons.send,
-                            color: Theme.of(context).accentColor,
+                            color: Colors.white70,
                           ),
                           onPressed: () async {
                             sendMessage();

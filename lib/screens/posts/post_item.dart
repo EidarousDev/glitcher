@@ -112,7 +112,8 @@ class _PostItemState extends State<PostItem> {
             children: <Widget>[
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -167,11 +168,11 @@ class _PostItemState extends State<PostItem> {
 //                            ),
                           ),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.only(top: 8.0),
                         child: Text(
                           "${Functions.formatTimestamp(post.timestamp)}",
-                          style: TextStyle(
-                              fontSize: 13.0, color: Constants.darkGrey),
+                          style:
+                              TextStyle(fontSize: 13.0, color: Colors.white30),
                         ),
                       ),
                     ],

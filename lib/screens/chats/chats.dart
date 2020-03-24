@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/chat_item.dart';
@@ -115,6 +116,13 @@ class _ChatsState extends State<Chats>
     super.build(context);
     return Scaffold(
       appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: <Color>[Constants.darkCardBG, Constants.darkBG])),
+        ),
 //        elevation: 4,
         leading: IconButton(
           icon: Icon(
@@ -138,12 +146,12 @@ class _ChatsState extends State<Chats>
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Theme.of(context).accentColor,
-          labelColor: Theme.of(context).accentColor,
+          labelColor: Constants.darkGrey,
           unselectedLabelColor: Theme.of(context).textTheme.caption.color,
           isScrollable: false,
           tabs: <Widget>[
             Tab(
-              text: "Message",
+              text: "Friends",
             ),
             Tab(
               text: "Groups",
@@ -202,8 +210,6 @@ class _ChatsState extends State<Chats>
       ),
     );
   }
-
-
 
   @override
   bool get wantKeepAlive => true;

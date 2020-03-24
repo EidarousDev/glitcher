@@ -38,7 +38,7 @@ class _NotificationItemState extends State<NotificationItem> {
 
   _buildItem(notification_model.Notification notification) {
     return Container(
-      color: notification.seen ? Constants.darkBG : Constants.darkAccent,
+      color: notification.seen ? Constants.darkBG : Constants.darkCardBG,
       child: Container(
         padding: EdgeInsets.all(7),
         child: ListTile(
@@ -73,7 +73,7 @@ class _NotificationItemState extends State<NotificationItem> {
                   : Container(
                       padding: EdgeInsets.all(1),
                       decoration: BoxDecoration(
-                        color: Colors.red,
+                        color: Constants.darkPrimary,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       constraints: BoxConstraints(

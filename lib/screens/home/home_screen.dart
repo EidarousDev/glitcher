@@ -46,7 +46,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Constants.darkBG,
+        centerTitle: true,
+        title: Text('Home'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: <Color>[Constants.darkCardBG, Constants.darkBG])),
+        ),
         leading: Builder(
           builder: (context) => Padding(
             padding: const EdgeInsets.all(8.0),
@@ -65,8 +73,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
           ),
         ),
-        title: Text("Feeds"),
-        centerTitle: true,
         actions: <Widget>[
           IconButton(
             icon: Icon(
@@ -128,7 +134,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                     ),
                                   ],
                                 ),
-
                                 Row(
                                   children: <Widget>[
                                     Radio(

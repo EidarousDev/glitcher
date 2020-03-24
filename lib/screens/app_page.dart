@@ -19,9 +19,9 @@ class AppPage extends StatefulWidget {
   _AppPageState createState() => _AppPageState();
 }
 
-class _AppPageState extends State<AppPage>{
+class _AppPageState extends State<AppPage> {
   PageController _pageController;
-  int _page = 2;
+  int _page = 0; //Highlight the first Icon in the BottomNavigationBarItem
   String username;
   String profileImageUrl;
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
@@ -34,9 +34,8 @@ class _AppPageState extends State<AppPage>{
         controller: _pageController,
         onPageChanged: onPageChanged,
         children: <Widget>[
-          Chats(),
-          Chats(),
           HomeScreen(),
+          Chats(),
           NotificationsScreen(),
           ProfileScreen(Constants.currentUserID),
         ],
@@ -52,21 +51,21 @@ class _AppPageState extends State<AppPage>{
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.message,
-              ),
-              title: Container(height: 0.0),
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.group,
-              ),
-              title: Container(height: 0.0),
-            ),
+//            BottomNavigationBarItem(
+//              icon: Icon(
+//                Icons.group,
+//              ),
+//              title: Container(height: 0.0),
+//            ),
             BottomNavigationBarItem(
               icon: Icon(
                 Icons.home,
+              ),
+              title: Container(height: 0.0),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.message,
               ),
               title: Container(height: 0.0),
             ),
@@ -106,7 +105,7 @@ class _AppPageState extends State<AppPage>{
   void initState() {
     super.initState();
     print('Constants.loggedInUser: ${Constants.loggedInUser}');
-    _pageController = PageController(initialPage: 2);
+    _pageController = PageController(initialPage: 0);
     _retrieveDynamicLink();
     userListener();
     _saveDeviceToken();
@@ -144,7 +143,6 @@ class _AppPageState extends State<AppPage>{
       });
     });
   }
-
 
   void onPageChanged(int page) {
     //Solves the problem setState() called after dispose()
