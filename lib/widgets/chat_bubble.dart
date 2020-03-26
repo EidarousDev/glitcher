@@ -149,7 +149,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                               ),
                             ),
                           )
-                    : Image.asset(
+                    : Image.network(
                         "${widget.message}",
                         height: 130,
                         width: MediaQuery.of(context).size.width / 1.3,

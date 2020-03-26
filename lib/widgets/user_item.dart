@@ -1,29 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:glitcher/screens/chats/conversation.dart';
 
-class ChatItem extends StatefulWidget {
+class UserItem extends StatefulWidget {
   final String dp;
   final String name;
   final String time;
-  final String msg;
+  final String description;
   final bool isOnline;
   final int counter;
 
-  ChatItem({
+  UserItem({
     Key key,
     @required this.dp,
     @required this.name,
     @required this.time,
-    @required this.msg,
+    @required this.description,
     @required this.isOnline,
     @required this.counter,
   }) : super(key: key);
 
   @override
-  _ChatItemState createState() => _ChatItemState();
+  _UserItemState createState() => _UserItemState();
 }
 
-class _ChatItemState extends State<ChatItem> {
+class _UserItemState extends State<UserItem> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -68,7 +68,7 @@ class _ChatItemState extends State<ChatItem> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        subtitle: Text("${widget.msg}"),
+        subtitle: Text("${widget.description}"),
         trailing: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
@@ -84,27 +84,27 @@ class _ChatItemState extends State<ChatItem> {
             widget.counter == 0
                 ? SizedBox()
                 : Container(
-                    padding: EdgeInsets.all(1),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    constraints: BoxConstraints(
-                      minWidth: 11,
-                      minHeight: 11,
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 1, left: 5, right: 5),
-                      child: Text(
-                        "${widget.counter}",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
+              padding: EdgeInsets.all(1),
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              constraints: BoxConstraints(
+                minWidth: 11,
+                minHeight: 11,
+              ),
+              child: Padding(
+                padding: EdgeInsets.only(top: 1, left: 5, right: 5),
+                child: Text(
+                  "${widget.counter}",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
                   ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
           ],
         ),
         onTap: () {

@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/auth.dart';
+import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/chat_item.dart';
 import 'package:glitcher/utils/data.dart';
@@ -22,11 +24,10 @@ class _ChatsState extends State<Chats>
   Set friends = Set();
   List<ChatItem> chats = [];
 
-  FirebaseUser currentUser;
-
-  void getCurrentUser() async {
-    this.currentUser = await Auth().getCurrentUser();
-    loadFollowing();
+  void getCurrentUserFriends() async {
+    await loadFollowing();
+    await loadFollowers();
+    await getFriends();
   }
 
   Future<Set> getFriends() async {
@@ -49,56 +50,52 @@ class _ChatsState extends State<Chats>
     return friends;
   }
 
-  void loadFollowing() async {
+  loadFollowing() async {
     if (following.length == 0) {
-      await _firestore
+      QuerySnapshot snap = await _firestore
           .collection('users')
-          .document(currentUser.uid)
+          .document(Constants.currentUserID)
           .collection('following')
-          .getDocuments()
-          .then((snap) {
-        for (int i = 0; i < snap.documents.length; i++) {
-          this.following.add(snap.documents[i].documentID);
-        }
-        loadFollowers();
-      });
+          .getDocuments();
+
+      for (int i = 0; i < snap.documents.length; i++) {
+        this.following.add(snap.documents[i].documentID);
+      }
     }
   }
 
-  void loadFollowers() async {
+  loadFollowers() async {
     if (followers.length == 0) {
-      await _firestore
+      QuerySnapshot snap = await _firestore
           .collection('users')
-          .document(currentUser.uid)
+          .document(Constants.currentUserID)
           .collection('followers')
-          .getDocuments()
-          .then((snap) {
-        for (int i = 0; i < snap.documents.length; i++) {
-          this.followers.add(snap.documents[i].documentID);
-        }
-        getFriends();
-      });
+          .getDocuments();
+
+      for (int i = 0; i < snap.documents.length; i++) {
+        this.followers.add(snap.documents[i].documentID);
+      }
     }
   }
 
   Future<ChatItem> loadUserData(String uid) async {
     ChatItem chatItem;
-    await _firestore.collection('users').document(uid).get().then((onValue) {
+    User user = await DatabaseService.getUserWithId(uid);
       setState(() {
         chatItem = ChatItem(
           key: ValueKey(uid),
-          dp: onValue.data['profile_url'],
-          name: onValue.data['username'],
-          isOnline: onValue.data['online'] == 'online',
+          dp: user.profileImageUrl,
+          name: user.username,
+          isOnline:user.online == 'online',
           msg: 'Last Message',
-          time: onValue.data['online'] == 'online'
+          time: user.online == 'online'
               ? 'online'
-              : Functions.formatTimestamp(onValue.data['online']),
+              : Functions.formatTimestamp(user.online),
           counter: 0,
         );
         chats.add(chatItem);
       });
-    });
+
 
     return chatItem;
   }
@@ -108,7 +105,7 @@ class _ChatsState extends State<Chats>
     super.initState();
     _tabController = TabController(vsync: this, initialIndex: 0, length: 2);
 
-    getCurrentUser();
+    getCurrentUserFriends();
   }
 
   @override
@@ -138,9 +135,11 @@ class _ChatsState extends State<Chats>
         actions: <Widget>[
           IconButton(
             icon: Icon(
-              Icons.filter_list,
+              Icons.add,
             ),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).pushNamed('new-group');
+            },
           ),
         ],
         bottom: TabBar(

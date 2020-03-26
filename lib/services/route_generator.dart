@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:glitcher/root_page.dart';
 import 'package:glitcher/screens/app_page.dart';
+import 'package:glitcher/screens/chats/conversation.dart';
+import 'package:glitcher/screens/chats/image_message_overlay.dart';
+import 'package:glitcher/screens/chats/new_group.dart';
 import 'package:glitcher/screens/games/game_screen.dart';
 import 'package:glitcher/screens/games/new_game.dart';
 import 'package:glitcher/screens/posts/add_comment.dart';
@@ -16,16 +19,20 @@ class RouteGenerator {
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(builder: (_) => RootPage());
+
       case '/home':
         return MaterialPageRoute(builder: (_) => AppPage());
+
       case '/new-post':
         return MaterialPageRoute(builder: (_) => NewPost());
+
       case '/user-profile':
         return MaterialPageRoute(
           builder: (_) => ProfileScreen(
             args['userId'],
           ),
         );
+
       case '/post':
         // Validation of correct data type
         return MaterialPageRoute(
@@ -58,6 +65,25 @@ class RouteGenerator {
 
       case '/new-game':
         return MaterialPageRoute(builder: (_) => NewGame());
+
+      case 'image-message-overlay':
+        return MaterialPageRoute(
+            builder: (_) => ImageMessageOverlay(
+                  otherUid: args['otherUid'],
+                  uri: args['uri'],
+                ));
+
+      case 'conversation':
+        return MaterialPageRoute(
+            builder: (_) => Conversation(
+                  otherUid: args['otherUid'],
+                ));
+
+      case 'new-group':
+        return MaterialPageRoute(
+            builder: (_) => NewGroup(
+            ));
+
       default:
         // If there is no such named route in the switch statement, e.g. /third
         return _errorRoute();

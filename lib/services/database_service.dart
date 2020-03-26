@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/comment_model.dart';
+import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/notification_model.dart';
 import 'package:glitcher/models/post_model.dart';
@@ -150,6 +151,17 @@ class DatabaseService {
       return User.fromDoc(userDocSnapshot);
     }
     return User();
+  }
+
+  static Future<List<Group>> getGroups() async{
+    QuerySnapshot snapshot = await usersRef.document(Constants.currentUserID)
+        .collection('group_chats').getDocuments();
+
+    List<Group> groups = snapshot.documents
+        .map((doc) => Group.fromDoc(doc))
+        .toList();
+
+    return groups;
   }
 
   static getFollowing() async {

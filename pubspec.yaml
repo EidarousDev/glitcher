@@ -46,6 +46,8 @@ dependencies:
   flutter_local_notifications: ^1.1.6
   intl: ^0.16.1
   flutter_typeahead: ^1.8.0
+  extended_image: ^0.7.1
+  image: any
 
 dev_dependencies:
   flutter_test:

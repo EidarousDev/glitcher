@@ -6,9 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/screens/chats/image_message_overlay.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/widgets/chat_bubble.dart';
+import 'package:image_picker/image_picker.dart';
 
 class Conversation extends StatefulWidget {
   final String otherUid;
@@ -274,6 +276,20 @@ class _ConversationState extends State<Conversation>
         .updateData({'isSeen': false});
   }
 
+  Future chooseImage() async {
+    await ImagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 52,
+        maxHeight: 400,
+        maxWidth: 600)
+        .then((image) {
+      setState(() {
+        Navigator.of(context).pushNamed('image-message-overlay', arguments: {'otherUid': otherUid, 'uri': image.path});
+        //_image = image;
+      });
+    });
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     updateOnlineUserState(state);
@@ -458,7 +474,9 @@ class _ConversationState extends State<Conversation>
                             Icons.add,
                             color: Colors.white70,
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                            chooseImage();
+                          },
                         ),
                         contentPadding: EdgeInsets.all(0),
                         title: TextField(
