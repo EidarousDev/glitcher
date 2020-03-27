@@ -13,6 +13,8 @@ final chatsRef = firestore.collection('chats');
 final gamesRef = firestore.collection('games');
 final chatGroupsRef = firestore.collection('chat_groups');
 
+String loggedInProfileImageURL;
+
 enum AvailableThemes {
   LIGHT_THEME,
   DARK_THEME,
@@ -32,7 +34,6 @@ class Constants {
   static FirebaseUser currentUser;
   static String currentUserID;
   static User loggedInUser;
-  static String loggedInProfileImageURL;
   static List<String> games = [];
   static const genres = ['Action', 'Sports', 'Racing', 'Fighting'];
 

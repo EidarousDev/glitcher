@@ -70,4 +70,11 @@ class Strings {
   static const String authenticationType = 'Authentication type';
   static const String firebase = 'Firebase';
   static const String mock = 'Mock';
+
+  // Defaults Assets
+  static const String default_profile_image =
+      'assets/images/default_profile.png';
+  static const String default_post_image = 'assets/images/default_profile.png';
+  static const String like_sound = 'assets/sounds/like_sound.mp3';
+  static const String dislike_sound = 'assets/sounds/dislikesfx.mp3';
 }

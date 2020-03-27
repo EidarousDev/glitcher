@@ -100,8 +100,8 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
                     child: widget.profileImageUrl != null
                         ? CircleAvatar(
                             radius: 30.0,
-                            backgroundImage: NetworkImage(Constants
-                                .loggedInProfileImageURL), // no matter how big it is, it won't overflow
+                            backgroundImage: NetworkImage(
+                                loggedInProfileImageURL), // no matter how big it is, it won't overflow
                           )
                         : CircleAvatar(
                             backgroundImage:

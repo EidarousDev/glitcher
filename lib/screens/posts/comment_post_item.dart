@@ -3,6 +3,7 @@ import 'package:chewie/chewie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/notification_handler.dart';
@@ -55,8 +56,8 @@ class _CommentPostItemState extends State<CommentPostItem> {
               child: CircleAvatar(
                 radius: 25.0,
                 backgroundColor: Colors.grey,
-                backgroundImage: Constants.loggedInProfileImageURL != null
-                    ? CacheImage(Constants.loggedInProfileImageURL)
+                backgroundImage: loggedInProfileImageURL != null
+                    ? CacheImage(loggedInProfileImageURL)
                     : AssetImage('assets/images/default_profile.png'),
               ),
               onTap: () {
@@ -114,7 +115,7 @@ class _CommentPostItemState extends State<CommentPostItem> {
                           ? null
                           : Container(
                               width: double.infinity,
-                              height: 200.0,
+                              height: Sizes.home_post_image_h,
                               child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8.0),
                                   child: Image.network(

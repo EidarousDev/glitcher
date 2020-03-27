@@ -6,6 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/font_awesome.dart';
 import 'package:glitcher/common_widgets/card_icon_text.dart';
 import 'package:glitcher/common_widgets/drawer.dart';
+import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/constants/sizes.dart';
+import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/chats/chats.dart';
@@ -15,6 +22,7 @@ import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/widgets/caching_image.dart';
 import 'package:path_provider/path_provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -192,16 +200,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   Row(
                     children: <Widget>[
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: CircleAvatar(
-                          radius: 25.0,
-                          backgroundColor: Colors.grey,
-                          backgroundImage: Constants.loggedInProfileImageURL !=
-                                  null
-                              ? CacheImage(Constants.loggedInProfileImageURL)
-                              : AssetImage('assets/images/default_profile.png'),
-                        ),
-                      ),
+                          padding: const EdgeInsets.all(8.0),
+                          child: CacheThisImage(
+                            imageUrl: loggedInProfileImageURL,
+                            imageShape: BoxShape.circle,
+                            width: Sizes.sm_profile_image_w,
+                            height: Sizes.sm_profile_image_h,
+                            defaultAssetImage: Strings.default_profile_image,
+                          )),
                       Expanded(
                         child: InkWell(
                           child: Padding(
@@ -445,10 +451,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     setState(() {
       //profileImageUrl = loggedInUser.profileImageUrl;
-      Constants.loggedInProfileImageURL = loggedInUser.profileImageUrl;
+      loggedInProfileImageURL = loggedInUser.profileImageUrl;
       username = loggedInUser.username;
       print(
-          'profileImageUrl = ${Constants.loggedInProfileImageURL} and username = $username');
+          'profileImageUrl = ${loggedInProfileImageURL} and username = $username');
     });
   }
 

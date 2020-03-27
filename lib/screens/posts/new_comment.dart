@@ -68,6 +68,7 @@ class _NewCommentState extends State<NewComment>
 
   @override
   void initState() {
+    loadPostData();
     super.initState();
 
     ///Set up listener here
@@ -83,23 +84,6 @@ class _NewCommentState extends State<NewComment>
         print("reached the top");
       } else {}
     });
-
-    /// Set up animation listener
-    _animationController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
-    _animation = Tween(begin: 300.0, end: 50.0).animate(_animationController)
-      ..addListener(() {
-        setState(() {});
-      });
-
-    _focusNode.addListener(() {
-      if (_focusNode.hasFocus) {
-        _animationController.forward();
-      } else {
-        _animationController.reverse();
-      }
-    });
-    loadPostData();
   }
 
   @override
@@ -113,10 +97,11 @@ class _NewCommentState extends State<NewComment>
 
   void loadComments() async {
     List<Comment> comments = await DatabaseService.getComments(widget.postId);
-    if (comments != null) {
+    if (comments.length > 0) {
       setState(() {
         _comments = comments;
-        this.lastVisibleCommentSnapShot = comments?.last?.timestamp;
+        this.lastVisibleCommentSnapShot = comments.last.timestamp;
+        print('It"s actually here!');
       });
     }
   }
@@ -270,6 +255,8 @@ class _NewCommentState extends State<NewComment>
     print('currentPost = $_currentPost and author= $_author');
     loadComments();
     print('comments.length = ${_comments.length}');
-    _loading = false;
+    setState(() {
+      _loading = false;
+    });
   }
 }

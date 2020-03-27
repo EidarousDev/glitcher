@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:glitcher/constants/sizes.dart';
 
 class CardIconText extends StatelessWidget {
   final TextStyle tStyle;
@@ -17,7 +18,7 @@ class CardIconText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 50,
+      height: Sizes.sm_profile_image_h,
       decoration: BoxDecoration(
           color: color, borderRadius: BorderRadius.all(Radius.circular(20))),
       child: Center(

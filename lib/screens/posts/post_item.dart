@@ -6,6 +6,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:glitcher/constants/sizes.dart';
+import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
@@ -13,6 +15,8 @@ import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/services/share_link.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/utils/functions.dart';
+import 'package:glitcher/widgets/caching_image.dart';
+import 'package:glitcher/widgets/image_overlay.dart';
 import 'package:share/share.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -65,16 +69,13 @@ class _PostItemState extends State<PostItem> {
           ListTile(
             contentPadding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
             leading: InkWell(
-                child: author.profileImageUrl != null
-                    ? CircleAvatar(
-                        radius: 30.0,
-                        backgroundImage: NetworkImage(author
-                            .profileImageUrl), // no matter how big it is, it won't overflow
-                      )
-                    : CircleAvatar(
-                        backgroundImage:
-                            AssetImage('assets/images/default_profile.png'),
-                      ),
+                child: CacheThisImage(
+                  imageUrl: author.profileImageUrl,
+                  imageShape: BoxShape.circle,
+                  width: Sizes.md_profile_image_w,
+                  height: Sizes.md_profile_image_h,
+                  defaultAssetImage: Strings.default_profile_image,
+                ),
                 onTap: () {
                   Navigator.of(context).pushNamed('/user-profile', arguments: {
                     'userId': post.authorId,
@@ -131,14 +132,32 @@ class _PostItemState extends State<PostItem> {
                         child: post.imageUrl == null
                             ? null
                             : Container(
-                                width: double.infinity,
-                                height: 200.0,
+                                width: Sizes.home_post_image_w,
+                                height: Sizes.home_post_image_h,
                                 child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8.0),
-                                    child: Image.network(
-                                      post.imageUrl,
-                                      fit: BoxFit.fill,
-                                    )),
+                                    child: InkWell(
+                                        onTap: () {
+                                          showDialog(
+                                              barrierDismissible: true,
+                                              child: Container(
+                                                width: Sizes.sm_profile_image_w,
+                                                height:
+                                                    Sizes.sm_profile_image_h,
+                                                child: ImageOverlay(
+                                                  imageUrl: post.imageUrl,
+                                                ),
+                                              ),
+                                              context: context);
+                                        },
+                                        child: CacheThisImage(
+                                          imageUrl: post.imageUrl,
+                                          imageShape: BoxShape.rectangle,
+                                          width: Sizes.home_post_image_w,
+                                          height: Sizes.home_post_image_h,
+                                          defaultAssetImage:
+                                              Strings.default_post_image,
+                                        ))),
                               ),
                       ),
                       Container(
@@ -371,8 +390,8 @@ class _PostItemState extends State<PostItem> {
   }
 
   void _loadAudioByteData() async {
-    _likeSFX = await rootBundle.load('assets/sounds/like_sound.mp3');
-    _dislikeSFX = await rootBundle.load('assets/sounds/dislikesfx.mp3');
+    _likeSFX = await rootBundle.load(Strings.like_sound);
+    _dislikeSFX = await rootBundle.load(Strings.dislike_sound);
   }
 
   // Youtube Video listener

@@ -6,9 +6,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/utils/Loader.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:photo_view/photo_view.dart';
 
 class FullScreenOverlay extends StatefulWidget {
-
   final String url;
   final int type;
   final int whichImage;
@@ -17,8 +17,8 @@ class FullScreenOverlay extends StatefulWidget {
   FullScreenOverlay({this.url, this.type, this.whichImage, this.userId});
 
   @override
-  _FullscreenOverlayState createState() =>
-      _FullscreenOverlayState(url: url, type: type, whichImage: whichImage, userId: userId);
+  _FullscreenOverlayState createState() => _FullscreenOverlayState(
+      url: url, type: type, whichImage: whichImage, userId: userId);
 }
 
 class _FullscreenOverlayState extends State<FullScreenOverlay> {
@@ -30,36 +30,38 @@ class _FullscreenOverlayState extends State<FullScreenOverlay> {
       backgroundColor: Colors.transparent.withOpacity(.3),
       body: type == 1
           ? _editBtnOverlay(
-        context,
-        Image.network(
-          url,
-          fit: BoxFit.scaleDown,
-          height: double.infinity,
-          width: double.infinity,
-          alignment: Alignment.center,
-        ),
-      )
+              context,
+              PhotoView(
+                imageProvider: NetworkImage(url),
+                minScale: PhotoViewComputedScale.contained * 0.8,
+                maxScale: PhotoViewComputedScale.contained * 2,
+                enableRotation: true,
+                loadingChild: Center(child: CircularProgressIndicator()),
+                backgroundDecoration:
+                    BoxDecoration(color: Colors.transparent.withOpacity(.3)),
+              ),
+            )
           : type == 2
-          ? _editBtnOverlay(
-        context,
-        Image.file(
-          File(url),
-          fit: BoxFit.scaleDown,
-          height: double.infinity,
-          width: double.infinity,
-          alignment: Alignment.center,
-        ),
-      )
-          : _editBtnOverlay(
-        context,
-        Image.asset(
-          url,
-          fit: BoxFit.scaleDown,
-          height: double.infinity,
-          width: double.infinity,
-          alignment: Alignment.center,
-        ),
-      ),
+              ? _editBtnOverlay(
+                  context,
+                  Image.file(
+                    File(url),
+                    fit: BoxFit.scaleDown,
+                    height: double.infinity,
+                    width: double.infinity,
+                    alignment: Alignment.center,
+                  ),
+                )
+              : _editBtnOverlay(
+                  context,
+                  Image.asset(
+                    url,
+                    fit: BoxFit.scaleDown,
+                    height: double.infinity,
+                    width: double.infinity,
+                    alignment: Alignment.center,
+                  ),
+                ),
     );
   }
 
@@ -100,11 +102,13 @@ class _FullscreenOverlayState extends State<FullScreenOverlay> {
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30.0))),
         _loading
-        ? Center(child:  LoaderTwo(),)
-        : Container(
-          width: 0,
-          height: 0,
-        ),
+            ? Center(
+                child: LoaderTwo(),
+              )
+            : Container(
+                width: 0,
+                height: 0,
+              ),
       ],
     );
   }
@@ -127,9 +131,8 @@ class _FullscreenOverlayState extends State<FullScreenOverlay> {
       _loading = true;
     });
     print((file));
-    StorageReference storageReference = FirebaseStorage.instance
-        .ref()
-        .child('$parentFolder/$userId');
+    StorageReference storageReference =
+        FirebaseStorage.instance.ref().child('$parentFolder/$userId');
     StorageUploadTask uploadTask = storageReference.putFile(file);
 
     await uploadTask.onComplete;
@@ -143,13 +146,12 @@ class _FullscreenOverlayState extends State<FullScreenOverlay> {
         _firestore
             .collection('users')
             .document(userId)
-            .updateData({'profile_url': _url}).then((onValue){
+            .updateData({'profile_url': _url}).then((onValue) {
           setState(() {
             _file = null;
             _loading = false;
             Navigator.pop(context, _url);
           });
-
         });
       } else if (parentFolder == 'cover_img') {
         setState(() {
@@ -159,13 +161,12 @@ class _FullscreenOverlayState extends State<FullScreenOverlay> {
         _firestore
             .collection('users')
             .document(userId)
-            .updateData({'cover_url': _url}).then((onValue){
+            .updateData({'cover_url': _url}).then((onValue) {
           setState(() {
             _file = null;
             _loading = false;
             Navigator.pop(context, _url);
           });
-
         });
       }
       //print(_uploadedFileURL);
