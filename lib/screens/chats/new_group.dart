@@ -1,15 +1,16 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/utils/functions.dart';
-import 'package:glitcher/widgets/chat_item.dart';
-import 'package:glitcher/utils/data.dart';
-import 'package:glitcher/widgets/user_item.dart';
+import 'package:image_picker/image_picker.dart';
+
+
+import 'package:random_string/random_string.dart';
+import 'dart:math' show Random;
 
 class NewGroup extends StatefulWidget {
   @override
@@ -24,10 +25,17 @@ class _NewGroupState extends State<NewGroup>
   Set friends = Set();
   List<User> friendsData = [];
   List<bool> chosens = [];
+  List<String> chosenUsers;
 
-  TextEditingController textEditingController;
+  TextEditingController textEditingController = TextEditingController();
 
   ScrollController _scrollController;
+
+  File _imageFile;
+
+  String _imageUrl;
+
+  String _groupId;
 
   void getCurrentUserFriends() async {
     await loadFollowing();
@@ -105,13 +113,20 @@ class _NewGroupState extends State<NewGroup>
         child: Icon(
           Icons.done,
         ),
-        onPressed: (){
-          List chosenUsers = [];
+        onPressed: () async{
+          chosenUsers = [];
           for(int i = 0; i < chosens.length; i++){
             if(chosens[i]){
-              chosenUsers.add(friendsData[i]);
+              chosenUsers.add(friendsData[i].id);
             }
           }
+
+          chosenUsers.add(Constants.currentUserID);
+
+          await uploadFile(_imageFile, context);
+          await addGroup();
+          await addGroupToUsers();
+          Navigator.of(context).pushNamed('chats');
         },
       ),
       appBar: AppBar(
@@ -145,28 +160,48 @@ class _NewGroupState extends State<NewGroup>
             flexibleSpace:
             Container(
               color: Constants.darkBG,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(
-                    flex: 2,
-                    child: CircleAvatar(
-                      radius: 40,
-                      backgroundColor: Colors.white,
-                      child: Icon(Icons.camera_alt),
+              child: Padding(
+                padding: const EdgeInsets.all(3.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    SizedBox(
+                      width: 5,
                     ),
-                  ),
-                  Expanded(
-                    flex: 8,
-                    child: TextField(
-                      controller: textEditingController,
-                      decoration: InputDecoration.collapsed(
-                        hintText: 'Group name',
+                    Expanded(
+                      flex: 2,
+                      child: GestureDetector(
+                        onTap: (){
+                          chooseImage();
+                        },
+                        child: CircleAvatar(
+                          radius: 25,
+                          backgroundColor: Colors.white,
+                          child: _imageFile == null ? Icon(Icons.camera_alt) : null,
+                          backgroundImage: _imageFile != null ?FileImage(_imageFile): null,
+                        ),
                       ),
                     ),
-                  )
-                ],
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Expanded(
+                      flex: 10,
+                      child: TextField(
+                        autofocus: true,
+                        cursorColor: Colors.white,
+                        controller: textEditingController,
+                        decoration: InputDecoration.collapsed(
+                          hintStyle: TextStyle(
+                            color: Colors.grey.shade400
+                          ),
+                          hintText: 'Group name',
+                        ),
+                      ),
+                    )
+                  ],
+                ),
               ),
             ),
           ),
@@ -251,11 +286,50 @@ class _NewGroupState extends State<NewGroup>
     );
   }
 
-  addGroup(){
-//    _firestore.collection('chat_groups').add({
-//      'name': textEditingController.text,
-//      'image':
-//    })
+  addGroup() async{
+    DocumentReference documentReference = await _firestore.collection('chat_groups').add({
+      'name': textEditingController.text,
+      'image': _imageUrl,
+      'users': chosenUsers,
+      'timestamp': FieldValue.serverTimestamp()
+    });
+
+    _groupId = documentReference.documentID;
+  }
+
+  addGroupToUsers() async{
+    for(String user in chosenUsers){
+      await usersRef.document(user).collection('chat_groups').document(_groupId).setData({'timestamp': FieldValue.serverTimestamp()});
+    }
+  }
+
+  Future uploadFile(File file, BuildContext context) async {
+    if (file == null) return;
+
+    print((file));
+
+    StorageReference storageReference = FirebaseStorage.instance
+        .ref()
+        .child('group_chats_images/').child(randomAlphaNumeric(20));
+    StorageUploadTask uploadTask = storageReference.putFile(file);
+
+    await uploadTask.onComplete;
+    print('File Uploaded');
+
+    _imageUrl = await storageReference.getDownloadURL();
+  }
+
+  Future chooseImage() async {
+    await ImagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 52,
+        maxHeight: 400,
+        maxWidth: 600)
+        .then((image) {
+      setState(() {
+        _imageFile = image;
+      });
+    });
   }
 
   @override

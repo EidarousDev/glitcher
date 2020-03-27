@@ -1,12 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:glitcher/models/user_model.dart';
 
 class Group {
   final String id;
   final String name;
   final String image;
-  List<User> users;
+  List users;
   final dynamic timestamp;
 
   Group({

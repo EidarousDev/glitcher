@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/database_service.dart';
@@ -23,6 +24,7 @@ class _ChatsState extends State<Chats>
   var followers = [];
   Set friends = Set();
   List<ChatItem> chats = [];
+  List<Group> groups = [];
 
   void getCurrentUserFriends() async {
     await loadFollowing();
@@ -106,6 +108,17 @@ class _ChatsState extends State<Chats>
     _tabController = TabController(vsync: this, initialIndex: 0, length: 2);
 
     getCurrentUserFriends();
+    getChatGroups();
+  }
+
+  getChatGroups() async{
+    List<String> groupsIds = await DatabaseService.getGroups();
+    for(String groupId in groupsIds){
+      Group group = await DatabaseService.getGroupWithId(groupId);
+      setState(() {
+        this.groups.add(group);
+      });
+    }
   }
 
   @override
@@ -180,7 +193,7 @@ class _ChatsState extends State<Chats>
             },
           ),
           ListView.separated(
-            padding: EdgeInsets.all(10),
+            padding: EdgeInsets.symmetric(vertical: 7,),
             separatorBuilder: (BuildContext context, int index) {
               return Align(
                 alignment: Alignment.centerRight,
@@ -191,17 +204,19 @@ class _ChatsState extends State<Chats>
                 ),
               );
             },
-            itemCount: groups.length,
+            itemCount: this.groups.length,
             itemBuilder: (BuildContext context, int index) {
-              Map chat = groups[index];
+              Group group = this.groups[index];
 
-              return ChatItem(
-                dp: chat['dp'],
-                name: chat['name'],
-                isOnline: chat['isOnline'],
-                counter: chat['counter'],
-                msg: chat['msg'],
-                time: chat['time'],
+              return ListTile(
+                onTap: (){
+                  Navigator.of(context).pushNamed('group-conversation', arguments: {'groupId': group.id});
+                },
+                leading: CircleAvatar(
+                  radius: 25,
+                  backgroundImage: NetworkImage(group.image),
+                ),
+                title: Text(group.name),
               );
             },
           ),

@@ -17,12 +17,13 @@ class ImageMessageOverlay extends StatefulWidget {
 
   final String uri;
   final String otherUid;
+  final String groupId;
 
-  ImageMessageOverlay({this.uri, this.otherUid});
+  ImageMessageOverlay({this.uri, this.otherUid, this.groupId});
 
   @override
   _ImageMessageState createState() =>
-      _ImageMessageState(uri: uri, otherUid: otherUid);
+      _ImageMessageState(uri: uri, otherUid: otherUid, groupId: groupId);
 }
 
 class _ImageMessageState extends State<ImageMessageOverlay> {
@@ -64,6 +65,8 @@ class _ImageMessageState extends State<ImageMessageOverlay> {
 
   final String uri;
   final String otherUid;
+  final String groupId;
+
   final Firestore _firestore = Firestore.instance;
 
   var _url;
@@ -71,6 +74,7 @@ class _ImageMessageState extends State<ImageMessageOverlay> {
   _ImageMessageState({
     this.uri,
     this.otherUid,
+    this.groupId
   });
 
   Stack _editBtnOverlay(BuildContext context, Widget child) {
@@ -85,11 +89,25 @@ class _ImageMessageState extends State<ImageMessageOverlay> {
             ),
             onPressed: () async{
               await uploadFile(File(uri), context);
-              await sendMessage();
-              setState(() {
-                _loading = false;
-              });
-              Navigator.of(context).pushNamed('conversation', arguments: {'otherUid': otherUid});
+
+              if(otherUid != null){
+                await sendMessage();
+                setState(() {
+                  _loading = false;
+                });
+
+                Navigator.of(context).pushNamed('conversation', arguments: {'otherUid': otherUid});
+              }
+              else if(groupId != null){
+                await sendGroupMessage();
+
+                setState(() {
+                  _loading = false;
+                });
+
+                Navigator.of(context).pushNamed('group-conversation', arguments: {'groupId': groupId});
+              }
+
             },
             borderSide: BorderSide(
               color: Colors.blue, //Color of the border
@@ -119,7 +137,6 @@ class _ImageMessageState extends State<ImageMessageOverlay> {
 //    croppedFile = await croppedFile.writeAsBytes(byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
 
     print((file));
-
 
     StorageReference storageReference = FirebaseStorage.instance
         .ref()
@@ -151,6 +168,18 @@ class _ImageMessageState extends State<ImageMessageOverlay> {
         .document(otherUid)
         .collection('conversations')
         .document(Constants.currentUserID)
+        .collection('messages')
+        .add({
+      'sender': Constants.currentUserID,
+      'image': _url,
+      'timestamp': FieldValue.serverTimestamp(),
+      'type': 'image'
+    });
+  }
+
+  sendGroupMessage() async{
+    await chatGroupsRef
+        .document(groupId)
         .collection('messages')
         .add({
       'sender': Constants.currentUserID,

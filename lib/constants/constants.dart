@@ -11,6 +11,7 @@ final postsRef = firestore.collection('posts');
 final usersRef = firestore.collection('users');
 final chatsRef = firestore.collection('chats');
 final gamesRef = firestore.collection('games');
+final chatGroupsRef = firestore.collection('chat_groups');
 
 enum AvailableThemes {
   LIGHT_THEME,

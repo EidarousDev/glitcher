@@ -153,15 +153,25 @@ class DatabaseService {
     return User();
   }
 
-  static Future<List<Group>> getGroups() async{
+  static Future<List<String>> getGroups() async{
     QuerySnapshot snapshot = await usersRef.document(Constants.currentUserID)
-        .collection('group_chats').getDocuments();
+        .collection('chat_groups').getDocuments();
 
-    List<Group> groups = snapshot.documents
-        .map((doc) => Group.fromDoc(doc))
-        .toList();
+    List<String> groups = [];
+
+     snapshot.documents.forEach((f){
+      groups.add(f.documentID);
+    });
 
     return groups;
+  }
+
+  static Future<Group> getGroupWithId(String groupId) async {
+    DocumentSnapshot groupDocSnapshot = await chatGroupsRef.document(groupId).get();
+    if (groupDocSnapshot.exists) {
+      return Group.fromDoc(groupDocSnapshot);
+    }
+    return Group();
   }
 
   static getFollowing() async {
@@ -203,11 +213,37 @@ class DatabaseService {
     return messages;
   }
 
+  static Future<List<Message>> getGroupMessages(
+      String groupId) async {
+    QuerySnapshot msgSnapshot = await chatGroupsRef
+        .document(groupId)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .limit(20)
+        .getDocuments();
+    List<Message> messages =
+    msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
+    return messages;
+  }
+
   static Future<List<Message>> getPrevMessages(Timestamp firstVisibleGameSnapShot, String otherUserId) async {
     QuerySnapshot msgSnapshot = await chatsRef
         .document(Constants.currentUserID)
         .collection('conversations')
         .document(otherUserId)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .startAfter([firstVisibleGameSnapShot])
+        .limit(20)
+        .getDocuments();
+    List<Message> messages =
+    msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
+    return messages;
+  }
+
+  static Future<List<Message>> getPrevGroupMessages(Timestamp firstVisibleGameSnapShot, String groupId) async {
+    QuerySnapshot msgSnapshot = await chatGroupsRef
+        .document(groupId)
         .collection('messages')
         .orderBy('timestamp', descending: true)
         .startAfter([firstVisibleGameSnapShot])
