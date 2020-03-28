@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ChatBubble extends StatefulWidget {
@@ -59,12 +60,13 @@ class _ChatBubbleState extends State<ChatBubble> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               widget.isMe
                   ? SizedBox()
                   : widget.isGroup
                       ? Padding(
-                          padding: EdgeInsets.all(5),
+                          padding: EdgeInsets.fromLTRB(5, 5, 5, 0),
                           child: Text(
                             widget.username,
                             style: TextStyle(
@@ -72,6 +74,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                               color: colors[rNum],
                               fontWeight: FontWeight.bold,
                             ),
+                            textAlign: TextAlign.right,
                           ),
                         )
                       : SizedBox(),
