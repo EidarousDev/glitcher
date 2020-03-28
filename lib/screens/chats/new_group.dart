@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/services/permissions_service.dart';
 import 'package:image_picker/image_picker.dart';
-
 
 import 'package:random_string/random_string.dart';
 import 'dart:math' show Random;
@@ -113,10 +113,10 @@ class _NewGroupState extends State<NewGroup>
         child: Icon(
           Icons.done,
         ),
-        onPressed: () async{
+        onPressed: () async {
           chosenUsers = [];
-          for(int i = 0; i < chosens.length; i++){
-            if(chosens[i]){
+          for (int i = 0; i < chosens.length; i++) {
+            if (chosens[i]) {
               chosenUsers.add(friendsData[i].id);
             }
           }
@@ -157,8 +157,7 @@ class _NewGroupState extends State<NewGroup>
           SliverAppBar(
             expandedHeight: 50,
             leading: Container(),
-            flexibleSpace:
-            Container(
+            flexibleSpace: Container(
               color: Constants.darkBG,
               child: Padding(
                 padding: const EdgeInsets.all(3.0),
@@ -172,14 +171,21 @@ class _NewGroupState extends State<NewGroup>
                     Expanded(
                       flex: 2,
                       child: GestureDetector(
-                        onTap: (){
+                        onTap: () {
+                          PermissionsService().requestStoragePermission(
+                              onPermissionDenied: () {
+                            print('Permission has been denied');
+                          });
                           chooseImage();
                         },
                         child: CircleAvatar(
                           radius: 25,
                           backgroundColor: Colors.white,
-                          child: _imageFile == null ? Icon(Icons.camera_alt) : null,
-                          backgroundImage: _imageFile != null ?FileImage(_imageFile): null,
+                          child: _imageFile == null
+                              ? Icon(Icons.camera_alt)
+                              : null,
+                          backgroundImage:
+                              _imageFile != null ? FileImage(_imageFile) : null,
                         ),
                       ),
                     ),
@@ -193,9 +199,7 @@ class _NewGroupState extends State<NewGroup>
                         cursorColor: Colors.white,
                         controller: textEditingController,
                         decoration: InputDecoration.collapsed(
-                          hintStyle: TextStyle(
-                            color: Colors.grey.shade400
-                          ),
+                          hintStyle: TextStyle(color: Colors.grey.shade400),
                           hintText: 'Group name',
                         ),
                       ),
@@ -248,7 +252,8 @@ class _NewGroupState extends State<NewGroup>
                             child: Center(
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: friendsData.elementAt(index).online == 'online'
+                                  color: friendsData.elementAt(index).online ==
+                                          'online'
                                       ? Colors.greenAccent
                                       : Colors.grey,
                                   borderRadius: BorderRadius.circular(6),
@@ -286,8 +291,9 @@ class _NewGroupState extends State<NewGroup>
     );
   }
 
-  addGroup() async{
-    DocumentReference documentReference = await _firestore.collection('chat_groups').add({
+  addGroup() async {
+    DocumentReference documentReference =
+        await _firestore.collection('chat_groups').add({
       'name': textEditingController.text,
       'image': _imageUrl,
       'users': chosenUsers,
@@ -297,9 +303,13 @@ class _NewGroupState extends State<NewGroup>
     _groupId = documentReference.documentID;
   }
 
-  addGroupToUsers() async{
-    for(String user in chosenUsers){
-      await usersRef.document(user).collection('chat_groups').document(_groupId).setData({'timestamp': FieldValue.serverTimestamp()});
+  addGroupToUsers() async {
+    for (String user in chosenUsers) {
+      await usersRef
+          .document(user)
+          .collection('chat_groups')
+          .document(_groupId)
+          .setData({'timestamp': FieldValue.serverTimestamp()});
     }
   }
 
@@ -310,7 +320,8 @@ class _NewGroupState extends State<NewGroup>
 
     StorageReference storageReference = FirebaseStorage.instance
         .ref()
-        .child('group_chats_images/').child(randomAlphaNumeric(20));
+        .child('group_chats_images/')
+        .child(randomAlphaNumeric(20));
     StorageUploadTask uploadTask = storageReference.putFile(file);
 
     await uploadTask.onComplete;
@@ -321,10 +332,10 @@ class _NewGroupState extends State<NewGroup>
 
   Future chooseImage() async {
     await ImagePicker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 52,
-        maxHeight: 400,
-        maxWidth: 600)
+            source: ImageSource.gallery,
+            imageQuality: 52,
+            maxHeight: 400,
+            maxWidth: 600)
         .then((image) {
       setState(() {
         _imageFile = image;

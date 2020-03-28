@@ -64,18 +64,14 @@ class _ChatBubbleState extends State<ChatBubble> {
                   ? SizedBox()
                   : widget.isGroup
                       ? Padding(
-                          padding: EdgeInsets.only(right: 48.0),
-                          child: Container(
-                            child: Text(
-                              widget.username,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: colors[rNum],
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.left,
+                          padding: EdgeInsets.all(5),
+                          child: Text(
+                            widget.username,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: colors[rNum],
+                              fontWeight: FontWeight.bold,
                             ),
-                            alignment: Alignment.centerLeft,
                           ),
                         )
                       : SizedBox(),
