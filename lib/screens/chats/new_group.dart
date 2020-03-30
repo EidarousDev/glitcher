@@ -19,7 +19,6 @@ class NewGroup extends StatefulWidget {
 
 class _NewGroupState extends State<NewGroup>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-  Firestore _firestore = Firestore.instance;
   var following = [];
   var followers = [];
   Set friends = Set();
@@ -70,8 +69,7 @@ class _NewGroupState extends State<NewGroup>
 
   loadFollowing() async {
     if (following.length == 0) {
-      QuerySnapshot snap = await _firestore
-          .collection('users')
+      QuerySnapshot snap = await usersRef
           .document(Constants.currentUserID)
           .collection('following')
           .getDocuments();
@@ -84,8 +82,7 @@ class _NewGroupState extends State<NewGroup>
 
   loadFollowers() async {
     if (followers.length == 0) {
-      QuerySnapshot snap = await _firestore
-          .collection('users')
+      QuerySnapshot snap = await usersRef
           .document(Constants.currentUserID)
           .collection('followers')
           .getDocuments();
@@ -157,7 +154,8 @@ class _NewGroupState extends State<NewGroup>
           SliverAppBar(
             expandedHeight: 50,
             leading: Container(),
-            flexibleSpace: Container(
+            flexibleSpace:
+            Container(
               color: Constants.darkBG,
               child: Padding(
                 padding: const EdgeInsets.all(3.0),
