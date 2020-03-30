@@ -154,8 +154,7 @@ class _NewGroupState extends State<NewGroup>
           SliverAppBar(
             expandedHeight: 50,
             leading: Container(),
-            flexibleSpace:
-            Container(
+            flexibleSpace: Container(
               color: Constants.darkBG,
               child: Padding(
                 padding: const EdgeInsets.all(3.0),
