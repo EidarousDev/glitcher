@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:glitcher/root_page.dart';
 import 'package:glitcher/screens/app_page.dart';
+import 'package:glitcher/screens/chats/add_members_to_group.dart';
 import 'package:glitcher/screens/chats/chats.dart';
 import 'package:glitcher/screens/chats/conversation.dart';
 import 'package:glitcher/screens/chats/group_conversation.dart';
@@ -93,6 +94,12 @@ class RouteGenerator {
         return MaterialPageRoute(
             builder: (_) => GroupMembers(
                   groupId: args['groupId'],
+                ));
+
+      case 'add-members-to-group':
+        return MaterialPageRoute(
+            builder: (_) => AddMembersToGroup(
+                  args['groupId'],
                 ));
 
       case 'new-group':

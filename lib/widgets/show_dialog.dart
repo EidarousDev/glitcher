@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class MyDialog extends StatefulWidget {
   final DialogType dialogType;
-  final BuildContext context;
+  //final BuildContext context;
   final Function confirmFunction;
   final bool isBarrierDismissible;
   final String headerText;
@@ -13,7 +13,6 @@ class MyDialog extends StatefulWidget {
   const MyDialog(
       {Key key,
       this.dialogType,
-      this.context,
       this.confirmFunction,
       this.isBarrierDismissible,
       this.headerText,
@@ -34,7 +33,6 @@ class _MyDialogState extends State<MyDialog> {
     return widget.dialogType == DialogType.ONE_BUTTON
         ? Container()
         : twoButtonsDialog(
-            widget.context,
             widget.confirmFunction,
             isBarrierDismissible: widget.isBarrierDismissible,
             headerText: widget.headerText,
@@ -44,7 +42,7 @@ class _MyDialogState extends State<MyDialog> {
           );
   }
 
-  Future<Widget> twoButtonsDialog(BuildContext context, confirmFunction,
+  Future<Widget> twoButtonsDialog(confirmFunction,
       {bool isBarrierDismissible = true,
       String headerText = "Confirm",
       String bodyText = "Are you sure you want to do this?",

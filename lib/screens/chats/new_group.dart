@@ -19,9 +19,6 @@ class NewGroup extends StatefulWidget {
 
 class _NewGroupState extends State<NewGroup>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-  var following = [];
-  var followers = [];
-  Set friends = Set();
   List<User> friendsData = [];
   List<bool> chosens = [];
   List<Map<String, dynamic>> chosenUsers;
@@ -36,27 +33,12 @@ class _NewGroupState extends State<NewGroup>
 
   String _groupId;
 
-  void getCurrentUserFriends() async {
-    await loadFollowing();
-    await loadFollowers();
-    await getFriends();
-  }
-
-  Future<Set> getFriends() async {
-    Set followingSet = Set();
-    Set followerSet = Set();
-
-    for (int i = 0; i < following.length; i++) {
-      followingSet.add(following[i]);
-    }
-
-    for (int j = 0; j < followers.length; j++) {
-      followerSet.add(followers[j]);
-    }
-    friends = followingSet.intersection(followerSet);
+  getFriends() async {
+    List<User> friends =
+        await DatabaseService.getFriends(Constants.currentUserID);
 
     for (int i = 0; i < friends.length; i++) {
-      User user = await DatabaseService.getUserWithId(friends.elementAt(i));
+      User user = await DatabaseService.getUserWithId(friends[i].id);
 
       setState(() {
         friendsData.add(user);
@@ -67,37 +49,10 @@ class _NewGroupState extends State<NewGroup>
     return friends;
   }
 
-  loadFollowing() async {
-    if (following.length == 0) {
-      QuerySnapshot snap = await usersRef
-          .document(Constants.currentUserID)
-          .collection('following')
-          .getDocuments();
-
-      for (int i = 0; i < snap.documents.length; i++) {
-        this.following.add(snap.documents[i].documentID);
-      }
-    }
-  }
-
-  loadFollowers() async {
-    if (followers.length == 0) {
-      QuerySnapshot snap = await usersRef
-          .document(Constants.currentUserID)
-          .collection('followers')
-          .getDocuments();
-
-      for (int i = 0; i < snap.documents.length; i++) {
-        this.followers.add(snap.documents[i].documentID);
-      }
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-
-    getCurrentUserFriends();
+    getFriends();
   }
 
   @override

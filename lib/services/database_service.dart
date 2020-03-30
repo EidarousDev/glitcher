@@ -281,6 +281,19 @@ class DatabaseService {
         .delete();
   }
 
+  static Future<List<String>> getGroupMembersIds(String groupId) async {
+    QuerySnapshot members = await chatGroupsRef
+        .document(groupId)
+        .collection('users')
+        .getDocuments();
+    List<String> ids = [];
+    members.documents.forEach((doc) {
+      ids.add(doc.documentID);
+    });
+
+    return ids;
+  }
+
   static addMemberToGroup(String groupId, String memberId) async {
     await chatGroupsRef
         .document(groupId)
@@ -303,7 +316,7 @@ class DatabaseService {
         .document(memberId)
         .get();
 
-    doc.reference.updateData({
+    await doc.reference.updateData({
       'is_admin': !doc.data['is_admin'],
       'timestamp': FieldValue.serverTimestamp()
     });

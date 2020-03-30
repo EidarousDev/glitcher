@@ -28,7 +28,6 @@ class _GroupMembersState extends State<GroupMembers>
   _GroupMembersState({this.groupId});
 
   loadUsersData() async {
-    List<Map<String, dynamic>> users = [];
     QuerySnapshot usersSnapshot = await chatGroupsRef
         .document(groupId)
         .collection('users')
@@ -39,6 +38,7 @@ class _GroupMembersState extends State<GroupMembers>
       User temp = await DatabaseService.getUserWithId(doc.documentID);
       user.putIfAbsent('name', (() => temp.username));
       user.putIfAbsent('image', (() => temp.profileImageUrl));
+      user.putIfAbsent('description', (() => temp.description));
       user.putIfAbsent('is_admin', (() => doc.data['is_admin']));
       user.putIfAbsent('id', (() => doc.documentID));
       setState(() {
@@ -70,7 +70,9 @@ class _GroupMembersState extends State<GroupMembers>
           icon: Icon(
             Icons.keyboard_backspace,
           ),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
         title: TextField(
           decoration: InputDecoration.collapsed(
@@ -83,8 +85,8 @@ class _GroupMembersState extends State<GroupMembers>
               Icons.person_add,
             ),
             onPressed: () {
-              //TODO add new screen to add select friends to be added to group;
-              /// DatabaseService.addMemberToGroup(groupId, '');
+              Navigator.of(context).pushReplacementNamed('add-members-to-group',
+                  arguments: {'groupId': groupId});
             },
           )
         ],
@@ -109,7 +111,7 @@ class _GroupMembersState extends State<GroupMembers>
               backgroundImage: NetworkImage(members[index]['image']),
             ),
             title: Text(members[index]['name'] ?? ''),
-            subtitle: Text(members[index]['is_admin'] ? 'Admin' : ''),
+            subtitle: Text(members[index]['description'] ?? ''),
             trailing: members
                     .where((member) => member['id'] == Constants.currentUserID)
                     .toList()[0]['is_admin']
@@ -122,40 +124,74 @@ class _GroupMembersState extends State<GroupMembers>
                         IconButton(
                           icon: Icon(
                               MaterialCommunityIcons.getIconData('crown'),
-                              color: Colors.white70),
+                              color: members[index]['is_admin']
+                                  ? Colors.yellow
+                                  : Colors.white70),
                           onPressed: () {
                             print('user to be made admin');
-                            MyDialog(
-                              context: context,
-                              bodyText: 'Sure to make this member an admin?',
-                              dialogType: DialogType.TWO_BUTTONS,
-                              confirmFunction: () {
-                                DatabaseService.toggleMemberAdmin(
-                                    groupId, members[index]['id']);
-                                setState(() {
-                                  members[index]['is_admin'] =
-                                      !members[index]['is_admin'];
+                            showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text('Confirmation'),
+                                    content: Text(
+                                        'Sure to make this member an admin?'),
+                                    actions: <Widget>[
+                                      MaterialButton(
+                                        onPressed: () {
+                                          DatabaseService.toggleMemberAdmin(
+                                              groupId, members[index]['id']);
+                                          setState(() {
+                                            members[index]['is_admin'] =
+                                                !members[index]['is_admin'];
+                                          });
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text('Yes'),
+                                      ),
+                                      MaterialButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text('No'),
+                                      )
+                                    ],
+                                  );
                                 });
-                              },
-                            );
                           },
                         ),
                         IconButton(
                           icon: Icon(Icons.close, color: Colors.white70),
                           onPressed: () {
                             print('user to be removed');
-                            MyDialog(
-                              context: context,
-                              bodyText: 'Sure to delete this member?',
-                              dialogType: DialogType.TWO_BUTTONS,
-                              confirmFunction: () {
-                                DatabaseService.removeGroupMember(
-                                    groupId, members[index]['id']);
-                                setState(() {
-                                  members.removeAt(index);
+                            showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text('Confirmation'),
+                                    content:
+                                        Text('Sure to remove this member?'),
+                                    actions: <Widget>[
+                                      MaterialButton(
+                                        onPressed: () {
+                                          DatabaseService.removeGroupMember(
+                                              groupId, members[index]['id']);
+                                          setState(() {
+                                            members.removeAt(index);
+                                          });
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text('Yes'),
+                                      ),
+                                      MaterialButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text('No'),
+                                      )
+                                    ],
+                                  );
                                 });
-                              },
-                            );
                           },
                         ),
                       ],

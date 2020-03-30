@@ -553,11 +553,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _loading = false;
       AppUtil().showAlert('You started following ' + _nameText);
       _screenState = ScreenState.to_unfollow;
-      _following++;
+      _followers++;
     });
   }
 
   void unfollowUser() async {
+    setState(() {
+      _loading = true;
+    });
     await usersRef
         .document(Constants.currentUserID)
         .collection('following')
@@ -616,7 +619,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     setState(() {
       _screenState = ScreenState.to_follow;
-      _following--;
+      _followers--;
+      _loading = false;
     });
   }
 
