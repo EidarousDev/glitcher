@@ -83,6 +83,15 @@ class DatabaseService {
     return posts;
   }
 
+  static getFriends(String userId) async {
+    QuerySnapshot friendsSnapshot =
+        await usersRef.document(userId).collection('friends').getDocuments();
+
+    List<User> friends =
+        friendsSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
+    return friends;
+  }
+
   // This function is used to get the recent posts (filtered by a certain game)
   static Future<List<Post>> getGamePosts(String gameName) async {
     QuerySnapshot postSnapshot = await postsRef
@@ -153,13 +162,15 @@ class DatabaseService {
     return User();
   }
 
-  static Future<List<String>> getGroups() async{
-    QuerySnapshot snapshot = await usersRef.document(Constants.currentUserID)
-        .collection('chat_groups').getDocuments();
+  static Future<List<String>> getGroups() async {
+    QuerySnapshot snapshot = await usersRef
+        .document(Constants.currentUserID)
+        .collection('chat_groups')
+        .getDocuments();
 
     List<String> groups = [];
 
-     snapshot.documents.forEach((f){
+    snapshot.documents.forEach((f) {
       groups.add(f.documentID);
     });
 
@@ -167,7 +178,8 @@ class DatabaseService {
   }
 
   static Future<Group> getGroupWithId(String groupId) async {
-    DocumentSnapshot groupDocSnapshot = await chatGroupsRef.document(groupId).get();
+    DocumentSnapshot groupDocSnapshot =
+        await chatGroupsRef.document(groupId).get();
     if (groupDocSnapshot.exists) {
       return Group.fromDoc(groupDocSnapshot);
     }
@@ -198,8 +210,7 @@ class DatabaseService {
   }
 
   // This function is used to get the recent messages (unfiltered)
-  static Future<List<Message>> getMessages(
-      String otherUserId) async {
+  static Future<List<Message>> getMessages(String otherUserId) async {
     QuerySnapshot msgSnapshot = await chatsRef
         .document(Constants.currentUserID)
         .collection('conversations')
@@ -213,8 +224,7 @@ class DatabaseService {
     return messages;
   }
 
-  static Future<List<Message>> getGroupMessages(
-      String groupId) async {
+  static Future<List<Message>> getGroupMessages(String groupId) async {
     QuerySnapshot msgSnapshot = await chatGroupsRef
         .document(groupId)
         .collection('messages')
@@ -222,11 +232,12 @@ class DatabaseService {
         .limit(20)
         .getDocuments();
     List<Message> messages =
-    msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
+        msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
     return messages;
   }
 
-  static Future<List<Message>> getPrevMessages(Timestamp firstVisibleGameSnapShot, String otherUserId) async {
+  static Future<List<Message>> getPrevMessages(
+      Timestamp firstVisibleGameSnapShot, String otherUserId) async {
     QuerySnapshot msgSnapshot = await chatsRef
         .document(Constants.currentUserID)
         .collection('conversations')
@@ -237,11 +248,12 @@ class DatabaseService {
         .limit(20)
         .getDocuments();
     List<Message> messages =
-    msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
+        msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
     return messages;
   }
 
-  static Future<List<Message>> getPrevGroupMessages(Timestamp firstVisibleGameSnapShot, String groupId) async {
+  static Future<List<Message>> getPrevGroupMessages(
+      Timestamp firstVisibleGameSnapShot, String groupId) async {
     QuerySnapshot msgSnapshot = await chatGroupsRef
         .document(groupId)
         .collection('messages')
@@ -250,8 +262,51 @@ class DatabaseService {
         .limit(20)
         .getDocuments();
     List<Message> messages =
-    msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
+        msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
     return messages;
+  }
+
+  /// To remove a user from a group or to exit a group
+  static removeGroupMember(String groupId, String memberId) async {
+    await chatGroupsRef
+        .document(groupId)
+        .collection('users')
+        .document(memberId)
+        .delete();
+
+    await usersRef
+        .document(memberId)
+        .collection('chat_groups')
+        .document(groupId)
+        .delete();
+  }
+
+  static addMemberToGroup(String groupId, String memberId) async {
+    await chatGroupsRef
+        .document(groupId)
+        .collection('users')
+        .document(memberId)
+        .setData(
+            {'is_admin': false, 'timestamp': FieldValue.serverTimestamp()});
+
+    await usersRef
+        .document(memberId)
+        .collection('chat_groups')
+        .document(groupId)
+        .setData({'timestamp': FieldValue.serverTimestamp()});
+  }
+
+  static toggleMemberAdmin(String groupId, String memberId) async {
+    DocumentSnapshot doc = await chatGroupsRef
+        .document(groupId)
+        .collection('users')
+        .document(memberId)
+        .get();
+
+    doc.reference.updateData({
+      'is_admin': !doc.data['is_admin'],
+      'timestamp': FieldValue.serverTimestamp()
+    });
   }
 
   // Get Comments of a specific post

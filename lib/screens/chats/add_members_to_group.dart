@@ -12,12 +12,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:random_string/random_string.dart';
 import 'dart:math' show Random;
 
-class NewGroup extends StatefulWidget {
+class AddMembersToGroup extends StatefulWidget {
   @override
-  _NewGroupState createState() => _NewGroupState();
+  _AddMembersToGroupState createState() => _AddMembersToGroupState();
 }
 
-class _NewGroupState extends State<NewGroup>
+class _AddMembersToGroupState extends State<AddMembersToGroup>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   Firestore _firestore = Firestore.instance;
   var following = [];
@@ -70,8 +70,7 @@ class _NewGroupState extends State<NewGroup>
 
   loadFollowing() async {
     if (following.length == 0) {
-      QuerySnapshot snap = await _firestore
-          .collection('users')
+      QuerySnapshot snap = await usersRef
           .document(Constants.currentUserID)
           .collection('following')
           .getDocuments();
@@ -84,8 +83,7 @@ class _NewGroupState extends State<NewGroup>
 
   loadFollowers() async {
     if (followers.length == 0) {
-      QuerySnapshot snap = await _firestore
-          .collection('users')
+      QuerySnapshot snap = await usersRef
           .document(Constants.currentUserID)
           .collection('followers')
           .getDocuments();

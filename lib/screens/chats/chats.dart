@@ -18,86 +18,39 @@ class Chats extends StatefulWidget {
 class _ChatsState extends State<Chats>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   TabController _tabController;
-
-  Firestore _firestore = Firestore.instance;
-  var following = [];
-  var followers = [];
-  Set friends = Set();
   List<ChatItem> chats = [];
   List<Group> groups = [];
+  List<User> friends = [];
 
   void getCurrentUserFriends() async {
-    await loadFollowing();
-    await loadFollowers();
-    await getFriends();
-  }
+    List<User> friends =
+        await DatabaseService.getFriends(Constants.currentUserID);
 
-  Future<Set> getFriends() async {
-    Set followingSet = Set();
-    Set followerSet = Set();
-
-    for (int i = 0; i < following.length; i++) {
-      followingSet.add(following[i]);
-    }
-
-    for (int j = 0; j < followers.length; j++) {
-      followerSet.add(followers[j]);
-    }
-    friends = followingSet.intersection(followerSet);
-
-    for (int i = 0; i < friends.length; i++) {
-      await loadUserData(friends.elementAt(i));
-    }
-
-    return friends;
-  }
-
-  loadFollowing() async {
-    if (following.length == 0) {
-      QuerySnapshot snap = await _firestore
-          .collection('users')
-          .document(Constants.currentUserID)
-          .collection('following')
-          .getDocuments();
-
-      for (int i = 0; i < snap.documents.length; i++) {
-        this.following.add(snap.documents[i].documentID);
-      }
-    }
-  }
-
-  loadFollowers() async {
-    if (followers.length == 0) {
-      QuerySnapshot snap = await _firestore
-          .collection('users')
-          .document(Constants.currentUserID)
-          .collection('followers')
-          .getDocuments();
-
-      for (int i = 0; i < snap.documents.length; i++) {
-        this.followers.add(snap.documents[i].documentID);
-      }
-    }
+    friends.forEach((f) async {
+      await loadUserData(f.id);
+    });
+    setState(() {
+      this.friends = friends;
+    });
   }
 
   Future<ChatItem> loadUserData(String uid) async {
     ChatItem chatItem;
     User user = await DatabaseService.getUserWithId(uid);
-      setState(() {
-        chatItem = ChatItem(
-          key: ValueKey(uid),
-          dp: user.profileImageUrl,
-          name: user.username,
-          isOnline:user.online == 'online',
-          msg: 'Last Message',
-          time: user.online == 'online'
-              ? 'online'
-              : Functions.formatTimestamp(user.online),
-          counter: 0,
-        );
-        chats.add(chatItem);
-      });
-
+    setState(() {
+      chatItem = ChatItem(
+        key: ValueKey(uid),
+        dp: user.profileImageUrl,
+        name: user.username,
+        isOnline: user.online == 'online',
+        msg: 'Last Message',
+        time: user.online == 'online'
+            ? 'online'
+            : Functions.formatTimestamp(user.online),
+        counter: 0,
+      );
+      chats.add(chatItem);
+    });
 
     return chatItem;
   }
@@ -111,9 +64,9 @@ class _ChatsState extends State<Chats>
     getChatGroups();
   }
 
-  getChatGroups() async{
+  getChatGroups() async {
     List<String> groupsIds = await DatabaseService.getGroups();
-    for(String groupId in groupsIds){
+    for (String groupId in groupsIds) {
       Group group = await DatabaseService.getGroupWithId(groupId);
       setState(() {
         this.groups.add(group);
@@ -193,7 +146,9 @@ class _ChatsState extends State<Chats>
             },
           ),
           ListView.separated(
-            padding: EdgeInsets.symmetric(vertical: 7,),
+            padding: EdgeInsets.symmetric(
+              vertical: 7,
+            ),
             separatorBuilder: (BuildContext context, int index) {
               return Align(
                 alignment: Alignment.centerRight,
@@ -209,8 +164,9 @@ class _ChatsState extends State<Chats>
               Group group = this.groups[index];
 
               return ListTile(
-                onTap: (){
-                  Navigator.of(context).pushNamed('group-conversation', arguments: {'groupId': group.id});
+                onTap: () {
+                  Navigator.of(context).pushNamed('group-conversation',
+                      arguments: {'groupId': group.id});
                 },
                 leading: CircleAvatar(
                   radius: 25,

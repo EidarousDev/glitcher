@@ -19,12 +19,12 @@ class GroupConversation extends StatefulWidget {
   GroupConversation({this.groupId});
 
   @override
-  _GroupConversationState createState() => _GroupConversationState(groupId: groupId);
+  _GroupConversationState createState() =>
+      _GroupConversationState(groupId: groupId);
 }
 
 class _GroupConversationState extends State<GroupConversation>
     with WidgetsBindingObserver {
-
   Timestamp firstVisibleGameSnapShot;
   String messageText;
 
@@ -43,6 +43,8 @@ class _GroupConversationState extends State<GroupConversation>
 
   Map<String, User> usersMap = {};
 
+  var choices = ['Members'];
+
   _GroupConversationState({this.groupId});
 
   void loadGroupData(String groupId) async {
@@ -58,10 +60,7 @@ class _GroupConversationState extends State<GroupConversation>
   void sendMessage() async {
     messageController.clear();
 
-    await chatGroupsRef
-        .document(groupId)
-        .collection('messages')
-        .add({
+    await chatGroupsRef.document(groupId).collection('messages').add({
       'sender': Constants.currentUserID,
       'text': messageText,
       'timestamp': FieldValue.serverTimestamp(),
@@ -73,7 +72,10 @@ class _GroupConversationState extends State<GroupConversation>
     var messages = await DatabaseService.getGroupMessages(groupId);
     setState(() {
       this._messages = messages;
-      this.firstVisibleGameSnapShot = messages.last.timestamp;
+
+      if (messages.length >
+          0) //TODO comment this line if prevMessages malfunction
+        this.firstVisibleGameSnapShot = messages.last.timestamp;
     });
   }
 
@@ -149,24 +151,36 @@ class _GroupConversationState extends State<GroupConversation>
     return time;
   }
 
-  getGroupUsersData() async{
-    for(String userId in group.users){
+  getGroupUsersData() async {
+    List<Map<String, dynamic>> users = [];
+    List<String> usersIds = [];
+    QuerySnapshot usersSnapshot = await chatGroupsRef
+        .document(groupId)
+        .collection('users')
+        .getDocuments();
+    usersSnapshot.documents.forEach((doc) {
+      users.add(doc.data);
+      usersIds.add(doc.documentID);
+    });
+
+    for (String userId in usersIds) {
       User user = await DatabaseService.getUserWithId(userId);
       setState(() {
-        this.usersMap.putIfAbsent(userId, ()=> user);
+        this.usersMap.putIfAbsent(userId, () => user);
       });
     }
   }
 
   Future chooseImage() async {
     await ImagePicker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 52,
-        maxHeight: 400,
-        maxWidth: 600)
+            source: ImageSource.gallery,
+            imageQuality: 52,
+            maxHeight: 400,
+            maxWidth: 600)
         .then((image) {
       setState(() {
-        Navigator.of(context).pushNamed('image-message-overlay', arguments: {'groupId': this.groupId, 'uri': image.path});
+        Navigator.of(context).pushNamed('image-message-overlay',
+            arguments: {'groupId': this.groupId, 'uri': image.path});
       });
     });
   }
@@ -196,12 +210,12 @@ class _GroupConversationState extends State<GroupConversation>
     _scrollController
       ..addListener(() {
         if (_scrollController.offset >=
-            _scrollController.position.maxScrollExtent &&
+                _scrollController.position.maxScrollExtent &&
             !_scrollController.position.outOfRange) {
           print('reached the bottom');
           getPrevGroupMessages();
         } else if (_scrollController.offset <=
-            _scrollController.position.minScrollExtent &&
+                _scrollController.position.minScrollExtent &&
             !_scrollController.position.outOfRange) {
           print("reached the top");
         } else {}
@@ -241,10 +255,10 @@ class _GroupConversationState extends State<GroupConversation>
                 padding: EdgeInsets.only(left: 0.0, right: 10.0),
                 child: group?.image != null
                     ? CircleAvatar(
-                  backgroundImage: NetworkImage(
-                    group.image,
-                  ),
-                )
+                        backgroundImage: NetworkImage(
+                          group.image,
+                        ),
+                      )
                     : Container(),
               ),
               Expanded(
@@ -267,12 +281,23 @@ class _GroupConversationState extends State<GroupConversation>
           onTap: () {},
         ),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(
-              Icons.more_horiz,
-            ),
-            onPressed: () {},
-          ),
+          PopupMenuButton<String>(
+            elevation: 0,
+            initialValue: choices[0],
+            onCanceled: () {
+              print('You have not chossed anything');
+            },
+            tooltip: 'This is tooltip',
+            onSelected: _select,
+            itemBuilder: (BuildContext context) {
+              return choices.map((String choice) {
+                return PopupMenuItem<String>(
+                  value: choice,
+                  child: Text(choice),
+                );
+              }).toList();
+            },
+          )
         ],
       ),
       body: Container(
@@ -282,29 +307,29 @@ class _GroupConversationState extends State<GroupConversation>
             SizedBox(height: 10),
             _messages != null
                 ? Flexible(
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: EdgeInsets.symmetric(horizontal: 10),
-                itemCount: _messages.length,
-                reverse: true,
-                itemBuilder: (BuildContext context, int index) {
-                  Message msg = _messages[index];
-                  return ChatBubble(
-                    message: msg.type == "text" ? msg.text : msg.image,
-                    username: usersMap[msg.sender].username,
-                    time: msg.timestamp != null
-                        ? formatTimestamp(msg.timestamp)
-                        : 'now',
-                    type: msg.type,
-                    replyText: null,
-                    isMe: msg.sender == Constants.currentUserID,
-                    isGroup: true,
-                    isReply: false,
-                    replyName: null,
-                  );
-                },
-              ),
-            )
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      itemCount: _messages.length,
+                      reverse: true,
+                      itemBuilder: (BuildContext context, int index) {
+                        Message msg = _messages[index];
+                        return ChatBubble(
+                          message: msg.type == "text" ? msg.text : msg.image,
+                          username: usersMap[msg.sender].username,
+                          time: msg.timestamp != null
+                              ? formatTimestamp(msg.timestamp)
+                              : 'now',
+                          type: msg.type,
+                          replyText: null,
+                          isMe: msg.sender == Constants.currentUserID,
+                          isGroup: true,
+                          isReply: false,
+                          replyName: null,
+                        );
+                      },
+                    ),
+                  )
                 : Container(),
             Align(
                 alignment: Alignment.bottomRight,
@@ -398,5 +423,14 @@ class _GroupConversationState extends State<GroupConversation>
         ),
       ),
     );
+  }
+
+  void _select(String value) {
+    switch (value) {
+      case 'Members':
+        print('xxx');
+        Navigator.of(context)
+            .pushNamed('group-members', arguments: {'groupId': groupId});
+    }
   }
 }

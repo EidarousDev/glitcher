@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/user_model.dart';
@@ -70,8 +71,21 @@ class _CommentItemState extends State<CommentItem> {
             ),
             subtitle: widget.comment.text == null
                 ? ''
-                : Wrap(
-                    children: <Widget>[Text('${widget.comment.text}')],
+                : Text.rich(
+                    TextSpan(
+                        text: '',
+                        children: widget.comment.text.split(' ').map((w) {
+                          return w.startsWith('@') && w.length > 1
+                              ? TextSpan(
+                                  text: ' ' + w,
+                                  style: TextStyle(color: Colors.blue),
+                                  recognizer: new TapGestureRecognizer()
+                                    ..onTap = () => mentionedUserProfile(w),
+                                )
+                              : TextSpan(
+                                  text: ' ' + w,
+                                  style: TextStyle(color: Colors.black));
+                        }).toList()),
                   ),
             isThreeLine: true,
           ),
@@ -96,5 +110,9 @@ class _CommentItemState extends State<CommentItem> {
   @override
   void initState() {
     super.initState();
+  }
+
+  mentionedUserProfile(String w) {
+    //TODO: Implement Mentioned user profile - Get UID from string then pass it to the navigator
   }
 }

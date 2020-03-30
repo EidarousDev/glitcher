@@ -494,88 +494,129 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     FieldValue timestamp = FieldValue.serverTimestamp();
 
-    await _firestore
-        .collection('users')
+    await usersRef
         .document(userId)
         .collection('followers')
-        .document(currentUser.uid)
+        .document(Constants.currentUserID)
         .setData({
-      'timestamp': timestamp,
+      'timestamp': FieldValue.serverTimestamp(),
     });
 
-    await _firestore.collection('users').document(userId).updateData({
-      'followers': ++_followers,
-    });
-
-    int following = 0;
-
-    await _firestore
-        .collection('users')
-        .document(currentUser.uid)
-        .get()
-        .then((onValue) {
-      following = onValue.data['following'];
-    });
-
-    await _firestore.collection('users').document(currentUser.uid).updateData({
-      'following': ++following,
+    await usersRef.document(userId).updateData({
+      'followers': FieldValue.increment(1),
     });
 
     await _firestore
         .collection('users')
-        .document(currentUser.uid)
+        .document(Constants.currentUserID)
+        .updateData({
+      'following': FieldValue.increment(1),
+    });
+
+    await usersRef
+        .document(Constants.currentUserID)
         .collection('following')
         .document(userId)
         .setData({
       'timestamp': timestamp,
-    }).then((_) {
-      setState(() {
-        _loading = false;
-        AppUtil().showAlert('You started following ' + _nameText);
-        setState(() {
-          _screenState = ScreenState.to_unfollow;
-        });
-      });
+    });
+
+    DocumentSnapshot doc = await usersRef
+        .document(userId)
+        .collection('following')
+        .document(Constants.currentUserID)
+        .get();
+
+    if (doc.exists) {
+      await usersRef
+          .document(Constants.currentUserID)
+          .collection('friends')
+          .document(userId)
+          .setData({'timestamp': FieldValue.serverTimestamp()});
+
+      await usersRef
+          .document(Constants.currentUserID)
+          .updateData({'friends': FieldValue.increment(1)});
+
+      await usersRef
+          .document(userId)
+          .collection('friends')
+          .document(Constants.currentUserID)
+          .setData({'timestamp': FieldValue.serverTimestamp()});
+
+      await usersRef
+          .document(userId)
+          .updateData({'friends': FieldValue.increment(1)});
+    }
+
+    setState(() {
+      _loading = false;
+      AppUtil().showAlert('You started following ' + _nameText);
+      _screenState = ScreenState.to_unfollow;
+      _following++;
     });
   }
 
   void unfollowUser() async {
-    await _firestore
-        .collection('users')
-        .document(currentUser.uid)
+    await usersRef
+        .document(Constants.currentUserID)
         .collection('following')
         .document(userId)
         .delete();
 
-    int following = 0;
-
-    await _firestore
-        .collection('users')
-        .document(currentUser.uid)
-        .get()
-        .then((onValue) {
-      following = onValue.data['following'];
+    await usersRef.document(Constants.currentUserID).updateData({
+      'following': FieldValue.increment(-1),
     });
 
-    await _firestore.collection('users').document(currentUser.uid).updateData({
-      'following': --following,
-    });
-
-    await _firestore
-        .collection('users')
+    await usersRef
         .document(userId)
         .collection('followers')
-        .document(currentUser.uid)
+        .document(Constants.currentUserID)
         .delete();
 
-    await _firestore.collection('users').document(userId).updateData({
-      'followers': --_followers,
+    await usersRef.document(userId).updateData({
+      'followers': FieldValue.increment(-1),
     });
 
+    DocumentSnapshot doc = await usersRef
+        .document(Constants.currentUserID)
+        .collection('friends')
+        .document(userId)
+        .get();
+
+    if (doc.exists) {
+      await usersRef
+          .document(Constants.currentUserID)
+          .collection('friends')
+          .document(userId)
+          .delete();
+
+      await usersRef
+          .document(Constants.currentUserID)
+          .updateData({'friends': FieldValue.increment(-1)});
+    }
+
+    DocumentSnapshot doc2 = await usersRef
+        .document(userId)
+        .collection('friends')
+        .document(Constants.currentUserID)
+        .get();
+
+    if (doc2.exists) {
+      await usersRef
+          .document(userId)
+          .collection('friends')
+          .document(Constants.currentUserID)
+          .delete();
+
+      await usersRef
+          .document(userId)
+          .updateData({'friends': FieldValue.increment(-1)});
+    }
+
     setState(() {
-      setState(() {
-        _screenState = ScreenState.to_follow;
-      });
+      _screenState = ScreenState.to_follow;
+      _following--;
     });
   }
 

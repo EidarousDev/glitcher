@@ -4,6 +4,7 @@ import 'package:glitcher/screens/app_page.dart';
 import 'package:glitcher/screens/chats/chats.dart';
 import 'package:glitcher/screens/chats/conversation.dart';
 import 'package:glitcher/screens/chats/group_conversation.dart';
+import 'package:glitcher/screens/chats/group_members.dart';
 import 'package:glitcher/screens/chats/image_message_overlay.dart';
 import 'package:glitcher/screens/chats/new_group.dart';
 import 'package:glitcher/screens/games/game_screen.dart';
@@ -85,18 +86,20 @@ class RouteGenerator {
       case 'group-conversation':
         return MaterialPageRoute(
             builder: (_) => GroupConversation(
-              groupId: args['groupId'],
-            ));
+                  groupId: args['groupId'],
+                ));
+
+      case 'group-members':
+        return MaterialPageRoute(
+            builder: (_) => GroupMembers(
+                  groupId: args['groupId'],
+                ));
 
       case 'new-group':
-        return MaterialPageRoute(
-            builder: (_) => NewGroup(
-            ));
+        return MaterialPageRoute(builder: (_) => NewGroup());
 
       case 'chats':
-        return MaterialPageRoute(
-            builder: (_) => Chats(
-            ));
+        return MaterialPageRoute(builder: (_) => Chats());
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

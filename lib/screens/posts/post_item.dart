@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:audiofileplayer/audiofileplayer.dart';
 import 'package:chewie/chewie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -44,7 +43,9 @@ class _PostItemState extends State<PostItem> {
   String dropdownValue = 'Edit';
 
   bool isLiked = false;
+  bool isLikeEnabled = true;
   bool isDisliked = false;
+  bool isDislikedEnabled = true;
   var likes = [];
   var dislikes = [];
   NotificationHandler notificationHandler = NotificationHandler();
@@ -250,15 +251,17 @@ class _PostItemState extends State<PostItem> {
                     ],
                   ),
                   onTap: () async {
-                    _likeSFX == null
-                        ? null
-                        : Audio.loadFromByteData(_likeSFX,
-                            onComplete: () =>
-                                setState(() => --_spawnedAudioCount))
-                      ..play()
-                      ..dispose();
-                    setState(() => ++_spawnedAudioCount);
-                    likeBtnHandler(post);
+                    if (isLikeEnabled) {
+                      _likeSFX == null
+                          ? null
+                          : Audio.loadFromByteData(_likeSFX,
+                              onComplete: () =>
+                                  setState(() => --_spawnedAudioCount))
+                        ..play()
+                        ..dispose();
+                      setState(() => ++_spawnedAudioCount);
+                      await likeBtnHandler(post);
+                    }
                   },
                 ),
                 SizedBox(
@@ -296,15 +299,17 @@ class _PostItemState extends State<PostItem> {
                     ],
                   ),
                   onTap: () async {
-                    _dislikeSFX == null
-                        ? null
-                        : Audio.loadFromByteData(_dislikeSFX,
-                            onComplete: () =>
-                                setState(() => --_spawnedAudioCount))
-                      ..play()
-                      ..dispose();
-                    setState(() => ++_spawnedAudioCount);
-                    dislikeBtnHandler(post);
+                    if (isDislikedEnabled) {
+                      _dislikeSFX == null
+                          ? null
+                          : Audio.loadFromByteData(_dislikeSFX,
+                              onComplete: () =>
+                                  setState(() => --_spawnedAudioCount))
+                        ..play()
+                        ..dispose();
+                      setState(() => ++_spawnedAudioCount);
+                      await dislikeBtnHandler(post);
+                    }
                   },
                 ),
                 SizedBox(
@@ -419,40 +424,44 @@ class _PostItemState extends State<PostItem> {
   }
 
   Future<void> likeBtnHandler(Post post) async {
-    if (isLiked && !isDisliked) {
-      postsRef
+    setState(() {
+      isLikeEnabled = false;
+    });
+    if (isLiked == true && isDisliked == false) {
+      await postsRef
           .document(post.id)
           .collection('likes')
           .document(Constants.currentUserID)
           .delete();
-      postsRef
+      await postsRef
           .document(post.id)
           .updateData({'likes': FieldValue.increment(-1)});
       setState(() {
         isLiked = false;
         //post.likesCount = likesNo;
       });
-    } else {
-      if (isDisliked && !isLiked) {
-        postsRef
-            .document(post.id)
-            .collection('dislikes')
-            .document(Constants.currentUserID)
-            .delete();
-        postsRef
-            .document(post.id)
-            .updateData({'dislikes': FieldValue.increment(-1)});
-      }
+    } else if (isDisliked == true && isLiked == false) {
+      await postsRef
+          .document(post.id)
+          .collection('dislikes')
+          .document(Constants.currentUserID)
+          .delete();
+      await postsRef
+          .document(post.id)
+          .updateData({'dislikes': FieldValue.increment(-1)});
+
       setState(() {
         isDisliked = false;
         //post.disLikesCount = dislikesNo;
       });
-      postsRef
+      await postsRef
           .document(post.id)
           .collection('likes')
           .document(Constants.currentUserID)
           .setData({'timestamp': FieldValue.serverTimestamp()});
-      postsRef.document(post.id).updateData({'likes': FieldValue.increment(1)});
+      await postsRef
+          .document(post.id)
+          .updateData({'likes': FieldValue.increment(1)});
 
       setState(() {
         isLiked = true;
@@ -461,11 +470,27 @@ class _PostItemState extends State<PostItem> {
 
       notificationHandler.sendNotification(
           post.authorId, 'New Post Like', 'likes your post', post.id);
+    } else if (isLiked == false && isDisliked == false) {
+      await postsRef
+          .document(post.id)
+          .collection('likes')
+          .document(Constants.currentUserID)
+          .setData({'timestamp': FieldValue.serverTimestamp()});
+      await postsRef
+          .document(post.id)
+          .updateData({'likes': FieldValue.increment(1)});
+      setState(() {
+        isLiked = true;
+        //post.likesCount = likesNo;
+      });
+    } else {
+      throw Exception('Unconditional Event Occurred!');
     }
     var postMeta = await DatabaseService.getPostMeta(post.id);
     setState(() {
       post.likesCount = postMeta['likes'];
       post.disLikesCount = postMeta['dislikes'];
+      isLikeEnabled = true;
     });
 
     print(
@@ -473,40 +498,41 @@ class _PostItemState extends State<PostItem> {
   }
 
   Future<void> dislikeBtnHandler(Post post) async {
-    if (isDisliked && !isLiked) {
-      postsRef
+    setState(() {
+      isDislikedEnabled = false;
+    });
+    if (isDisliked == true && isLiked == false) {
+      await postsRef
           .document(post.id)
           .collection('dislikes')
           .document(Constants.currentUserID)
           .delete();
-      postsRef
+      await postsRef
           .document(post.id)
           .updateData({'dislikes': FieldValue.increment(-1)});
       setState(() {
         isDisliked = false;
         //post.disLikesCount = dislikesNo;
       });
-    } else {
-      if (isLiked && !isDisliked) {
-        postsRef
-            .document(post.id)
-            .collection('likes')
-            .document(Constants.currentUserID)
-            .delete();
-        postsRef
-            .document(post.id)
-            .updateData({'likes': FieldValue.increment(-1)});
-      }
+    } else if (isLiked == true && isDisliked == false) {
+      await postsRef
+          .document(post.id)
+          .collection('likes')
+          .document(Constants.currentUserID)
+          .delete();
+      await postsRef
+          .document(post.id)
+          .updateData({'likes': FieldValue.increment(-1)});
       setState(() {
         isLiked = false;
         //post.likesCount = likesNo;
       });
-      postsRef
+      await postsRef
           .document(post.id)
           .collection('dislikes')
           .document(Constants.currentUserID)
           .setData({'timestamp': FieldValue.serverTimestamp()});
-      postsRef
+      await postsRef
           .document(post.id)
           .updateData({'dislikes': FieldValue.increment(1)});
 
@@ -514,6 +540,22 @@ class _PostItemState extends State<PostItem> {
         isDisliked = true;
         //post.disLikesCount = dislikesNo;
       });
+    } else if (isDisliked == false && isLiked == false) {
+      await postsRef
+          .document(post.id)
+          .collection('dislikes')
+          .document(Constants.currentUserID)
+          .setData({'timestamp': FieldValue.serverTimestamp()});
+      await postsRef
+          .document(post.id)
+          .updateData({'dislikes': FieldValue.increment(1)});
+
+      setState(() {
+        isDisliked = true;
+        //post.disLikesCount = dislikesNo;
+      });
+    } else {
+      throw Exception('Unconditional Event Occurred.');
     }
 
     var postMeta = await DatabaseService.getPostMeta(post.id);
@@ -521,6 +563,7 @@ class _PostItemState extends State<PostItem> {
     setState(() {
       post.likesCount = postMeta['likes'];
       post.disLikesCount = postMeta['dislikes'];
+      isDislikedEnabled = true;
     });
 
     print(

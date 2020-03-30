@@ -4,12 +4,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:glitcher/constants/sizes.dart';
+import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/services/share_link.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/utils/functions.dart';
+import 'package:glitcher/widgets/caching_image.dart';
 import 'package:share/share.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -53,12 +55,12 @@ class _CommentPostItemState extends State<CommentPostItem> {
         ListTile(
           contentPadding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
           leading: InkWell(
-              child: CircleAvatar(
-                radius: 25.0,
-                backgroundColor: Colors.grey,
-                backgroundImage: loggedInProfileImageURL != null
-                    ? CacheImage(loggedInProfileImageURL)
-                    : AssetImage('assets/images/default_profile.png'),
+              child: CacheThisImage(
+                imageUrl: author.profileImageUrl,
+                imageShape: BoxShape.circle,
+                width: Sizes.sm_profile_image_w,
+                height: Sizes.sm_profile_image_h,
+                defaultAssetImage: Strings.default_profile_image,
               ),
               onTap: () {
                 Navigator.of(context).pushNamed('/user-profile', arguments: {

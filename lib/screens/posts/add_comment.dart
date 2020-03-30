@@ -21,10 +21,11 @@ class AddCommentScreen extends StatefulWidget {
 }
 
 class _AddCommentScreenState extends State<AddCommentScreen> {
-  String _commentText;
+  String _commentText = '';
 
   /// Comment Text
   var _commentTextController = TextEditingController();
+  var words = []; // to split the characters for the mention user feature
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,8 +40,29 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
               color: Colors.white,
             ),
             onPressed: () {
-              DatabaseService.addComment(widget.postId, _commentText);
-              Navigator.pop(context);
+              if (_commentTextController.text.isNotEmpty) {
+                DatabaseService.addComment(widget.postId, _commentText);
+                Navigator.pop(context);
+              } else {
+                showDialog(
+                  context: context,
+                  barrierDismissible: true,
+                  builder: (BuildContext context) {
+                    // return object of type Dialog
+                    return AlertDialog(
+                      content: new Text("A comment can't be empty!"),
+                      actions: <Widget>[
+                        new FlatButton(
+                          child: new Text("Ok"),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
             },
           ),
         ],
@@ -76,9 +98,8 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
               ],
             ),
           ),
-          Container(
-            height: 350,
-            child: TextFormField(
+          Column(children: <Widget>[
+            TextFormField(
               maxLength: 250,
               maxLines: 10,
               maxLengthEnforced: true,
@@ -87,7 +108,12 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
               controller: _commentTextController,
               onChanged: (value) {
                 setState(() {
-                  _commentText = value;
+                  words = value.split(' ');
+                  _commentText = words.length > 0 &&
+                          words[words.length - 1].startsWith('@')
+                      ? words[words.length - 1]
+                      : '';
+                  //_commentText = value;
                 });
               },
               decoration: InputDecoration(
@@ -96,26 +122,54 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
                     EdgeInsets.symmetric(vertical: 25.0, horizontal: 12.0),
                 hintText: 'Leave your comment',
                 filled: true,
-                prefixIcon: InkWell(
-                    child: widget.profileImageUrl != null
-                        ? CircleAvatar(
-                            radius: 30.0,
-                            backgroundImage: NetworkImage(
-                                loggedInProfileImageURL), // no matter how big it is, it won't overflow
-                          )
-                        : CircleAvatar(
-                            backgroundImage:
-                                AssetImage('assets/images/default_profile.png'),
-                          ),
-                    onTap: () {
-                      Navigator.of(context)
-                          .pushNamed('/user-profile', arguments: {
-                        'userId': widget.userId,
-                      });
-                    }),
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: InkWell(
+                      child: widget.profileImageUrl != null
+                          ? CircleAvatar(
+                              radius: 30.0,
+                              backgroundImage: NetworkImage(
+                                  loggedInProfileImageURL), // no matter how big it is, it won't overflow
+                            )
+                          : CircleAvatar(
+                              backgroundImage: AssetImage(
+                                  'assets/images/default_profile.png'),
+                            ),
+                      onTap: () {
+                        Navigator.of(context)
+                            .pushNamed('/user-profile', arguments: {
+                          'userId': widget.userId,
+                        });
+                      }),
+                ),
               ),
             ),
-          ),
+            _commentText.length > 1
+                ? ListView(
+                    shrinkWrap: true,
+                    children: Constants.userFriends.map((s) {
+                      if (('@' + s).contains(_commentText))
+                        return ListTile(
+                            title: Text(
+                              s,
+                              style: TextStyle(color: Colors.black),
+                            ),
+                            onTap: () {
+                              String tmp = _commentText.substring(
+                                  1, _commentText.length);
+                              setState(() {
+                                _commentText = '';
+                                _commentTextController.text += s
+                                    .substring(
+                                        s.indexOf(tmp) + tmp.length, s.length)
+                                    .replaceAll(' ', '_');
+                              });
+                            });
+                      else
+                        return SizedBox();
+                    }).toList())
+                : SizedBox(),
+          ]),
         ],
       ),
     );
