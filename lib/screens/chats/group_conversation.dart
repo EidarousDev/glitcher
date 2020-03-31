@@ -48,7 +48,7 @@ class _GroupConversationState extends State<GroupConversation>
 
   Map<String, User> usersMap = {};
 
-  var choices = ['Members'];
+  var choices = ['Group Details', 'Members'];
 
   _GroupConversationState({this.groupId});
 
@@ -183,38 +183,30 @@ class _GroupConversationState extends State<GroupConversation>
             maxHeight: 400,
             maxWidth: 600)
         .then((image) {
-          showDialog(
+      showDialog(
           barrierDismissible: true,
           child: Container(
             width: Sizes.sm_profile_image_w,
-            height:
-                Sizes.sm_profile_image_h,
+            height: Sizes.sm_profile_image_h,
             child: ImageOverlay(
               imageFile: image,
               btnText: 'Send',
-              btnFunction: () async{
+              btnFunction: () async {
                 await uploadFile(image, context);
-                              
+
                 await sendImageMessage();
 
                 Navigator.of(context).pop();
-              
-
               },
             ),
           ),
           context: context);
-
-
     });
   }
 
-    sendImageMessage() async{
-      messageController.clear();
-    await chatGroupsRef
-        .document(groupId)
-        .collection('messages')
-        .add({
+  sendImageMessage() async {
+    messageController.clear();
+    await chatGroupsRef.document(groupId).collection('messages').add({
       'sender': Constants.currentUserID,
       'image': _url,
       'timestamp': FieldValue.serverTimestamp(),
@@ -229,14 +221,14 @@ class _GroupConversationState extends State<GroupConversation>
 
     StorageReference storageReference = FirebaseStorage.instance
         .ref()
-        .child('image_messages/').child(randomAlphaNumeric(20));
+        .child('image_messages/')
+        .child(randomAlphaNumeric(20));
     StorageUploadTask uploadTask = storageReference.putFile(file);
 
     await uploadTask.onComplete;
     print('File Uploaded');
     _url = await storageReference.getDownloadURL();
   }
-  
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -481,9 +473,13 @@ class _GroupConversationState extends State<GroupConversation>
   void _select(String value) {
     switch (value) {
       case 'Members':
-        print('xxx');
         Navigator.of(context)
             .pushNamed('group-members', arguments: {'groupId': groupId});
+        break;
+
+      case 'Group Details':
+        Navigator.of(context)
+            .pushNamed('group-details', arguments: {'groupId': groupId});
     }
   }
 }

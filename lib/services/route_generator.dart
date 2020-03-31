@@ -6,8 +6,8 @@ import 'package:glitcher/screens/chats/chats.dart';
 import 'package:glitcher/screens/chats/conversation.dart';
 import 'package:glitcher/screens/chats/group_conversation.dart';
 import 'package:glitcher/screens/chats/group_members.dart';
-import 'package:glitcher/screens/chats/image_message_overlay.dart';
 import 'package:glitcher/screens/chats/new_group.dart';
+import 'package:glitcher/screens/chats/group_details.dart';
 import 'package:glitcher/screens/games/game_screen.dart';
 import 'package:glitcher/screens/games/new_game.dart';
 import 'package:glitcher/screens/posts/add_comment.dart';
@@ -70,14 +70,6 @@ class RouteGenerator {
       case '/new-game':
         return MaterialPageRoute(builder: (_) => NewGame());
 
-      case 'image-message-overlay':
-        return MaterialPageRoute(
-            builder: (_) => ImageMessageOverlay(
-                  otherUid: args['otherUid'],
-                  groupId: args['groupId'],
-                  uri: args['uri'],
-                ));
-
       case 'conversation':
         return MaterialPageRoute(
             builder: (_) => Conversation(
@@ -104,6 +96,9 @@ class RouteGenerator {
 
       case 'new-group':
         return MaterialPageRoute(builder: (_) => NewGroup());
+
+      case 'group-details':
+        return MaterialPageRoute(builder: (_) => GroupDetails(args['groupId']));
 
       case 'chats':
         return MaterialPageRoute(builder: (_) => Chats());
