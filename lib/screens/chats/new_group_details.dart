@@ -37,88 +37,12 @@ class _NewGroupDetailsState extends State<NewGroupDetails>
 
         },
       ),
-      appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: <Color>[Constants.darkCardBG, Constants.darkBG])),
-        ),
-//        elevation: 4,
-        leading: IconButton(
-          icon: Icon(
-            Icons.keyboard_backspace,
-          ),
-          onPressed: () {},
-        ),
-        title: TextField(
-          decoration: InputDecoration.collapsed(
-            hintText: 'Search',
-          ),
-        ),
-      ),
-      body: ListView.separated(
-        padding: EdgeInsets.all(10),
-        separatorBuilder: (BuildContext context, int index) {
-          return Align(
-            alignment: Alignment.centerRight,
-            child: Container(
-              height: 0.5,
-              width: MediaQuery.of(context).size.width / 1.3,
-              child: Divider(),
-            ),
-          );
-        },
-        itemCount: friendsData.length,
-        itemBuilder: (BuildContext context, int index) {
-          //User user = groups[index];
-          return ListTile(
-            contentPadding: EdgeInsets.all(0),
-            leading: Stack(
-              children: <Widget>[
-                CircleAvatar(
-                  backgroundImage: NetworkImage(
-                    friendsData.elementAt(index).profileImageUrl,
-                  ),
-                  radius: 25,
-                ),
-                Positioned(
-                  bottom: 0.0,
-                  left: 6.0,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    height: 11,
-                    width: 11,
-                    child: Center(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: friendsData.elementAt(index).online == 'online'
-                              ? Colors.greenAccent
-                              : Colors.grey,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        height: 7,
-                        width: 7,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            title: Text(
-              friendsData.elementAt(index).username,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            subtitle: Text(friendsData.elementAt(index).description),
-          );
-        },
-      ),
+      appBar:AppBar(),
+      body: Column(
+        children: <Widget>[
+          
+        ],
+      )
     );
   }
 

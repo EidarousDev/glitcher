@@ -1,16 +1,19 @@
 import 'dart:async';
-
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/screens/chats/image_message_overlay.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/widgets/chat_bubble.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:glitcher/widgets/image_overlay.dart';
+import 'package:glitcher/constants/sizes.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:math' show Random;
+import 'package:random_string/random_string.dart';
 
 class Conversation extends StatefulWidget {
   final String otherUid;
@@ -27,6 +30,7 @@ class _ConversationState extends State<Conversation>
 //  static Random random = Random();
 //  String name;
 //  String profileImage;
+  var _url;
   User otherUser = User();
   final String otherUid;
   Timestamp firstVisibleGameSnapShot;
@@ -79,6 +83,37 @@ class _ConversationState extends State<Conversation>
       'text': messageText,
       'timestamp': FieldValue.serverTimestamp(),
       'type': 'text'
+    });
+
+    await makeMessagesUnseen();
+  }
+  void sendImageMessage() async {
+    messageController.clear();
+    print(_url);
+    await _firestore
+        .collection('chats')
+        .document(Constants.currentUserID)
+        .collection('conversations')
+        .document(otherUid)
+        .collection('messages')
+        .add({
+      'sender': Constants.currentUserID,
+      'image':_url,
+      'timestamp': FieldValue.serverTimestamp(),
+      'type': 'image'
+    });
+
+    await _firestore
+        .collection('chats')
+        .document(otherUid)
+        .collection('conversations')
+        .document(Constants.currentUserID)
+        .collection('messages')
+        .add({
+      'sender': Constants.currentUserID,
+      'image':_url,
+      'timestamp': FieldValue.serverTimestamp(),
+      'type': 'image'
     });
 
     makeMessagesUnseen();
@@ -225,6 +260,8 @@ class _ConversationState extends State<Conversation>
   }
 
   void updateOnlineUserState(AppLifecycleState state) async {
+
+
     if (state == AppLifecycleState.paused) {
       await usersRef
           .document(Constants.currentUserID)
@@ -235,6 +272,23 @@ class _ConversationState extends State<Conversation>
           .updateData({'online': 'online'});
     }
   }
+
+  Future uploadFile(File file, BuildContext context) async {
+    if (file == null) return;
+
+
+    print((file));
+
+    StorageReference storageReference = FirebaseStorage.instance
+        .ref()
+        .child('image_messages/').child(randomAlphaNumeric(20));
+    StorageUploadTask uploadTask = storageReference.putFile(file);
+
+    await uploadTask.onComplete;
+    print('File Uploaded');
+    _url = await storageReference.getDownloadURL();
+  }
+
 
   void makeMessagesSeen() async {
 //    await _firestore
@@ -251,8 +305,6 @@ class _ConversationState extends State<Conversation>
         .document(otherUid)
         .collection('conversations')
         .document(Constants.currentUserID)
-        .collection('messages')
-        .document('seen')
         .setData({'isSeen': true});
   }
 
@@ -262,18 +314,14 @@ class _ConversationState extends State<Conversation>
         .document(Constants.currentUserID)
         .collection('conversations')
         .document(otherUid)
-        .collection('messages')
-        .document('seen')
-        .updateData({'isSeen': false});
+        .setData({'isSeen': false});
 
     await _firestore
         .collection('chats')
         .document(otherUid)
         .collection('conversations')
         .document(Constants.currentUserID)
-        .collection('messages')
-        .document('seen')
-        .updateData({'isSeen': false});
+        .setData({'isSeen': false});
   }
 
   Future chooseImage() async {
@@ -284,12 +332,35 @@ class _ConversationState extends State<Conversation>
         maxWidth: 600)
         .then((image) {
       setState(() {
-        Navigator.of(context).pushNamed('image-message-overlay', arguments: {'otherUid': otherUid, 'uri': image.path});
+
+        showDialog(
+          barrierDismissible: true,
+          child: Container(
+            width: Sizes.sm_profile_image_w,
+            height:
+                Sizes.sm_profile_image_h,
+            child: ImageOverlay(
+              imageFile: image,
+              btnText: 'Send',
+              btnFunction: () async{
+                await uploadFile(image, context);
+                              
+                await sendImageMessage();
+
+                Navigator.of(context).pop();
+              
+
+              },
+            ),
+          ),
+          context: context);
+
         //_image = image;
       });
     });
   }
 
+  
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     updateOnlineUserState(state);
