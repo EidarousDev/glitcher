@@ -50,6 +50,10 @@ class _GroupConversationState extends State<GroupConversation>
 
   var choices = ['Group Details', 'Members'];
 
+  FocusScopeNode  _focusNode = FocusScopeNode();
+
+  bool _typing = false;
+
   _GroupConversationState({this.groupId});
 
   void loadGroupData(String groupId) async {
@@ -250,236 +254,273 @@ class _GroupConversationState extends State<GroupConversation>
     getGroupMessages();
     listenToMessagesChanges();
     loadGroupData(groupId);
+    _focusNode.addListener(_onFocusChange);
+    
+        ///Set up listener here
+        _scrollController
+          ..addListener(() {
+            if (_scrollController.offset >=
+                    _scrollController.position.maxScrollExtent &&
+                !_scrollController.position.outOfRange) {
+              print('reached the bottom');
+              getPrevGroupMessages();
+            } else if (_scrollController.offset <=
+                    _scrollController.position.minScrollExtent &&
+                !_scrollController.position.outOfRange) {
+              print("reached the top");
+            } else {}
+          });
+      }
+    
+      @override
+      void dispose() {
+        WidgetsBinding.instance.removeObserver(this);
+        messagesSubscription.cancel();
+        _scrollController.dispose();
+        super.dispose();
+      }
+    
+      @override
+      Widget build(BuildContext context) {
+        return GestureDetector(
+          onTap: (){
+            FocusScopeNode currentFocus = FocusScope.of(context);
+            _focusNode.unfocus();
+            _typing = false;
 
-    ///Set up listener here
-    _scrollController
-      ..addListener(() {
-        if (_scrollController.offset >=
-                _scrollController.position.maxScrollExtent &&
-            !_scrollController.position.outOfRange) {
-          print('reached the bottom');
-          getPrevGroupMessages();
-        } else if (_scrollController.offset <=
-                _scrollController.position.minScrollExtent &&
-            !_scrollController.position.outOfRange) {
-          print("reached the top");
-        } else {}
-      });
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    messagesSubscription.cancel();
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: <Color>[Constants.darkCardBG, Constants.darkBG])),
-        ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.keyboard_backspace,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        titleSpacing: 0,
-        title: InkWell(
-          child: Row(
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(left: 0.0, right: 10.0),
-                child: group?.image != null
-                    ? CircleAvatar(
-                        backgroundImage: NetworkImage(
-                          group.image,
-                        ),
-                      )
-                    : Container(),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    SizedBox(height: 15.0),
-                    Text(
-                      group.name ?? '',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          onTap: () {},
-        ),
-        actions: <Widget>[
-          PopupMenuButton<String>(
-            elevation: 0,
-            initialValue: choices[0],
-            onCanceled: () {
-              print('You have not chossed anything');
-            },
-            tooltip: 'This is tooltip',
-            onSelected: _select,
-            itemBuilder: (BuildContext context) {
-              return choices.map((String choice) {
-                return PopupMenuItem<String>(
-                  value: choice,
-                  child: Text(choice),
-                );
-              }).toList();
-            },
-          )
-        ],
-      ),
-      body: Container(
-        height: MediaQuery.of(context).size.height,
-        child: Column(
-          children: <Widget>[
-            SizedBox(height: 10),
-            _messages != null
-                ? Flexible(
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      itemCount: _messages.length,
-                      reverse: true,
-                      itemBuilder: (BuildContext context, int index) {
-                        Message msg = _messages[index];
-                        return ChatBubble(
-                          message: msg.type == "text" ? msg.text : msg.image,
-                          username: usersMap[msg.sender].username,
-                          time: msg.timestamp != null
-                              ? formatTimestamp(msg.timestamp)
-                              : 'now',
-                          type: msg.type,
-                          replyText: null,
-                          isMe: msg.sender == Constants.currentUserID,
-                          isGroup: true,
-                          isReply: false,
-                          replyName: null,
-                        );
-                      },
-                    ),
-                  )
-                : Container(),
-            Align(
-                alignment: Alignment.bottomRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 8.0, bottom: 8),
-                  child: Text(
-                    seen ? 'seen' : '',
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                )),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-//                height: 140,
+        // if (!_focusNode.hasPrimaryFocus) {
+        //   _focusNode.unfocus();
+        // }
+          },
+                  child: Scaffold(
+            appBar: AppBar(
+              flexibleSpace: Container(
                 decoration: BoxDecoration(
-                  color: Constants.darkBG,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey[500],
-                      offset: Offset(0.0, 1.5),
-                      blurRadius: 4.0,
-                    ),
-                  ],
+                    gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: <Color>[Constants.darkCardBG, Constants.darkBG])),
+              ),
+              leading: IconButton(
+                icon: Icon(
+                  Icons.keyboard_backspace,
                 ),
-                constraints: BoxConstraints(
-                  maxHeight: 190,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                onPressed: () => Navigator.pop(context),
+              ),
+              titleSpacing: 0,
+              title: InkWell(
+                child: Row(
                   children: <Widget>[
-                    Flexible(
-                      child: ListTile(
-                        leading: IconButton(
-                          icon: Icon(
-                            Icons.add,
-                            color: Colors.white70,
-                          ),
-                          onPressed: () {
-                            chooseImage();
-                          },
-                        ),
-                        contentPadding: EdgeInsets.all(0),
-                        title: TextField(
-                          textCapitalization: TextCapitalization.sentences,
-                          controller: messageController,
-                          onChanged: (value) {
-                            messageText = value;
-                          },
-                          style: TextStyle(
-                            fontSize: 15.0,
-                            color: Colors.white70,
-                          ),
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.all(10.0),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                              borderSide: BorderSide(
-                                color: Constants.darkBG,
+                    Padding(
+                      padding: EdgeInsets.only(left: 0.0, right: 10.0),
+                      child: group?.image != null
+                          ? CircleAvatar(
+                              backgroundImage: NetworkImage(
+                                group.image,
                               ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Constants.darkBG,
-                              ),
-                              borderRadius: BorderRadius.circular(5.0),
-                            ),
-                            hintText: "Write your message...",
-                            hintStyle: TextStyle(
-                              fontSize: 15.0,
-                              color: Colors.white70,
+                            )
+                          : Container(),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          SizedBox(height: 15.0),
+                          Text(
+                            group.name ?? '',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
                             ),
                           ),
-                          maxLines: null,
-                        ),
-                        trailing: IconButton(
-                          icon: Icon(
-                            Icons.send,
-                            color: Colors.white70,
-                          ),
-                          onPressed: () async {
-                            sendMessage();
-                          },
-                        ),
+                        ],
                       ),
                     ),
                   ],
                 ),
+                onTap: () {},
+              ),
+              actions: <Widget>[
+                PopupMenuButton<String>(
+                  elevation: 0,
+                  initialValue: choices[0],
+                  onCanceled: () {
+                    print('You have not chossed anything');
+                  },
+                  tooltip: 'This is tooltip',
+                  onSelected: _select,
+                  itemBuilder: (BuildContext context) {
+                    return choices.map((String choice) {
+                      return PopupMenuItem<String>(
+                        value: choice,
+                        child: Text(choice),
+                      );
+                    }).toList();
+                  },
+                )
+              ],
+            ),
+            body: Container(
+              height: MediaQuery.of(context).size.height,
+              child: Column(
+                children: <Widget>[
+                  SizedBox(height: 10),
+                  _messages != null
+                      ? Flexible(
+                          child: ListView.builder(
+                            controller: _scrollController,
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            itemCount: _messages.length,
+                            reverse: true,
+                            itemBuilder: (BuildContext context, int index) {
+                              Message msg = _messages[index];
+                              return ChatBubble(
+                                message: msg.type == "text" ? msg.text : msg.image,
+                                username: usersMap[msg.sender].username,
+                                time: msg.timestamp != null
+                                    ? formatTimestamp(msg.timestamp)
+                                    : 'now',
+                                type: msg.type,
+                                replyText: null,
+                                isMe: msg.sender == Constants.currentUserID,
+                                isGroup: true,
+                                isReply: false,
+                                replyName: null,
+                              );
+                            },
+                          ),
+                        )
+                      : Container(),
+                  Align(
+                      alignment: Alignment.bottomRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8.0, bottom: 8),
+                        child: Text(
+                          seen ? 'seen' : '',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                      )),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+    //                height: 140,
+                      decoration: BoxDecoration(
+                        color: Constants.darkBG,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey[500],
+                            offset: Offset(0.0, 1.5),
+                            blurRadius: 4.0,
+                          ),
+                        ],
+                      ),
+                      constraints: BoxConstraints(
+                        maxHeight: 190,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Flexible(
+                            child: ListTile(
+                              leading: IconButton(
+                                icon: Icon(
+                                  Icons.add,
+                                  color: Colors.white70,
+                                ),
+                                onPressed: () {
+                                  chooseImage();
+                                },
+                              ),
+                              contentPadding: EdgeInsets.all(0),
+                              title: TextField(
+                                focusNode: _focusNode,
+                                textCapitalization: TextCapitalization.sentences,
+                                controller: messageController,
+                                onChanged: (value) {
+                                  messageText = value;
+                                },
+                                style: TextStyle(
+                                  fontSize: 15.0,
+                                  color: Colors.white70,
+                                ),
+                                decoration: InputDecoration(
+                                  contentPadding: EdgeInsets.all(10.0),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(5.0),
+                                    borderSide: BorderSide(
+                                      color: Constants.darkBG,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Constants.darkBG,
+                                    ),
+                                    borderRadius: BorderRadius.circular(5.0),
+                                  ),
+                                  hintText: "Write your message...",
+                                  hintStyle: TextStyle(
+                                    fontSize: 15.0,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                maxLines: null,
+                              ),
+                              trailing: _typing? 
+                              IconButton(
+                                icon: Icon(
+                                  Icons.send,
+                                  color: Colors.white70,
+                                ),
+                                onPressed: () async {
+                                  sendMessage();
+                                },
+                              )
+                              :GestureDetector(
+                                onTapDown: (tapDownDetails){
+                                  
+                                },
+                                  child: IconButton(
+                                  icon: Icon(
+                                    Icons.mic,
+                                    color: Colors.white70,
+                                  ),                      
+                                  onPressed: (){},        
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _select(String value) {
-    switch (value) {
-      case 'Members':
-        Navigator.of(context)
-            .pushNamed('group-members', arguments: {'groupId': groupId});
-        break;
-
-      case 'Group Details':
-        Navigator.of(context)
-            .pushNamed('group-details', arguments: {'groupId': groupId});
-    }
+          ),
+        );
+      }
+    
+      void _select(String value) {
+        switch (value) {
+          case 'Members':
+            Navigator.of(context)
+                .pushNamed('group-members', arguments: {'groupId': groupId});
+            break;
+    
+          case 'Group Details':
+            Navigator.of(context)
+                .pushNamed('group-details', arguments: {'groupId': groupId});
+        }
+      }
+    
+      void _onFocusChange() {
+       
+        if(_focusNode.hasFocus){
+          _typing = true;
+        }
+        else{
+           _focusNode.unfocus();
+          _typing = false;
+        }
   }
 }

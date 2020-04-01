@@ -123,12 +123,40 @@ class _NewGroupState extends State<NewGroup>
                     Expanded(
                       flex: 2,
                       child: GestureDetector(
-                        onTap: () {
-                          PermissionsService().requestStoragePermission(
+                        onTap: () async{
+                          bool isGranted = await PermissionsService().requestStoragePermission(
                               onPermissionDenied: () {
                             print('Permission has been denied');
                           });
+
+                          if(isGranted){                            
                           chooseImage();
+                          }
+
+                          else{
+                            showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text('Info'),
+                                    content: Text(
+                                        'You must grant this storage access to be able to use this feature.'),
+                                    actions: <Widget>[
+                                      MaterialButton(
+
+                                      ),
+                                      MaterialButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text('OK'),
+                                      )
+                                    ],
+                                  );
+                                });
+                          
+                          }
+
                         },
                         child: CircleAvatar(
                           radius: 25,
