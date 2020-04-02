@@ -3,19 +3,23 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/auth.dart';
+import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/widgets/chat_bubble.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:math' show Random;
 import 'package:random_string/random_string.dart';
+
 
 class GroupConversation extends StatefulWidget {
   final String groupId;
@@ -54,7 +58,23 @@ class _GroupConversationState extends State<GroupConversation>
 
   bool _typing = false;
 
+  FlutterAudioRecorder recorder;
+
+  String recordTime;
+
   _GroupConversationState({this.groupId});
+
+  Future<String>  _localPath() async{
+  final directory = await getApplicationDocumentsDirectory();
+
+  return directory.path;
+  }
+
+  Future<File> _localFile() async{
+    final path = await _localPath();
+    return File('$path/glitcher_record.wav');
+  }
+
 
   void loadGroupData(String groupId) async {
     Group group;
@@ -196,7 +216,7 @@ class _GroupConversationState extends State<GroupConversation>
               imageFile: image,
               btnText: 'Send',
               btnFunction: () async {
-                await uploadFile(image, context);
+                await uploadFile(image, context, 'image_messages/$groupId/');
 
                 await sendImageMessage();
 
@@ -218,14 +238,14 @@ class _GroupConversationState extends State<GroupConversation>
     });
   }
 
-  Future uploadFile(File file, BuildContext context) async {
+  Future uploadFile(File file, BuildContext context, String path) async {
     if (file == null) return;
 
     print((file));
 
     StorageReference storageReference = FirebaseStorage.instance
         .ref()
-        .child('image_messages/')
+        .child(path)
         .child(randomAlphaNumeric(20));
     StorageUploadTask uploadTask = storageReference.putFile(file);
 
@@ -246,6 +266,21 @@ class _GroupConversationState extends State<GroupConversation>
       // app suspended (not used in iOS)
     }
   }
+RecordingStatus _currentStatus = RecordingStatus.Unset;
+Recording _current;
+
+static const tick = const Duration(milliseconds: 1000);
+
+  initRecorder() async{
+
+    File file = await _localFile();
+    if(await file.exists()){
+      file.delete();
+    }
+    recorder = FlutterAudioRecorder(file.path); // .wav .aac .m4a
+    await recorder.initialized;
+
+  }
 
   @override
   void initState() {
@@ -254,6 +289,9 @@ class _GroupConversationState extends State<GroupConversation>
     getGroupMessages();
     listenToMessagesChanges();
     loadGroupData(groupId);
+
+    initRecorder();
+
     _focusNode.addListener(_onFocusChange);
     
         ///Set up listener here
@@ -283,10 +321,12 @@ class _GroupConversationState extends State<GroupConversation>
       @override
       Widget build(BuildContext context) {
         return GestureDetector(
-          onTap: (){
-            FocusScopeNode currentFocus = FocusScope.of(context);
-            _focusNode.unfocus();
-            _typing = false;
+          onTap: (){            
+            setState(() {
+              _focusNode.unfocus();
+              _typing = false;
+            });
+
 
         // if (!_focusNode.hasPrimaryFocus) {
         //   _focusNode.unfocus();
@@ -432,7 +472,7 @@ class _GroupConversationState extends State<GroupConversation>
                                 },
                               ),
                               contentPadding: EdgeInsets.all(0),
-                              title: TextField(
+                              title: _currentStatus != RecordingStatus.Recording ? TextField(
                                 focusNode: _focusNode,
                                 textCapitalization: TextCapitalization.sentences,
                                 controller: messageController,
@@ -464,7 +504,9 @@ class _GroupConversationState extends State<GroupConversation>
                                   ),
                                 ),
                                 maxLines: null,
-                              ),
+                              )
+                                :Text((int.parse(recordTime)/60).toString() 
+                                + ' : ' + (int.parse(recordTime)%60).toString()),
                               trailing: _typing? 
                               IconButton(
                                 icon: Icon(
@@ -476,15 +518,55 @@ class _GroupConversationState extends State<GroupConversation>
                                 },
                               )
                               :GestureDetector(
-                                onTapDown: (tapDownDetails){
+                                
+                                onLongPress: () async{
+                                                            bool isGranted = await PermissionsService().requestMicrophonePermission(
+                              onPermissionDenied: () {
+                            print('Permission has been denied');
+                          });
+
+                          if(isGranted){   
+                            _start();                         
+                                              
+                          
+                          }
+
+                          else{
+                            showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text('Info'),
+                                    content: Text(
+                                        'You must grant this microphone access to be able to use this feature.'),
+                                    actions: <Widget>[
+                                       MaterialButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text('OK'),
+                                      )
+                                    ],
+                                  );
+                                });
+                          
+                          }
                                   
+                                },
+
+                                onLongPressEnd: (longPressDetails) async{
+                                  var result = await recorder.stop();
+                                  //_currentStatus = RecordingStatus.Stopped;
+                                  print(result.path);
+                                  File file = await _stop();
+                                  uploadFile(file, context, 'group_voice_messages/$groupId/');
                                 },
                                   child: IconButton(
                                   icon: Icon(
                                     Icons.mic,
                                     color: Colors.white70,
                                   ),                      
-                                  onPressed: (){},        
+                                  onPressed: null,        
                                 ),
                               ),
                             ),
@@ -499,6 +581,8 @@ class _GroupConversationState extends State<GroupConversation>
           ),
         );
       }
+
+
     
       void _select(String value) {
         switch (value) {
@@ -523,4 +607,47 @@ class _GroupConversationState extends State<GroupConversation>
           _typing = false;
         }
   }
+
+  _start() async {
+    try {
+      await recorder.start();
+      var recording = await recorder.current(channel: 0);
+      setState(() {
+        _current = recording;
+      });
+
+      new Timer.periodic(tick, (Timer t) async {
+        if (_currentStatus == RecordingStatus.Stopped) {
+          t.cancel();
+        }
+
+        var current = await recorder.current(channel: 0);
+        
+      setState(() {
+                            recordTime = t.tick.toString();
+                            _currentStatus = current.status;
+                          });
+        print('cyrrent ${current.status}');
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+    Future<File> _stop() async {
+    var result = await recorder.stop();
+    print("Stop recording: ${result.path}");
+    print("Stop recording: ${result.duration}");
+    File file = File(result.path);
+    print("File length: ${await file.length()}");
+    setState(() {
+      _current = result;
+      _currentStatus = _current.status;
+    });
+
+    initRecorder();
+    return file;
+  }
+
+
 }

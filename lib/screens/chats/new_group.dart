@@ -141,10 +141,7 @@ class _NewGroupState extends State<NewGroup>
                                     title: Text('Info'),
                                     content: Text(
                                         'You must grant this storage access to be able to use this feature.'),
-                                    actions: <Widget>[
-                                      MaterialButton(
-
-                                      ),
+                                    actions: <Widget>[                                      
                                       MaterialButton(
                                         onPressed: () {
                                           Navigator.of(context).pop();
@@ -272,15 +269,14 @@ class _NewGroupState extends State<NewGroup>
   }
 
   addGroup() async {
-    DocumentReference documentReference = await chatGroupsRef.add({
+     await chatGroupsRef.document(_groupId).setData({
       'name': textEditingController.text,
       'image': _imageUrl,
       'timestamp': FieldValue.serverTimestamp()
     });
-
-    _groupId = documentReference.documentID;
+    
     for (Map<String, dynamic> user in chosenUsers) {
-      documentReference.collection('users').document(user['user_id']).setData({
+      chatGroupsRef.document(_groupId).collection('users').document(user['user_id']).setData({
         'is_admin': user['is_admin'],
         'timestamp': FieldValue.serverTimestamp()
       });
@@ -301,11 +297,12 @@ class _NewGroupState extends State<NewGroup>
     if (file == null) return;
 
     print((file));
+    _groupId = randomAlphaNumeric(20);
 
     StorageReference storageReference = FirebaseStorage.instance
         .ref()
         .child('group_chats_images/')
-        .child(randomAlphaNumeric(20));
+        .child(_groupId);
     StorageUploadTask uploadTask = storageReference.putFile(file);
 
     await uploadTask.onComplete;
