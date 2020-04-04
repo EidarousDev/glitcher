@@ -186,6 +186,15 @@ class DatabaseService {
     return Group();
   }
 
+  static sendGroupMessage(String groupId, String type, String message) async {
+    await chatGroupsRef.document(groupId).collection('messages').add({
+      'sender': Constants.currentUserID,
+      'message': message,
+      'timestamp': FieldValue.serverTimestamp(),
+      'type': type
+    });
+  }
+
   static getFollowing() async {
     QuerySnapshot following = await usersRef
         .document(Constants.currentUserID)

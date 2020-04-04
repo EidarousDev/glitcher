@@ -4,7 +4,7 @@ description: Glitcher - Social App for Gamers!
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.2.2 <3.0.0"
 
 dependencies:
   flutter:
@@ -51,6 +51,10 @@ dependencies:
   image: any
   flutter_audio_recorder: ^0.5.5
   path_provider: ^1.6.5
+  chewie_audio: ^1.0.0+1
+  audioplayer: ^0.7.0+1
+  audioplayer_web: 0.7.0
+  audioplayers: ^0.15.0
 
 dev_dependencies:
   flutter_test:

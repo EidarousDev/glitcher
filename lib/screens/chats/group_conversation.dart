@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -12,14 +13,15 @@ import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/widgets/chat_bubble.dart';
+import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:math' show Random;
 import 'package:random_string/random_string.dart';
-
 
 class GroupConversation extends StatefulWidget {
   final String groupId;
@@ -54,27 +56,34 @@ class _GroupConversationState extends State<GroupConversation>
 
   var choices = ['Group Details', 'Members'];
 
-  FocusScopeNode  _focusNode = FocusScopeNode();
+  FocusScopeNode _focusNode = FocusScopeNode();
 
   bool _typing = false;
 
   FlutterAudioRecorder recorder;
 
   String recordTime;
+  final formatter = new NumberFormat("##");
 
   _GroupConversationState({this.groupId});
 
-  Future<String>  _localPath() async{
-  final directory = await getApplicationDocumentsDirectory();
+  Future<String> _localPath() async {
+    final directory = await getApplicationDocumentsDirectory();
 
-  return directory.path;
+    return directory.path;
   }
 
-  Future<File> _localFile() async{
+  Future<File> _localFile() async {
+//    final bytes = await _loadFileBytes(_url,
+//        onError: (Exception exception) =>
+//            print('_loadFile => exception $exception'));
     final path = await _localPath();
-    return File('$path/glitcher_record.wav');
-  }
+    print('path $path');
+    var file = File('$path/glitcher_record.wav');
 
+    //await file.writeAsBytes(bytes);
+    return file;
+  }
 
   void loadGroupData(String groupId) async {
     Group group;
@@ -84,17 +93,6 @@ class _GroupConversationState extends State<GroupConversation>
     });
 
     await getGroupUsersData();
-  }
-
-  void sendMessage() async {
-    messageController.clear();
-
-    await chatGroupsRef.document(groupId).collection('messages').add({
-      'sender': Constants.currentUserID,
-      'text': messageText,
-      'timestamp': FieldValue.serverTimestamp(),
-      'type': 'text'
-    });
   }
 
   void getGroupMessages() async {
@@ -218,23 +216,14 @@ class _GroupConversationState extends State<GroupConversation>
               btnFunction: () async {
                 await uploadFile(image, context, 'image_messages/$groupId/');
 
-                await sendImageMessage();
+                messageController.clear();
+                await DatabaseService.sendGroupMessage(groupId, 'image', _url);
 
                 Navigator.of(context).pop();
               },
             ),
           ),
           context: context);
-    });
-  }
-
-  sendImageMessage() async {
-    messageController.clear();
-    await chatGroupsRef.document(groupId).collection('messages').add({
-      'sender': Constants.currentUserID,
-      'image': _url,
-      'timestamp': FieldValue.serverTimestamp(),
-      'type': 'image'
     });
   }
 
@@ -266,20 +255,22 @@ class _GroupConversationState extends State<GroupConversation>
       // app suspended (not used in iOS)
     }
   }
-RecordingStatus _currentStatus = RecordingStatus.Unset;
-Recording _current;
 
-static const tick = const Duration(milliseconds: 1000);
+  RecordingStatus _currentStatus = RecordingStatus.Unset;
+  Recording _current;
 
-  initRecorder() async{
+  static const tick = const Duration(milliseconds: 1000);
 
+  initRecorder() async {
     File file = await _localFile();
-    if(await file.exists()){
+
+    if (await file.exists()) {
       file.delete();
     }
+    print('MyFile : ${file.path}');
+
     recorder = FlutterAudioRecorder(file.path); // .wav .aac .m4a
     await recorder.initialized;
-
   }
 
   @override
@@ -293,322 +284,322 @@ static const tick = const Duration(milliseconds: 1000);
     initRecorder();
 
     _focusNode.addListener(_onFocusChange);
-    
-        ///Set up listener here
-        _scrollController
-          ..addListener(() {
-            if (_scrollController.offset >=
-                    _scrollController.position.maxScrollExtent &&
-                !_scrollController.position.outOfRange) {
-              print('reached the bottom');
-              getPrevGroupMessages();
-            } else if (_scrollController.offset <=
-                    _scrollController.position.minScrollExtent &&
-                !_scrollController.position.outOfRange) {
-              print("reached the top");
-            } else {}
-          });
-      }
-    
-      @override
-      void dispose() {
-        WidgetsBinding.instance.removeObserver(this);
-        messagesSubscription.cancel();
-        _scrollController.dispose();
-        super.dispose();
-      }
-    
-      @override
-      Widget build(BuildContext context) {
-        return GestureDetector(
-          onTap: (){            
-            setState(() {
-              _focusNode.unfocus();
-              _typing = false;
-            });
 
+    ///Set up listener here
+    _scrollController
+      ..addListener(() {
+        if (_scrollController.offset >=
+                _scrollController.position.maxScrollExtent &&
+            !_scrollController.position.outOfRange) {
+          print('reached the bottom');
+          getPrevGroupMessages();
+        } else if (_scrollController.offset <=
+                _scrollController.position.minScrollExtent &&
+            !_scrollController.position.outOfRange) {
+          print("reached the top");
+        } else {}
+      });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    messagesSubscription.cancel();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _focusNode.unfocus();
+          _typing = false;
+        });
 
         // if (!_focusNode.hasPrimaryFocus) {
         //   _focusNode.unfocus();
         // }
-          },
-                  child: Scaffold(
-            appBar: AppBar(
-              flexibleSpace: Container(
-                decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: <Color>[Constants.darkCardBG, Constants.darkBG])),
-              ),
-              leading: IconButton(
-                icon: Icon(
-                  Icons.keyboard_backspace,
-                ),
-                onPressed: () => Navigator.pop(context),
-              ),
-              titleSpacing: 0,
-              title: InkWell(
-                child: Row(
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.only(left: 0.0, right: 10.0),
-                      child: group?.image != null
-                          ? CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                group.image,
-                              ),
-                            )
-                          : Container(),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          SizedBox(height: 15.0),
-                          Text(
-                            group.name ?? '',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                onTap: () {},
-              ),
-              actions: <Widget>[
-                PopupMenuButton<String>(
-                  elevation: 0,
-                  initialValue: choices[0],
-                  onCanceled: () {
-                    print('You have not chossed anything');
-                  },
-                  tooltip: 'This is tooltip',
-                  onSelected: _select,
-                  itemBuilder: (BuildContext context) {
-                    return choices.map((String choice) {
-                      return PopupMenuItem<String>(
-                        value: choice,
-                        child: Text(choice),
-                      );
-                    }).toList();
-                  },
-                )
-              ],
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: <Color>[Constants.darkCardBG, Constants.darkBG])),
+          ),
+          leading: IconButton(
+            icon: Icon(
+              Icons.keyboard_backspace,
             ),
-            body: Container(
-              height: MediaQuery.of(context).size.height,
-              child: Column(
-                children: <Widget>[
-                  SizedBox(height: 10),
-                  _messages != null
-                      ? Flexible(
-                          child: ListView.builder(
-                            controller: _scrollController,
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            itemCount: _messages.length,
-                            reverse: true,
-                            itemBuilder: (BuildContext context, int index) {
-                              Message msg = _messages[index];
-                              return ChatBubble(
-                                message: msg.type == "text" ? msg.text : msg.image,
-                                username: usersMap[msg.sender].username,
-                                time: msg.timestamp != null
-                                    ? formatTimestamp(msg.timestamp)
-                                    : 'now',
-                                type: msg.type,
-                                replyText: null,
-                                isMe: msg.sender == Constants.currentUserID,
-                                isGroup: true,
-                                isReply: false,
-                                replyName: null,
-                              );
-                            },
+            onPressed: () => Navigator.pop(context),
+          ),
+          titleSpacing: 0,
+          title: InkWell(
+            child: Row(
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.only(left: 0.0, right: 10.0),
+                  child: group?.image != null
+                      ? CircleAvatar(
+                          backgroundImage: NetworkImage(
+                            group.image,
                           ),
                         )
                       : Container(),
-                  Align(
-                      alignment: Alignment.bottomRight,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 8.0, bottom: 8),
-                        child: Text(
-                          seen ? 'seen' : '',
-                          style: TextStyle(color: Colors.white70),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(height: 15.0),
+                      Text(
+                        group.name ?? '',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
                         ),
-                      )),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-    //                height: 140,
-                      decoration: BoxDecoration(
-                        color: Constants.darkBG,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey[500],
-                            offset: Offset(0.0, 1.5),
-                            blurRadius: 4.0,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            onTap: () {},
+          ),
+          actions: <Widget>[
+            PopupMenuButton<String>(
+              elevation: 0,
+              initialValue: choices[0],
+              onCanceled: () {
+                print('You have not chossed anything');
+              },
+              tooltip: 'This is tooltip',
+              onSelected: _select,
+              itemBuilder: (BuildContext context) {
+                return choices.map((String choice) {
+                  return PopupMenuItem<String>(
+                    value: choice,
+                    child: Text(choice),
+                  );
+                }).toList();
+              },
+            )
+          ],
+        ),
+        body: Container(
+          height: MediaQuery.of(context).size.height,
+          child: Column(
+            children: <Widget>[
+              SizedBox(height: 10),
+              _messages != null
+                  ? Flexible(
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        itemCount: _messages.length,
+                        reverse: true,
+                        itemBuilder: (BuildContext context, int index) {
+                          Message msg = _messages[index];
+                          return ChatBubble(
+                            message: msg.message,
+                            username: usersMap[msg.sender].username,
+                            time: msg.timestamp != null
+                                ? formatTimestamp(msg.timestamp)
+                                : 'now',
+                            type: msg.type,
+                            replyText: null,
+                            isMe: msg.sender == Constants.currentUserID,
+                            isGroup: true,
+                            isReply: false,
+                            replyName: null,
+                          );
+                        },
+                      ),
+                    )
+                  : Container(),
+              Align(
+                  alignment: Alignment.bottomRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8.0, bottom: 8),
+                    child: Text(
+                      seen ? 'seen' : '',
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                  )),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  //                height: 140,
+                  decoration: BoxDecoration(
+                    color: Constants.darkBG,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey[500],
+                        offset: Offset(0.0, 1.5),
+                        blurRadius: 4.0,
+                      ),
+                    ],
+                  ),
+                  constraints: BoxConstraints(
+                    maxHeight: 190,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Flexible(
+                        child: ListTile(
+                          leading: IconButton(
+                            icon: Icon(
+                              Icons.add,
+                              color: Colors.white70,
+                            ),
+                            onPressed: () {
+                              chooseImage();
+                            },
                           ),
-                        ],
-                      ),
-                      constraints: BoxConstraints(
-                        maxHeight: 190,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Flexible(
-                            child: ListTile(
-                              leading: IconButton(
-                                icon: Icon(
-                                  Icons.add,
-                                  color: Colors.white70,
-                                ),
-                                onPressed: () {
-                                  chooseImage();
-                                },
-                              ),
-                              contentPadding: EdgeInsets.all(0),
-                              title: _currentStatus != RecordingStatus.Recording ? TextField(
-                                focusNode: _focusNode,
-                                textCapitalization: TextCapitalization.sentences,
-                                controller: messageController,
-                                onChanged: (value) {
-                                  messageText = value;
-                                },
-                                style: TextStyle(
-                                  fontSize: 15.0,
-                                  color: Colors.white70,
-                                ),
-                                decoration: InputDecoration(
-                                  contentPadding: EdgeInsets.all(10.0),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(5.0),
-                                    borderSide: BorderSide(
-                                      color: Constants.darkBG,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Constants.darkBG,
-                                    ),
-                                    borderRadius: BorderRadius.circular(5.0),
-                                  ),
-                                  hintText: "Write your message...",
-                                  hintStyle: TextStyle(
+                          contentPadding: EdgeInsets.all(0),
+                          title: _currentStatus != RecordingStatus.Recording
+                              ? TextField(
+                                  focusNode: _focusNode,
+                                  textCapitalization:
+                                      TextCapitalization.sentences,
+                                  controller: messageController,
+                                  onChanged: (value) {
+                                    messageText = value;
+                                  },
+                                  style: TextStyle(
                                     fontSize: 15.0,
                                     color: Colors.white70,
                                   ),
-                                ),
-                                maxLines: null,
-                              )
-                                :Text((int.parse(recordTime)/60).toString() 
-                                + ' : ' + (int.parse(recordTime)%60).toString()),
-                              trailing: _typing? 
-                              IconButton(
-                                icon: Icon(
-                                  Icons.send,
-                                  color: Colors.white70,
-                                ),
-                                onPressed: () async {
-                                  sendMessage();
-                                },
-                              )
-                              :GestureDetector(
-                                
-                                onLongPress: () async{
-                                                            bool isGranted = await PermissionsService().requestMicrophonePermission(
-                              onPermissionDenied: () {
-                            print('Permission has been denied');
-                          });
-
-                          if(isGranted){   
-                            _start();                         
-                                              
-                          
-                          }
-
-                          else{
-                            showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    title: Text('Info'),
-                                    content: Text(
-                                        'You must grant this microphone access to be able to use this feature.'),
-                                    actions: <Widget>[
-                                       MaterialButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text('OK'),
-                                      )
-                                    ],
-                                  );
-                                });
-                          
-                          }
-                                  
-                                },
-
-                                onLongPressEnd: (longPressDetails) async{
-                                  var result = await recorder.stop();
-                                  //_currentStatus = RecordingStatus.Stopped;
-                                  print(result.path);
-                                  File file = await _stop();
-                                  uploadFile(file, context, 'group_voice_messages/$groupId/');
-                                },
-                                  child: IconButton(
+                                  decoration: InputDecoration(
+                                    contentPadding: EdgeInsets.all(10.0),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(5.0),
+                                      borderSide: BorderSide(
+                                        color: Constants.darkBG,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Constants.darkBG,
+                                      ),
+                                      borderRadius: BorderRadius.circular(5.0),
+                                    ),
+                                    hintText: "Write your message...",
+                                    hintStyle: TextStyle(
+                                      fontSize: 15.0,
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                  maxLines: null,
+                                )
+                              : Text(formatter
+                                      .format((int.parse(recordTime) ~/ 60))
+                                      .toString() +
+                                  ' : ' +
+                                  (formatter.format(int.parse(recordTime) % 60))
+                                      .toString()),
+                          trailing: _typing
+                              ? IconButton(
                                   icon: Icon(
-                                    Icons.mic,
+                                    Icons.send,
                                     color: Colors.white70,
-                                  ),                      
-                                  onPressed: null,        
+                                  ),
+                                  onPressed: () async {
+                                    messageController.clear();
+                                    await DatabaseService.sendGroupMessage(
+                                        groupId, 'text', messageText);
+                                  },
+                                )
+                              : GestureDetector(
+                                  onLongPress: () async {
+                                    bool isGranted = await PermissionsService()
+                                        .requestMicrophonePermission(
+                                            onPermissionDenied: () {
+                                      print('Permission has been denied');
+                                    });
+
+                                    if (isGranted) {
+                                      _start();
+                                    } else {
+                                      showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return AlertDialog(
+                                              title: Text('Info'),
+                                              content: Text(
+                                                  'You must grant this microphone access to be able to use this feature.'),
+                                              actions: <Widget>[
+                                                MaterialButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Text('OK'),
+                                                )
+                                              ],
+                                            );
+                                          });
+                                    }
+                                  },
+                                  onLongPressEnd: (longPressDetails) async {
+                                    var result = await recorder.stop();
+                                    //_currentStatus = RecordingStatus.Stopped;
+                                    print(result.path);
+                                    File file = await _stop();
+                                    await uploadFile(file, context,
+                                        'group_voice_messages/$groupId/');
+                                    await DatabaseService.sendGroupMessage(
+                                        groupId, 'audio', _url);
+                                  },
+                                  child: IconButton(
+                                    icon: Icon(
+                                      Icons.mic,
+                                      color: Colors.white70,
+                                    ),
+                                    onPressed: null,
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-        );
-      }
+        ),
+      ),
+    );
+  }
 
+  void _select(String value) {
+    switch (value) {
+      case 'Members':
+        Navigator.of(context)
+            .pushNamed('group-members', arguments: {'groupId': groupId});
+        break;
 
-    
-      void _select(String value) {
-        switch (value) {
-          case 'Members':
-            Navigator.of(context)
-                .pushNamed('group-members', arguments: {'groupId': groupId});
-            break;
-    
-          case 'Group Details':
-            Navigator.of(context)
-                .pushNamed('group-details', arguments: {'groupId': groupId});
-        }
-      }
-    
-      void _onFocusChange() {
-       
-        if(_focusNode.hasFocus){
-          _typing = true;
-        }
-        else{
-           _focusNode.unfocus();
-          _typing = false;
-        }
+      case 'Group Details':
+        Navigator.of(context)
+            .pushNamed('group-details', arguments: {'groupId': groupId});
+    }
+  }
+
+  void _onFocusChange() {
+    if (_focusNode.hasFocus) {
+      _typing = true;
+    } else {
+      _focusNode.unfocus();
+      _typing = false;
+    }
   }
 
   _start() async {
+    initRecorder();
     try {
       await recorder.start();
       var recording = await recorder.current(channel: 0);
@@ -621,33 +612,37 @@ static const tick = const Duration(milliseconds: 1000);
           t.cancel();
         }
 
-        var current = await recorder.current(channel: 0);
-        
-      setState(() {
-                            recordTime = t.tick.toString();
-                            _currentStatus = current.status;
-                          });
-        print('cyrrent ${current.status}');
+        setState(() {
+          recordTime = t.tick.toString();
+          _currentStatus = RecordingStatus.Recording;
+        });
+        print('cyrrent ${recording.status}');
       });
     } catch (e) {
       print(e);
     }
   }
 
-    Future<File> _stop() async {
+  Future<File> _stop() async {
     var result = await recorder.stop();
-    print("Stop recording: ${result.path}");
+    print("Stop recording: ${result.path} + ${result.status}");
     print("Stop recording: ${result.duration}");
     File file = File(result.path);
     print("File length: ${await file.length()}");
     setState(() {
-      _current = result;
-      _currentStatus = _current.status;
+      _currentStatus = result.status;
     });
 
-    initRecorder();
     return file;
   }
 
-
+  Future<Uint8List> _loadFileBytes(String url, {OnError onError}) async {
+    Uint8List bytes;
+    try {
+      bytes = await readBytes(url);
+    } on ClientException {
+      rethrow;
+    }
+    return bytes;
+  }
 }

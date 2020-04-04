@@ -87,6 +87,7 @@ class _ConversationState extends State<Conversation>
 
     await makeMessagesUnseen();
   }
+
   void sendImageMessage() async {
     messageController.clear();
     print(_url);
@@ -98,7 +99,7 @@ class _ConversationState extends State<Conversation>
         .collection('messages')
         .add({
       'sender': Constants.currentUserID,
-      'image':_url,
+      'image': _url,
       'timestamp': FieldValue.serverTimestamp(),
       'type': 'image'
     });
@@ -111,7 +112,7 @@ class _ConversationState extends State<Conversation>
         .collection('messages')
         .add({
       'sender': Constants.currentUserID,
-      'image':_url,
+      'image': _url,
       'timestamp': FieldValue.serverTimestamp(),
       'type': 'image'
     });
@@ -260,8 +261,6 @@ class _ConversationState extends State<Conversation>
   }
 
   void updateOnlineUserState(AppLifecycleState state) async {
-
-
     if (state == AppLifecycleState.paused) {
       await usersRef
           .document(Constants.currentUserID)
@@ -276,19 +275,18 @@ class _ConversationState extends State<Conversation>
   Future uploadFile(File file, BuildContext context) async {
     if (file == null) return;
 
-
     print((file));
 
     StorageReference storageReference = FirebaseStorage.instance
         .ref()
-        .child('image_messages/').child(randomAlphaNumeric(20));
+        .child('image_messages/')
+        .child(randomAlphaNumeric(20));
     StorageUploadTask uploadTask = storageReference.putFile(file);
 
     await uploadTask.onComplete;
     print('File Uploaded');
     _url = await storageReference.getDownloadURL();
   }
-
 
   void makeMessagesSeen() async {
 //    await _firestore
@@ -326,41 +324,36 @@ class _ConversationState extends State<Conversation>
 
   Future chooseImage() async {
     await ImagePicker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 52,
-        maxHeight: 400,
-        maxWidth: 600)
+            source: ImageSource.gallery,
+            imageQuality: 52,
+            maxHeight: 400,
+            maxWidth: 600)
         .then((image) {
       setState(() {
-
         showDialog(
-          barrierDismissible: true,
-          child: Container(
-            width: Sizes.sm_profile_image_w,
-            height:
-                Sizes.sm_profile_image_h,
-            child: ImageOverlay(
-              imageFile: image,
-              btnText: 'Send',
-              btnFunction: () async{
-                await uploadFile(image, context);
-                              
-                await sendImageMessage();
+            barrierDismissible: true,
+            child: Container(
+              width: Sizes.sm_profile_image_w,
+              height: Sizes.sm_profile_image_h,
+              child: ImageOverlay(
+                imageFile: image,
+                btnText: 'Send',
+                btnFunction: () async {
+                  await uploadFile(image, context);
 
-                Navigator.of(context).pop();
-              
+                  await sendImageMessage();
 
-              },
+                  Navigator.of(context).pop();
+                },
+              ),
             ),
-          ),
-          context: context);
+            context: context);
 
         //_image = image;
       });
     });
   }
 
-  
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     updateOnlineUserState(state);
@@ -493,7 +486,7 @@ class _ConversationState extends State<Conversation>
                       itemBuilder: (BuildContext context, int index) {
                         Message msg = _messages[index];
                         return ChatBubble(
-                          message: msg.type == "text" ? msg.text : msg.image,
+                          message: msg.message,
                           username: otherUser.username,
                           time: msg.timestamp != null
                               ? formatTimestamp(msg.timestamp)

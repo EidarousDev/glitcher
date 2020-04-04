@@ -2,13 +2,15 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/screens/chats/audio_message_player.dart';
 
 class ChatBubble extends StatefulWidget {
   final String message, time, username, type, replyText, replyName;
   final bool isMe, isGroup, isReply;
 
   ChatBubble(
-      {@required this.message,
+      {Key key,
+      @required this.message,
       @required this.time,
       @required this.isMe,
       @required this.isGroup,
@@ -16,16 +18,34 @@ class ChatBubble extends StatefulWidget {
       @required this.type,
       @required this.replyText,
       @required this.isReply,
-      @required this.replyName});
+      @required this.replyName})
+      : super(key: key);
 
   @override
   _ChatBubbleState createState() => _ChatBubbleState();
 }
 
+typedef void OnError(Exception exception);
+
+enum PlayerState { stopped, playing, paused }
+
 class _ChatBubbleState extends State<ChatBubble> {
   List colors = Colors.primaries;
   static Random random = Random();
   int rNum = random.nextInt(18);
+
+  AudioMessagePlayer audioPlayerWidget;
+
+  @override
+  void initState() {
+    super.initState();
+    audioPlayerWidget = AudioMessagePlayer(url: widget.message);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -148,12 +168,16 @@ class _ChatBubbleState extends State<ChatBubble> {
                               ),
                             ),
                           )
-                    : Image.network(
-                        "${widget.message}",
-                        height: 130,
-                        width: MediaQuery.of(context).size.width / 1.3,
-                        fit: BoxFit.cover,
-                      ),
+                    : widget.type == 'image'
+                        ? Image.network(
+                            "${widget.message}",
+                            height: 130,
+                            width: MediaQuery.of(context).size.width / 1.3,
+                            fit: BoxFit.cover,
+                          )
+                        : widget.type == 'audio'
+                            ? audioPlayerWidget
+                            : Container(),
               ),
             ],
           ),
