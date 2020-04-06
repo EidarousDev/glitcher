@@ -1,14 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/chat_item.dart';
-import 'package:glitcher/utils/data.dart';
 
 class Chats extends StatefulWidget {
   @override
@@ -84,7 +81,7 @@ class _ChatsState extends State<Chats>
               gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: <Color>[Constants.darkCardBG, Constants.darkBG])),
+                  colors: <Color>[MyColors.darkCardBG, MyColors.darkBG])),
         ),
 //        elevation: 4,
         leading: IconButton(
@@ -111,7 +108,7 @@ class _ChatsState extends State<Chats>
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Theme.of(context).accentColor,
-          labelColor: Constants.darkGrey,
+          labelColor: MyColors.darkGrey,
           unselectedLabelColor: Theme.of(context).textTheme.caption.color,
           isScrollable: false,
           tabs: <Widget>[

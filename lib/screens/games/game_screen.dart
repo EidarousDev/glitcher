@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/common_widgets/drawer.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
@@ -37,7 +38,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Constants.darkBG,
+        backgroundColor: MyColors.darkBG,
         leading: Builder(
           builder: (context) => Padding(
             padding: const EdgeInsets.all(8.0),
@@ -73,7 +74,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
             leading: Container(),
             flexibleSpace: Container(
               height: 250,
-              color: Constants.darkBG,
+              color: MyColors.darkBG,
               child: Column(
                 children: <Widget>[
                   SizedBox(
@@ -109,7 +110,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                   ),
                   Container(
                     height: 20,
-                    color: Constants.darkLineBreak,
+                    color: MyColors.darkLineBreak,
                   )
                 ],
               ),

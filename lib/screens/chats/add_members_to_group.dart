@@ -1,10 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'dart:math' show Random;
 
 class AddMembersToGroup extends StatefulWidget {
   final String groupId;
@@ -79,7 +77,7 @@ class _AddMembersToGroupState extends State<AddMembersToGroup>
                 gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: <Color>[Constants.darkCardBG, Constants.darkBG])),
+                    colors: <Color>[MyColors.darkCardBG, MyColors.darkBG])),
           ),
 //        elevation: 4,
           leading: IconButton(

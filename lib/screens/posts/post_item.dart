@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/post_model.dart';
@@ -87,7 +88,7 @@ class _PostItemState extends State<PostItem> {
                   style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
-                      color: Constants.darkPrimary)),
+                      color: MyColors.darkPrimary)),
               onTap: () {
                 Navigator.of(context).pushNamed('/user-profile', arguments: {
                   'userId': author.id,
@@ -98,7 +99,7 @@ class _PostItemState extends State<PostItem> {
               child: Text('↳ ${post.game}' ?? '',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Constants.darkGrey,
+                    color: MyColors.darkGrey,
                   )),
               onTap: () {
                 Navigator.of(context).pushNamed('/user-profile', arguments: {
@@ -148,7 +149,7 @@ class _PostItemState extends State<PostItem> {
                                                 child: ImageOverlay(
                                                   imageUrl: post.imageUrl,
                                                   btnText: 'Download',
-                                                  btnFunction: (){},
+                                                  btnFunction: () {},
                                                 ),
                                               ),
                                               context: context);
@@ -216,15 +217,15 @@ class _PostItemState extends State<PostItem> {
             child: DecoratedBox(
               decoration: BoxDecoration(
                   color: currentTheme == AvailableThemes.LIGHT_THEME
-                      ? Constants.lightLineBreak
-                      : Constants.darkLineBreak),
+                      ? MyColors.lightLineBreak
+                      : MyColors.darkLineBreak),
             ),
           ),
           Container(
-            height: inlineBreak,
+            height: Sizes.inline_break,
             color: currentTheme == AvailableThemes.LIGHT_THEME
-                ? Constants.lightPrimary
-                : Constants.darkCardBG,
+                ? MyColors.lightLineBreak
+                : MyColors.darkCardBG,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
@@ -235,12 +236,12 @@ class _PostItemState extends State<PostItem> {
                         child: isLiked
                             ? Icon(
                                 FontAwesome.getIconData('thumbs-up'),
-                                size: Constants.cardBtnSize,
-                                color: Constants.darkPrimary,
+                                size: Sizes.card_btn_size,
+                                color: MyColors.darkPrimary,
                               )
                             : Icon(
                                 FontAwesome.getIconData('thumbs-o-up'),
-                                size: Constants.cardBtnSize,
+                                size: Sizes.card_btn_size,
                               ),
                       ),
                       Padding(
@@ -268,12 +269,12 @@ class _PostItemState extends State<PostItem> {
                 ),
                 SizedBox(
                   width: 1.0,
-                  height: inlineBreak,
+                  height: Sizes.inline_break,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                         color: currentTheme == AvailableThemes.LIGHT_THEME
-                            ? Constants.lightInLineBreak
-                            : Constants.darkLineBreak),
+                            ? MyColors.lightInLineBreak
+                            : MyColors.darkLineBreak),
                   ),
                 ),
                 InkWell(
@@ -283,12 +284,12 @@ class _PostItemState extends State<PostItem> {
                         child: isDisliked
                             ? Icon(
                                 FontAwesome.getIconData('thumbs-down'),
-                                size: Constants.cardBtnSize,
-                                color: Constants.darkPrimary,
+                                size: Sizes.card_btn_size,
+                                color: MyColors.darkPrimary,
                               )
                             : Icon(
                                 FontAwesome.getIconData('thumbs-o-down'),
-                                size: Constants.cardBtnSize,
+                                size: Sizes.card_btn_size,
                               ),
                       ),
                       Padding(
@@ -316,12 +317,12 @@ class _PostItemState extends State<PostItem> {
                 ),
                 SizedBox(
                   width: 1.0,
-                  height: inlineBreak,
+                  height: Sizes.inline_break,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                         color: currentTheme == AvailableThemes.LIGHT_THEME
-                            ? Constants.lightInLineBreak
-                            : Constants.darkLineBreak),
+                            ? MyColors.lightInLineBreak
+                            : MyColors.darkLineBreak),
                   ),
                 ),
                 InkWell(
@@ -330,7 +331,7 @@ class _PostItemState extends State<PostItem> {
                       SizedBox(
                         child: Icon(
                           Icons.chat_bubble_outline,
-                          size: Constants.cardBtnSize,
+                          size: Sizes.card_btn_size,
                         ),
                       ),
                       Padding(
@@ -351,19 +352,19 @@ class _PostItemState extends State<PostItem> {
                 ),
                 SizedBox(
                   width: 1.0,
-                  height: inlineBreak,
+                  height: Sizes.inline_break,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                         color: currentTheme == AvailableThemes.LIGHT_THEME
-                            ? Constants.lightInLineBreak
-                            : Constants.darkLineBreak),
+                            ? MyColors.lightInLineBreak
+                            : MyColors.darkLineBreak),
                   ),
                 ),
                 InkWell(
                   child: SizedBox(
                     child: Icon(
                       Icons.share,
-                      size: Constants.cardBtnSize,
+                      size: Sizes.card_btn_size,
                     ),
                   ),
                   onTap: () {
@@ -379,8 +380,8 @@ class _PostItemState extends State<PostItem> {
             child: DecoratedBox(
               decoration: BoxDecoration(
                   color: currentTheme == AvailableThemes.LIGHT_THEME
-                      ? Constants.lightLineBreak
-                      : Constants.darkLineBreak),
+                      ? MyColors.lightLineBreak
+                      : MyColors.darkLineBreak),
             ),
           ),
         ],
@@ -608,21 +609,21 @@ class _PostItemState extends State<PostItem> {
               child: Icon(
                 Icons.report_problem,
                 size: 22.0,
-                color: Constants.darkAccent,
+                color: MyColors.darkAccent,
               ),
               onTap: () {}),
           InkWell(
               child: Icon(
                 Icons.delete_forever,
                 size: 22.0,
-                color: Constants.darkAccent,
+                color: MyColors.darkAccent,
               ),
               onTap: () {}),
           InkWell(
               child: Icon(
                 Icons.edit,
                 size: 22.0,
-                color: Constants.darkAccent,
+                color: MyColors.darkAccent,
               ),
               onTap: () {}),
         ],

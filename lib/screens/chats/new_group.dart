@@ -4,13 +4,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:image_picker/image_picker.dart';
-
 import 'package:random_string/random_string.dart';
-import 'dart:math' show Random;
 
 class NewGroup extends StatefulWidget {
   @override
@@ -87,7 +86,7 @@ class _NewGroupState extends State<NewGroup>
               gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: <Color>[Constants.darkCardBG, Constants.darkBG])),
+                  colors: <Color>[MyColors.darkCardBG, MyColors.darkBG])),
         ),
 //        elevation: 4,
         leading: IconButton(
@@ -110,7 +109,7 @@ class _NewGroupState extends State<NewGroup>
             expandedHeight: 50,
             leading: Container(),
             flexibleSpace: Container(
-              color: Constants.darkBG,
+              color: MyColors.darkBG,
               child: Padding(
                 padding: const EdgeInsets.all(3.0),
                 child: Row(
