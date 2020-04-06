@@ -122,17 +122,15 @@ class _NewGroupState extends State<NewGroup>
                     Expanded(
                       flex: 2,
                       child: GestureDetector(
-                        onTap: () async{
-                          bool isGranted = await PermissionsService().requestStoragePermission(
-                              onPermissionDenied: () {
+                        onTap: () async {
+                          bool isGranted = await PermissionsService()
+                              .requestStoragePermission(onPermissionDenied: () {
                             print('Permission has been denied');
                           });
 
-                          if(isGranted){                            
-                          chooseImage();
-                          }
-
-                          else{
+                          if (isGranted) {
+                            chooseImage();
+                          } else {
                             showDialog(
                                 context: context,
                                 builder: (context) {
@@ -140,7 +138,7 @@ class _NewGroupState extends State<NewGroup>
                                     title: Text('Info'),
                                     content: Text(
                                         'You must grant this storage access to be able to use this feature.'),
-                                    actions: <Widget>[                                      
+                                    actions: <Widget>[
                                       MaterialButton(
                                         onPressed: () {
                                           Navigator.of(context).pop();
@@ -150,9 +148,7 @@ class _NewGroupState extends State<NewGroup>
                                     ],
                                   );
                                 });
-                          
                           }
-
                         },
                         child: CircleAvatar(
                           radius: 25,
@@ -268,14 +264,18 @@ class _NewGroupState extends State<NewGroup>
   }
 
   addGroup() async {
-     await chatGroupsRef.document(_groupId).setData({
+    await chatGroupsRef.document(_groupId).setData({
       'name': textEditingController.text,
       'image': _imageUrl,
       'timestamp': FieldValue.serverTimestamp()
     });
-    
+
     for (Map<String, dynamic> user in chosenUsers) {
-      chatGroupsRef.document(_groupId).collection('users').document(user['user_id']).setData({
+      chatGroupsRef
+          .document(_groupId)
+          .collection('users')
+          .document(user['user_id'])
+          .setData({
         'is_admin': user['is_admin'],
         'timestamp': FieldValue.serverTimestamp()
       });
