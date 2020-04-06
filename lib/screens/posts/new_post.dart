@@ -2,6 +2,7 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -110,66 +111,22 @@ class _NewPostState extends State<NewPost> {
     });
   }
 
-  Future chooseVideo() async {
-    clearVars();
-    await ImagePicker.pickVideo(source: ImageSource.gallery).then((video) {
-      setState(() {
-        _video = video;
-        playVideo();
-      });
-    });
-  }
-
-  Future chooseImage() async {
-    clearVars();
-    await ImagePicker.pickImage(
-            source: ImageSource.gallery,
-            imageQuality: 52,
-            maxHeight: 400,
-            maxWidth: 600)
-        .then((image) {
-      setState(() {
-        _image = image;
-      });
-    });
-  }
-
-  Future uploadFile(String parentFolder, var fileName) async {
-    if (fileName == null) return;
-
-    setState(() {
-      this.$ranFileName =
-          randomAlphaNumeric(5) + '_' + p.basename(fileName.path);
-    });
-    print((fileName));
-    print('fileNameRandomized = ' + this.$ranFileName);
-
-    StorageReference storageReference = FirebaseStorage.instance
-        .ref()
-        .child('$parentFolder/' + this.$ranFileName);
-    StorageUploadTask uploadTask = storageReference.putFile(fileName);
-    await uploadTask.onComplete;
-    print('File Uploaded');
-    await storageReference.getDownloadURL().then((fileURL) {
-      setState(() {
-        _uploadedFileURL = fileURL;
-      });
-    });
-  }
 
   Future uploadPost(String text) async {
     setState(() {
       _loading = true;
     });
 
+    String postId = randomAlphaNumeric(20);
+
     if (_video != null) {
-      await uploadFile('videos', _video);
+      _uploadedFileURL = await AppUtil.uploadFile(_video, context, 'posts_videos/' + postId);
     } else if (_image != null) {
       //await compressAndUploadFile(_image, 'glitchertemp.jpg');
-      await uploadFile('images', _image);
+      _uploadedFileURL =  await  AppUtil.uploadFile(_image, context, 'posts_images/' + postId);
     }
 
-    await firestore.collection('posts').add({
+    await postsRef.document(postId).setData({
       'owner': Constants.currentUserID,
       'text': text,
       'youtubeId': _youtubeId,
@@ -180,13 +137,14 @@ class _NewPostState extends State<NewPost> {
       'comments': 0,
       'timestamp': FieldValue.serverTimestamp(),
       'game': selectedGame
-    }).then((_) {
-      setState(() {
-        _loading = false;
-        //Navigator.pop(context);
-      });
-      pushHomeScreen(context);
     });
+
+    setState(() {
+      _loading = false;
+      //Navigator.pop(context);
+    });
+    pushHomeScreen(context);
+
   }
 
   Widget _buildWidget() {
@@ -286,8 +244,10 @@ class _NewPostState extends State<NewPost> {
                           child: Icon(FontAwesome.getIconData("file-video-o")),
                           textColor: Colors.white,
                           color: Colors.blue,
-                          onPressed: () {
-                            chooseVideo();
+                          onPressed: () async{
+                            clearVars();
+                            _video = await AppUtil.chooseVideo();
+                            playVideo();
                           }),
                     ),
                     flex: 1,
@@ -320,12 +280,12 @@ class _NewPostState extends State<NewPost> {
                             child: Icon(FontAwesome.getIconData("image")),
                             textColor: Colors.white,
                             color: Colors.blue,
-                            onPressed: () {
+                            onPressed: () async{
                               PermissionsService().requestStoragePermission(
                                   onPermissionDenied: () {
                                 print('Permission has been denied');
                               });
-                              chooseImage();
+                             _image = await AppUtil.chooseImage();
                             })),
                     flex: 1,
                   ),
