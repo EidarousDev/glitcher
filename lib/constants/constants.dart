@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:glitcher/models/user_model.dart';
 
+/// Firebase Constants
 final auth = FirebaseAuth.instance;
 final firestore = Firestore.instance;
 final storageRef = FirebaseStorage.instance.ref();
@@ -13,14 +13,7 @@ final chatsRef = firestore.collection('chats');
 final gamesRef = firestore.collection('games');
 final chatGroupsRef = firestore.collection('chat_groups');
 
-String loggedInProfileImageURL;
-
-enum AvailableThemes {
-  LIGHT_THEME,
-  DARK_THEME,
-}
-var currentTheme = AvailableThemes.DARK_THEME;
-
+/// User Authentication Constants
 enum AuthStatus {
   NOT_DETERMINED,
   NOT_LOGGED_IN,
@@ -28,7 +21,15 @@ enum AuthStatus {
 }
 AuthStatus authStatus = AuthStatus.NOT_DETERMINED;
 
-final double inlineBreak = 32.0;
+/// Logged In User Constants
+String loggedInProfileImageURL; // TODO: Assign Default image url
+
+/// App Theme Constants
+enum AvailableThemes {
+  LIGHT_THEME,
+  DARK_THEME,
+}
+var currentTheme = AvailableThemes.DARK_THEME;
 
 class Constants {
   static FirebaseUser currentUser;
@@ -40,64 +41,8 @@ class Constants {
   static List<String> followingIds = [];
   static List<String> followedGamesNames = [];
 
-  //Colors for theme
-  static Color lightPrimary = Color(0xffdbd8e3);
-  static const Color darkPrimary = Color(0xffc74f57);
-  static Color darkPrimarySwatch = Colors.indigo;
-  static Color darkGrey = Color(0xff878681);
-  static Color darkPrimaryTappedBtn = Color(0xff88caff);
-  static Color darkAccentTappedBtn = Color(0xffd78f94);
-  static Color lightAccent = Color(0xff065471);
-  static Color darkAccent = Color(0xff393e46);
-  static Color lightBG = Color(0xffeeeeee);
-  static Color darkBG = Color(0xff212832);
-  static Color darkCardBG = Color(0xff222e3f);
-  static Color badgeColor = Colors.red;
-  static Color lightLineBreak = Colors.grey[300];
-  static Color darkLineBreak = darkBG;
-  static Color lightInLineBreak = Colors.blueGrey[200];
-
-  static ThemeData lightTheme = ThemeData(
-    backgroundColor: lightBG,
-    primaryColor: lightPrimary,
-    accentColor: lightAccent,
-    cursorColor: lightAccent,
-    scaffoldBackgroundColor: lightBG,
-    appBarTheme: AppBarTheme(
-      elevation: 0,
-      textTheme: TextTheme(
-        title: TextStyle(
-          color: darkBG,
-          fontSize: 18.0,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-    ),
-  );
-
-  static ThemeData darkTheme = ThemeData(
-    brightness: Brightness.dark,
-    backgroundColor: darkBG,
-    primaryColor: darkPrimary,
-    primarySwatch: darkPrimarySwatch,
-    accentColor: darkAccent,
-    scaffoldBackgroundColor: darkCardBG,
-    cursorColor: darkAccent,
-    appBarTheme: AppBarTheme(
-      elevation: 0,
-      textTheme: TextTheme(
-        title: TextStyle(
-          color: Colors.white,
-          fontSize: 18.0,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-    ),
-  );
-
-  static final double cardBtnSize = 25.0;
-
-  static List<String> userFriends = ['DevGamer', 'DevTester'];
-
-  //static Color darkCardBG = Color(0xff222831);
+  static List<String> userFriends = [
+    'DevGamer',
+    'DevTester'
+  ]; // ToDo: Get Dynamic User Friends to use it in the mention
 }

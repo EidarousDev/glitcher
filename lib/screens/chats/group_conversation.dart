@@ -2,15 +2,14 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/widgets/chat_bubble.dart';
@@ -21,7 +20,6 @@ import 'package:glitcher/constants/sizes.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
-import 'dart:math' show Random;
 import 'package:random_string/random_string.dart';
 
 class GroupConversation extends StatefulWidget {
@@ -286,7 +284,7 @@ class _GroupConversationState extends State<GroupConversation>
                 gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: <Color>[Constants.darkCardBG, Constants.darkBG])),
+                    colors: <Color>[MyColors.darkCardBG, MyColors.darkBG])),
           ),
           leading: IconButton(
             icon: Icon(
@@ -392,7 +390,7 @@ class _GroupConversationState extends State<GroupConversation>
                 child: Container(
                   //                height: 140,
                   decoration: BoxDecoration(
-                    color: Constants.darkBG,
+                    color: MyColors.darkBG,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey[500],
@@ -458,12 +456,12 @@ class _GroupConversationState extends State<GroupConversation>
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(5.0),
                                       borderSide: BorderSide(
-                                        color: Constants.darkBG,
+                                        color: MyColors.darkBG,
                                       ),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderSide: BorderSide(
-                                        color: Constants.darkBG,
+                                        color: MyColors.darkBG,
                                       ),
                                       borderRadius: BorderRadius.circular(5.0),
                                     ),

@@ -1,8 +1,8 @@
-import 'package:cache_image/cache_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/post_model.dart';
@@ -72,7 +72,7 @@ class _CommentPostItemState extends State<CommentPostItem> {
                 style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: Constants.darkPrimary)),
+                    color: MyColors.darkPrimary)),
             onTap: () {
               Navigator.of(context).pushNamed('/user-profile', arguments: {
                 'userId': author.id,
@@ -83,7 +83,7 @@ class _CommentPostItemState extends State<CommentPostItem> {
             child: Text('↳ ${post.game}' ?? '',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Constants.darkGrey,
+                  color: MyColors.darkGrey,
                 )),
             onTap: () {
               Navigator.of(context).pushNamed('/user-profile', arguments: {
@@ -156,8 +156,8 @@ class _CommentPostItemState extends State<CommentPostItem> {
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
                         "${Functions.formatTimestamp(post.timestamp)}",
-                        style: TextStyle(
-                            fontSize: 13.0, color: Constants.darkGrey),
+                        style:
+                            TextStyle(fontSize: 13.0, color: MyColors.darkGrey),
                       ),
                     ),
                   ],
@@ -172,15 +172,15 @@ class _CommentPostItemState extends State<CommentPostItem> {
           child: DecoratedBox(
             decoration: BoxDecoration(
                 color: currentTheme == AvailableThemes.LIGHT_THEME
-                    ? Constants.lightLineBreak
-                    : Constants.darkLineBreak),
+                    ? MyColors.lightLineBreak
+                    : MyColors.darkLineBreak),
           ),
         ),
         Container(
-          height: inlineBreak,
+          height: Sizes.inline_break,
           color: currentTheme == AvailableThemes.LIGHT_THEME
-              ? Constants.lightPrimary
-              : Constants.darkAccent,
+              ? MyColors.lightPrimary
+              : MyColors.darkAccent,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
@@ -221,12 +221,12 @@ class _CommentPostItemState extends State<CommentPostItem> {
               ),
               SizedBox(
                 width: 1.0,
-                height: inlineBreak,
+                height: Sizes.inline_break,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                       color: currentTheme == AvailableThemes.LIGHT_THEME
-                          ? Constants.lightInLineBreak
-                          : Constants.darkLineBreak),
+                          ? MyColors.lightInLineBreak
+                          : MyColors.darkLineBreak),
                 ),
               ),
               InkWell(
@@ -266,12 +266,12 @@ class _CommentPostItemState extends State<CommentPostItem> {
               ),
               SizedBox(
                 width: 1.0,
-                height: inlineBreak,
+                height: Sizes.inline_break,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                       color: currentTheme == AvailableThemes.LIGHT_THEME
-                          ? Constants.lightInLineBreak
-                          : Constants.darkLineBreak),
+                          ? MyColors.lightInLineBreak
+                          : MyColors.darkLineBreak),
                 ),
               ),
               SizedBox(
@@ -299,12 +299,12 @@ class _CommentPostItemState extends State<CommentPostItem> {
                   )),
               SizedBox(
                 width: 1.0,
-                height: inlineBreak,
+                height: Sizes.inline_break,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                       color: currentTheme == AvailableThemes.LIGHT_THEME
-                          ? Constants.lightInLineBreak
-                          : Constants.darkLineBreak),
+                          ? MyColors.lightInLineBreak
+                          : MyColors.darkLineBreak),
                 ),
               ),
               InkWell(
@@ -333,8 +333,8 @@ class _CommentPostItemState extends State<CommentPostItem> {
           child: DecoratedBox(
             decoration: BoxDecoration(
                 color: currentTheme == AvailableThemes.LIGHT_THEME
-                    ? Constants.lightLineBreak
-                    : Constants.darkLineBreak),
+                    ? MyColors.lightLineBreak
+                    : MyColors.darkLineBreak),
           ),
         ),
       ],

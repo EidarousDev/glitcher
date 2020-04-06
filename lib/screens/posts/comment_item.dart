@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/constants/constants.dart';
@@ -49,17 +50,17 @@ class _CommentItemState extends State<CommentItem> {
                         // Child text spans will inherit styles from parent
                         style: TextStyle(
                           fontSize: 15.0,
-                          color: Constants.darkPrimary,
+                          color: MyColors.darkPrimary,
                         ),
                         children: <TextSpan>[
                           TextSpan(text: '${widget.commenter.name}'),
                           TextSpan(
                               text: ' @${widget.commenter.username}',
-                              style: TextStyle(color: Constants.darkGrey)),
+                              style: TextStyle(color: MyColors.darkGrey)),
                           TextSpan(
                               text:
                                   ' - ${Functions.formatCommentsTimestamp(widget.comment.timestamp)}',
-                              style: TextStyle(color: Constants.darkAccent)),
+                              style: TextStyle(color: MyColors.darkAccent)),
                         ],
                       ),
                     ),
@@ -97,8 +98,8 @@ class _CommentItemState extends State<CommentItem> {
               child: DecoratedBox(
                 decoration: BoxDecoration(
                     color: currentTheme == AvailableThemes.LIGHT_THEME
-                        ? Constants.lightLineBreak
-                        : Constants.darkLineBreak),
+                        ? MyColors.lightLineBreak
+                        : MyColors.darkLineBreak),
               ),
             ),
           ),

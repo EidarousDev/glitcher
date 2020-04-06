@@ -1,5 +1,6 @@
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
@@ -10,7 +11,6 @@ import 'package:glitcher/utils/Loader.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:video_player/video_player.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class NewComment extends StatefulWidget {
   final String postId;
@@ -225,10 +225,10 @@ class _NewCommentState extends State<NewComment>
             gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: <Color>[Constants.darkBG, Constants.darkCardBG]),
+                colors: <Color>[MyColors.darkBG, MyColors.darkCardBG]),
             boxShadow: [
               BoxShadow(
-                color: Constants.darkBG,
+                color: MyColors.darkBG,
                 blurRadius: 1.0, // has the effect of softening the shadow
                 spreadRadius: 0, // has the effect of extending the shadow
                 offset: Offset(
@@ -255,7 +255,7 @@ class _NewCommentState extends State<NewComment>
       floatingActionButton: FloatingActionButton(
         child: Icon(
           Icons.comment,
-          color: Constants.darkGrey,
+          color: MyColors.darkGrey,
         ),
         onPressed: () {
           Navigator.of(context).pushNamed('/add-comment', arguments: {

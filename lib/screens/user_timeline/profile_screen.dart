@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/screens/fullscreen_overaly.dart';
 import 'package:glitcher/utils/Loader.dart';
 import 'package:glitcher/utils/app_util.dart';
@@ -616,7 +617,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: <Color>[Constants.darkCardBG, Constants.darkBG])),
+                  colors: <Color>[MyColors.darkCardBG, MyColors.darkBG])),
         ),
         title: Text('Profile'),
       ),

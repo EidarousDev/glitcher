@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/screens/home/home.dart';
 import 'package:glitcher/screens/login_page.dart';
 //import 'package:glitcher/utils/sound_manager.dart';
@@ -15,10 +16,10 @@ import '../constants/constants.dart';
 
 void changeTheme(BuildContext context) {
   if (currentTheme == AvailableThemes.LIGHT_THEME) {
-    DynamicTheme.of(context).setThemeData(Constants.darkTheme);
+    DynamicTheme.of(context).setThemeData(MyColors.darkTheme);
     currentTheme = AvailableThemes.DARK_THEME;
   } else {
-    DynamicTheme.of(context).setThemeData(Constants.lightTheme);
+    DynamicTheme.of(context).setThemeData(MyColors.lightTheme);
     currentTheme = AvailableThemes.LIGHT_THEME;
   }
 }

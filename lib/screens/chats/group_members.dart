@@ -1,16 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:glitcher/constants/constants.dart';
-import 'package:glitcher/models/group_model.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/utils/functions.dart';
-import 'package:glitcher/widgets/chat_item.dart';
-import 'package:glitcher/utils/data.dart';
-import 'package:glitcher/widgets/show_dialog.dart';
 
 class GroupMembers extends StatefulWidget {
   final String groupId;
@@ -63,7 +57,7 @@ class _GroupMembersState extends State<GroupMembers>
               gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: <Color>[Constants.darkCardBG, Constants.darkBG])),
+                  colors: <Color>[MyColors.darkCardBG, MyColors.darkBG])),
         ),
 //        elevation: 4,
         leading: IconButton(

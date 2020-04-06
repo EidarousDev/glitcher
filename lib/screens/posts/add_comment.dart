@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/constants/constants.dart';
 
@@ -69,7 +70,7 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
         leading: IconButton(
           icon: Icon(
             Icons.clear,
-            color: Constants.darkGrey,
+            color: MyColors.darkGrey,
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -82,13 +83,13 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
               // Child text spans will inherit styles from parent
               style: TextStyle(
                 fontSize: 15.0,
-                color: Constants.darkPrimary,
+                color: MyColors.darkPrimary,
               ),
               children: <TextSpan>[
                 TextSpan(text: 'Replying to '),
                 TextSpan(
                   text: ' @${widget.username}',
-                  style: TextStyle(color: Constants.darkGrey),
+                  style: TextStyle(color: MyColors.darkGrey),
                   recognizer: new TapGestureRecognizer()
                     ..onTap = () => Navigator.of(context)
                             .pushNamed('/user-profile', arguments: {
@@ -117,7 +118,7 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
                 });
               },
               decoration: InputDecoration(
-                fillColor: Constants.darkBG,
+                fillColor: MyColors.darkBG,
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 25.0, horizontal: 12.0),
                 hintText: 'Leave your comment',

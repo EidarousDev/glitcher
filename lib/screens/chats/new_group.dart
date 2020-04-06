@@ -4,14 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:image_picker/image_picker.dart';
-
 import 'package:random_string/random_string.dart';
-import 'dart:math' show Random;
 
 class NewGroup extends StatefulWidget {
   @override
@@ -90,7 +89,7 @@ class _NewGroupState extends State<NewGroup>
               gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: <Color>[Constants.darkCardBG, Constants.darkBG])),
+                  colors: <Color>[MyColors.darkCardBG, MyColors.darkBG])),
         ),
 //        elevation: 4,
         leading: IconButton(
@@ -113,7 +112,7 @@ class _NewGroupState extends State<NewGroup>
             expandedHeight: 50,
             leading: Container(),
             flexibleSpace: Container(
-              color: Constants.darkBG,
+              color: MyColors.darkBG,
               child: Padding(
                 padding: const EdgeInsets.all(3.0),
                 child: Row(
@@ -126,9 +125,9 @@ class _NewGroupState extends State<NewGroup>
                     Expanded(
                       flex: 2,
                       child: GestureDetector(
-                        onTap: () async{
-                          bool isGranted = await PermissionsService().requestStoragePermission(
-                              onPermissionDenied: () {
+                        onTap: () async {
+                          bool isGranted = await PermissionsService()
+                              .requestStoragePermission(onPermissionDenied: () {
                             print('Permission has been denied');
                           });
 
@@ -144,7 +143,7 @@ class _NewGroupState extends State<NewGroup>
                                     title: Text('Info'),
                                     content: Text(
                                         'You must grant this storage access to be able to use this feature.'),
-                                    actions: <Widget>[                                      
+                                    actions: <Widget>[
                                       MaterialButton(
                                         onPressed: () {
                                           Navigator.of(context).pop();
@@ -154,9 +153,7 @@ class _NewGroupState extends State<NewGroup>
                                     ],
                                   );
                                 });
-                          
                           }
-
                         },
                         child: CircleAvatar(
                           radius: 25,
@@ -272,14 +269,18 @@ class _NewGroupState extends State<NewGroup>
   }
 
   addGroup() async {
-     await chatGroupsRef.document(_groupId).setData({
+    await chatGroupsRef.document(_groupId).setData({
       'name': textEditingController.text,
       'image': _imageUrl,
       'timestamp': FieldValue.serverTimestamp()
     });
-    
+
     for (Map<String, dynamic> user in chosenUsers) {
-      chatGroupsRef.document(_groupId).collection('users').document(user['user_id']).setData({
+      chatGroupsRef
+          .document(_groupId)
+          .collection('users')
+          .document(user['user_id'])
+          .setData({
         'is_admin': user['is_admin'],
         'timestamp': FieldValue.serverTimestamp()
       });

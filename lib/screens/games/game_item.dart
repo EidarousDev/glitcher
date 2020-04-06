@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/constants/constants.dart';
@@ -74,7 +75,7 @@ class _GameItemState extends State<GameItem> {
                   followUnfollow();
                 },
                 textColor: Colors.white,
-                color: Constants.badgeColor,
+                color: MyColors.badgeColor,
                 child: Text(followBtnText == null ? '' : followBtnText),
               ),
             )

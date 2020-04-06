@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
@@ -13,7 +13,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'dart:math' show Random;
 import 'package:random_string/random_string.dart';
 
 class Conversation extends StatefulWidget {
@@ -285,7 +284,7 @@ class _ConversationState extends State<Conversation>
               gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: <Color>[Constants.darkCardBG, Constants.darkBG])),
+                  colors: <Color>[MyColors.darkCardBG, MyColors.darkBG])),
         ),
         leading: IconButton(
           icon: Icon(
@@ -390,7 +389,7 @@ class _ConversationState extends State<Conversation>
               child: Container(
 //                height: 140,
                 decoration: BoxDecoration(
-                  color: Constants.darkBG,
+                  color: MyColors.darkBG,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey[500],
@@ -453,12 +452,12 @@ class _ConversationState extends State<Conversation>
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(5.0),
                               borderSide: BorderSide(
-                                color: Constants.darkBG,
+                                color: MyColors.darkBG,
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
-                                color: Constants.darkBG,
+                                color: MyColors.darkBG,
                               ),
                               borderRadius: BorderRadius.circular(5.0),
                             ),

@@ -1,11 +1,11 @@
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/services/route_generator.dart';
-import 'package:glitcher/constants/constants.dart';
 
 void main() {
   /*RenderErrorBox.backgroundColor = Colors.transparent;
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
       auth: Auth(),
       child: DynamicTheme(
           defaultBrightness: Brightness.dark,
-          data: (brightness) => Constants.darkTheme,
+          data: (brightness) => MyColors.darkTheme,
           themedWidgetBuilder: (context, theme) {
             return MaterialApp(
               title: Strings.appName,
