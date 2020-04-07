@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-class MyColors{
+class MyColors {
   /// Light Theme Colors
   //Colors for theme
   static Color lightPrimary = Color(0xffdbd8e3);
@@ -61,4 +61,8 @@ class MyColors{
     ),
   );
 
+  /// AppBar Gradient Colors
+  static Color appBarGradientTopColor = darkBG;
+  static Color appBarGradientBottomColor = darkCardBG;
+  static Color boxShadowColor = darkBG;
 }

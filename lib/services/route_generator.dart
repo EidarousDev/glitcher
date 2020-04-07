@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:glitcher/root_page.dart';
+import 'package:glitcher/screens/about/about_us.dart';
+import 'package:glitcher/screens/about/cookie_use.dart';
+import 'package:glitcher/screens/about/help_center.dart';
+import 'package:glitcher/screens/about/legal_notices.dart';
+import 'package:glitcher/screens/about/privacy_policy.dart';
+import 'package:glitcher/screens/about/terms_of_service.dart';
 import 'package:glitcher/screens/app_page.dart';
 import 'package:glitcher/screens/chats/add_members_to_group.dart';
 import 'package:glitcher/screens/chats/chats.dart';
@@ -102,6 +108,19 @@ class RouteGenerator {
 
       case 'chats':
         return MaterialPageRoute(builder: (_) => Chats());
+
+      case '/about-us':
+        return MaterialPageRoute(builder: (_) => AboutUs());
+      case '/cookie-use':
+        return MaterialPageRoute(builder: (_) => CookieUse());
+      case '/help-center':
+        return MaterialPageRoute(builder: (_) => HelpCenter());
+      case '/legal-notices':
+        return MaterialPageRoute(builder: (_) => LegalNotices());
+      case '/terms-of-service':
+        return MaterialPageRoute(builder: (_) => TermsOfService());
+      case '/privacy-policy':
+        return MaterialPageRoute(builder: (_) => PrivacyPolicy());
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

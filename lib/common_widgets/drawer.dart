@@ -119,19 +119,14 @@ class _BuildDrawerState extends State<BuildDrawer> {
           ),
           ListTile(
             title: Text(
-              'Settings and Privacy',
+              'About Glitcher',
             ),
-          ),
-          ListTile(
+            leading: Icon(
+              Icons.info,
+            ),
             onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => NotificationsScreen()));
+              Navigator.of(context).pushNamed('/about-us');
             },
-            title: Text(
-              'Help center',
-            ),
           ),
           ListTile(
             onTap: () {
