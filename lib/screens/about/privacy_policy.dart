@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:glitcher/constants/my_colors.dart';
-import 'package:glitcher/constants/sizes.dart';
+import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'dart:async';
 import 'package:webview_media/webview_flutter.dart';
@@ -13,30 +12,7 @@ class PrivacyPolicy extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(Strings.privacy_policy),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: <Color>[
-                  MyColors.appBarGradientTopColor,
-                  MyColors.darkCardBG
-                ]),
-            boxShadow: [
-              BoxShadow(
-                color: MyColors.boxShadowColor,
-                blurRadius: Sizes
-                    .appbar_blur_radius, // has the effect of softening the shadow
-                spreadRadius: Sizes
-                    .appbar_spread_radius, // has the effect of extending the shadow
-                offset: Offset(
-                  Sizes.appbar_offset_h, // horizontal, move right 10
-                  Sizes.appbar_offset_v, // vertical, move down 10
-                ),
-              )
-            ],
-          ),
-        ),
+        flexibleSpace: gradientAppBar(),
         centerTitle: true,
       ),
       // We're using a Builder here so we have a context that is below the Scaffold

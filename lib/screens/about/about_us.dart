@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/strings.dart';
 
@@ -32,25 +33,7 @@ class _AboutUsState extends State<AboutUs> {
     return Scaffold(
       appBar: AppBar(
         title: Text(Strings.about_us),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: <Color>[MyColors.darkBG, MyColors.darkCardBG]),
-            boxShadow: [
-              BoxShadow(
-                color: MyColors.darkBG,
-                blurRadius: 1.0, // has the effect of softening the shadow
-                spreadRadius: 0, // has the effect of extending the shadow
-                offset: Offset(
-                  1.0, // horizontal, move right 10
-                  1.0, // vertical, move down 10
-                ),
-              )
-            ],
-          ),
-        ),
+        flexibleSpace: gradientAppBar(),
         centerTitle: true,
       ),
       body: Column(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/screens/games/game_item.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/models/game_model.dart';
@@ -37,6 +38,7 @@ class _GamesScreenState extends State<GamesScreen> {
                   ),
                 )),
         title: Text("Games"),
+        flexibleSpace: gradientAppBar(),
         centerTitle: true,
       ),
       body: Column(

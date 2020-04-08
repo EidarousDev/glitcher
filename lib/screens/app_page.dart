@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/home/home_screen.dart';
@@ -52,12 +51,8 @@ class _AppPageState extends State<AppPage> {
       ),
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
-            // sets the background color of the `BottomNavigationBar`
-            canvasColor: Theme.of(context).backgroundColor,
             // sets the active color of the `BottomNavigationBar` if `Brightness` is light
-            primaryColor: Theme.of(context).primaryColor,
-            accentColor: MyColors.darkPrimary,
-            textTheme: Theme.of(context).textTheme),
+            accentColor: Theme.of(context).primaryColor),
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           items: <BottomNavigationBarItem>[

@@ -2,11 +2,13 @@ import 'dart:async';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/chat_bubble.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
@@ -405,13 +407,7 @@ class _ConversationState extends State<Conversation>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: <Color>[MyColors.darkCardBG, MyColors.darkBG])),
-        ),
+        flexibleSpace: gradientAppBar(),
         leading: IconButton(
           icon: Icon(
             Icons.keyboard_backspace,
@@ -507,7 +503,8 @@ class _ConversationState extends State<Conversation>
                   padding: const EdgeInsets.only(right: 8.0, bottom: 8),
                   child: Text(
                     seen ? 'seen' : '',
-                    style: TextStyle(color: Colors.white70),
+                    style: TextStyle(
+                        color: switchColor(Colors.black87, Colors.white70)),
                   ),
                 )),
             Align(
@@ -515,10 +512,10 @@ class _ConversationState extends State<Conversation>
               child: Container(
 //                height: 140,
                 decoration: BoxDecoration(
-                  color: MyColors.darkBG,
+                  color: switchColor(MyColors.lightBG, MyColors.darkBG),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey[500],
+                      color: switchColor(Colors.black45, Colors.grey[500]),
                       offset: Offset(0.0, 1.5),
                       blurRadius: 4.0,
                     ),
@@ -535,7 +532,7 @@ class _ConversationState extends State<Conversation>
                         leading: IconButton(
                           icon: Icon(
                             Icons.add,
-                            color: Colors.white70,
+                            color: switchColor(Colors.black54, Colors.white70),
                           ),
                           onPressed: () {
                             chooseImage();
@@ -550,26 +547,29 @@ class _ConversationState extends State<Conversation>
                           },
                           style: TextStyle(
                             fontSize: 15.0,
-                            color: Colors.white70,
+                            color: switchColor(Colors.black54, Colors.white70),
                           ),
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.all(10.0),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(5.0),
                               borderSide: BorderSide(
-                                color: MyColors.darkBG,
+                                color: switchColor(
+                                    MyColors.lightBG, MyColors.darkBG),
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
-                                color: MyColors.darkBG,
+                                color: switchColor(
+                                    MyColors.lightBG, MyColors.darkBG),
                               ),
                               borderRadius: BorderRadius.circular(5.0),
                             ),
                             hintText: "Write your message...",
                             hintStyle: TextStyle(
                               fontSize: 15.0,
-                              color: Colors.white70,
+                              color:
+                                  switchColor(Colors.black54, Colors.white70),
                             ),
                           ),
                           maxLines: null,
@@ -577,7 +577,7 @@ class _ConversationState extends State<Conversation>
                         trailing: IconButton(
                           icon: Icon(
                             Icons.send,
-                            color: Colors.white70,
+                            color: switchColor(Colors.black54, Colors.white70),
                           ),
                           onPressed: () async {
                             sendMessage();

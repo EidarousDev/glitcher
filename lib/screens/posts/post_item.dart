@@ -224,7 +224,7 @@ class _PostItemState extends State<PostItem> {
           Container(
             height: Sizes.inline_break,
             color: currentTheme == AvailableThemes.LIGHT_THEME
-                ? MyColors.lightLineBreak
+                ? MyColors.lightCardBG
                 : MyColors.darkCardBG,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,

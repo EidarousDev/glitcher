@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
-import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/screens/fullscreen_overaly.dart';
 import 'package:glitcher/utils/Loader.dart';
 import 'package:glitcher/utils/app_util.dart';
@@ -629,13 +629,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: <Color>[MyColors.darkCardBG, MyColors.darkBG])),
-        ),
+        flexibleSpace: gradientAppBar(),
         title: Text('Profile'),
       ),
       body: _build(),

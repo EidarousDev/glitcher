@@ -24,6 +24,10 @@ void changeTheme(BuildContext context) {
   }
 }
 
+Color switchColor(Color lightColor, Color darkColor) {
+  return currentTheme == AvailableThemes.LIGHT_THEME ? lightColor : darkColor;
+}
+
 // Play audio
 //void playSound(String fileName) {
 //  SoundManager soundManager = new SoundManager();
