@@ -1,5 +1,6 @@
 import 'package:dropdownfield/dropdownfield.dart';
 import 'package:glitcher/services/permissions_service.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -49,55 +50,19 @@ class _NewGameState extends State<NewGame> {
     });
   }
 
-  Future chooseImage() async {
-    clearVars();
-    await ImagePicker.pickImage(
-            source: ImageSource.gallery,
-            imageQuality: 52,
-            maxHeight: 400,
-            maxWidth: 600)
-        .then((image) {
-      setState(() {
-        _image = image;
-      });
-    });
-  }
-
-  Future uploadFile(String parentFolder, var fileName) async {
-    if (fileName == null) return;
-
-    setState(() {
-      this.$ranFileName =
-          randomAlphaNumeric(5) + '_' + p.basename(fileName.path);
-    });
-    print((fileName));
-    print('fileNameRandomized = ' + this.$ranFileName);
-
-    StorageReference storageReference = FirebaseStorage.instance
-        .ref()
-        .child('$parentFolder/' + this.$ranFileName);
-    StorageUploadTask uploadTask = storageReference.putFile(fileName);
-    await uploadTask.onComplete;
-    print('File Uploaded');
-    await storageReference.getDownloadURL().then((fileURL) {
-      setState(() {
-        _uploadedFileURL = fileURL;
-      });
-    });
-  }
-
   Future uploadGame(String fullName, String shortName, String description,
       String genre) async {
     setState(() {
       _loading = true;
     });
 
+    String gameId = randomAlphaNumeric(20);
+
     if (_image != null) {
-      //await compressAndUploadFile(_image, 'glitchertemp.jpg');
-      await uploadFile('images', _image);
+      _uploadedFileURL = await AppUtil.uploadFile(_image, context, 'games_images/' + gameId);
     }
 
-    await firestore.collection('games').add({
+    await firestore.collection('games').document(gameId).setData({
       'fullName': fullName,
       'shortName': shortName,
       'description': description,
@@ -110,7 +75,9 @@ class _NewGameState extends State<NewGame> {
         _loading = false;
         //Navigator.pop(context);
       });
+
       pushHomeScreen(context);
+
     });
   }
 
@@ -199,12 +166,14 @@ class _NewGameState extends State<NewGame> {
                       child: Icon(FontAwesome.getIconData("image")),
                       textColor: Colors.white,
                       color: Colors.blue,
-                      onPressed: () {
+                      onPressed: () async{
                         PermissionsService().requestStoragePermission(
                             onPermissionDenied: () {
                           print('Permission has been denied');
                         });
-                        chooseImage();
+                        clearVars();
+                        _image = await AppUtil.chooseImage();
+
                       })),
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 10),

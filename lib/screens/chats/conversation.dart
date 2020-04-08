@@ -8,6 +8,7 @@ import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/chat_bubble.dart';
 import 'package:image_picker/image_picker.dart';
@@ -31,7 +32,7 @@ class _ConversationState extends State<Conversation>
 //  static Random random = Random();
 //  String name;
 //  String profileImage;
-  var _url;
+
   User otherUser = User();
   final String otherUid;
   Timestamp firstVisibleGameSnapShot;
@@ -57,69 +58,6 @@ class _ConversationState extends State<Conversation>
     });
   }
 
-  void sendMessage() async {
-    messageController.clear();
-
-    await _firestore
-        .collection('chats')
-        .document(Constants.currentUserID)
-        .collection('conversations')
-        .document(otherUid)
-        .collection('messages')
-        .add({
-      'sender': Constants.currentUserID,
-      'text': messageText,
-      'timestamp': FieldValue.serverTimestamp(),
-      'type': 'text'
-    });
-
-    await _firestore
-        .collection('chats')
-        .document(otherUid)
-        .collection('conversations')
-        .document(Constants.currentUserID)
-        .collection('messages')
-        .add({
-      'sender': Constants.currentUserID,
-      'text': messageText,
-      'timestamp': FieldValue.serverTimestamp(),
-      'type': 'text'
-    });
-
-    await makeMessagesUnseen();
-  }
-
-  void sendImageMessage() async {
-    messageController.clear();
-    print(_url);
-    await _firestore
-        .collection('chats')
-        .document(Constants.currentUserID)
-        .collection('conversations')
-        .document(otherUid)
-        .collection('messages')
-        .add({
-      'sender': Constants.currentUserID,
-      'image': _url,
-      'timestamp': FieldValue.serverTimestamp(),
-      'type': 'image'
-    });
-
-    await _firestore
-        .collection('chats')
-        .document(otherUid)
-        .collection('conversations')
-        .document(Constants.currentUserID)
-        .collection('messages')
-        .add({
-      'sender': Constants.currentUserID,
-      'image': _url,
-      'timestamp': FieldValue.serverTimestamp(),
-      'type': 'image'
-    });
-
-    makeMessagesUnseen();
-  }
 
   void getMessages() async {
     var messages = await DatabaseService.getMessages(otherUid);
@@ -142,24 +80,7 @@ class _ConversationState extends State<Conversation>
     }
   }
 
-//  void streamMessages() async {
-//    await for (var snapshot in _firestore
-//        .collection('chats')
-//        .document(Constants.currentUserID)
-//        .collection('conversations')
-//        .document(otherUid)
-//        .collection('messages')
-//        .orderBy('timestamp', descending: true)
-//        .snapshots()) {
-//      setState(() {
-//        messages = snapshot.documents;
-//        if (snapshot.documents.first.data['sender'] == otherUid) {
-//          print('made seen');
-//          makeMessagesSeen();
-//        }
-//      });
-//    }
-//  }
+
   void listenToMessagesChanges() async {
     messagesSubscription = _firestore
         .collection('chats')
@@ -273,23 +194,7 @@ class _ConversationState extends State<Conversation>
     }
   }
 
-  Future uploadFile(File file, BuildContext context) async {
-    if (file == null) return;
-
-    print((file));
-
-    StorageReference storageReference = FirebaseStorage.instance
-        .ref()
-        .child('image_messages/')
-        .child(randomAlphaNumeric(20));
-    StorageUploadTask uploadTask = storageReference.putFile(file);
-
-    await uploadTask.onComplete;
-    print('File Uploaded');
-    _url = await storageReference.getDownloadURL();
-  }
-
-  void makeMessagesSeen() async {
+  makeMessagesSeen() async {
 //    await _firestore
 //        .collection('chats')
 //        .document(Constants.currentUserID)
@@ -307,7 +212,7 @@ class _ConversationState extends State<Conversation>
         .setData({'isSeen': true});
   }
 
-  void makeMessagesUnseen() async {
+  makeMessagesUnseen() async {
     await _firestore
         .collection('chats')
         .document(Constants.currentUserID)
@@ -323,37 +228,6 @@ class _ConversationState extends State<Conversation>
         .setData({'isSeen': false});
   }
 
-  Future chooseImage() async {
-    await ImagePicker.pickImage(
-            source: ImageSource.gallery,
-            imageQuality: 52,
-            maxHeight: 400,
-            maxWidth: 600)
-        .then((image) {
-      setState(() {
-        showDialog(
-            barrierDismissible: true,
-            child: Container(
-              width: Sizes.sm_profile_image_w,
-              height: Sizes.sm_profile_image_h,
-              child: ImageOverlay(
-                imageFile: image,
-                btnText: 'Send',
-                btnFunction: () async {
-                  await uploadFile(image, context);
-
-                  await sendImageMessage();
-
-                  Navigator.of(context).pop();
-                },
-              ),
-            ),
-            context: context);
-
-        //_image = image;
-      });
-    });
-  }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -534,8 +408,29 @@ class _ConversationState extends State<Conversation>
                             Icons.add,
                             color: switchColor(Colors.black54, Colors.white70),
                           ),
-                          onPressed: () {
-                            chooseImage();
+                          onPressed: () async{
+                            File image = await AppUtil.chooseImage();
+
+                            showDialog(
+                                barrierDismissible: true,
+                                child: Container(
+                                  width: Sizes.sm_profile_image_w,
+                                  height: Sizes.sm_profile_image_h,
+                                  child: ImageOverlay(
+                                    imageFile: image,
+                                    btnText: 'Send',
+                                    btnFunction: () async {
+                                      String url = await AppUtil.uploadFile(image, context, 'image_messages/' + randomAlphaNumeric(20));
+
+                                      messageController.clear();
+                                      await DatabaseService.sendMessage(otherUid, 'image', url);
+                                      makeMessagesUnseen();
+
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ),
+                                context: context);
                           },
                         ),
                         contentPadding: EdgeInsets.all(0),
@@ -580,7 +475,9 @@ class _ConversationState extends State<Conversation>
                             color: switchColor(Colors.black54, Colors.white70),
                           ),
                           onPressed: () async {
-                            sendMessage();
+                            messageController.clear();
+                            await DatabaseService.sendMessage(otherUid, 'text', messageText);
+                            await makeMessagesUnseen();
                           },
                         ),
                       ),

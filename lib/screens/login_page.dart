@@ -179,12 +179,12 @@ class _LoginPageState extends State<LoginPage>
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
     RegExp regExp = new RegExp(pattern);
     if (value.length == 0) {
-      AppUtil().showAlert("Email is Required");
+      AppUtil().showToast("Email is Required");
       setState(() {
         _errorMsgEmail = "Email is Required";
       });
     } else if (!regExp.hasMatch(value)) {
-      AppUtil().showAlert("Invalid Email");
+      AppUtil().showToast("Invalid Email");
       setState(() {
         _errorMsgEmail = "Invalid Email";
       });
@@ -201,12 +201,12 @@ class _LoginPageState extends State<LoginPage>
         r'^(?=.{8,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$';
     RegExp regExp = new RegExp(pattern);
     if (value.length == 0) {
-      AppUtil().showAlert("Username is Required");
+      AppUtil().showToast("Username is Required");
       setState(() {
         _errorMsgUsername = "Username is Required";
       });
     } else if (!regExp.hasMatch(value)) {
-      AppUtil().showAlert("Invalid Username");
+      AppUtil().showToast("Invalid Username");
       setState(() {
         _errorMsgUsername = "Invalid Username";
       });
@@ -242,7 +242,7 @@ class _LoginPageState extends State<LoginPage>
 
   loginError(e) {
     setState(() {
-      AppUtil().showAlert(e.message);
+      AppUtil().showToast(e.message);
       //_isLoading = false;
     });
   }

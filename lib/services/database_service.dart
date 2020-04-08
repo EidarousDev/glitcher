@@ -195,6 +195,30 @@ class DatabaseService {
     });
   }
 
+  static sendMessage(String otherUserId, String type, String message) async {
+    await chatsRef.document(Constants.currentUserID)
+        .collection('conversations')
+        .document(otherUserId)
+        .collection('messages').add({
+      'sender': Constants.currentUserID,
+      'message': message,
+      'timestamp': FieldValue.serverTimestamp(),
+      'type': type
+    });
+
+    await chatsRef.document(otherUserId)
+        .collection('conversations')
+        .document(Constants.currentUserID)
+        .collection('messages').add({
+      'sender': Constants.currentUserID,
+      'message': message,
+      'timestamp': FieldValue.serverTimestamp(),
+      'type': type
+    });
+  }
+
+
+
   static getFollowing() async {
     QuerySnapshot following = await usersRef
         .document(Constants.currentUserID)
@@ -352,6 +376,7 @@ class DatabaseService {
     }
     return Game();
   }
+
 
   static getGames() async {
     QuerySnapshot gameSnapshot = await gamesRef

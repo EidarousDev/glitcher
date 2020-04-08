@@ -11,6 +11,7 @@ import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/widgets/chat_bubble.dart';
 import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
@@ -196,50 +197,6 @@ class _GroupConversationState extends State<GroupConversation>
     }
   }
 
-  Future chooseImage() async {
-    await ImagePicker.pickImage(
-            source: ImageSource.gallery,
-            imageQuality: 52,
-            maxHeight: 400,
-            maxWidth: 600)
-        .then((image) {
-      showDialog(
-          barrierDismissible: true,
-          child: Container(
-            width: Sizes.sm_profile_image_w,
-            height: Sizes.sm_profile_image_h,
-            child: ImageOverlay(
-              imageFile: image,
-              btnText: 'Send',
-              btnFunction: () async {
-                await uploadFile(image, context, 'image_messages/$groupId/');
-
-                messageController.clear();
-                await DatabaseService.sendGroupMessage(groupId, 'image', _url);
-
-                Navigator.of(context).pop();
-              },
-            ),
-          ),
-          context: context);
-    });
-  }
-
-  Future uploadFile(File file, BuildContext context, String path) async {
-    if (file == null) return;
-
-    print((file));
-
-    StorageReference storageReference = FirebaseStorage.instance
-        .ref()
-        .child(path)
-        .child(randomAlphaNumeric(20));
-    StorageUploadTask uploadTask = storageReference.putFile(file);
-
-    await uploadTask.onComplete;
-    print('File Uploaded');
-    _url = await storageReference.getDownloadURL();
-  }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -455,8 +412,29 @@ class _GroupConversationState extends State<GroupConversation>
                               Icons.add,
                               color: Colors.white70,
                             ),
-                            onPressed: () {
-                              chooseImage();
+                            onPressed: () async{
+                              File image = await AppUtil.chooseImage();
+
+                              showDialog(
+                                  barrierDismissible: true,
+                                  child: Container(
+                                    width: Sizes.sm_profile_image_w,
+                                    height: Sizes.sm_profile_image_h,
+                                    child: ImageOverlay(
+                                      imageFile: image,
+                                      btnText: 'Send',
+                                      btnFunction: () async {
+                                        _url = await AppUtil.uploadFile(image, context, 'image_messages/$groupId/' + randomAlphaNumeric(20));
+
+                                        messageController.clear();
+                                        await DatabaseService.sendGroupMessage(groupId, 'image', _url);
+
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ),
+                                  context: context);
+
                             },
                           ),
                           contentPadding: EdgeInsets.all(0),
@@ -548,8 +526,9 @@ class _GroupConversationState extends State<GroupConversation>
                                     //_currentStatus = RecordingStatus.Stopped;
                                     print(result.path);
                                     File file = await _stop();
-                                    await uploadFile(file, context,
-                                        'group_voice_messages/$groupId/');
+
+                                    AppUtil.uploadFile(file, context, 'group_voice_messages/$groupId/' + randomAlphaNumeric(20));
+
                                     await DatabaseService.sendGroupMessage(
                                         groupId, 'audio', _url);
                                   },

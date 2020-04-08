@@ -83,19 +83,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future chooseImage(int whichImage) async {
-    await ImagePicker.pickImage(source: ImageSource.gallery).then((image) {
-      setState(() {
-        if (whichImage == 1) {
-          _coverImageFile = image;
-          if (_coverImageFile != null) _coverImageUrl = null;
-        } else {
-          _profileImageFile = image;
-          if (_profileImageFile != null) _profileImageUrl = null;
-        }
-      });
-    });
-  }
 
   void loadUserData() async {
     setState(() {
@@ -119,47 +106,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  Future uploadFile(String parentFolder, var fileName) async {
-    if (fileName == null) return;
-
-    _loading = true;
-    print((fileName));
-    StorageReference storageReference =
-        FirebaseStorage.instance.ref().child('$parentFolder/$userId');
-    StorageUploadTask uploadTask = storageReference.putFile(fileName);
-
-    await uploadTask.onComplete;
-    print('File Uploaded');
-    storageReference.getDownloadURL().then((fileURL) {
-      if (parentFolder == 'profile_img') {
-        setState(() {
-          _profileImageUrl = fileURL;
-        });
-
-        _firestore
-            .collection('users')
-            .document(userId)
-            .updateData({'profile_url': _profileImageUrl});
-      } else if (parentFolder == 'cover_img') {
-        setState(() {
-          _coverImageUrl = fileURL;
-        });
-
-        _firestore
-            .collection('users')
-            .document(userId)
-            .updateData({'cover_url': _coverImageUrl});
-      }
-      setState(() {
-        _profileImageFile = null;
-        _coverImageFile = null;
-        _loading = false;
-      });
-
-      //print(_uploadedFileURL);
-    });
-  }
-
   void edit() {
     setState(() {
       _screenState = ScreenState.to_save;
@@ -168,24 +114,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  Future save() async {
+  save() async {
     setState(() {
       _screenState = ScreenState.to_edit;
       _descText = _descEditingController.text;
       _nameText = _nameEditingController.text;
-
-      userData['name'] = _nameText;
-      userData['description'] = _descText;
-
-      _firestore.collection('users').document(userId).updateData(userData);
-
-      if (_profileImageFile != null) {
-        uploadFile('profile_img', _profileImageFile);
-      }
-      if (_coverImageFile != null) {
-        uploadFile('cover_img', _coverImageFile);
-      }
     });
+
+    userData['name'] = _nameText;
+    userData['description'] = _descText;
+
+    usersRef.document(userId).updateData(userData);
+
+    setState(() {
+      _loading = true;
+    });
+
+    String url;
+
+    if (_profileImageFile != null) {
+      url = await AppUtil.uploadFile(
+        _profileImageFile,
+        context,
+        'profile_img/$userId',
+      );
+
+      setState(() {
+        _profileImageUrl = url;
+      });
+
+      usersRef.document(userId).updateData({'profile_url': _profileImageUrl});
+    }
+    if (_coverImageFile != null) {
+      url = await AppUtil.uploadFile(
+          _coverImageFile, context, 'cover_img/$userId');
+
+      setState(() {
+        _coverImageUrl = url;
+      });
+
+      usersRef.document(userId).updateData({'cover_url': _coverImageUrl});
+    }
+
+    setState(() {
+      _profileImageFile = null;
+      _coverImageFile = null;
+      _loading = false;
+    });
+
   }
 
   Widget profileOverlay(Widget child, double size) {
@@ -240,8 +216,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: <Widget>[
         GestureDetector(
           onTap: _screenState == ScreenState.to_save
-              ? () {
-                  chooseImage(1);
+              ? () async{
+            _coverImageFile = await AppUtil.chooseImage();
+            setState(() {
+              if (_coverImageFile != null) _coverImageUrl = null;
+            });
+
                 }
               : () async {
                   if (_coverImageUrl != null) {
@@ -312,8 +292,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         GestureDetector(
             onTap: _screenState == ScreenState.to_save
-                ? () {
-                    chooseImage(2);
+                ? () async{
+                    _profileImageFile = await AppUtil.chooseImage();
+                    setState(() {
+                      if(_profileImageFile != null) _profileImageUrl = null;
+                    });
                   }
                 : () async {
                     if (_profileImageUrl != null) {
@@ -552,7 +535,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     setState(() {
       _loading = false;
-      AppUtil().showAlert('You started following ' + _nameText);
+      AppUtil().showToast('You started following ' + _nameText);
       _screenState = ScreenState.to_unfollow;
       _followers++;
     });

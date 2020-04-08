@@ -1,11 +1,9 @@
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/utils/Loader.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:photo_view/photo_view.dart';
 
 class FullScreenOverlay extends StatefulWidget {
@@ -69,10 +67,6 @@ class _FullscreenOverlayState extends State<FullScreenOverlay> {
   final int type;
   final int whichImage;
   final String userId;
-  final Firestore _firestore = Firestore.instance;
-  File _file;
-
-  var _url;
 
   _FullscreenOverlayState({
     this.url,
@@ -91,8 +85,31 @@ class _FullscreenOverlayState extends State<FullScreenOverlay> {
               "Edit",
               style: TextStyle(color: Colors.blue),
             ),
-            onPressed: () {
-              chooseImage(whichImage, context);
+            onPressed: () async{
+
+              File image = await AppUtil.chooseImage();
+
+              setState(() {
+                _loading = true;
+              });
+
+              String url;
+              if (whichImage == 1) {
+                url = await AppUtil.uploadFile(image, context, 'cover_img/$userId');
+
+                updateCoverImage(url);
+              } else {
+                url = await AppUtil.uploadFile(image, context, 'profile_img/$userId');
+
+                updateProfileImage(url);
+              }
+
+              setState(() {
+                image = null;
+                _loading = false;
+                Navigator.pop(context, url);
+              });
+
             },
             borderSide: BorderSide(
               color: Colors.blue, //Color of the border
@@ -113,63 +130,16 @@ class _FullscreenOverlayState extends State<FullScreenOverlay> {
     );
   }
 
-  Future chooseImage(int whichImage, BuildContext context) async {
-    await ImagePicker.pickImage(source: ImageSource.gallery).then((image) {
-      if (whichImage == 1) {
-        _file = image;
-        uploadFile('cover_img', _file, context);
-      } else {
-        _file = image;
-        uploadFile('profile_img', _file, context);
-      }
-    });
+  updateProfileImage(String url) async{
+    await usersRef
+        .document(userId)
+        .updateData({'profile_url': url});
   }
 
-  Future uploadFile(String parentFolder, var file, BuildContext context) async {
-    if (file == null) return;
-    setState(() {
-      _loading = true;
-    });
-    print((file));
-    StorageReference storageReference =
-        FirebaseStorage.instance.ref().child('$parentFolder/$userId');
-    StorageUploadTask uploadTask = storageReference.putFile(file);
-
-    await uploadTask.onComplete;
-    print('File Uploaded');
-    storageReference.getDownloadURL().then((fileURL) {
-      if (parentFolder == 'profile_img') {
-        setState(() {
-          _url = fileURL;
-        });
-
-        _firestore
-            .collection('users')
-            .document(userId)
-            .updateData({'profile_url': _url}).then((onValue) {
-          setState(() {
-            _file = null;
-            _loading = false;
-            Navigator.pop(context, _url);
-          });
-        });
-      } else if (parentFolder == 'cover_img') {
-        setState(() {
-          _url = fileURL;
-        });
-
-        _firestore
-            .collection('users')
-            .document(userId)
-            .updateData({'cover_url': _url}).then((onValue) {
-          setState(() {
-            _file = null;
-            _loading = false;
-            Navigator.pop(context, _url);
-          });
-        });
-      }
-      //print(_uploadedFileURL);
-    });
+  updateCoverImage(String url) async{
+    await usersRef
+        .document(userId)
+        .updateData({'cover_url': url});
   }
+
 }

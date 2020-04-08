@@ -7,6 +7,7 @@ import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:math' show Random;
@@ -31,8 +32,6 @@ class _GroupDetailsState extends State<GroupDetails>
   bool _editing = false;
 
   TextEditingController _textEditingController = TextEditingController();
-
-  var _url;
 
   _GroupDetailsState(this.groupId);
 
@@ -68,8 +67,30 @@ class _GroupDetailsState extends State<GroupDetails>
                   alignment: Alignment.topRight,
                   child: IconButton(
                     icon: Icon(Icons.edit),
-                    onPressed: () {
-                      chooseImage();
+                    onPressed: () async{
+                      File image = await AppUtil.chooseImage();
+                      showDialog(
+                          barrierDismissible: true,
+                          child: Container(
+                            width: Sizes.sm_profile_image_w,
+                            height: Sizes.sm_profile_image_h,
+                            child: ImageOverlay(
+                              imageFile: image,
+                              btnText: 'Upload',
+                              btnFunction: () async {
+                                String url = await AppUtil.uploadFile(image, context, 'group_chats_images/$groupId');
+
+                                await chatGroupsRef
+                                    .document(groupId)
+                                    .updateData({'image': url});
+
+                                getGroup();
+
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ),
+                          context: context);
                     },
                   ),
                 )
@@ -132,54 +153,6 @@ class _GroupDetailsState extends State<GroupDetails>
             )
           ],
         ));
-  }
-
-  Future uploadFile(File file, BuildContext context) async {
-    if (file == null) return;
-
-    print((file));
-
-    StorageReference storageReference = FirebaseStorage.instance
-        .ref()
-        .child('group_chats_images/')
-        .child(randomAlphaNumeric(20));
-    StorageUploadTask uploadTask = storageReference.putFile(file);
-
-    await uploadTask.onComplete;
-    print('File Uploaded');
-    _url = await storageReference.getDownloadURL();
-  }
-
-  Future chooseImage() async {
-    await ImagePicker.pickImage(
-            source: ImageSource.gallery,
-            imageQuality: 52,
-            maxHeight: 400,
-            maxWidth: 600)
-        .then((image) {
-      showDialog(
-          barrierDismissible: true,
-          child: Container(
-            width: Sizes.sm_profile_image_w,
-            height: Sizes.sm_profile_image_h,
-            child: ImageOverlay(
-              imageFile: image,
-              btnText: 'Upload',
-              btnFunction: () async {
-                await uploadFile(image, context);
-
-                await chatGroupsRef
-                    .document(groupId)
-                    .updateData({'image': _url});
-
-                getGroup();
-
-                Navigator.of(context).pop();
-              },
-            ),
-          ),
-          context: context);
-    });
   }
 
   @override

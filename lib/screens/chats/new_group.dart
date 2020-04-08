@@ -8,6 +8,7 @@ import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:random_string/random_string.dart';
 
@@ -74,7 +75,9 @@ class _NewGroupState extends State<NewGroup>
           chosenUsers
               .add({'user_id': Constants.currentUserID, 'is_admin': true});
 
-          await uploadFile(_imageFile, context);
+          _groupId = randomAlphaNumeric(20);
+
+          _imageUrl = await AppUtil.uploadFile(_imageFile, context, 'group_chats_images/$_groupId');
           await addGroup();
           await addGroupToUsers();
           Navigator.of(context).pushNamed('chats');
@@ -128,9 +131,11 @@ class _NewGroupState extends State<NewGroup>
                             print('Permission has been denied');
                           });
 
-                          if (isGranted) {
-                            chooseImage();
-                          } else {
+                          if(isGranted){                            
+                          _imageFile = await AppUtil.chooseImage();
+                          }
+
+                          else{
                             showDialog(
                                 context: context,
                                 builder: (context) {
@@ -290,37 +295,6 @@ class _NewGroupState extends State<NewGroup>
           .document(_groupId)
           .setData({'timestamp': FieldValue.serverTimestamp()});
     }
-  }
-
-  Future uploadFile(File file, BuildContext context) async {
-    if (file == null) return;
-
-    print((file));
-    _groupId = randomAlphaNumeric(20);
-
-    StorageReference storageReference = FirebaseStorage.instance
-        .ref()
-        .child('group_chats_images/')
-        .child(_groupId);
-    StorageUploadTask uploadTask = storageReference.putFile(file);
-
-    await uploadTask.onComplete;
-    print('File Uploaded');
-
-    _imageUrl = await storageReference.getDownloadURL();
-  }
-
-  Future chooseImage() async {
-    await ImagePicker.pickImage(
-            source: ImageSource.gallery,
-            imageQuality: 52,
-            maxHeight: 400,
-            maxWidth: 600)
-        .then((image) {
-      setState(() {
-        _imageFile = image;
-      });
-    });
   }
 
   @override
