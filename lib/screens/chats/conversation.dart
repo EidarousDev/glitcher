@@ -58,7 +58,6 @@ class _ConversationState extends State<Conversation>
     });
   }
 
-
   void getMessages() async {
     var messages = await DatabaseService.getMessages(otherUid);
     setState(() {
@@ -79,7 +78,6 @@ class _ConversationState extends State<Conversation>
       });
     }
   }
-
 
   void listenToMessagesChanges() async {
     messagesSubscription = _firestore
@@ -227,7 +225,6 @@ class _ConversationState extends State<Conversation>
         .document(Constants.currentUserID)
         .setData({'isSeen': false});
   }
-
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -408,7 +405,7 @@ class _ConversationState extends State<Conversation>
                             Icons.add,
                             color: switchColor(Colors.black54, Colors.white70),
                           ),
-                          onPressed: () async{
+                          onPressed: () async {
                             File image = await AppUtil.chooseImage();
 
                             showDialog(
@@ -420,10 +417,15 @@ class _ConversationState extends State<Conversation>
                                     imageFile: image,
                                     btnText: 'Send',
                                     btnFunction: () async {
-                                      String url = await AppUtil.uploadFile(image, context, 'image_messages/' + randomAlphaNumeric(20));
+                                      String url = await AppUtil.uploadFile(
+                                          image,
+                                          context,
+                                          'image_messages/' +
+                                              randomAlphaNumeric(20));
 
                                       messageController.clear();
-                                      await DatabaseService.sendMessage(otherUid, 'image', url);
+                                      await DatabaseService.sendMessage(
+                                          otherUid, 'image', url);
                                       makeMessagesUnseen();
 
                                       Navigator.of(context).pop();
@@ -476,7 +478,8 @@ class _ConversationState extends State<Conversation>
                           ),
                           onPressed: () async {
                             messageController.clear();
-                            await DatabaseService.sendMessage(otherUid, 'text', messageText);
+                            await DatabaseService.sendMessage(
+                                otherUid, 'text', messageText);
                             await makeMessagesUnseen();
                           },
                         ),
