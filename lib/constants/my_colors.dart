@@ -2,27 +2,45 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-class MyColors{
+class MyColors {
   /// Light Theme Colors
   //Colors for theme
-  static Color lightPrimary = Color(0xffdbd8e3);
-  static Color lightAccent = Color(0xff065471);
+  static Color lightPrimary = Color(0xffc74f57);
+  static Color lightPrimarySwatch = Colors.indigo;
+  static Color lightAccent = Color(0xff393e46);
+  static Color lightCardBG = Color(0xffe5e5e5);
   static Color lightBG = Color(0xffeeeeee);
   static Color badgeColor = Colors.red;
-  static Color lightLineBreak = Colors.grey[300];
-  static Color lightInLineBreak = Colors.blueGrey[200];
+  static Color lightButtonsBackground = Colors.grey[300];
+  static Color lightLineBreak = Color(0xffd5d5d5);
+  static Color lightInLineBreak = Color(0xffe1e3e3);
 
   static ThemeData lightTheme = ThemeData(
-    backgroundColor: lightBG,
-    primaryColor: lightPrimary,
-    accentColor: lightAccent,
+    canvasColor: lightBG, // BottomNavigationBar & Drawer Colors
+    brightness:
+        Brightness.light, // This will make all text and icons colors white
+    backgroundColor:
+        lightCardBG, // the background color of the app if not Scaffold
+    primaryColor: lightPrimary, // The AppBar background Color
+    primarySwatch: lightPrimarySwatch,
+    accentColor:
+        lightPrimary, // The active/selected button of the bottomNavigationBar & the FAB color
+    scaffoldBackgroundColor:
+        lightCardBG, // The background color of the entire Scaffold Widget
     cursorColor: lightAccent,
-    scaffoldBackgroundColor: lightBG,
+    primaryIconTheme:
+        IconThemeData(color: Colors.black87), // AppBar Icons Color
+    iconTheme: IconThemeData(
+        color: Colors
+            .black54), // IconButtons inside the body of the app (i.e. like, dislike, comment, share, and arrow_down)
+    accentIconTheme:
+        IconThemeData(color: Colors.white70), // Text Color inside FAB
+
     appBarTheme: AppBarTheme(
       elevation: 0,
       textTheme: TextTheme(
         title: TextStyle(
-          color: darkBG,
+          color: Colors.black54,
           fontSize: 18.0,
           fontWeight: FontWeight.w800,
         ),
@@ -42,13 +60,24 @@ class MyColors{
   static Color darkLineBreak = darkBG;
 
   static ThemeData darkTheme = ThemeData(
-    brightness: Brightness.dark,
-    backgroundColor: darkBG,
-    primaryColor: darkPrimary,
+    canvasColor: darkBG, // BottomNavigationBar & Drawer Colors
+    brightness:
+        Brightness.dark, // This will make all text and icons colors white
+    backgroundColor:
+        darkCardBG, // the background color of the app if not Scaffold
+    primaryColor: darkPrimary, // The AppBar background Color
     primarySwatch: darkPrimarySwatch,
-    accentColor: darkAccent,
-    scaffoldBackgroundColor: darkCardBG,
+    accentColor:
+        darkAccent, // The active/selected button of the bottomNavigationBar & the FAB color
+    scaffoldBackgroundColor:
+        darkCardBG, // The background color of the entire Scaffold Widget
     cursorColor: darkAccent,
+    primaryIconTheme: IconThemeData(color: darkGrey), // AppBar Icons Color
+    iconTheme: IconThemeData(
+        color: Colors
+            .white70), // IconButtons inside the body of the app (i.e. like, dislike, comment, share, and arrow_down)
+    accentIconTheme: IconThemeData(color: darkGrey), // Text Color inside FAB
+
     appBarTheme: AppBarTheme(
       elevation: 0,
       textTheme: TextTheme(
@@ -61,4 +90,8 @@ class MyColors{
     ),
   );
 
+  /// AppBar Gradient Colors
+  static Color appBarGradientTopColor = darkBG;
+  static Color appBarGradientBottomColor = darkCardBG;
+  static Color boxShadowColor = darkBG;
 }

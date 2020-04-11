@@ -1,5 +1,6 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/group_model.dart';
@@ -84,16 +85,14 @@ class _ChatsState extends State<Chats>
     super.build(context);
     return Scaffold(
       appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: <Color>[MyColors.darkCardBG, MyColors.darkBG])),
+        flexibleSpace: gradientAppBar(),
+//        elevation: 4,
+        leading: IconButton(
+          icon: Icon(
+            Icons.keyboard_backspace,
+          ),
+          onPressed: () {},
         ),
-
-        //        elevation: 4,
-
         title: TextField(
           controller: _searchController,
           decoration: InputDecoration(

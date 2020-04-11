@@ -12,4 +12,11 @@ class Sizes {
   /// UI Card Sizes
   static const double card_btn_size = 25.0;
   static const double inline_break = 32.0;
+
+  /// AppBar Box Shadow Sizes
+  static const double appbar_blur_radius = 1.0;
+  static const double appbar_spread_radius = 0;
+  static const double appbar_offset_h = 1.0; // horizontal offest
+  static const double appbar_offset_v = 1.0; // vertical   offset
+
 }

@@ -1,5 +1,6 @@
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/post_model.dart';
@@ -219,25 +220,7 @@ class _PostPreviewState extends State<PostPreview>
       resizeToAvoidBottomPadding: true,
       appBar: AppBar(
         title: Text('New Comment'),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: <Color>[MyColors.darkBG, MyColors.darkCardBG]),
-            boxShadow: [
-              BoxShadow(
-                color: MyColors.darkBG,
-                blurRadius: 1.0, // has the effect of softening the shadow
-                spreadRadius: 0, // has the effect of extending the shadow
-                offset: Offset(
-                  1.0, // horizontal, move right 10
-                  1.0, // vertical, move down 10
-                ),
-              )
-            ],
-          ),
-        ),
+        flexibleSpace: gradientAppBar(),
       ),
       body: new InkWell(
         // to dismiss the keyboard when the user tabs out of the TextField

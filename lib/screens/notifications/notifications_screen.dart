@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/notifications/notification_item.dart';
@@ -18,13 +19,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: <Color>[MyColors.darkCardBG, MyColors.darkBG])),
-        ),
+        flexibleSpace: gradientAppBar(),
         leading: Builder(
             builder: (context) => Padding(
                   padding: const EdgeInsets.all(8.0),

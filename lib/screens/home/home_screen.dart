@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/font_awesome.dart';
 import 'package:glitcher/common_widgets/card_icon_text.dart';
 import 'package:glitcher/common_widgets/drawer.dart';
+import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -12,6 +13,7 @@ import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/posts/post_item.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -46,13 +48,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       appBar: AppBar(
         centerTitle: true,
         title: Text('Home'),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: <Color>[MyColors.darkCardBG, MyColors.darkBG])),
-        ),
+        flexibleSpace: gradientAppBar(),
         leading: Builder(
           builder: (context) => Padding(
             padding: const EdgeInsets.all(8.0),
@@ -74,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         actions: <Widget>[
           IconButton(
             icon: Icon(
-              FontAwesome.getIconData('filter'),
+              Icons.tune,
             ),
             onPressed: () {
               setState(() {
@@ -102,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             leading: Container(),
             flexibleSpace: Container(
               height: sliverAppBarHeight,
-              color: MyColors.darkBG,
+              color: switchColor(MyColors.lightBG, MyColors.darkBG),
               child: Column(
                 children: <Widget>[
                   isFiltering
@@ -210,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 border: Border.all(
                                     color: currentTheme ==
                                             AvailableThemes.LIGHT_THEME
-                                        ? MyColors.lightAccent
+                                        ? MyColors.lightPrimary
                                         : MyColors.darkPrimary,
                                     width: 1),
                               ),
@@ -225,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                           fontWeight: FontWeight.w400,
                                           color: currentTheme ==
                                                   AvailableThemes.LIGHT_THEME
-                                              ? MyColors.lightAccent
+                                              ? MyColors.lightPrimary
                                               : MyColors.darkPrimary)),
                                 ),
                               ),
@@ -245,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                           color: currentTheme == AvailableThemes.LIGHT_THEME
-                              ? MyColors.lightLineBreak
+                              ? MyColors.lightCardBG
                               : MyColors.darkLineBreak),
                     ),
                   ),
@@ -260,9 +256,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           icon: FontAwesome.getIconData("image"),
                           text: "Image",
                           color: currentTheme == AvailableThemes.LIGHT_THEME
-                              ? MyColors.lightLineBreak
+                              ? MyColors.lightBG
                               : MyColors.darkLineBreak,
-                          ccolor: Colors.blue,
+                          ccolor:
+                              switchColor(MyColors.lightPrimary, Colors.blue),
                         )),
                         SizedBox(
                           height: 25,
@@ -281,9 +278,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           icon: FontAwesome.getIconData("file-video-o"),
                           text: "Video",
                           color: currentTheme == AvailableThemes.LIGHT_THEME
-                              ? MyColors.lightLineBreak
+                              ? MyColors.lightBG
                               : MyColors.darkLineBreak,
-                          ccolor: Colors.greenAccent,
+                          ccolor: switchColor(
+                              MyColors.lightPrimary, Colors.greenAccent),
                         )),
                         SizedBox(
                           height: 25,
@@ -302,11 +300,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           icon: FontAwesome.getIconData("youtube"),
                           text: "YouTube",
                           color: currentTheme == AvailableThemes.LIGHT_THEME
-                              ? MyColors.lightLineBreak
+                              ? MyColors.lightBG
                               : MyColors.darkLineBreak,
-                          ccolor: Colors.pink,
+                          ccolor:
+                              switchColor(MyColors.lightPrimary, Colors.pink),
                         )),
                       ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 1,
+                    width: double.infinity,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                          color: currentTheme == AvailableThemes.LIGHT_THEME
+                              ? MyColors.lightCardBG
+                              : MyColors.darkLineBreak),
                     ),
                   ),
                 ],

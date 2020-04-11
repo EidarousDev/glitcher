@@ -1,8 +1,8 @@
-import 'dart:async';
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/screens/chats/audio_message_player.dart';
+import 'package:glitcher/utils/functions.dart';
 
 class ChatBubble extends StatefulWidget {
   final String message, time, username, type, replyText, replyName;
@@ -195,7 +195,7 @@ class _ChatBubbleState extends State<ChatBubble> {
           child: Text(
             widget.time,
             style: TextStyle(
-              color: Colors.white70,
+              color: switchColor(Colors.black54, Colors.white70),
               fontSize: 10.0,
             ),
           ),
