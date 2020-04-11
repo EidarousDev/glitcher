@@ -320,8 +320,9 @@ class _CommentPostItemState extends State<CommentPostItem> {
                     ),
                   ),
                 ),
-                onTap: () {
-                  sharePost(post.id, post.text, post.imageUrl);
+                onTap: () async{
+                  await sharePost(post.id, post.text, post.imageUrl);
+                  await notificationHandler.sendNotification(post.authorId, 'New post share', Constants.loggedInUser.username + ' shared your post', post.id);
                 },
               ),
             ],
@@ -342,7 +343,7 @@ class _CommentPostItemState extends State<CommentPostItem> {
   }
 
   // Sharing a post with a shortened url
-  void sharePost(String postId, String postText, String imageUrl) async {
+  sharePost(String postId, String postText, String imageUrl) async {
     var postLink = await DynamicLinks.createDynamicLink(
         {'postId': postId, 'postText': postText, 'imageUrl': imageUrl});
     Share.share('Check out: $postText : $postLink');
@@ -367,43 +368,43 @@ class _CommentPostItemState extends State<CommentPostItem> {
     super.initState();
   }
 
-  void likeBtnHandler(Post post) {
+  void likeBtnHandler(Post post) async{
     if (isLiked) {
       setState(() {
         isLiked = false;
         post.likesCount--;
       });
-      postsRef
+      await postsRef
           .document(post.id)
           .collection('likes')
           .document(Constants.currentUserID)
           .delete();
-      postsRef.document(post.id).updateData({'likes': post.likesCount});
+      await postsRef.document(post.id).updateData({'likes': post.likesCount});
     } else {
       if (isDisliked) {
         setState(() {
           isDisliked = false;
           post.disLikesCount--;
         });
-        postsRef
+        await postsRef
             .document(post.id)
             .collection('dislikes')
             .document(Constants.currentUserID)
             .delete();
-        postsRef.document(post.id).updateData({'dislikes': post.disLikesCount});
+        await postsRef.document(post.id).updateData({'dislikes': post.disLikesCount});
       }
       setState(() {
         isLiked = true;
         post.likesCount++;
       });
-      postsRef
+      await postsRef
           .document(post.id)
           .collection('likes')
           .document(Constants.currentUserID)
           .setData({'timestamp': FieldValue.serverTimestamp()});
-      postsRef.document(post.id).updateData({'likes': post.likesCount});
+      await postsRef.document(post.id).updateData({'likes': post.likesCount});
 
-      notificationHandler.sendNotification(
+      await notificationHandler.sendNotification(
           post.authorId, 'New Post Like', 'likes your post', post.id);
     }
   }

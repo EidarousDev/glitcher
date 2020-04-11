@@ -367,8 +367,9 @@ class _PostItemState extends State<PostItem> {
                       size: Sizes.card_btn_size,
                     ),
                   ),
-                  onTap: () {
-                    sharePost(post.id, post.text, post.imageUrl);
+                  onTap: () async{
+                    await sharePost(post.id, post.text, post.imageUrl);
+                    await notificationHandler.sendNotification(post.authorId, 'New post share', Constants.loggedInUser.username + ' shared your post', post.id);
                   },
                 ),
               ],
@@ -390,7 +391,7 @@ class _PostItemState extends State<PostItem> {
   }
 
   // Sharing a post with a shortened url
-  void sharePost(String postId, String postText, String imageUrl) async {
+  sharePost(String postId, String postText, String imageUrl) async {
     var postLink = await DynamicLinks.createDynamicLink(
         {'postId': postId, 'postText': postText, 'imageUrl': imageUrl});
     Share.share('Check out: $postText : $postLink');
@@ -471,8 +472,9 @@ class _PostItemState extends State<PostItem> {
         //post.likesCount = likesNo;
       });
 
-      notificationHandler.sendNotification(
-          post.authorId, 'New Post Like', 'likes your post', post.id);
+      await notificationHandler.sendNotification(
+          post.authorId, 'New Post Like', Constants.loggedInUser.username + ' likes your post', post.id);
+
     } else if (isLiked == false && isDisliked == false) {
       await postsRef
           .document(post.id)
@@ -486,6 +488,10 @@ class _PostItemState extends State<PostItem> {
         isLiked = true;
         //post.likesCount = likesNo;
       });
+
+      await notificationHandler.sendNotification(
+          post.authorId, 'New Post Like', Constants.loggedInUser.username + ' likes your post', post.id);
+
     } else {
       throw Exception('Unconditional Event Occurred!');
     }

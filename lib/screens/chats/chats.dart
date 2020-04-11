@@ -1,3 +1,4 @@
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
@@ -18,6 +19,13 @@ class _ChatsState extends State<Chats>
   List<ChatItem> chats = [];
   List<Group> groups = [];
   List<User> friends = [];
+
+  bool _searching = false;
+
+  List<ChatItem> filteredChats = [];
+  List<Group> filteredGroups = [];
+
+  TextEditingController _searchController = TextEditingController();
 
   void getCurrentUserFriends() async {
     List<User> friends =
@@ -83,29 +91,65 @@ class _ChatsState extends State<Chats>
                   end: Alignment.bottomCenter,
                   colors: <Color>[MyColors.darkCardBG, MyColors.darkBG])),
         ),
-//        elevation: 4,
-        leading: IconButton(
-          icon: Icon(
-            Icons.keyboard_backspace,
-          ),
-          onPressed: () {},
-        ),
+
+        //        elevation: 4,
+
         title: TextField(
-          decoration: InputDecoration.collapsed(
+          controller: _searchController,
+          decoration: InputDecoration(
+            prefixIcon: Icon(
+              Icons.search,
+              size: 28.0,
+            ),
+            suffixIcon: IconButton(
+                icon: Icon(Icons.close),
+                onPressed: () {
+                  _searchController.clear();
+                }),
             hintText: 'Search',
           ),
+          onChanged: (text) {
+            filteredChats = [];
+            filteredGroups = [];
+            if (text.length != 0) {
+              setState(() {
+                _searching = true;
+              });
+            } else {
+              setState(() {
+                _searching = false;
+              });
+            }
+            if (_tabController.index == 0) {
+              chats.forEach((chatItem) {
+                if (chatItem.name.contains(text)) {
+                  setState(() {
+                    filteredChats.add(chatItem);
+                  });
+                }
+              });
+            } else {
+              groups.forEach((groupItem) {
+                if (groupItem.name.contains(text)) {
+                  setState(() {
+                    filteredGroups.add(groupItem);
+                  });
+                }
+              });
+            }
+          },
         ),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(
-              Icons.add,
-            ),
-            onPressed: () {
-              Navigator.of(context).pushNamed('new-group');
-            },
-          ),
         ],
         bottom: TabBar(
+          onTap: (index) {
+            setState(() {
+              filteredGroups = [];
+              filteredChats = [];
+              _searching = false;
+            });
+            _searchController.clear();
+          },
           controller: _tabController,
           indicatorColor: Theme.of(context).accentColor,
           labelColor: MyColors.darkGrey,
@@ -121,6 +165,14 @@ class _ChatsState extends State<Chats>
           ],
         ),
       ),
+      floatingActionButton: _tabController.index == 1 ? FloatingActionButton(
+        onPressed: (){
+          Navigator.of(context).pushNamed('new-group');
+        },
+        child: Icon(
+        Icons.add,
+      )
+      ): null,
       body: TabBarView(
         controller: _tabController,
         children: <Widget>[
@@ -136,11 +188,16 @@ class _ChatsState extends State<Chats>
                 ),
               );
             },
-            itemCount: chats.length,
-            itemBuilder: (BuildContext context, int index) {
-              ChatItem chat = chats[index];
-              return chat;
-            },
+            itemCount: !_searching ? chats.length : filteredChats.length,
+            itemBuilder: !_searching
+                ? (BuildContext context, int index) {
+                    ChatItem chat = chats[index];
+                    return chat;
+                  }
+                : (BuildContext context, int index) {
+                    ChatItem chat = filteredChats[index];
+                    return chat;
+                  },
           ),
           ListView.separated(
             padding: EdgeInsets.symmetric(
@@ -156,9 +213,13 @@ class _ChatsState extends State<Chats>
                 ),
               );
             },
-            itemCount: this.groups.length,
+            itemCount: !_searching && _tabController.index == 1
+                ? this.groups.length
+                : this.filteredGroups.length,
             itemBuilder: (BuildContext context, int index) {
-              Group group = this.groups[index];
+              Group group = !_searching && _tabController.index == 1
+                  ? this.groups[index]
+                  : this.filteredGroups[index];
 
               return ListTile(
                 onTap: () {

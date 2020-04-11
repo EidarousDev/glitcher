@@ -12,15 +12,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:video_player/video_player.dart';
 
-class NewComment extends StatefulWidget {
+class PostPreview extends StatefulWidget {
   final String postId;
-  final int commentsNo;
-  NewComment({@required this.postId, this.commentsNo});
+  PostPreview({@required this.postId});
   @override
-  _NewCommentState createState() => _NewCommentState();
+  _PostPreviewState createState() => _PostPreviewState();
 }
 
-class _NewCommentState extends State<NewComment>
+class _PostPreviewState extends State<PostPreview>
     with SingleTickerProviderStateMixin {
   /// Post Data
   Post _currentPost;

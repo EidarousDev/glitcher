@@ -1,8 +1,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/services/notification_handler.dart';
 
 class AddCommentScreen extends StatefulWidget {
   final String username;
@@ -18,15 +20,22 @@ class AddCommentScreen extends StatefulWidget {
       this.profileImageUrl = null})
       : super(key: key);
   @override
-  _AddCommentScreenState createState() => _AddCommentScreenState();
+  _AddCommentScreenState createState() => _AddCommentScreenState(postId: postId);
 }
 
 class _AddCommentScreenState extends State<AddCommentScreen> {
+  String postId;
+  _AddCommentScreenState({@required this.postId});
+  Post post;
+
   String _commentText = '';
 
   /// Comment Text
   var _commentTextController = TextEditingController();
-  var words = []; // to split the characters for the mention user feature
+  var words = [];
+
+  NotificationHandler notificationHandler =
+      NotificationHandler(); // to split the characters for the mention user feature
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,9 +49,15 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
               Icons.send,
               color: Colors.white,
             ),
-            onPressed: () {
+            onPressed: () async {
               if (_commentTextController.text.isNotEmpty) {
-                DatabaseService.addComment(widget.postId, _commentText);
+                DatabaseService.addComment(widget.postId, _commentTextController.text);
+
+                post = await DatabaseService.getPostWithId(postId);
+
+                await notificationHandler.sendNotification(
+                    post.authorId, Constants.loggedInUser.username + ' commented on your post', _commentTextController.text, postId);
+
                 Navigator.pop(context);
               } else {
                 showDialog(
@@ -77,6 +92,9 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
       ),
       body: Column(
         children: <Widget>[
+          SizedBox(
+            height: 15,
+          ),
           RichText(
             text: TextSpan(
               // Note: Styles for TextSpans must be explicitly defined.

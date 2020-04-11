@@ -49,18 +49,18 @@ class NotificationHandler {
         print("onLaunch: $message");
         makeNotificationSeen(message['data']['id']);
         Navigator.of(context).pushNamed('/post',
-            arguments: {'postId': message['data']['postId'], 'commentsNo': 5});
+            arguments: {'postId': message['data']['postId']});
       },
       onResume: (Map<String, dynamic> message) async {
         print("onResume: $message");
         makeNotificationSeen(message['data']['id']);
         Navigator.of(context).pushNamed('/post',
-            arguments: {'postId': message['data']['postId'], 'commentsNo': 5});
+            arguments: {'postId': message['data']['postId']});
       },
     );
   }
 
-  void sendNotification(
+  sendNotification(
       String receiverId, String title, String body, String postId) async {
     usersRef.document(receiverId).collection('notifications').add({
       'title': title,

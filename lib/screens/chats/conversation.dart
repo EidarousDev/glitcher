@@ -7,6 +7,7 @@ import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/widgets/chat_bubble.dart';
 import 'package:image_picker/image_picker.dart';
@@ -45,6 +46,8 @@ class _ConversationState extends State<Conversation>
   StreamSubscription<QuerySnapshot> messagesSubscription;
 
   ScrollController _scrollController = ScrollController();
+
+  NotificationHandler notificationHandler = NotificationHandler();
 
   _ConversationState({this.otherUid});
 
@@ -429,6 +432,8 @@ class _ConversationState extends State<Conversation>
                                       await DatabaseService.sendMessage(otherUid, 'image', url);
                                       makeMessagesUnseen();
 
+                                      await notificationHandler.sendNotification(otherUid, Constants.loggedInUser.username +  ':', url, '');
+
                                       Navigator.of(context).pop();
                                     },
                                   ),
@@ -477,6 +482,9 @@ class _ConversationState extends State<Conversation>
                           onPressed: () async {
                             messageController.clear();
                             await DatabaseService.sendMessage(otherUid, 'text', messageText);
+
+                            await notificationHandler.sendNotification(otherUid, Constants.loggedInUser.username +  ':', messageText, '');
+
                             await makeMessagesUnseen();
                           },
                         ),

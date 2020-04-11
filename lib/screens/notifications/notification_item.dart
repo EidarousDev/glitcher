@@ -50,9 +50,11 @@ class _NotificationItemState extends State<NotificationItem> {
             radius: 25,
           ),
           title: Text(
-            "${widget.senderName}",
+            "${widget.notification.title}",
             style: TextStyle(
+              fontSize: 14,
               fontWeight: FontWeight.bold,
+
             ),
           ),
           subtitle: Text("${widget.notification.body}"),
