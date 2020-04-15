@@ -4,6 +4,7 @@ import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
 
 class CommentItem extends StatefulWidget {
@@ -80,7 +81,7 @@ class _CommentItemState extends State<CommentItem> {
                               ? TextSpan(
                                   text: ' ' + w,
                                   style: TextStyle(color: Colors.blue),
-                                  recognizer: new TapGestureRecognizer()
+                                  recognizer: TapGestureRecognizer()
                                     ..onTap = () => mentionedUserProfile(w),
                                 )
                               : TextSpan(
@@ -97,7 +98,7 @@ class _CommentItemState extends State<CommentItem> {
               width: double.infinity,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                    color: currentTheme == AvailableThemes.LIGHT_THEME
+                    color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
                         ? MyColors.lightLineBreak
                         : MyColors.darkLineBreak),
               ),
@@ -113,7 +114,12 @@ class _CommentItemState extends State<CommentItem> {
     super.initState();
   }
 
-  mentionedUserProfile(String w) {
+  mentionedUserProfile(String w) async {
     //TODO: Implement Mentioned user profile - Get UID from string then pass it to the navigator
+    String username = w.substring(1);
+    User user = await DatabaseService.getUserWithUsername(username);
+    Navigator.of(context)
+        .pushNamed('/user-profile', arguments: {'userId': user.id});
+    print(w);
   }
 }

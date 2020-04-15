@@ -216,14 +216,14 @@ class _PostItemState extends State<PostItem> {
             width: double.infinity,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                  color: currentTheme == AvailableThemes.LIGHT_THEME
+                  color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
                       ? MyColors.lightLineBreak
                       : MyColors.darkLineBreak),
             ),
           ),
           Container(
             height: Sizes.inline_break,
-            color: currentTheme == AvailableThemes.LIGHT_THEME
+            color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
                 ? MyColors.lightCardBG
                 : MyColors.darkCardBG,
             child: Row(
@@ -272,7 +272,8 @@ class _PostItemState extends State<PostItem> {
                   height: Sizes.inline_break,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                        color: currentTheme == AvailableThemes.LIGHT_THEME
+                        color: Constants.currentTheme ==
+                                AvailableThemes.LIGHT_THEME
                             ? MyColors.lightInLineBreak
                             : MyColors.darkLineBreak),
                   ),
@@ -320,7 +321,8 @@ class _PostItemState extends State<PostItem> {
                   height: Sizes.inline_break,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                        color: currentTheme == AvailableThemes.LIGHT_THEME
+                        color: Constants.currentTheme ==
+                                AvailableThemes.LIGHT_THEME
                             ? MyColors.lightInLineBreak
                             : MyColors.darkLineBreak),
                   ),
@@ -355,7 +357,8 @@ class _PostItemState extends State<PostItem> {
                   height: Sizes.inline_break,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                        color: currentTheme == AvailableThemes.LIGHT_THEME
+                        color: Constants.currentTheme ==
+                                AvailableThemes.LIGHT_THEME
                             ? MyColors.lightInLineBreak
                             : MyColors.darkLineBreak),
                   ),
@@ -367,9 +370,13 @@ class _PostItemState extends State<PostItem> {
                       size: Sizes.card_btn_size,
                     ),
                   ),
-                  onTap: () async{
+                  onTap: () async {
                     await sharePost(post.id, post.text, post.imageUrl);
-                    await notificationHandler.sendNotification(post.authorId, 'New post share', Constants.loggedInUser.username + ' shared your post', post.id);
+                    await notificationHandler.sendNotification(
+                        post.authorId,
+                        'New post share',
+                        Constants.loggedInUser.username + ' shared your post',
+                        post.id);
                   },
                 ),
               ],
@@ -380,7 +387,7 @@ class _PostItemState extends State<PostItem> {
             width: double.infinity,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                  color: currentTheme == AvailableThemes.LIGHT_THEME
+                  color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
                       ? MyColors.lightLineBreak
                       : MyColors.darkLineBreak),
             ),
@@ -472,9 +479,8 @@ class _PostItemState extends State<PostItem> {
         //post.likesCount = likesNo;
       });
 
-      await notificationHandler.sendNotification(
-          post.authorId, 'New Post Like', Constants.loggedInUser.username + ' likes your post', post.id);
-
+      await notificationHandler.sendNotification(post.authorId, 'New Post Like',
+          Constants.loggedInUser.username + ' likes your post', post.id);
     } else if (isLiked == false && isDisliked == false) {
       await postsRef
           .document(post.id)
@@ -489,9 +495,8 @@ class _PostItemState extends State<PostItem> {
         //post.likesCount = likesNo;
       });
 
-      await notificationHandler.sendNotification(
-          post.authorId, 'New Post Like', Constants.loggedInUser.username + ' likes your post', post.id);
-
+      await notificationHandler.sendNotification(post.authorId, 'New Post Like',
+          Constants.loggedInUser.username + ' likes your post', post.id);
     } else {
       throw Exception('Unconditional Event Occurred!');
     }

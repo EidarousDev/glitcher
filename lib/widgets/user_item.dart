@@ -84,33 +84,34 @@ class _UserItemState extends State<UserItem> {
             widget.counter == 0
                 ? SizedBox()
                 : Container(
-              padding: EdgeInsets.all(1),
-              decoration: BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              constraints: BoxConstraints(
-                minWidth: 11,
-                minHeight: 11,
-              ),
-              child: Padding(
-                padding: EdgeInsets.only(top: 1, left: 5, right: 5),
-                child: Text(
-                  "${widget.counter}",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
+                    padding: EdgeInsets.all(1),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    constraints: BoxConstraints(
+                      minWidth: 11,
+                      minHeight: 11,
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 1, left: 5, right: 5),
+                      child: Text(
+                        "${widget.counter}",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
           ],
         ),
         onTap: () {
           ValueKey key = this.widget.key;
           String uid = key.value;
-          Navigator.of(context).pushNamed('conversation', arguments: {'otherUid': uid});
+          Navigator.of(context)
+              .pushNamed('/conversation', arguments: {'otherUid': uid});
         },
       ),
     );

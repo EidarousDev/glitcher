@@ -110,7 +110,8 @@ class _ChatItemState extends State<ChatItem> {
         onTap: () {
           ValueKey key = this.widget.key;
           String uid = key.value;
-          Navigator.of(context).pushNamed('conversation', arguments: {'otherUid': uid});
+          Navigator.of(context)
+              .pushNamed('/conversation', arguments: {'otherUid': uid});
         },
       ),
     );

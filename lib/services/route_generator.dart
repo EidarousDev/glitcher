@@ -75,37 +75,37 @@ class RouteGenerator {
       case '/new-game':
         return MaterialPageRoute(builder: (_) => NewGame());
 
-      case 'conversation':
+      case '/conversation':
         return MaterialPageRoute(
             builder: (_) => Conversation(
                   otherUid: args['otherUid'],
                 ));
 
-      case 'group-conversation':
+      case '/group-conversation':
         return MaterialPageRoute(
             builder: (_) => GroupConversation(
                   groupId: args['groupId'],
                 ));
 
-      case 'group-members':
+      case '/group-members':
         return MaterialPageRoute(
             builder: (_) => GroupMembers(
                   groupId: args['groupId'],
                 ));
 
-      case 'add-members-to-group':
+      case '/add-members-to-group':
         return MaterialPageRoute(
             builder: (_) => AddMembersToGroup(
                   args['groupId'],
                 ));
 
-      case 'new-group':
+      case '/new-group':
         return MaterialPageRoute(builder: (_) => NewGroup());
 
-      case 'group-details':
+      case '/group-details':
         return MaterialPageRoute(builder: (_) => GroupDetails(args['groupId']));
 
-      case 'chats':
+      case '/chats':
         return MaterialPageRoute(builder: (_) => Chats());
 
       case '/about-us':

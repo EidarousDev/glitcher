@@ -1,16 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/home/home_screen.dart';
 import 'package:glitcher/screens/notifications/notifications_screen.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:badges/badges.dart';
+import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/utils/functions.dart';
 import 'package:package_info/package_info.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'chats/chats.dart';
 
 class AppPage extends StatefulWidget {
@@ -115,6 +120,10 @@ class _AppPageState extends State<AppPage> {
     _retrieveDynamicLink();
     userListener();
     _saveDeviceToken();
+    setFriends();
+    print('User Firends = ${Constants.userFriends}');
+
+    this.getCurrentTheme();
   }
 
   Future<void> _retrieveDynamicLink() async {
@@ -136,6 +145,21 @@ class _AppPageState extends State<AppPage> {
   void dispose() {
     super.dispose();
     _pageController.dispose();
+  }
+
+  getCurrentTheme() async {
+    String theme = await getTheme();
+    if (theme == "AvailableThemes.LIGHT_THEME") {
+      setState(() {
+        DynamicTheme.of(context).setThemeData(MyColors.lightTheme);
+        Constants.currentTheme = AvailableThemes.LIGHT_THEME;
+      });
+    } else {
+      setState(() {
+        DynamicTheme.of(context).setThemeData(MyColors.darkTheme);
+        Constants.currentTheme = AvailableThemes.DARK_THEME;
+      });
+    }
   }
 
   userListener() {
@@ -183,6 +207,14 @@ class _AppPageState extends State<AppPage> {
       Strings.appVersion = packageInfo.version;
       Strings.appName = packageInfo.appName;
       Strings.buildNumber = packageInfo.buildNumber;
+    });
+  }
+
+  Future<void> setFriends() async {
+    List<User> friends = await getFriends();
+    // User Friends
+    setState(() {
+      Constants.userFriends = friends;
     });
   }
 

@@ -79,7 +79,8 @@ class _GroupMembersState extends State<GroupMembers>
               Icons.person_add,
             ),
             onPressed: () {
-              Navigator.of(context).pushReplacementNamed('add-members-to-group',
+              Navigator.of(context).pushReplacementNamed(
+                  '/add-members-to-group',
                   arguments: {'groupId': groupId});
             },
           )

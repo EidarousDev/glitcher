@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/post_model.dart';
+import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/services/notification_handler.dart';
@@ -20,7 +21,8 @@ class AddCommentScreen extends StatefulWidget {
       this.profileImageUrl = null})
       : super(key: key);
   @override
-  _AddCommentScreenState createState() => _AddCommentScreenState(postId: postId);
+  _AddCommentScreenState createState() =>
+      _AddCommentScreenState(postId: postId);
 }
 
 class _AddCommentScreenState extends State<AddCommentScreen> {
@@ -51,12 +53,18 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
             ),
             onPressed: () async {
               if (_commentTextController.text.isNotEmpty) {
-                DatabaseService.addComment(widget.postId, _commentTextController.text);
+                DatabaseService.addComment(
+                    widget.postId, _commentTextController.text);
 
                 post = await DatabaseService.getPostWithId(postId);
 
                 await notificationHandler.sendNotification(
-                    post.authorId, Constants.loggedInUser.username + ' commented on your post', _commentTextController.text, postId);
+                    post.authorId,
+                    Constants.loggedInUser.username + ' commented on your post',
+                    _commentTextController.text,
+                    postId);
+
+                checkIfContainsMention(_commentTextController.text);
 
                 Navigator.pop(context);
               } else {
@@ -164,29 +172,35 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
               ),
             ),
             _commentText.length > 1
-                ? ListView(
-                    shrinkWrap: true,
-                    children: Constants.userFriends.map((s) {
+                ? ListView.builder(
+                    itemCount: Constants.userFriends.length,
+                    itemBuilder: (context, index) {
+                      String s = Constants.userFriends[index].username;
+                      print('username:' + s);
                       if (('@' + s).contains(_commentText))
                         return ListTile(
-                            title: Text(
-                              s,
-                              style: TextStyle(color: Colors.black),
-                            ),
-                            onTap: () {
-                              String tmp = _commentText.substring(
-                                  1, _commentText.length);
-                              setState(() {
-                                _commentText = '';
-                                _commentTextController.text += s
-                                    .substring(
-                                        s.indexOf(tmp) + tmp.length, s.length)
-                                    .replaceAll(' ', '_');
-                              });
+                          leading: CircleAvatar(
+                            backgroundImage: NetworkImage(
+                                Constants.userFriends[index].profileImageUrl),
+                          ),
+                          title: Text(Constants.userFriends[index].username),
+                          onTap: () {
+                            String tmp =
+                                _commentText.substring(1, _commentText.length);
+                            setState(() {
+                              _commentText = '';
+                              _commentTextController.text += s
+                                  .substring(
+                                      s.indexOf(tmp) + tmp.length, s.length)
+                                  .replaceAll(' ', '_');
                             });
-                      else
-                        return SizedBox();
-                    }).toList())
+                          },
+                        );
+
+                      return SizedBox();
+                    },
+                    shrinkWrap: true,
+                  )
                 : SizedBox(),
           ]),
         ],
@@ -198,5 +212,20 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
   void dispose() {
     _commentTextController.dispose();
     super.dispose();
+  }
+
+  void checkIfContainsMention(String comment) async {
+    comment.split(' ').forEach((word) async {
+      if (word.startsWith('@')) {
+        User user =
+            await DatabaseService.getUserWithUsername(word.substring(1));
+
+        await notificationHandler.sendNotification(
+            user.id,
+            'New post mention',
+            Constants.loggedInUser.username + ' mentioned you in a post',
+            postId);
+      }
+    });
   }
 }

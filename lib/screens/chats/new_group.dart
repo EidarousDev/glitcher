@@ -77,10 +77,11 @@ class _NewGroupState extends State<NewGroup>
 
           _groupId = randomAlphaNumeric(20);
 
-          _imageUrl = await AppUtil.uploadFile(_imageFile, context, 'group_chats_images/$_groupId');
+          _imageUrl = await AppUtil.uploadFile(
+              _imageFile, context, 'group_chats_images/$_groupId');
           await addGroup();
           await addGroupToUsers();
-          Navigator.of(context).pushNamed('chats');
+          Navigator.of(context).pushNamed('/chats');
         },
       ),
       appBar: AppBar(
@@ -131,11 +132,9 @@ class _NewGroupState extends State<NewGroup>
                             print('Permission has been denied');
                           });
 
-                          if(isGranted){                            
-                          _imageFile = await AppUtil.chooseImage();
-                          }
-
-                          else{
+                          if (isGranted) {
+                            _imageFile = await AppUtil.chooseImage();
+                          } else {
                             showDialog(
                                 context: context,
                                 builder: (context) {

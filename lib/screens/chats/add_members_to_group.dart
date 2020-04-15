@@ -67,7 +67,7 @@ class _AddMembersToGroupState extends State<AddMembersToGroup>
               }
             }
 
-            Navigator.of(context).pushReplacementNamed('group-members',
+            Navigator.of(context).pushReplacementNamed('/group-members',
                 arguments: {'groupId': groupId});
           },
         ),

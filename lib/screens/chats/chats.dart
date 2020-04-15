@@ -35,6 +35,7 @@ class _ChatsState extends State<Chats>
     friends.forEach((f) async {
       await loadUserData(f.id);
     });
+
     setState(() {
       this.friends = friends;
     });
@@ -138,8 +139,7 @@ class _ChatsState extends State<Chats>
             }
           },
         ),
-        actions: <Widget>[
-        ],
+        actions: <Widget>[],
         bottom: TabBar(
           onTap: (index) {
             setState(() {
@@ -164,14 +164,15 @@ class _ChatsState extends State<Chats>
           ],
         ),
       ),
-      floatingActionButton: _tabController.index == 1 ? FloatingActionButton(
-        onPressed: (){
-          Navigator.of(context).pushNamed('new-group');
-        },
-        child: Icon(
-        Icons.add,
-      )
-      ): null,
+      floatingActionButton: _tabController.index == 1
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed('/new-group');
+              },
+              child: Icon(
+                Icons.add,
+              ))
+          : null,
       body: TabBarView(
         controller: _tabController,
         children: <Widget>[
@@ -222,7 +223,7 @@ class _ChatsState extends State<Chats>
 
               return ListTile(
                 onTap: () {
-                  Navigator.of(context).pushNamed('group-conversation',
+                  Navigator.of(context).pushNamed('/group-conversation',
                       arguments: {'groupId': group.id});
                 },
                 leading: CircleAvatar(

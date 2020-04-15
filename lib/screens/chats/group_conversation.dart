@@ -197,7 +197,6 @@ class _GroupConversationState extends State<GroupConversation>
     }
   }
 
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
@@ -412,7 +411,7 @@ class _GroupConversationState extends State<GroupConversation>
                               Icons.add,
                               color: Colors.white70,
                             ),
-                            onPressed: () async{
+                            onPressed: () async {
                               File image = await AppUtil.chooseImage();
 
                               showDialog(
@@ -424,17 +423,21 @@ class _GroupConversationState extends State<GroupConversation>
                                       imageFile: image,
                                       btnText: 'Send',
                                       btnFunction: () async {
-                                        _url = await AppUtil.uploadFile(image, context, 'image_messages/$groupId/' + randomAlphaNumeric(20));
+                                        _url = await AppUtil.uploadFile(
+                                            image,
+                                            context,
+                                            'image_messages/$groupId/' +
+                                                randomAlphaNumeric(20));
 
                                         messageController.clear();
-                                        await DatabaseService.sendGroupMessage(groupId, 'image', _url);
+                                        await DatabaseService.sendGroupMessage(
+                                            groupId, 'image', _url);
 
                                         Navigator.of(context).pop();
                                       },
                                     ),
                                   ),
                                   context: context);
-
                             },
                           ),
                           contentPadding: EdgeInsets.all(0),
@@ -527,7 +530,11 @@ class _GroupConversationState extends State<GroupConversation>
                                     print(result.path);
                                     File file = await _stop();
 
-                                    AppUtil.uploadFile(file, context, 'group_voice_messages/$groupId/' + randomAlphaNumeric(20));
+                                    AppUtil.uploadFile(
+                                        file,
+                                        context,
+                                        'group_voice_messages/$groupId/' +
+                                            randomAlphaNumeric(20));
 
                                     await DatabaseService.sendGroupMessage(
                                         groupId, 'audio', _url);
@@ -557,12 +564,12 @@ class _GroupConversationState extends State<GroupConversation>
     switch (value) {
       case 'Members':
         Navigator.of(context)
-            .pushNamed('group-members', arguments: {'groupId': groupId});
+            .pushNamed('/group-members', arguments: {'groupId': groupId});
         break;
 
       case 'Group Details':
         Navigator.of(context)
-            .pushNamed('group-details', arguments: {'groupId': groupId});
+            .pushNamed('/group-details', arguments: {'groupId': groupId});
     }
   }
 

@@ -171,14 +171,14 @@ class _CommentPostItemState extends State<CommentPostItem> {
           width: double.infinity,
           child: DecoratedBox(
             decoration: BoxDecoration(
-                color: currentTheme == AvailableThemes.LIGHT_THEME
+                color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
                     ? MyColors.lightLineBreak
                     : MyColors.darkLineBreak),
           ),
         ),
         Container(
           height: Sizes.inline_break,
-          color: currentTheme == AvailableThemes.LIGHT_THEME
+          color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
               ? MyColors.lightPrimary
               : MyColors.darkAccent,
           child: Row(
@@ -224,9 +224,10 @@ class _CommentPostItemState extends State<CommentPostItem> {
                 height: Sizes.inline_break,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                      color: currentTheme == AvailableThemes.LIGHT_THEME
-                          ? MyColors.lightInLineBreak
-                          : MyColors.darkLineBreak),
+                      color:
+                          Constants.currentTheme == AvailableThemes.LIGHT_THEME
+                              ? MyColors.lightInLineBreak
+                              : MyColors.darkLineBreak),
                 ),
               ),
               InkWell(
@@ -269,9 +270,10 @@ class _CommentPostItemState extends State<CommentPostItem> {
                 height: Sizes.inline_break,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                      color: currentTheme == AvailableThemes.LIGHT_THEME
-                          ? MyColors.lightInLineBreak
-                          : MyColors.darkLineBreak),
+                      color:
+                          Constants.currentTheme == AvailableThemes.LIGHT_THEME
+                              ? MyColors.lightInLineBreak
+                              : MyColors.darkLineBreak),
                 ),
               ),
               SizedBox(
@@ -302,9 +304,10 @@ class _CommentPostItemState extends State<CommentPostItem> {
                 height: Sizes.inline_break,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                      color: currentTheme == AvailableThemes.LIGHT_THEME
-                          ? MyColors.lightInLineBreak
-                          : MyColors.darkLineBreak),
+                      color:
+                          Constants.currentTheme == AvailableThemes.LIGHT_THEME
+                              ? MyColors.lightInLineBreak
+                              : MyColors.darkLineBreak),
                 ),
               ),
               InkWell(
@@ -320,9 +323,13 @@ class _CommentPostItemState extends State<CommentPostItem> {
                     ),
                   ),
                 ),
-                onTap: () async{
+                onTap: () async {
                   await sharePost(post.id, post.text, post.imageUrl);
-                  await notificationHandler.sendNotification(post.authorId, 'New post share', Constants.loggedInUser.username + ' shared your post', post.id);
+                  await notificationHandler.sendNotification(
+                      post.authorId,
+                      'New post share',
+                      Constants.loggedInUser.username + ' shared your post',
+                      post.id);
                 },
               ),
             ],
@@ -333,7 +340,7 @@ class _CommentPostItemState extends State<CommentPostItem> {
           width: double.infinity,
           child: DecoratedBox(
             decoration: BoxDecoration(
-                color: currentTheme == AvailableThemes.LIGHT_THEME
+                color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
                     ? MyColors.lightLineBreak
                     : MyColors.darkLineBreak),
           ),
@@ -368,7 +375,7 @@ class _CommentPostItemState extends State<CommentPostItem> {
     super.initState();
   }
 
-  void likeBtnHandler(Post post) async{
+  void likeBtnHandler(Post post) async {
     if (isLiked) {
       setState(() {
         isLiked = false;
@@ -391,7 +398,9 @@ class _CommentPostItemState extends State<CommentPostItem> {
             .collection('dislikes')
             .document(Constants.currentUserID)
             .delete();
-        await postsRef.document(post.id).updateData({'dislikes': post.disLikesCount});
+        await postsRef
+            .document(post.id)
+            .updateData({'dislikes': post.disLikesCount});
       }
       setState(() {
         isLiked = true;

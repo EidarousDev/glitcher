@@ -89,6 +89,11 @@ class DatabaseService {
 
     List<User> friends =
         friendsSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
+
+    for (int i = 0; i < friends.length; i++) {
+      friends[i] = await DatabaseService.getUserWithId(friends[i].id);
+    }
+
     return friends;
   }
 
@@ -162,6 +167,15 @@ class DatabaseService {
     return User();
   }
 
+  static Future<User> getUserWithUsername(String username) async {
+    QuerySnapshot userDocSnapshot =
+        await usersRef.where('username', isEqualTo: username).getDocuments();
+    User user =
+        userDocSnapshot.documents.map((doc) => User.fromDoc(doc)).toList()[0];
+
+    return user;
+  }
+
   static Future<List<String>> getGroups() async {
     QuerySnapshot snapshot = await usersRef
         .document(Constants.currentUserID)
@@ -196,28 +210,30 @@ class DatabaseService {
   }
 
   static sendMessage(String otherUserId, String type, String message) async {
-    await chatsRef.document(Constants.currentUserID)
+    await chatsRef
+        .document(Constants.currentUserID)
         .collection('conversations')
         .document(otherUserId)
-        .collection('messages').add({
+        .collection('messages')
+        .add({
       'sender': Constants.currentUserID,
       'message': message,
       'timestamp': FieldValue.serverTimestamp(),
       'type': type
     });
 
-    await chatsRef.document(otherUserId)
+    await chatsRef
+        .document(otherUserId)
         .collection('conversations')
         .document(Constants.currentUserID)
-        .collection('messages').add({
+        .collection('messages')
+        .add({
       'sender': Constants.currentUserID,
       'message': message,
       'timestamp': FieldValue.serverTimestamp(),
       'type': type
     });
   }
-
-
 
   static getFollowing() async {
     QuerySnapshot following = await usersRef
@@ -376,7 +392,6 @@ class DatabaseService {
     }
     return Game();
   }
-
 
   static getGames() async {
     QuerySnapshot gameSnapshot = await gamesRef

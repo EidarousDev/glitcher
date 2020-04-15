@@ -29,7 +29,6 @@ enum AvailableThemes {
   LIGHT_THEME,
   DARK_THEME,
 }
-var currentTheme = AvailableThemes.DARK_THEME;
 
 class Constants {
   static FirebaseUser currentUser;
@@ -37,12 +36,10 @@ class Constants {
   static User loggedInUser;
   static List<String> games = [];
   static const genres = ['Action', 'Sports', 'Racing', 'Fighting'];
+  static var currentTheme = AvailableThemes.DARK_THEME;
 
   static List<String> followingIds = [];
   static List<String> followedGamesNames = [];
 
-  static List<String> userFriends = [
-    'DevGamer',
-    'DevTester'
-  ]; // ToDo: Get Dynamic User Friends to use it in the mention
+  static List<User> userFriends = [];
 }

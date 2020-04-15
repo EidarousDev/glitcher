@@ -5,27 +5,49 @@ import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/home/home.dart';
 import 'package:glitcher/screens/login_page.dart';
+import 'package:glitcher/services/database_service.dart';
 //import 'package:glitcher/utils/sound_manager.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/constants.dart';
 
-void changeTheme(BuildContext context) {
-  if (currentTheme == AvailableThemes.LIGHT_THEME) {
+void changeTheme(BuildContext context) async {
+  if (Constants.currentTheme == AvailableThemes.LIGHT_THEME) {
     DynamicTheme.of(context).setThemeData(MyColors.darkTheme);
-    currentTheme = AvailableThemes.DARK_THEME;
+    Constants.currentTheme = AvailableThemes.DARK_THEME;
   } else {
     DynamicTheme.of(context).setThemeData(MyColors.lightTheme);
-    currentTheme = AvailableThemes.LIGHT_THEME;
+    Constants.currentTheme = AvailableThemes.LIGHT_THEME;
   }
+
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String theme = Constants.currentTheme.toString();
+  await prefs.setString('theme', theme);
+}
+
+Future getTheme() async {
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  return preferences.getString('theme');
+}
+
+Future<List> getFriends() async {
+  print('currentUID = ${Constants.currentUserID}');
+  List<User> friends =
+      await DatabaseService.getFriends(Constants.currentUserID);
+
+  return friends;
 }
 
 Color switchColor(Color lightColor, Color darkColor) {
-  return currentTheme == AvailableThemes.LIGHT_THEME ? lightColor : darkColor;
+  return Constants.currentTheme == AvailableThemes.LIGHT_THEME
+      ? lightColor
+      : darkColor;
 }
 
 // Play audio

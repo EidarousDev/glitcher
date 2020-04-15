@@ -204,7 +204,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(20)),
                                 border: Border.all(
-                                    color: currentTheme ==
+                                    color: Constants.currentTheme ==
                                             AvailableThemes.LIGHT_THEME
                                         ? MyColors.lightPrimary
                                         : MyColors.darkPrimary,
@@ -219,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                       enabled: false,
                                       hintStyle: TextStyle(
                                           fontWeight: FontWeight.w400,
-                                          color: currentTheme ==
+                                          color: Constants.currentTheme ==
                                                   AvailableThemes.LIGHT_THEME
                                               ? MyColors.lightPrimary
                                               : MyColors.darkPrimary)),
@@ -240,7 +240,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     width: double.infinity,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                          color: currentTheme == AvailableThemes.LIGHT_THEME
+                          color: Constants.currentTheme ==
+                                  AvailableThemes.LIGHT_THEME
                               ? MyColors.lightCardBG
                               : MyColors.darkLineBreak),
                     ),
@@ -255,7 +256,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           tStyle: TextStyle(fontWeight: FontWeight.bold),
                           icon: FontAwesome.getIconData("image"),
                           text: "Image",
-                          color: currentTheme == AvailableThemes.LIGHT_THEME
+                          color: Constants.currentTheme ==
+                                  AvailableThemes.LIGHT_THEME
                               ? MyColors.lightBG
                               : MyColors.darkLineBreak,
                           ccolor:
@@ -266,10 +268,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           width: 1.0,
                           child: DecoratedBox(
                             decoration: BoxDecoration(
-                                color:
-                                    currentTheme == AvailableThemes.LIGHT_THEME
-                                        ? MyColors.lightLineBreak
-                                        : MyColors.darkLineBreak),
+                                color: Constants.currentTheme ==
+                                        AvailableThemes.LIGHT_THEME
+                                    ? MyColors.lightLineBreak
+                                    : MyColors.darkLineBreak),
                           ),
                         ),
                         Expanded(
@@ -277,7 +279,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           tStyle: TextStyle(fontWeight: FontWeight.bold),
                           icon: FontAwesome.getIconData("file-video-o"),
                           text: "Video",
-                          color: currentTheme == AvailableThemes.LIGHT_THEME
+                          color: Constants.currentTheme ==
+                                  AvailableThemes.LIGHT_THEME
                               ? MyColors.lightBG
                               : MyColors.darkLineBreak,
                           ccolor: switchColor(
@@ -288,10 +291,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           width: 1.0,
                           child: DecoratedBox(
                             decoration: BoxDecoration(
-                                color:
-                                    currentTheme == AvailableThemes.LIGHT_THEME
-                                        ? MyColors.lightLineBreak
-                                        : MyColors.darkLineBreak),
+                                color: Constants.currentTheme ==
+                                        AvailableThemes.LIGHT_THEME
+                                    ? MyColors.lightLineBreak
+                                    : MyColors.darkLineBreak),
                           ),
                         ),
                         Expanded(
@@ -299,7 +302,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           tStyle: TextStyle(fontWeight: FontWeight.bold),
                           icon: FontAwesome.getIconData("youtube"),
                           text: "YouTube",
-                          color: currentTheme == AvailableThemes.LIGHT_THEME
+                          color: Constants.currentTheme ==
+                                  AvailableThemes.LIGHT_THEME
                               ? MyColors.lightBG
                               : MyColors.darkLineBreak,
                           ccolor:
@@ -313,7 +317,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     width: double.infinity,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                          color: currentTheme == AvailableThemes.LIGHT_THEME
+                          color: Constants.currentTheme ==
+                                  AvailableThemes.LIGHT_THEME
                               ? MyColors.lightCardBG
                               : MyColors.darkLineBreak),
                     ),

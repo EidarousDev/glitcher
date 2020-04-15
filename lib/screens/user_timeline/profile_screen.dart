@@ -1,13 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/screens/fullscreen_overaly.dart';
 import 'package:glitcher/utils/Loader.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/services/auth.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -35,7 +33,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   var _descEditingController = TextEditingController()
     ..text = 'Description here';
   var _nameEditingController = TextEditingController()..text = '';
-  Firestore _firestore = Firestore.instance;
 
   String userId;
 
@@ -46,6 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int _following = 0;
 
   bool _loading = false;
+  bool _isBtnEnabled = true;
 
   FirebaseUser currentUser;
 
@@ -61,7 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     currentUser = await Auth().getCurrentUser();
 
     if (this.userId != currentUser.uid) {
-      DocumentSnapshot followSnapshot = await _firestore
+      DocumentSnapshot followSnapshot = await firestore
           .collection('users')
           .document(currentUser.uid)
           .collection('following')
@@ -83,13 +81,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-
   void loadUserData() async {
     setState(() {
       _loading = true;
     });
     print('profileUserID = ${widget.userId}');
-    await _firestore.collection('users').document(userId).get().then((onValue) {
+    await firestore.collection('users').document(userId).get().then((onValue) {
       setState(() {
         userData = onValue.data;
         _nameText = onValue.data['username'];
@@ -116,6 +113,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   save() async {
     setState(() {
+      _loading = true;
+      _isBtnEnabled = false;
       _screenState = ScreenState.to_edit;
       _descText = _descEditingController.text;
       _nameText = _nameEditingController.text;
@@ -125,10 +124,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     userData['description'] = _descText;
 
     usersRef.document(userId).updateData(userData);
-
-    setState(() {
-      _loading = true;
-    });
 
     String url;
 
@@ -160,8 +155,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _profileImageFile = null;
       _coverImageFile = null;
       _loading = false;
+      _isBtnEnabled = true;
     });
-
   }
 
   Widget profileOverlay(Widget child, double size) {
@@ -216,12 +211,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: <Widget>[
         GestureDetector(
           onTap: _screenState == ScreenState.to_save
-              ? () async{
-            _coverImageFile = await AppUtil.chooseImage();
-            setState(() {
-              if (_coverImageFile != null) _coverImageUrl = null;
-            });
-
+              ? () async {
+                  _coverImageFile = await AppUtil.chooseImage();
+                  setState(() {
+                    if (_coverImageFile != null) _coverImageUrl = null;
+                  });
                 }
               : () async {
                   if (_coverImageUrl != null) {
@@ -292,10 +286,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         GestureDetector(
             onTap: _screenState == ScreenState.to_save
-                ? () async{
+                ? () async {
                     _profileImageFile = await AppUtil.chooseImage();
                     setState(() {
-                      if(_profileImageFile != null) _profileImageUrl = null;
+                      if (_profileImageFile != null) _profileImageUrl = null;
                     });
                   }
                 : () async {
@@ -473,6 +467,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void followUser() async {
     setState(() {
+      _isBtnEnabled = false;
       _loading = true;
     });
 
@@ -490,7 +485,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       'followers': FieldValue.increment(1),
     });
 
-    await _firestore
+    await firestore
         .collection('users')
         .document(Constants.currentUserID)
         .updateData({
@@ -535,6 +530,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     setState(() {
       _loading = false;
+      _isBtnEnabled = true;
       AppUtil().showToast('You started following ' + _nameText);
       _screenState = ScreenState.to_unfollow;
       _followers++;
@@ -543,6 +539,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void unfollowUser() async {
     setState(() {
+      _isBtnEnabled = false;
       _loading = true;
     });
     await usersRef
@@ -605,6 +602,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _screenState = ScreenState.to_follow;
       _followers--;
       _loading = false;
+      _isBtnEnabled = true;
     });
   }
 
@@ -630,15 +628,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
               }
             : _screenState == ScreenState.to_save
                 ? () {
-                    save();
+                    if (_isBtnEnabled) {
+                      save();
+                    }
                   }
                 : _screenState == ScreenState.to_follow
                     ? () {
                         //VIEWING
-                        followUser();
+                        if (_isBtnEnabled) {
+                          followUser();
+                        }
                       }
                     : () {
-                        unfollowUser();
+                        if (_isBtnEnabled) {
+                          unfollowUser();
+                        }
                       },
       ),
     );
