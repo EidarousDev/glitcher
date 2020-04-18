@@ -24,6 +24,13 @@ class NotificationHandler {
     }
 
     _fcm.configure(
+      onBackgroundMessage: (Map<String, dynamic> message) async {
+        print("onLaunch: $message");
+        makeNotificationSeen(message['data']['id']);
+
+        navigateToScreen(context, message['data']['type'], message['data']['object_id']);
+      },
+
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");
         makeNotificationSeen(message['data']['id']);
@@ -48,27 +55,46 @@ class NotificationHandler {
       onLaunch: (Map<String, dynamic> message) async {
         print("onLaunch: $message");
         makeNotificationSeen(message['data']['id']);
-        Navigator.of(context).pushNamed('/post',
-            arguments: {'postId': message['data']['postId']});
+
+        navigateToScreen(context, message['data']['type'], message['data']['object_id']);
       },
       onResume: (Map<String, dynamic> message) async {
         print("onResume: $message");
         makeNotificationSeen(message['data']['id']);
-        Navigator.of(context).pushNamed('/post',
-            arguments: {'postId': message['data']['postId']});
+        navigateToScreen(context, message['data']['type'], message['data']['object_id']);
       },
     );
   }
 
+  navigateToScreen(BuildContext context, String type, String objectId){
+    switch(type){
+      case 'message':
+        Navigator.of(context).pushNamed('/conversation',
+            arguments: {'otherUid': objectId});
+        break;
+
+      case 'comment' 'mention' 'like':
+        Navigator.of(context).pushNamed('/post',
+            arguments: {'postId': objectId});
+        break;
+
+      case 'follow':
+        Navigator.of(context).pushNamed('/user-profile',
+            arguments: {'userId': objectId});
+        break;
+    }
+  }
+
   sendNotification(
-      String receiverId, String title, String body, String postId) async {
+      String receiverId, String title, String body, String objectId, String type) async {
     usersRef.document(receiverId).collection('notifications').add({
       'title': title,
       'body': body,
       'seen': false,
       'timestamp': FieldValue.serverTimestamp(),
       'sender': Constants.currentUserID,
-      'postId': postId
+      'object_id': objectId,
+      'type': type
     });
 
     //To increment notificationsNumber

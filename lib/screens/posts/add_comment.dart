@@ -62,7 +62,7 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
                     post.authorId,
                     Constants.loggedInUser.username + ' commented on your post',
                     _commentTextController.text,
-                    postId);
+                    postId,'comment');
 
                 checkIfContainsMention(_commentTextController.text);
 
@@ -224,7 +224,8 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
             user.id,
             'New post mention',
             Constants.loggedInUser.username + ' mentioned you in a post',
-            postId);
+            postId,
+        'mention');
       }
     });
   }

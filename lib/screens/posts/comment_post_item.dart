@@ -325,11 +325,8 @@ class _CommentPostItemState extends State<CommentPostItem> {
                 ),
                 onTap: () async {
                   await sharePost(post.id, post.text, post.imageUrl);
-                  await notificationHandler.sendNotification(
-                      post.authorId,
-                      'New post share',
-                      Constants.loggedInUser.username + ' shared your post',
-                      post.id);
+
+
                 },
               ),
             ],
@@ -414,7 +411,7 @@ class _CommentPostItemState extends State<CommentPostItem> {
       await postsRef.document(post.id).updateData({'likes': post.likesCount});
 
       await notificationHandler.sendNotification(
-          post.authorId, 'New Post Like', 'likes your post', post.id);
+          post.authorId, 'New Post Like', 'likes your post', post.id, 'like');
     }
   }
 

@@ -79,6 +79,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     DatabaseService.getUserWithId(senderUserId);
   }
 
+  makeAllNotificationsSeen(){
+
+  }
+
   @override
   void initState() {
     super.initState();

@@ -179,7 +179,7 @@ class _AppPageState extends State<AppPage> {
     if (mounted) {
       setState(() {
         this._page = page;
-        if (page == 3) {
+        if (page == 2) {
           //notification screen
           NotificationHandler().clearNotificationsNumber();
         }

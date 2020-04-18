@@ -372,11 +372,8 @@ class _PostItemState extends State<PostItem> {
                   ),
                   onTap: () async {
                     await sharePost(post.id, post.text, post.imageUrl);
-                    await notificationHandler.sendNotification(
-                        post.authorId,
-                        'New post share',
-                        Constants.loggedInUser.username + ' shared your post',
-                        post.id);
+
+
                   },
                 ),
               ],
@@ -480,7 +477,7 @@ class _PostItemState extends State<PostItem> {
       });
 
       await notificationHandler.sendNotification(post.authorId, 'New Post Like',
-          Constants.loggedInUser.username + ' likes your post', post.id);
+          Constants.loggedInUser.username + ' likes your post', post.id, 'like');
     } else if (isLiked == false && isDisliked == false) {
       await postsRef
           .document(post.id)
@@ -496,7 +493,7 @@ class _PostItemState extends State<PostItem> {
       });
 
       await notificationHandler.sendNotification(post.authorId, 'New Post Like',
-          Constants.loggedInUser.username + ' likes your post', post.id);
+          Constants.loggedInUser.username + ' likes your post', post.id, 'like');
     } else {
       throw Exception('Unconditional Event Occurred!');
     }

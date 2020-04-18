@@ -431,7 +431,7 @@ class _ConversationState extends State<Conversation>
                                           otherUid, 'image', url);
                                       makeMessagesUnseen();
 
-                                      await notificationHandler.sendNotification(otherUid, Constants.loggedInUser.username +  ':', url, '');
+                                      await notificationHandler.sendNotification(otherUid, Constants.loggedInUser.username +  ':', url, Constants.currentUserID, 'message');
 
                                       Navigator.of(context).pop();
                                     },
@@ -485,7 +485,7 @@ class _ConversationState extends State<Conversation>
                             messageController.clear();
                             await DatabaseService.sendMessage(otherUid, 'text', messageText);
 
-                            await notificationHandler.sendNotification(otherUid, Constants.loggedInUser.username +  ':', messageText, '');
+                            await notificationHandler.sendNotification(otherUid, Constants.loggedInUser.username +  ':', messageText, Constants.currentUserID, 'message');
 
                             await makeMessagesUnseen();
                           },

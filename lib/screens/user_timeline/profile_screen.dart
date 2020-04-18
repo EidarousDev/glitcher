@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/screens/fullscreen_overaly.dart';
+import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/Loader.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/services/auth.dart';
@@ -46,6 +47,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isBtnEnabled = true;
 
   FirebaseUser currentUser;
+
+  NotificationHandler notificationHandler = NotificationHandler();
 
   _ProfileScreenState(this.userId);
 
@@ -526,6 +529,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await usersRef
           .document(userId)
           .updateData({'friends': FieldValue.increment(1)});
+
+      notificationHandler.sendNotification(userId, '${Constants.loggedInUser.username} followed you', 'You are now friends', Constants.currentUserID, 'follow');
+    }
+
+    else{
+      notificationHandler.sendNotification(userId, '${Constants.loggedInUser.username} followed you', 'Follow him back to be friends', Constants.currentUserID, 'follow');
+
     }
 
     setState(() {
