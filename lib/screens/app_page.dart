@@ -124,6 +124,7 @@ class _AppPageState extends State<AppPage> {
     print('User Firends = ${Constants.userFriends}');
 
     this.getCurrentTheme();
+    NotificationHandler().receiveNotification(context);
   }
 
   Future<void> _retrieveDynamicLink() async {
