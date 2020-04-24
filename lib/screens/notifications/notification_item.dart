@@ -100,8 +100,7 @@ class _NotificationItemState extends State<NotificationItem> {
             ],
           ),
           onTap: () {
-            NotificationHandler notificationHandler = NotificationHandler();
-            notificationHandler.makeNotificationSeen(widget.notification.id);
+            NotificationHandler.makeNotificationSeen(widget.notification.id);
 
             Navigator.of(context).pushNamed('/post', arguments: {
               'postId': this.widget.notification.postId,

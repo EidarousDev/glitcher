@@ -10,8 +10,12 @@ import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/constants/constants.dart';
 
+
+
+
 class NotificationHandler {
-  void receiveNotification(BuildContext context) {
+
+  static receiveNotification(BuildContext context) {
     StreamSubscription iosSubscription;
     FirebaseMessaging _fcm = FirebaseMessaging();
 
@@ -24,12 +28,12 @@ class NotificationHandler {
     }
 
     _fcm.configure(
-      onBackgroundMessage: (Map<String, dynamic> message) async {
-        print("onLaunch: $message");
-        makeNotificationSeen(message['data']['id']);
-
-        navigateToScreen(context, message['data']['type'], message['data']['object_id']);
-      },
+//    onBackgroundMessage: (Map<String, dynamic> message) async {
+//      print("onLaunch: $message");
+//      makeNotificationSeen(message['data']['id']);
+//
+//      navigateToScreen(context, message['data']['type'], message['data']['object_id']);
+//    },
 
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");
@@ -50,7 +54,7 @@ class NotificationHandler {
 
         Scaffold.of(context).showSnackBar(snackBar);
 
-        showNotification(message);
+        //showNotification(message);
       },
       onLaunch: (Map<String, dynamic> message) async {
         print("onLaunch: $message");
@@ -66,7 +70,17 @@ class NotificationHandler {
     );
   }
 
-  navigateToScreen(BuildContext context, String type, String objectId){
+  static makeNotificationSeen(String notificationId) {
+    usersRef
+        .document(Constants.currentUserID)
+        .collection('notifications')
+        .document(notificationId)
+        .updateData({
+      'seen': true,
+    });
+  }
+
+  static navigateToScreen(BuildContext context, String type, String objectId){
     switch(type){
       case 'message':
         Navigator.of(context).pushNamed('/conversation',
@@ -102,16 +116,6 @@ class NotificationHandler {
     usersRef
         .document(receiverId)
         .updateData({'notificationsNumber': FieldValue.increment(1)});
-  }
-
-  void makeNotificationSeen(String notificationId) {
-    usersRef
-        .document(Constants.currentUserID)
-        .collection('notifications')
-        .document(notificationId)
-        .updateData({
-      'seen': true,
-    });
   }
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
