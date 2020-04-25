@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -33,6 +36,7 @@ class _AppPageState extends State<AppPage> {
   String profileImageUrl;
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
+
   PackageInfo packageInfo = PackageInfo(
     appName: 'Unknown',
     packageName: 'Unknown',
@@ -40,10 +44,13 @@ class _AppPageState extends State<AppPage> {
     buildNumber: 'Unknown',
   );
 
+  StreamSubscription<ConnectivityResult> connectivitySubscription;
+  ConnectivityResult connectionState;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView(
+      body: connectionState != ConnectivityResult.none ? PageView(
         physics: NeverScrollableScrollPhysics(),
         controller: _pageController,
         onPageChanged: onPageChanged,
@@ -53,6 +60,8 @@ class _AppPageState extends State<AppPage> {
           NotificationsScreen(),
           ProfileScreen(Constants.currentUserID),
         ],
+      ): Container(
+        child: Center(child: Text('No intenet')),
       ),
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
@@ -125,6 +134,38 @@ class _AppPageState extends State<AppPage> {
 
     this.getCurrentTheme();
     NotificationHandler.receiveNotification(context);
+
+    connectivitySubscription = Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+
+      setState(() {
+        connectionState = result;
+      });
+
+      print('internet');
+      SnackBar snackBar;
+      // Got a new connectivity status!
+      if(result == ConnectivityResult.none){
+
+        snackBar = SnackBar(
+          content: Text(
+            'No internet connection',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.blue,
+          duration: Duration(hours: 1),
+          action: SnackBarAction(
+            label: 'Try again',
+            textColor: Colors.white,
+            onPressed: () {},
+          ),
+        );
+
+        Scaffold.of(context).showSnackBar(snackBar);
+      }
+      else{
+        Scaffold.of(context).hideCurrentSnackBar();
+      }
+    });
   }
 
   Future<void> _retrieveDynamicLink() async {

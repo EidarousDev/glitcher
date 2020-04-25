@@ -28,13 +28,6 @@ class NotificationHandler {
     }
 
     _fcm.configure(
-//    onBackgroundMessage: (Map<String, dynamic> message) async {
-//      print("onLaunch: $message");
-//      makeNotificationSeen(message['data']['id']);
-//
-//      navigateToScreen(context, message['data']['type'], message['data']['object_id']);
-//    },
-
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");
         makeNotificationSeen(message['data']['id']);
@@ -87,15 +80,16 @@ class NotificationHandler {
             arguments: {'otherUid': objectId});
         break;
 
-      case 'comment' 'mention' 'like':
-        Navigator.of(context).pushNamed('/post',
-            arguments: {'postId': objectId});
-        break;
-
       case 'follow':
         Navigator.of(context).pushNamed('/user-profile',
             arguments: {'userId': objectId});
         break;
+
+      default :
+        Navigator.of(context).pushNamed('/post',
+            arguments: {'postId': objectId});
+        break;
+
     }
   }
 

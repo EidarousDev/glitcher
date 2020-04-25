@@ -12,13 +12,13 @@ class Notification {
 
   Notification(
       {this.id,
-      this.title,
-      this.body,
-      this.icon,
-      this.seen,
-      this.timestamp,
-      this.sender,
-      this.postId});
+        this.title,
+        this.body,
+        this.icon,
+        this.seen,
+        this.timestamp,
+        this.sender,
+        this.postId});
 
   factory Notification.fromDoc(DocumentSnapshot doc) {
     return Notification(

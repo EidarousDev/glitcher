@@ -15,7 +15,7 @@ void main() {
 
 Future<void> retrieveDynamicLink(BuildContext context) async {
   final PendingDynamicLinkData data =
-      await FirebaseDynamicLinks.instance.getInitialLink();
+  await FirebaseDynamicLinks.instance.getInitialLink();
   final Uri deepLink = data?.link;
 
   if (deepLink != null) {
