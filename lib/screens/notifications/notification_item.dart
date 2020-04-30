@@ -101,6 +101,7 @@ class _NotificationItemState extends State<NotificationItem> {
           ),
           onTap: () {
             NotificationHandler.makeNotificationSeen(widget.notification.id);
+            NotificationHandler.navigateToScreen(context, widget.notification.type, widget.notification.objectId);
           },
         ),
       ),

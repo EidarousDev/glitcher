@@ -34,7 +34,7 @@ Stack imageOverlay(BuildContext context, Widget child, String btnText, Function 
     alignment: Alignment(0, .9),
     children: <Widget>[
       child,
-      OutlineButton(
+      btnText != null ? OutlineButton(
           child: Text(
             btnText,
             style: TextStyle(color: Colors.blue),
@@ -48,7 +48,7 @@ Stack imageOverlay(BuildContext context, Widget child, String btnText, Function 
             width: 1.5, //width of the border
           ),
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30.0))),
+              borderRadius: BorderRadius.circular(30.0))): Container(),
     ],
   );
 }

@@ -1,8 +1,11 @@
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/screens/chats/audio_message_player.dart';
 import 'package:glitcher/utils/functions.dart';
+
+import 'image_overlay.dart';
 
 class ChatBubble extends StatefulWidget {
   final String message, time, username, type, replyText, replyName;
@@ -169,11 +172,28 @@ class _ChatBubbleState extends State<ChatBubble> {
                             ),
                           )
                     : widget.type == 'image'
-                        ? Image.network(
-                            "${widget.message}",
-                            height: 130,
-                            width: MediaQuery.of(context).size.width / 1.3,
-                            fit: BoxFit.cover,
+                        ? GestureDetector(
+                            onTap: () {
+                              showDialog(
+                                  barrierDismissible: true,
+                                  child: Container(
+                                    width: Sizes.sm_profile_image_w,
+                                    height:
+                                    Sizes.sm_profile_image_h,
+                                    child: ImageOverlay(
+                                      imageUrl: widget.message,
+                                      btnText: 'Download',
+                                      btnFunction: () {},
+                                    ),
+                                  ),
+                                  context: context);
+                            },
+                            child: Image.network(
+                              "${widget.message}",
+                              height: 130,
+                              width: MediaQuery.of(context).size.width / 1.3,
+                              fit: BoxFit.cover,
+                            ),
                           )
                         : widget.type == 'audio'
                             ? audioPlayerWidget

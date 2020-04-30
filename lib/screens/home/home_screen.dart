@@ -16,6 +16,7 @@ import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -41,6 +42,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool isFiltering = false;
 
   double sliverAppBarHeight = 120;
+
+  RefreshController _refreshController =
+  RefreshController(initialRefresh: false);
 
   @override
   Widget build(BuildContext context) {
@@ -89,266 +93,273 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
         ],
       ),
-      body: CustomScrollView(
-        controller: _scrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: <Widget>[
-          SliverAppBar(
-            expandedHeight: sliverAppBarHeight,
-            leading: Container(),
-            flexibleSpace: Container(
-              height: sliverAppBarHeight,
-              color: switchColor(MyColors.lightBG, MyColors.darkBG),
-              child: Column(
-                children: <Widget>[
-                  isFiltering
-                      ? Padding(
-                          padding: const EdgeInsets.only(
-                              left: 10, top: 2, right: 10),
-                          child: Container(
-                            child: Column(
-                              children: <Widget>[
-                                Text(
-                                  'Filter by:',
-                                  style: TextStyle(fontSize: 18),
-                                ),
-                                Row(
-                                  children: <Widget>[
-                                    Radio(
-                                        value: 0,
-                                        groupValue: gamersOrGames,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            //arePostsFilteredByFollowedGames = false;
-                                            gamersOrGames = value;
-                                          });
-                                        }),
-                                    Text(
-                                      'Recent Posts',
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: <Widget>[
-                                    Radio(
-                                        value: 1,
-                                        groupValue: gamersOrGames,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            //arePostsFilteredByFollowedGames = false;
-                                            gamersOrGames = value;
-                                          });
-                                        }),
-                                    Text(
-                                      'Followed Gamers',
-                                    ),
-                                    Radio(
-                                        value: 2,
-                                        groupValue: gamersOrGames,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            //arePostsFilteredByFollowedGames = true;
-                                            gamersOrGames = value;
-                                          });
-                                        }),
-                                    Text(
-                                      'Followed Games',
-                                    ),
-                                  ],
-                                ),
-                                Align(
-                                  alignment: Alignment.bottomRight,
-                                  child: MaterialButton(
-                                    color: MyColors.darkPrimary,
-                                    child: Text('Filter'),
-                                    onPressed: () {
-                                      _setupFeed();
-                                      setState(() {
-                                        isFiltering = false;
-                                        sliverAppBarHeight = 120;
-                                      });
-                                    },
-                                  ),
-                                ),
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: Divider(
-                                    height: 1,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        )
-                      : Container(),
-                  Row(
-                    children: <Widget>[
-                      Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: CacheThisImage(
-                            imageUrl: loggedInProfileImageURL,
-                            imageShape: BoxShape.circle,
-                            width: Sizes.sm_profile_image_w,
-                            height: Sizes.sm_profile_image_h,
-                            defaultAssetImage: Strings.default_profile_image,
-                          )),
-                      Expanded(
-                        child: InkWell(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
+      body: SmartRefresher(
+        controller: _refreshController,
+        enablePullDown: true,
+        header: WaterDropHeader(),
+        onRefresh: _onRefresh,
+        onLoading: _onLoading,
+        child: CustomScrollView(
+          controller: _scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: <Widget>[
+            SliverAppBar(
+              expandedHeight: sliverAppBarHeight,
+              leading: Container(),
+              flexibleSpace: Container(
+                height: sliverAppBarHeight,
+                color: switchColor(MyColors.lightBG, MyColors.darkBG),
+                child: Column(
+                  children: <Widget>[
+                    isFiltering
+                        ? Padding(
+                            padding: const EdgeInsets.only(
+                                left: 10, top: 2, right: 10),
                             child: Container(
-                              height: 40,
-                              decoration: BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20)),
-                                border: Border.all(
-                                    color: Constants.currentTheme ==
-                                            AvailableThemes.LIGHT_THEME
-                                        ? MyColors.lightPrimary
-                                        : MyColors.darkPrimary,
-                                    width: 1),
+                              child: Column(
+                                children: <Widget>[
+                                  Text(
+                                    'Filter by:',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                                  Row(
+                                    children: <Widget>[
+                                      Radio(
+                                          value: 0,
+                                          groupValue: gamersOrGames,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              //arePostsFilteredByFollowedGames = false;
+                                              gamersOrGames = value;
+                                            });
+                                          }),
+                                      Text(
+                                        'Recent Posts',
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: <Widget>[
+                                      Radio(
+                                          value: 1,
+                                          groupValue: gamersOrGames,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              //arePostsFilteredByFollowedGames = false;
+                                              gamersOrGames = value;
+                                            });
+                                          }),
+                                      Text(
+                                        'Followed Gamers',
+                                      ),
+                                      Radio(
+                                          value: 2,
+                                          groupValue: gamersOrGames,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              //arePostsFilteredByFollowedGames = true;
+                                              gamersOrGames = value;
+                                            });
+                                          }),
+                                      Text(
+                                        'Followed Games',
+                                      ),
+                                    ],
+                                  ),
+                                  Align(
+                                    alignment: Alignment.bottomRight,
+                                    child: MaterialButton(
+                                      color: MyColors.darkPrimary,
+                                      child: Text('Filter'),
+                                      onPressed: () {
+                                        _setupFeed();
+                                        setState(() {
+                                          isFiltering = false;
+                                          sliverAppBarHeight = 120;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 8.0),
+                                    child: Divider(
+                                      height: 1,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                ],
                               ),
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 22.0),
-                                child: TextField(
-                                  decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      hintText: "What's on your mind?",
-                                      enabled: false,
-                                      hintStyle: TextStyle(
-                                          fontWeight: FontWeight.w400,
-                                          color: Constants.currentTheme ==
-                                                  AvailableThemes.LIGHT_THEME
-                                              ? MyColors.lightPrimary
-                                              : MyColors.darkPrimary)),
+                            ),
+                          )
+                        : Container(),
+                    Row(
+                      children: <Widget>[
+                        Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: CacheThisImage(
+                              imageUrl: loggedInProfileImageURL,
+                              imageShape: BoxShape.circle,
+                              width: Sizes.sm_profile_image_w,
+                              height: Sizes.sm_profile_image_h,
+                              defaultAssetImage: Strings.default_profile_image,
+                            )),
+                        Expanded(
+                          child: InkWell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Container(
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(20)),
+                                  border: Border.all(
+                                      color: Constants.currentTheme ==
+                                              AvailableThemes.LIGHT_THEME
+                                          ? MyColors.lightPrimary
+                                          : MyColors.darkPrimary,
+                                      width: 1),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 22.0),
+                                  child: TextField(
+                                    decoration: InputDecoration(
+                                        border: InputBorder.none,
+                                        hintText: "What's on your mind?",
+                                        enabled: false,
+                                        hintStyle: TextStyle(
+                                            fontWeight: FontWeight.w400,
+                                            color: Constants.currentTheme ==
+                                                    AvailableThemes.LIGHT_THEME
+                                                ? MyColors.lightPrimary
+                                                : MyColors.darkPrimary)),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          onTap: () {
-                            Navigator.of(context)
-                                .pushReplacementNamed('/new-post');
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 1,
-                    width: double.infinity,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                          color: Constants.currentTheme ==
-                                  AvailableThemes.LIGHT_THEME
-                              ? MyColors.lightCardBG
-                              : MyColors.darkLineBreak),
-                    ),
-                  ),
-                  Center(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Expanded(
-                            child: CardIconText(
-                          tStyle: TextStyle(fontWeight: FontWeight.bold),
-                          icon: FontAwesome.getIconData("image"),
-                          text: "Image",
-                          color: Constants.currentTheme ==
-                                  AvailableThemes.LIGHT_THEME
-                              ? MyColors.lightBG
-                              : MyColors.darkLineBreak,
-                          ccolor:
-                              switchColor(MyColors.lightPrimary, Colors.blue),
-                        )),
-                        SizedBox(
-                          height: 25,
-                          width: 1.0,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                                color: Constants.currentTheme ==
-                                        AvailableThemes.LIGHT_THEME
-                                    ? MyColors.lightLineBreak
-                                    : MyColors.darkLineBreak),
+                            onTap: () {
+                              Navigator.of(context)
+                                  .pushReplacementNamed('/new-post');
+                            },
                           ),
                         ),
-                        Expanded(
-                            child: CardIconText(
-                          tStyle: TextStyle(fontWeight: FontWeight.bold),
-                          icon: FontAwesome.getIconData("file-video-o"),
-                          text: "Video",
-                          color: Constants.currentTheme ==
-                                  AvailableThemes.LIGHT_THEME
-                              ? MyColors.lightBG
-                              : MyColors.darkLineBreak,
-                          ccolor: switchColor(
-                              MyColors.lightPrimary, Colors.greenAccent),
-                        )),
-                        SizedBox(
-                          height: 25,
-                          width: 1.0,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                                color: Constants.currentTheme ==
-                                        AvailableThemes.LIGHT_THEME
-                                    ? MyColors.lightLineBreak
-                                    : MyColors.darkLineBreak),
-                          ),
-                        ),
-                        Expanded(
-                            child: CardIconText(
-                          tStyle: TextStyle(fontWeight: FontWeight.bold),
-                          icon: FontAwesome.getIconData("youtube"),
-                          text: "YouTube",
-                          color: Constants.currentTheme ==
-                                  AvailableThemes.LIGHT_THEME
-                              ? MyColors.lightBG
-                              : MyColors.darkLineBreak,
-                          ccolor:
-                              switchColor(MyColors.lightPrimary, Colors.pink),
-                        )),
                       ],
                     ),
-                  ),
-                  SizedBox(
-                    height: 1,
-                    width: double.infinity,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                          color: Constants.currentTheme ==
-                                  AvailableThemes.LIGHT_THEME
-                              ? MyColors.lightCardBG
-                              : MyColors.darkLineBreak),
+                    SizedBox(
+                      height: 1,
+                      width: double.infinity,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                            color: Constants.currentTheme ==
+                                    AvailableThemes.LIGHT_THEME
+                                ? MyColors.lightCardBG
+                                : MyColors.darkLineBreak),
+                      ),
                     ),
-                  ),
-                ],
+                    Center(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Expanded(
+                              child: CardIconText(
+                            tStyle: TextStyle(fontWeight: FontWeight.bold),
+                            icon: FontAwesome.getIconData("image"),
+                            text: "Image",
+                            color: Constants.currentTheme ==
+                                    AvailableThemes.LIGHT_THEME
+                                ? MyColors.lightBG
+                                : MyColors.darkLineBreak,
+                            ccolor:
+                                switchColor(MyColors.lightPrimary, Colors.blue),
+                          )),
+                          SizedBox(
+                            height: 25,
+                            width: 1.0,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                  color: Constants.currentTheme ==
+                                          AvailableThemes.LIGHT_THEME
+                                      ? MyColors.lightLineBreak
+                                      : MyColors.darkLineBreak),
+                            ),
+                          ),
+                          Expanded(
+                              child: CardIconText(
+                            tStyle: TextStyle(fontWeight: FontWeight.bold),
+                            icon: FontAwesome.getIconData("file-video-o"),
+                            text: "Video",
+                            color: Constants.currentTheme ==
+                                    AvailableThemes.LIGHT_THEME
+                                ? MyColors.lightBG
+                                : MyColors.darkLineBreak,
+                            ccolor: switchColor(
+                                MyColors.lightPrimary, Colors.greenAccent),
+                          )),
+                          SizedBox(
+                            height: 25,
+                            width: 1.0,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                  color: Constants.currentTheme ==
+                                          AvailableThemes.LIGHT_THEME
+                                      ? MyColors.lightLineBreak
+                                      : MyColors.darkLineBreak),
+                            ),
+                          ),
+                          Expanded(
+                              child: CardIconText(
+                            tStyle: TextStyle(fontWeight: FontWeight.bold),
+                            icon: FontAwesome.getIconData("youtube"),
+                            text: "YouTube",
+                            color: Constants.currentTheme ==
+                                    AvailableThemes.LIGHT_THEME
+                                ? MyColors.lightBG
+                                : MyColors.darkLineBreak,
+                            ccolor:
+                                switchColor(MyColors.lightPrimary, Colors.pink),
+                          )),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: 1,
+                      width: double.infinity,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                            color: Constants.currentTheme ==
+                                    AvailableThemes.LIGHT_THEME
+                                ? MyColors.lightCardBG
+                                : MyColors.darkLineBreak),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          SliverList(
-              delegate: SliverChildListDelegate([
-            ListView.builder(
-              physics: NeverScrollableScrollPhysics(),
-              scrollDirection: Axis.vertical,
-              itemCount: _posts.length,
-              shrinkWrap: true,
-              itemBuilder: (BuildContext context, int index) {
-                Post post = _posts[index];
-                return FutureBuilder(
-                    future: DatabaseService.getUserWithId(post.authorId),
-                    builder: (BuildContext context, AsyncSnapshot snapshot) {
-                      if (!snapshot.hasData) {
-                        return SizedBox.shrink();
-                      }
-                      User author = snapshot.data;
-                      return PostItem(post: post, author: author);
-                    });
-              },
-            ),
-          ]))
-        ],
+            SliverList(
+                delegate: SliverChildListDelegate([
+              ListView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                scrollDirection: Axis.vertical,
+                itemCount: _posts.length,
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int index) {
+                  Post post = _posts[index];
+                  return FutureBuilder(
+                      future: DatabaseService.getUserWithId(post.authorId),
+                      builder: (BuildContext context, AsyncSnapshot snapshot) {
+                        if (!snapshot.hasData) {
+                          return SizedBox.shrink();
+                        }
+                        User author = snapshot.data;
+                        return PostItem(post: post, author: author);
+                      });
+                },
+              ),
+            ]))
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(
@@ -453,13 +464,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     // here you write the codes to input the data into firestore
     loggedInUser = await DatabaseService.getUserWithId(currentUser.uid);
 
-    setState(() {
-      //profileImageUrl = loggedInUser.profileImageUrl;
-      loggedInProfileImageURL = loggedInUser.profileImageUrl;
-      username = loggedInUser.username;
-      print(
-          'profileImageUrl = ${loggedInProfileImageURL} and username = $username');
-    });
+    if(mounted){
+      setState(() {
+        //profileImageUrl = loggedInUser.profileImageUrl;
+        loggedInProfileImageURL = loggedInUser.profileImageUrl;
+        username = loggedInUser.username;
+        print(
+            'profileImageUrl = ${loggedInProfileImageURL} and username = $username');
+      });
+    }
   }
 
   void nextPosts() async {
@@ -480,6 +493,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       });
     }
   }
+
+  void _onRefresh() async{
+    await _setupFeed();
+    //await Future.delayed(Duration(milliseconds: 1000));
+    _refreshController.refreshCompleted();
+  }
+
+  void _onLoading() async{
+    // monitor network fetch
+    //await Future.delayed(Duration(milliseconds: 1000));
+    // if failed,use loadFailed(),if no data return,use LoadNodata()
+    if(mounted)
+      setState(() {
+
+      });
+    _refreshController.loadComplete();
+  }
+
 
   void _refresh() {
     getTemporaryDirectory().then((dir) {

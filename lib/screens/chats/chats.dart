@@ -88,12 +88,6 @@ class _ChatsState extends State<Chats>
       appBar: AppBar(
         flexibleSpace: gradientAppBar(),
 //        elevation: 4,
-        leading: IconButton(
-          icon: Icon(
-            Icons.keyboard_backspace,
-          ),
-          onPressed: () {},
-        ),
         title: TextField(
           controller: _searchController,
           decoration: InputDecoration(

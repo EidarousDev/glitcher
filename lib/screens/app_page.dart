@@ -45,12 +45,11 @@ class _AppPageState extends State<AppPage> {
   );
 
   StreamSubscription<ConnectivityResult> connectivitySubscription;
-  ConnectivityResult connectionState;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: connectionState != ConnectivityResult.none ? PageView(
+      body: Constants.connectionState != ConnectivityResult.none ? PageView(
         physics: NeverScrollableScrollPhysics(),
         controller: _pageController,
         onPageChanged: onPageChanged,
@@ -138,33 +137,33 @@ class _AppPageState extends State<AppPage> {
     connectivitySubscription = Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
 
       setState(() {
-        connectionState = result;
+        Constants.connectionState = result;
       });
 
       print('internet');
-      SnackBar snackBar;
-      // Got a new connectivity status!
-      if(result == ConnectivityResult.none){
-
-        snackBar = SnackBar(
-          content: Text(
-            'No internet connection',
-            style: TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.blue,
-          duration: Duration(hours: 1),
-          action: SnackBarAction(
-            label: 'Try again',
-            textColor: Colors.white,
-            onPressed: () {},
-          ),
-        );
-
-        Scaffold.of(context).showSnackBar(snackBar);
-      }
-      else{
-        Scaffold.of(context).hideCurrentSnackBar();
-      }
+//      SnackBar snackBar;
+//      // Got a new connectivity status!
+//      if(result == ConnectivityResult.none){
+//
+//        snackBar = SnackBar(
+//          content: Text(
+//            'No internet connection',
+//            style: TextStyle(color: Colors.white),
+//          ),
+//          backgroundColor: Colors.blue,
+//          duration: Duration(hours: 1),
+//          action: SnackBarAction(
+//            label: 'Try again',
+//            textColor: Colors.white,
+//            onPressed: () {},
+//          ),
+//        );
+//
+//        Scaffold.of(context).showSnackBar(snackBar);
+//      }
+//      else{
+//        Scaffold.of(context).hideCurrentSnackBar();
+//      }
     });
   }
 
