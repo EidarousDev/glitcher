@@ -49,8 +49,6 @@ class _ConversationState extends State<Conversation>
 
   ScrollController _scrollController = ScrollController();
 
-  NotificationHandler notificationHandler = NotificationHandler();
-
   _ConversationState({this.otherUid});
 
   void loadUserData(String uid) async {
@@ -431,7 +429,7 @@ class _ConversationState extends State<Conversation>
                                           otherUid, 'image', url);
                                       makeMessagesUnseen();
 
-                                      await notificationHandler.sendNotification(otherUid, Constants.loggedInUser.username +  ':', url, Constants.currentUserID, 'message');
+                                      await NotificationHandler.sendNotification(otherUid, Constants.loggedInUser.username, ' sent you an image.', Constants.currentUserID, 'message');
 
                                       Navigator.of(context).pop();
                                     },
@@ -485,7 +483,7 @@ class _ConversationState extends State<Conversation>
                             messageController.clear();
                             await DatabaseService.sendMessage(otherUid, 'text', messageText);
 
-                            await notificationHandler.sendNotification(otherUid, Constants.loggedInUser.username +  ':', messageText, Constants.currentUserID, 'message');
+                            await NotificationHandler.sendNotification(otherUid, Constants.loggedInUser.username +  ':', messageText, Constants.currentUserID, 'message');
 
                             await makeMessagesUnseen();
                           },

@@ -38,7 +38,6 @@ class _CommentPostItemState extends State<CommentPostItem> {
   bool isDisliked = false;
   var likes = [];
   var dislikes = [];
-  NotificationHandler notificationHandler = NotificationHandler();
 
   @override
   Widget build(BuildContext context) {
@@ -410,7 +409,7 @@ class _CommentPostItemState extends State<CommentPostItem> {
           .setData({'timestamp': FieldValue.serverTimestamp()});
       await postsRef.document(post.id).updateData({'likes': post.likesCount});
 
-      await notificationHandler.sendNotification(
+      await NotificationHandler.sendNotification(
           post.authorId, 'New Post Like', 'likes your post', post.id, 'like');
     }
   }

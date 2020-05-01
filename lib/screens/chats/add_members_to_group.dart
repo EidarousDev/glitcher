@@ -3,6 +3,7 @@ import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/services/notification_handler.dart';
 
 class AddMembersToGroup extends StatefulWidget {
   final String groupId;
@@ -65,6 +66,8 @@ class _AddMembersToGroupState extends State<AddMembersToGroup>
                 await DatabaseService.addMemberToGroup(
                     groupId, friendsData[i].id);
               }
+
+              await NotificationHandler.sendNotification(friendsData[i].id, 'New chat group', 'You\'ve been added to a new chat group "${textEditingController.text}"', groupId, 'new_group');
             }
 
             Navigator.of(context).pushReplacementNamed('/group-members',

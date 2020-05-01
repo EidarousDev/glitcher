@@ -85,6 +85,10 @@ class NotificationHandler {
             arguments: {'userId': objectId});
         break;
 
+      case 'new_group':
+        Navigator.of(context).pushNamed('/group-conversation', arguments: {'groupId': objectId});
+        break;
+
       default :
         Navigator.of(context).pushNamed('/post',
             arguments: {'postId': objectId});
@@ -93,7 +97,7 @@ class NotificationHandler {
     }
   }
 
-  sendNotification(
+  static sendNotification(
       String receiverId, String title, String body, String objectId, String type) async {
     usersRef.document(receiverId).collection('notifications').add({
       'title': title,

@@ -21,6 +21,18 @@ class DatabaseService {
     return posts;
   }
 
+  //Gets the posts of a certain user
+  static Future<List<Post>> getUserPosts(String authorId) async {
+    QuerySnapshot postSnapshot = await postsRef
+    .where('owner', isEqualTo: authorId)
+        .orderBy('timestamp', descending: true)
+        .limit(10)
+        .getDocuments();
+    List<Post> posts =
+    postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+    return posts;
+  }
+
   // Get Post info of a specific post
   static Future<Post> getPostWithId(String postId) async {
     DocumentSnapshot postDocSnapshot = await postsRef.document(postId).get();
@@ -52,6 +64,20 @@ class DatabaseService {
         .getDocuments();
     List<Post> posts =
         postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+    return posts;
+  }
+
+  // This function is used to get the recent user posts (unfiltered)
+  static Future<List<Post>> getUserNextPosts(
+      Timestamp lastVisiblePostSnapShot, String authorId) async {
+    QuerySnapshot postSnapshot = await postsRef
+    .where('owner', isEqualTo: authorId)
+        .orderBy('timestamp', descending: true)
+        .startAfter([lastVisiblePostSnapShot])
+        .limit(10)
+        .getDocuments();
+    List<Post> posts =
+    postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
     return posts;
   }
 

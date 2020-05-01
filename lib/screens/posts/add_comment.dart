@@ -36,8 +36,6 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
   var _commentTextController = TextEditingController();
   var words = [];
 
-  NotificationHandler notificationHandler =
-      NotificationHandler(); // to split the characters for the mention user feature
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,7 +56,7 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
 
                 post = await DatabaseService.getPostWithId(postId);
 
-                await notificationHandler.sendNotification(
+                await NotificationHandler.sendNotification(
                     post.authorId,
                     Constants.loggedInUser.username + ' commented on your post',
                     _commentTextController.text,
@@ -220,10 +218,10 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
         User user =
             await DatabaseService.getUserWithUsername(word.substring(1));
 
-        await notificationHandler.sendNotification(
+        await NotificationHandler.sendNotification(
             user.id,
             'New post mention',
-            Constants.loggedInUser.username + ' mentioned you in a post',
+            Constants.loggedInUser.username + ' mentioned you in a comment',
             postId,
         'mention');
       }

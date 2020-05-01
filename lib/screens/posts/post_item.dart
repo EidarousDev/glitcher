@@ -10,6 +10,7 @@ import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/screens/home/home_screen.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/services/share_link.dart';
@@ -49,7 +50,6 @@ class _PostItemState extends State<PostItem> {
   bool isDislikedEnabled = true;
   var likes = [];
   var dislikes = [];
-  NotificationHandler notificationHandler = NotificationHandler();
 
   @override
   Widget build(BuildContext context) {
@@ -476,7 +476,7 @@ class _PostItemState extends State<PostItem> {
         //post.likesCount = likesNo;
       });
 
-      await notificationHandler.sendNotification(post.authorId, 'New Post Like',
+      await NotificationHandler.sendNotification(post.authorId, 'New Post Like',
           Constants.loggedInUser.username + ' likes your post', post.id, 'like');
     } else if (isLiked == false && isDisliked == false) {
       await postsRef
@@ -492,7 +492,7 @@ class _PostItemState extends State<PostItem> {
         //post.likesCount = likesNo;
       });
 
-      await notificationHandler.sendNotification(post.authorId, 'New Post Like',
+      await NotificationHandler.sendNotification(post.authorId, 'New Post Like',
           Constants.loggedInUser.username + ' likes your post', post.id, 'like');
     } else {
       throw Exception('Unconditional Event Occurred!');
@@ -639,5 +639,14 @@ class _PostItemState extends State<PostItem> {
     );
   }
 
-  dropDownOptions() {}
+  dropDownOptions() {
+//    setState(() {
+//      HomeScreen.isBottomSheetVisible = !HomeScreen.isBottomSheetVisible;
+//    });
+//
+//    if(HomeScreen.isBottomSheetVisible){
+//
+//    }
+//    HomeScreen.showMyBottomSheet(context);
+  }
 }

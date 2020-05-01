@@ -21,6 +21,30 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
+
+  static bool isBottomSheetVisible = false;
+
+  static showMyBottomSheet(BuildContext context){
+    // the context of the bottomSheet will be this widget
+    //the context here is where you want to show the bottom sheet
+    showBottomSheet(context: context,
+        builder: (BuildContext context){
+          return BottomSheet(
+            enableDrag: true,
+            onClosing: (){
+              HomeScreen.isBottomSheetVisible = false;
+            },
+            builder: (BuildContext context){
+              return Container(
+                color: Colors.blue,
+                height: 120,
+              );
+            },
+          ); // returns your BottomSheet widget
+        }
+    );
+  }
+
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
@@ -44,7 +68,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   double sliverAppBarHeight = 120;
 
   RefreshController _refreshController =
-  RefreshController(initialRefresh: false);
+      RefreshController(initialRefresh: false);
+
 
   @override
   Widget build(BuildContext context) {
@@ -181,8 +206,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                     ),
                                   ),
                                   Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 8.0),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
                                     child: Divider(
                                       height: 1,
                                       color: Colors.white,
@@ -464,7 +489,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     // here you write the codes to input the data into firestore
     loggedInUser = await DatabaseService.getUserWithId(currentUser.uid);
 
-    if(mounted){
+    if (mounted) {
       setState(() {
         //profileImageUrl = loggedInUser.profileImageUrl;
         loggedInProfileImageURL = loggedInUser.profileImageUrl;
@@ -494,23 +519,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  void _onRefresh() async{
+  void _onRefresh() async {
     await _setupFeed();
     //await Future.delayed(Duration(milliseconds: 1000));
     _refreshController.refreshCompleted();
   }
 
-  void _onLoading() async{
+  void _onLoading() async {
     // monitor network fetch
     //await Future.delayed(Duration(milliseconds: 1000));
     // if failed,use loadFailed(),if no data return,use LoadNodata()
-    if(mounted)
-      setState(() {
-
-      });
+    if (mounted) setState(() {});
     _refreshController.loadComplete();
   }
-
 
   void _refresh() {
     getTemporaryDirectory().then((dir) {

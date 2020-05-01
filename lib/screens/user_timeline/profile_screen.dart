@@ -2,7 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/models/post_model.dart';
+import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/fullscreen_overaly.dart';
+import 'package:glitcher/screens/posts/post_item.dart';
+import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/Loader.dart';
 import 'package:glitcher/utils/app_util.dart';
@@ -48,14 +52,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   FirebaseUser currentUser;
 
-  NotificationHandler notificationHandler = NotificationHandler();
+  bool isFollowing;
+
+  List<Post> _posts;
+
+  Timestamp lastVisiblePostSnapShot;
+
+  ScrollController _scrollController = ScrollController();
 
   _ProfileScreenState(this.userId);
 
   @override
   void initState() {
     super.initState();
+
+    ///Set up listener here
+    _scrollController
+      ..addListener(() {
+        if (_scrollController.offset >=
+            _scrollController.position.maxScrollExtent &&
+            !_scrollController.position.outOfRange) {
+          print('reached the bottom');
+          nextPosts();
+        } else if (_scrollController.offset <=
+            _scrollController.position.minScrollExtent &&
+            !_scrollController.position.outOfRange) {
+          print("reached the top");
+        } else {}
+      });
+
     checkUser();
+    loadPosts();
   }
 
   void checkUser() async {
@@ -69,7 +96,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .document(userId)
           .get();
 
-      bool isFollowing = followSnapshot.exists;
+      setState(() {
+        isFollowing = followSnapshot.exists;
+      });
 
       setState(() {
         if (isFollowing)
@@ -81,6 +110,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (userData == null) {
       loadUserData();
+    }
+  }
+
+  void nextPosts() async {
+    var posts;
+    posts = await DatabaseService.getNextPosts(lastVisiblePostSnapShot);
+
+    if (posts.length > 0) {
+      setState(() {
+        posts.forEach((element) => _posts.add(element));
+        this.lastVisiblePostSnapShot = posts.last.timestamp;
+      });
     }
   }
 
@@ -372,6 +413,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         alignment: Alignment(0, 0),
         children: <Widget>[
           SingleChildScrollView(
+            controller: _scrollController,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
@@ -387,16 +429,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         style: TextStyle(
                             fontSize: 24, fontWeight: FontWeight.bold),
                       )
-                    : Container(
-                        height: 30,
-                        width: 200,
-                        child: TextField(
-                          textAlign: TextAlign.center,
-                          controller: _nameEditingController,
-                          onChanged: (text) => {},
-                          style: TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold),
-                        ),
+                    : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          Container(
+                            height: 30,
+                            width: 200,
+                            child: TextField(
+                              textAlign: TextAlign.center,
+                              controller: _nameEditingController,
+                              onChanged: (text) => {},
+                              style: TextStyle(
+                                  fontSize: 24, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          _screenState == ScreenState.to_follow ||
+                                  _screenState == ScreenState.to_unfollow
+                              ? OutlineButton(
+                                  child:
+                                      Text(isFollowing ? 'Unfollow' : 'Follow'),
+                                  onPressed: isFollowing
+                                      ? () {
+                                          unfollowUser();
+                                        }
+                                      : () {
+                                          followUser();
+                                        },
+                                )
+                              : Container()
+                        ],
                       ),
                 SizedBox(
                   height: 8,
@@ -453,7 +515,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ],
                     ),
                   ],
-                )
+                ),
+                SizedBox(
+                  height: 8,
+                ),
+                Divider(
+                  color: Colors.grey.shade400,
+                ),
+                ListView.builder(
+                  physics: NeverScrollableScrollPhysics(),
+                  scrollDirection: Axis.vertical,
+                  itemCount: _posts.length,
+                  shrinkWrap: true,
+                  itemBuilder: (BuildContext context, int index) {
+                    Post post = _posts[index];
+                    return FutureBuilder(
+                        future: DatabaseService.getUserWithId(post.authorId),
+                        builder: (BuildContext context, AsyncSnapshot snapshot) {
+                          if (!snapshot.hasData) {
+                            return SizedBox.shrink();
+                          }
+                          User author = snapshot.data;
+                          return PostItem(post: post, author: author);
+                        });
+                  },
+                ),
               ],
             ),
           ),
@@ -466,6 +552,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
     );
+  }
+
+  loadPosts() async{
+    List<Post> posts;
+    posts = await DatabaseService.getUserPosts(userId);
+    setState(() {
+      _posts = posts;
+      this.lastVisiblePostSnapShot = posts.last.timestamp;
+    });
   }
 
   void followUser() async {
@@ -530,12 +625,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .document(userId)
           .updateData({'friends': FieldValue.increment(1)});
 
-      notificationHandler.sendNotification(userId, '${Constants.loggedInUser.username} followed you', 'You are now friends', Constants.currentUserID, 'follow');
-    }
-
-    else{
-      notificationHandler.sendNotification(userId, '${Constants.loggedInUser.username} followed you', 'Follow him back to be friends', Constants.currentUserID, 'follow');
-
+      NotificationHandler.sendNotification(
+          userId,
+          '${Constants.loggedInUser.username} followed you',
+          'You are now friends',
+          Constants.currentUserID,
+          'follow');
+    } else {
+      NotificationHandler.sendNotification(
+          userId,
+          '${Constants.loggedInUser.username} followed you',
+          'Follow him back to be friends',
+          Constants.currentUserID,
+          'follow');
     }
 
     setState(() {
@@ -624,37 +726,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: Text('Profile'),
       ),
       body: _build(),
-      floatingActionButton: FloatingActionButton(
-        child: _screenState == ScreenState.to_edit
-            ? Icon(MaterialIcons.getIconData('edit'))
-            : _screenState == ScreenState.to_save
-                ? Icon(MaterialIcons.getIconData('save'))
-                : _screenState == ScreenState.to_follow
-                    ? Icon(FontAwesome.getIconData('user-plus'))
-                    : Icon(FontAwesome.getIconData('user-times')),
-        onPressed: _screenState == ScreenState.to_edit
-            ? () {
-                edit();
-              }
-            : _screenState == ScreenState.to_save
-                ? () {
-                    if (_isBtnEnabled) {
-                      save();
+      floatingActionButton: _screenState == ScreenState.to_edit ||
+              _screenState == ScreenState.to_save
+          ? FloatingActionButton(
+              child: _screenState == ScreenState.to_edit
+                  ? Icon(MaterialIcons.getIconData('edit'))
+                  : Icon(MaterialIcons.getIconData('save')),
+              onPressed: _screenState == ScreenState.to_edit
+                  ? () {
+                      edit();
                     }
-                  }
-                : _screenState == ScreenState.to_follow
-                    ? () {
-                        //VIEWING
-                        if (_isBtnEnabled) {
-                          followUser();
-                        }
+                  : () {
+                      if (_isBtnEnabled) {
+                        save();
                       }
-                    : () {
-                        if (_isBtnEnabled) {
-                          unfollowUser();
-                        }
-                      },
-      ),
+                    },
+            )
+          : null,
     );
   }
 }

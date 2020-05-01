@@ -7,6 +7,7 @@ import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:image_picker/image_picker.dart';
@@ -293,6 +294,8 @@ class _NewGroupState extends State<NewGroup>
           .collection('chat_groups')
           .document(_groupId)
           .setData({'timestamp': FieldValue.serverTimestamp()});
+
+      await NotificationHandler.sendNotification(user['user_id'], 'New chat group', 'You\'ve been added to a new chat group "${textEditingController.text}"', _groupId, 'new_group');
     }
   }
 

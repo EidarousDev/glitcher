@@ -33,7 +33,7 @@ class AppUtil {
   static Future chooseImage() async {
     File image = await ImagePicker.pickImage(
         source: ImageSource.gallery,
-        imageQuality: 100);
+        imageQuality: 80);
     return image;
 
   }
