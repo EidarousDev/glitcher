@@ -88,7 +88,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
 
     checkUser();
-    loadPosts();
   }
 
   void checkUser() async {
@@ -397,9 +396,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               SizedBox(
                 height: 8,
               ),
-              Divider(
-                color: Colors.grey.shade400,
-              ),
               SizedBox(
                 height: 8,
               ),
@@ -434,7 +430,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 height: 8,
               ),
               Divider(
-                color: Colors.grey.shade400,
+                color: switchColor(
+                    MyColors.lightLineBreak, MyColors.darkLineBreak),
               ),
               ListView.builder(
                 physics: NeverScrollableScrollPhysics(),
@@ -455,6 +452,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 },
               ),
             ],
+          ),
+        ),
+        Positioned(
+          top: 0.0,
+          left: 0.0,
+          right: 0.0,
+          child: AppBar(
+            backgroundColor: Colors.transparent,
           ),
         ),
         _loading
@@ -634,11 +639,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
       body: _build(),
       floatingActionButton: _screenState == ScreenState.to_edit ||
               _screenState == ScreenState.to_save
