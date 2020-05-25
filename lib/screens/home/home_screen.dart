@@ -5,6 +5,7 @@ import 'package:flutter_icons/font_awesome.dart';
 import 'package:glitcher/common_widgets/card_icon_text.dart';
 import 'package:glitcher/common_widgets/drawer.dart';
 import 'package:glitcher/common_widgets/gradient_appbar.dart';
+import 'package:glitcher/common_widgets/rate_app.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -17,6 +18,7 @@ import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:rate_my_app/rate_my_app.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -24,27 +26,26 @@ class HomeScreen extends StatefulWidget {
 
   static bool isBottomSheetVisible = false;
 
-  static showMyBottomSheet(BuildContext context){
+  static showMyBottomSheet(BuildContext context) {
     // the context of the bottomSheet will be this widget
     //the context here is where you want to show the bottom sheet
-    showBottomSheet(context: context,
-        builder: (BuildContext context){
+    showBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
           return BottomSheet(
             enableDrag: true,
-            onClosing: (){
+            onClosing: () {
               HomeScreen.isBottomSheetVisible = false;
             },
-            builder: (BuildContext context){
+            builder: (BuildContext context) {
               return Container(
                 color: Colors.blue,
                 height: 120,
               );
             },
           ); // returns your BottomSheet widget
-        }
-    );
+        });
   }
-
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
@@ -69,7 +70,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
-
 
   @override
   Widget build(BuildContext context) {
@@ -443,6 +443,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       });
     loadUserData();
     _setupFeed();
+    RateApp(context).rateGlitcher();
   }
 
   @override

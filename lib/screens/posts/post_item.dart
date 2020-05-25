@@ -18,6 +18,7 @@ import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
+import 'package:readmore/readmore.dart';
 import 'package:share/share.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -108,7 +109,7 @@ class _PostItemState extends State<PostItem> {
               },
             ),
             trailing: InkWell(
-                onTap: dropDownOptions(),
+                onTap: () => dropDownOptions(),
                 child: Icon(Icons.keyboard_arrow_down)),
           ),
           Row(
@@ -121,8 +122,13 @@ class _PostItemState extends State<PostItem> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                      Text(
+                      ReadMoreText(
                         post.text ?? '',
+                        trimLines: 2,
+                        colorClickableText: Colors.pink,
+                        trimMode: TrimMode.Line,
+                        trimCollapsedText: ' ...Show more',
+                        trimExpandedText: ' show less',
                         style: TextStyle(
                           fontSize: 16,
                         ),
@@ -372,8 +378,6 @@ class _PostItemState extends State<PostItem> {
                   ),
                   onTap: () async {
                     await sharePost(post.id, post.text, post.imageUrl);
-
-
                   },
                 ),
               ],
@@ -476,8 +480,12 @@ class _PostItemState extends State<PostItem> {
         //post.likesCount = likesNo;
       });
 
-      await NotificationHandler.sendNotification(post.authorId, 'New Post Like',
-          Constants.loggedInUser.username + ' likes your post', post.id, 'like');
+      await NotificationHandler.sendNotification(
+          post.authorId,
+          'New Post Like',
+          Constants.loggedInUser.username + ' likes your post',
+          post.id,
+          'like');
     } else if (isLiked == false && isDisliked == false) {
       await postsRef
           .document(post.id)
@@ -492,8 +500,12 @@ class _PostItemState extends State<PostItem> {
         //post.likesCount = likesNo;
       });
 
-      await NotificationHandler.sendNotification(post.authorId, 'New Post Like',
-          Constants.loggedInUser.username + ' likes your post', post.id, 'like');
+      await NotificationHandler.sendNotification(
+          post.authorId,
+          'New Post Like',
+          Constants.loggedInUser.username + ' likes your post',
+          post.id,
+          'like');
     } else {
       throw Exception('Unconditional Event Occurred!');
     }
@@ -640,13 +652,13 @@ class _PostItemState extends State<PostItem> {
   }
 
   dropDownOptions() {
-//    setState(() {
-//      HomeScreen.isBottomSheetVisible = !HomeScreen.isBottomSheetVisible;
-//    });
-//
-//    if(HomeScreen.isBottomSheetVisible){
-//
-//    }
-//    HomeScreen.showMyBottomSheet(context);
+    if (HomeScreen.isBottomSheetVisible) {
+      Navigator.pop(context);
+    } else {
+      HomeScreen.showMyBottomSheet(context);
+    }
+    setState(() {
+      HomeScreen.isBottomSheetVisible = !HomeScreen.isBottomSheetVisible;
+    });
   }
 }

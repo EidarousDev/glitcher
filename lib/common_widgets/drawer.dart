@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/common_widgets/rate_app.dart';
 import 'package:glitcher/screens/chats/chats.dart';
 import 'package:glitcher/screens/games/games_screen.dart';
 import 'package:glitcher/screens/notifications/notifications_screen.dart';
@@ -105,6 +106,7 @@ class _BuildDrawerState extends State<BuildDrawer> {
           ListTile(
             onTap: () {
               changeTheme(context);
+              Navigator.pop(context);
             },
             title: Text(
               'Change Theme',
@@ -138,6 +140,17 @@ class _BuildDrawerState extends State<BuildDrawer> {
             ),
             leading: Icon(
               Icons.chat_bubble,
+            ),
+          ),
+          ListTile(
+            onTap: () {
+              RateApp(context).rateApp();
+            },
+            title: Text(
+              'Rate us',
+            ),
+            leading: Icon(
+              Icons.tag_faces,
             ),
           ),
           ListTile(

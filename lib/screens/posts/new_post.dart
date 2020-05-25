@@ -1,4 +1,5 @@
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
@@ -111,7 +112,6 @@ class _NewPostState extends State<NewPost> {
     });
   }
 
-
   Future uploadPost(String text) async {
     setState(() {
       _loading = true;
@@ -120,10 +120,12 @@ class _NewPostState extends State<NewPost> {
     String postId = randomAlphaNumeric(20);
 
     if (_video != null) {
-      _uploadedFileURL = await AppUtil.uploadFile(_video, context, 'posts_videos/' + postId);
+      _uploadedFileURL =
+          await AppUtil.uploadFile(_video, context, 'posts_videos/' + postId);
     } else if (_image != null) {
       //await compressAndUploadFile(_image, 'glitchertemp.jpg');
-      _uploadedFileURL =  await  AppUtil.uploadFile(_image, context, 'posts_images/' + postId);
+      _uploadedFileURL =
+          await AppUtil.uploadFile(_image, context, 'posts_images/' + postId);
     }
 
     await postsRef.document(postId).setData({
@@ -144,7 +146,6 @@ class _NewPostState extends State<NewPost> {
       //Navigator.pop(context);
     });
     pushHomeScreen(context);
-
   }
 
   Widget _buildWidget() {
@@ -244,7 +245,7 @@ class _NewPostState extends State<NewPost> {
                           child: Icon(FontAwesome.getIconData("file-video-o")),
                           textColor: Colors.white,
                           color: Colors.blue,
-                          onPressed: () async{
+                          onPressed: () async {
                             clearVars();
                             _video = await AppUtil.chooseVideo();
                             playVideo();
@@ -280,12 +281,12 @@ class _NewPostState extends State<NewPost> {
                             child: Icon(FontAwesome.getIconData("image")),
                             textColor: Colors.white,
                             color: Colors.blue,
-                            onPressed: () async{
+                            onPressed: () async {
                               PermissionsService().requestStoragePermission(
                                   onPermissionDenied: () {
                                 print('Permission has been denied');
                               });
-                             _image = await AppUtil.chooseImage();
+                              _image = await AppUtil.chooseImage();
                             })),
                     flex: 1,
                   ),
@@ -346,12 +347,8 @@ class _NewPostState extends State<NewPost> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: true,
+        flexibleSpace: gradientAppBar(),
         title: Text('New Post'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => pushHomeScreen(context),
-        ),
       ),
       body: Stack(
         alignment: Alignment(0, 0),
