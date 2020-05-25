@@ -1,7 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/common_widgets/circular_clipper.dart';
 import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/constants/sizes.dart';
+import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/fullscreen_overaly.dart';
@@ -13,6 +17,8 @@ import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:glitcher/utils/functions.dart';
+import 'package:glitcher/widgets/caching_image.dart';
 
 enum ScreenState { to_edit, to_follow, to_save, to_unfollow }
 
@@ -26,7 +32,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  var _coverImageUrl;
+  String _coverImageUrl;
   var _profileImageUrl;
   var _coverImageFile;
   var _profileImageFile;
@@ -70,12 +76,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _scrollController
       ..addListener(() {
         if (_scrollController.offset >=
-            _scrollController.position.maxScrollExtent &&
+                _scrollController.position.maxScrollExtent &&
             !_scrollController.position.outOfRange) {
           print('reached the bottom');
           nextPosts();
         } else if (_scrollController.offset <=
-            _scrollController.position.minScrollExtent &&
+                _scrollController.position.minScrollExtent &&
             !_scrollController.position.outOfRange) {
           print("reached the top");
         } else {}
@@ -253,308 +259,215 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Stack(
       alignment: Alignment(0, 0),
       children: <Widget>[
-        GestureDetector(
-          onTap: _screenState == ScreenState.to_save
-              ? () async {
-                  _coverImageFile = await AppUtil.chooseImage();
-                  setState(() {
-                    if (_coverImageFile != null) _coverImageUrl = null;
-                  });
-                }
-              : () async {
-                  if (_coverImageUrl != null) {
-                    var result = await showDialog(
-                        barrierDismissible: true,
-                        context: context,
-                        builder: (_) => FullScreenOverlay(
-                              url: _coverImageUrl,
-                              type: 1,
-                              whichImage: 1,
-                              userId: userId,
-                            ));
-                    setState(() {
-                      if (result != null) {
-                        _coverImageUrl = result;
-                      }
-                    });
-                  } else if (_coverImageFile != null) {
-                    var result = await showDialog(
-                        context: context,
-                        builder: (_) => FullScreenOverlay(
-                              url: _coverImageFile,
-                              type: 2,
-                              whichImage: 1,
-                              userId: userId,
-                            ));
-                    setState(() {
-                      if (result != null) {
-                        _coverImageUrl = result;
-                      }
-                    });
-                  } else {
-                    var result = await showDialog(
-                        context: context,
-                        builder: (_) => FullScreenOverlay(
-                              url: 'images/default_cover.jpg',
-                              type: 3,
-                              whichImage: 1,
-                              userId: userId,
-                            ));
-                    setState(() {
-                      if (result != null) {
-                        _coverImageUrl = result;
-                      }
-                    });
-                  }
-                },
-          child: _coverImageUrl == null
-              ? _coverImageFile == null
-                  ? Image.asset(
-                      'images/default_cover.jpg',
-                      fit: BoxFit.fill,
-                      width: MediaQuery.of(context).size.width,
-                      height: _coverHeight,
-                    )
-                  : Image.file(
-                      _coverImageFile,
-                      fit: BoxFit.fill,
-                      width: MediaQuery.of(context).size.width,
-                      height: _coverHeight,
-                    )
-              : Image.network(
-                  _coverImageUrl,
-                  fit: BoxFit.fill,
-                  width: MediaQuery.of(context).size.width,
-                  height: _coverHeight,
-                ),
+        Container(
+          transform: Matrix4.translationValues(0.0, -50.0, 0.0),
+          child: Hero(
+            tag: _coverImageUrl != null
+                ? _coverImageUrl
+                : Strings.default_post_image,
+            child: ClipShadowPath(
+                clipper: CircularClipper(),
+                shadow: Shadow(blurRadius: 20.0),
+                child: CacheThisImage(
+                  imageUrl: _coverImageUrl,
+                  imageShape: BoxShape.rectangle,
+                  width: double.infinity,
+                  height: 400.0,
+                  defaultAssetImage: Strings.default_profile_image,
+                )),
+          ),
         ),
-        GestureDetector(
-            onTap: _screenState == ScreenState.to_save
-                ? () async {
-                    _profileImageFile = await AppUtil.chooseImage();
-                    setState(() {
-                      if (_profileImageFile != null) _profileImageUrl = null;
-                    });
-                  }
-                : () async {
-                    if (_profileImageUrl != null) {
-                      var result = await showDialog(
-                          context: context,
-                          builder: (_) => FullScreenOverlay(
-                                url: _profileImageUrl,
-                                type: 1,
-                                whichImage: 2,
-                                userId: userId,
-                              ));
-                      setState(() {
-                        if (result != null) {
-                          _profileImageUrl = result;
-                        }
-                      });
-                    } else if (_profileImageFile != null) {
-                      var result = await showDialog(
-                          context: context,
-                          builder: (_) => FullScreenOverlay(
-                                url: _profileImageFile,
-                                type: 2,
-                                whichImage: 2,
-                                userId: userId,
-                              ));
-                      setState(() {
-                        if (result != null) {
-                          _profileImageUrl = result;
-                        }
-                      });
-                    } else {
-                      var result = await showDialog(
-                          context: context,
-                          builder: (_) => FullScreenOverlay(
-                                url: 'images/default_profile.png',
-                                type: 3,
-                                whichImage: 2,
-                                userId: userId,
-                              ));
-
-                      setState(() {
-                        if (result != null) {
-                          _profileImageUrl = result;
-                        }
-                      });
-                    }
-                  },
-            child: _profileImageUrl == null
-                ? _profileImageFile == null
-                    ? profileOverlay(
-                        CircleAvatar(
-                          radius: 50,
-                          backgroundImage:
-                              AssetImage('images/default_profile.png'),
-                        ),
-                        100)
-                    : profileOverlay(
-                        CircleAvatar(
-                          radius: 50,
-                          backgroundImage: FileImage(_profileImageFile),
-                        ),
-                        100)
-                : profileOverlay(
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundImage: NetworkImage(_profileImageUrl),
-                    ),
-                    100))
+        Positioned.fill(
+          bottom: 10.0,
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: RawMaterialButton(
+                padding: EdgeInsets.all(1.0),
+                elevation: 12.0,
+                onPressed: () => print('Profile picture got tapped'),
+                shape: CircleBorder(),
+                fillColor: Colors.white,
+                child: CacheThisImage(
+                  imageUrl: _profileImageUrl,
+                  imageShape: BoxShape.circle,
+                  width: Sizes.lg_profile_image_w,
+                  height: Sizes.lg_profile_image_h,
+                  defaultAssetImage: Strings.default_profile_image,
+                )),
+          ),
+        ),
+        Positioned(
+          bottom: 0.0,
+          left: 20.0,
+          child: IconButton(
+            onPressed: () => print('Follow'),
+            icon: Icon(Icons.person_add),
+            iconSize: 25.0,
+            color: switchColor(
+                MyColors.lightButtonsBackground, MyColors.darkPrimaryTappedBtn),
+          ),
+        ),
+        Positioned(
+          bottom: 0.0,
+          right: 25.0,
+          child: IconButton(
+            onPressed: () => print('Share'),
+            icon: Icon(Icons.share),
+            iconSize: 25.0,
+            color: switchColor(
+                MyColors.lightButtonsBackground, MyColors.darkPrimaryTappedBtn),
+          ),
+        ),
       ],
     );
   }
 
   Widget _build() {
-    return SafeArea(
-      child: Stack(
-        alignment: Alignment(0, 0),
-        children: <Widget>[
-          SingleChildScrollView(
-            controller: _scrollController,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                _profileAndCover(),
-                SizedBox(
-                  height: 10,
-                ),
-                _screenState == ScreenState.to_edit ||
-                        _screenState == ScreenState.to_follow ||
-                        _screenState == ScreenState.to_unfollow
-                    ? Text(
-                        _nameText,
-                        style: TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.bold),
-                      )
-                    : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          Container(
-                            height: 30,
-                            width: 200,
-                            child: TextField(
-                              textAlign: TextAlign.center,
-                              controller: _nameEditingController,
-                              onChanged: (text) => {},
-                              style: TextStyle(
-                                  fontSize: 24, fontWeight: FontWeight.bold),
-                            ),
+    return Stack(
+      alignment: Alignment(0, 0),
+      children: <Widget>[
+        SingleChildScrollView(
+          controller: _scrollController,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              _profileAndCover(),
+              SizedBox(
+                height: 10,
+              ),
+              _screenState == ScreenState.to_edit ||
+                      _screenState == ScreenState.to_follow ||
+                      _screenState == ScreenState.to_unfollow
+                  ? Text(
+                      _nameText,
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        Container(
+                          height: 30,
+                          width: 200,
+                          child: TextField(
+                            textAlign: TextAlign.center,
+                            controller: _nameEditingController,
+                            onChanged: (text) => {},
+                            style: TextStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold),
                           ),
-                          _screenState == ScreenState.to_follow ||
-                                  _screenState == ScreenState.to_unfollow
-                              ? OutlineButton(
-                                  child:
-                                      Text(isFollowing ? 'Unfollow' : 'Follow'),
-                                  onPressed: isFollowing
-                                      ? () {
-                                          unfollowUser();
-                                        }
-                                      : () {
-                                          followUser();
-                                        },
-                                )
-                              : Container()
-                        ],
-                      ),
-                SizedBox(
-                  height: 8,
-                ),
-                _screenState == ScreenState.to_edit ||
+                        ),
                         _screenState == ScreenState.to_follow ||
-                        _screenState == ScreenState.to_unfollow
-                    ? Text(
-                        _descText,
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      )
-                    : Container(
-                        height: 30,
-                        width: 200,
-                        child: TextField(
-                          textAlign: TextAlign.center,
-                          controller: _descEditingController,
-                          onChanged: (text) => {},
-                          style: TextStyle(fontSize: 16),
-                        ),
+                                _screenState == ScreenState.to_unfollow
+                            ? OutlineButton(
+                                child:
+                                    Text(isFollowing ? 'Unfollow' : 'Follow'),
+                                onPressed: isFollowing
+                                    ? () {
+                                        unfollowUser();
+                                      }
+                                    : () {
+                                        followUser();
+                                      },
+                              )
+                            : Container()
+                      ],
+                    ),
+              SizedBox(
+                height: 8,
+              ),
+              _screenState == ScreenState.to_edit ||
+                      _screenState == ScreenState.to_follow ||
+                      _screenState == ScreenState.to_unfollow
+                  ? Text(
+                      _descText,
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    )
+                  : Container(
+                      height: 30,
+                      width: 200,
+                      child: TextField(
+                        textAlign: TextAlign.center,
+                        controller: _descEditingController,
+                        onChanged: (text) => {},
+                        style: TextStyle(fontSize: 16),
                       ),
-                SizedBox(
-                  height: 8,
-                ),
-                Divider(
-                  color: Colors.grey.shade400,
-                ),
-                SizedBox(
-                  height: 8,
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Column(
-                      children: <Widget>[
-                        Text(
-                          'Followers',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                        Text(_followers.toString())
-                      ],
                     ),
-                    SizedBox(
-                      width: 50,
-                    ),
-                    Column(
-                      children: <Widget>[
-                        Text(
-                          'Following',
-                          style: TextStyle(color: Colors.grey, fontSize: 14),
-                        ),
-                        Text(_following.toString())
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 8,
-                ),
-                Divider(
-                  color: Colors.grey.shade400,
-                ),
-                ListView.builder(
-                  physics: NeverScrollableScrollPhysics(),
-                  scrollDirection: Axis.vertical,
-                  itemCount: _posts.length,
-                  shrinkWrap: true,
-                  itemBuilder: (BuildContext context, int index) {
-                    Post post = _posts[index];
-                    return FutureBuilder(
-                        future: DatabaseService.getUserWithId(post.authorId),
-                        builder: (BuildContext context, AsyncSnapshot snapshot) {
-                          if (!snapshot.hasData) {
-                            return SizedBox.shrink();
-                          }
-                          User author = snapshot.data;
-                          return PostItem(post: post, author: author);
-                        });
-                  },
-                ),
-              ],
-            ),
+              SizedBox(
+                height: 8,
+              ),
+              Divider(
+                color: Colors.grey.shade400,
+              ),
+              SizedBox(
+                height: 8,
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Column(
+                    children: <Widget>[
+                      Text(
+                        'Followers',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                      Text(_followers.toString())
+                    ],
+                  ),
+                  SizedBox(
+                    width: 50,
+                  ),
+                  Column(
+                    children: <Widget>[
+                      Text(
+                        'Following',
+                        style: TextStyle(color: Colors.grey, fontSize: 14),
+                      ),
+                      Text(_following.toString())
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 8,
+              ),
+              Divider(
+                color: Colors.grey.shade400,
+              ),
+              ListView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                scrollDirection: Axis.vertical,
+                itemCount: _posts.length,
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int index) {
+                  Post post = _posts[index];
+                  return FutureBuilder(
+                      future: DatabaseService.getUserWithId(post.authorId),
+                      builder: (BuildContext context, AsyncSnapshot snapshot) {
+                        if (!snapshot.hasData) {
+                          return SizedBox.shrink();
+                        }
+                        User author = snapshot.data;
+                        return PostItem(post: post, author: author);
+                      });
+                },
+              ),
+            ],
           ),
-          _loading
-              ? LoaderTwo()
-              : Container(
-                  width: 0,
-                  height: 0,
-                ),
-        ],
-      ),
+        ),
+        _loading
+            ? LoaderTwo()
+            : Container(
+                width: 0,
+                height: 0,
+              ),
+      ],
     );
   }
 
-  loadPosts() async{
+  loadPosts() async {
     List<Post> posts;
     posts = await DatabaseService.getUserPosts(userId);
     setState(() {
@@ -721,9 +634,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        flexibleSpace: gradientAppBar(),
-        title: Text('Profile'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
       body: _build(),
       floatingActionButton: _screenState == ScreenState.to_edit ||

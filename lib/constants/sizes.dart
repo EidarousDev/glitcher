@@ -4,6 +4,8 @@ class Sizes {
   static const double sm_profile_image_h = 50.0;
   static const double md_profile_image_w = 60.0;
   static const double md_profile_image_h = 60.0;
+  static const double lg_profile_image_w = 120.0;
+  static const double lg_profile_image_h = 120.0;
 
   /// HomeScreen Sizes
   static const double home_post_image_w = double.infinity;
