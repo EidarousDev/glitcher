@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/common_widgets/circular_clipper.dart';
@@ -19,6 +21,7 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
+import 'package:glitcher/widgets/image_overlay.dart';
 
 enum ScreenState { to_edit, to_follow, to_save, to_unfollow }
 
@@ -36,14 +39,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   var _profileImageUrl;
   var _coverImageFile;
   var _profileImageFile;
-  var _screenState = ScreenState.to_edit;
   double _coverHeight = 200;
 
   String _descText = 'Description here';
   String _nameText = 'Username';
   var _descEditingController = TextEditingController()
     ..text = 'Description here';
-  var _nameEditingController = TextEditingController()..text = '';
+  var _textEditingController = TextEditingController()..text = '';
 
   String userId;
 
@@ -58,13 +60,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   FirebaseUser currentUser;
 
-  bool isFollowing;
+  bool isFollowing = false;
+  bool isFriend = false;
 
-  List<Post> _posts;
+  List<Post> _posts = [];
 
   Timestamp lastVisiblePostSnapShot;
 
   ScrollController _scrollController = ScrollController();
+
+  bool isEditingName = false;
+  bool isEditingDesc = false;
 
   _ProfileScreenState(this.userId);
 
@@ -88,6 +94,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
 
     checkUser();
+
+    loadPosts();
   }
 
   void checkUser() async {
@@ -105,11 +113,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         isFollowing = followSnapshot.exists;
       });
 
+      DocumentSnapshot friendSnapshot = await firestore
+          .collection('users')
+          .document(currentUser.uid)
+          .collection('friends')
+          .document(userId)
+          .get();
+
       setState(() {
-        if (isFollowing)
-          _screenState = ScreenState.to_unfollow;
-        else
-          _screenState = ScreenState.to_follow;
+        isFriend = friendSnapshot.exists;
       });
     }
 
@@ -152,21 +164,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  void edit() {
-    setState(() {
-      _screenState = ScreenState.to_save;
-      _nameEditingController..text = _nameText;
-      _descEditingController..text = _descText;
-    });
-  }
-
   save() async {
     setState(() {
       _loading = true;
       _isBtnEnabled = false;
-      _screenState = ScreenState.to_edit;
       _descText = _descEditingController.text;
-      _nameText = _nameEditingController.text;
+      _nameText = _textEditingController.text;
     });
 
     userData['name'] = _nameText;
@@ -208,52 +211,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  Widget profileOverlay(Widget child, double size) {
-    if (_screenState == ScreenState.to_edit ||
-        _screenState == ScreenState.to_follow ||
-        _screenState == ScreenState.to_unfollow) {
-      return child;
-    }
-
-    return Stack(
-      alignment: Alignment(0, 0),
-      children: <Widget>[
-        child,
-        Container(
-          child: Icon(FontAwesome.getIconData('camera')),
-          height: size,
-          width: size,
-          decoration: new BoxDecoration(
-            color: const Color(0x000000).withOpacity(0.3),
-            shape: BoxShape.circle,
-          ),
-        )
-      ],
-    );
-  }
-
-  Widget coverOverlay(Widget child, double size) {
-    if (_screenState == ScreenState.to_edit) {
-      return child;
-    }
-    return Stack(
-      alignment: Alignment.bottomRight,
-      children: <Widget>[
-        child,
-        Container(
-          margin: EdgeInsets.all(10),
-          child: Icon(FontAwesome.getIconData('camera')),
-          height: size,
-          width: size,
-          decoration: new BoxDecoration(
-            color: const Color(0x000000).withOpacity(0.3),
-            shape: BoxShape.circle,
-          ),
-        )
-      ],
-    );
-  }
-
   Stack _profileAndCover() {
     return Stack(
       alignment: Alignment(0, 0),
@@ -267,12 +224,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: ClipShadowPath(
                 clipper: CircularClipper(),
                 shadow: Shadow(blurRadius: 20.0),
-                child: CacheThisImage(
-                  imageUrl: _coverImageUrl,
-                  imageShape: BoxShape.rectangle,
-                  width: double.infinity,
-                  height: 400.0,
-                  defaultAssetImage: Strings.default_profile_image,
+                child: GestureDetector(
+                  onTap: () {
+                    if (userId == Constants.currentUserID)
+                      coverEdit();
+                    else {
+                      coverDownload();
+                    }
+                  },
+                  child: CacheThisImage(
+                    imageUrl: _coverImageUrl,
+                    imageShape: BoxShape.rectangle,
+                    width: double.infinity,
+                    height: 400.0,
+                    defaultAssetImage: Strings.default_profile_image,
+                  ),
                 )),
           ),
         ),
@@ -283,40 +249,64 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: RawMaterialButton(
                 padding: EdgeInsets.all(1.0),
                 elevation: 12.0,
-                onPressed: () => print('Profile picture got tapped'),
+                onPressed: () => () {},
                 shape: CircleBorder(),
                 fillColor: Colors.white,
-                child: CacheThisImage(
-                  imageUrl: _profileImageUrl,
-                  imageShape: BoxShape.circle,
-                  width: Sizes.lg_profile_image_w,
-                  height: Sizes.lg_profile_image_h,
-                  defaultAssetImage: Strings.default_profile_image,
+                child: GestureDetector(
+                  onTap: () {
+                    if (userId == Constants.currentUserID)
+                      profileEdit();
+                    else {
+                      profileDownload();
+                    }
+                  },
+                  child: CacheThisImage(
+                    imageUrl: _profileImageUrl,
+                    imageShape: BoxShape.circle,
+                    width: Sizes.lg_profile_image_w,
+                    height: Sizes.lg_profile_image_h,
+                    defaultAssetImage: Strings.default_profile_image,
+                  ),
                 )),
           ),
         ),
-        Positioned(
-          bottom: 0.0,
-          left: 20.0,
-          child: IconButton(
-            onPressed: () => print('Follow'),
-            icon: Icon(Icons.person_add),
-            iconSize: 25.0,
-            color: switchColor(
-                MyColors.lightButtonsBackground, MyColors.darkPrimaryTappedBtn),
-          ),
-        ),
-        Positioned(
-          bottom: 0.0,
-          right: 25.0,
-          child: IconButton(
-            onPressed: () => print('Share'),
-            icon: Icon(Icons.share),
-            iconSize: 25.0,
-            color: switchColor(
-                MyColors.lightButtonsBackground, MyColors.darkPrimaryTappedBtn),
-          ),
-        ),
+        userId != Constants.currentUserID
+            ? Positioned(
+                bottom: 0.0,
+                left: 20.0,
+                child: IconButton(
+                  onPressed: isFollowing
+                      ? () {
+                          unfollowUser();
+                        }
+                      : () {
+                          followUser();
+                        },
+                  icon: !isFollowing
+                      ? Icon(FontAwesome.getIconData('user-plus'))
+                      : Icon(FontAwesome.getIconData('user-times')),
+                  iconSize: 25.0,
+                  color: switchColor(MyColors.lightButtonsBackground,
+                      MyColors.darkPrimaryTappedBtn),
+                ),
+              )
+            : Container(),
+        isFriend
+            ? Positioned(
+                bottom: 0.0,
+                right: 25.0,
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/conversation',
+                        arguments: {'otherUid': userId});
+                  },
+                  icon: Icon(Icons.chat),
+                  iconSize: 25.0,
+                  color: switchColor(MyColors.lightButtonsBackground,
+                      MyColors.darkPrimaryTappedBtn),
+                ),
+              )
+            : Container(),
       ],
     );
   }
@@ -334,65 +324,62 @@ class _ProfileScreenState extends State<ProfileScreen> {
               SizedBox(
                 height: 10,
               ),
-              _screenState == ScreenState.to_edit ||
-                      _screenState == ScreenState.to_follow ||
-                      _screenState == ScreenState.to_unfollow
-                  ? Text(
-                      _nameText,
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        Container(
-                          height: 30,
-                          width: 200,
-                          child: TextField(
-                            textAlign: TextAlign.center,
-                            controller: _nameEditingController,
-                            onChanged: (text) => {},
-                            style: TextStyle(
-                                fontSize: 24, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        _screenState == ScreenState.to_follow ||
-                                _screenState == ScreenState.to_unfollow
-                            ? OutlineButton(
-                                child:
-                                    Text(isFollowing ? 'Unfollow' : 'Follow'),
-                                onPressed: isFollowing
-                                    ? () {
-                                        unfollowUser();
-                                      }
-                                    : () {
-                                        followUser();
-                                      },
-                              )
-                            : Container()
-                      ],
-                    ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  !isEditingName ? Text(
+                    _nameText,
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ): Container(width: 200, child: TextField(controller: _textEditingController,)),
+
+                  !isEditingName ? IconButton(icon: Icon(Icons.edit), onPressed: () {
+                    setState(() {
+                      isEditingName = true;
+                      _textEditingController.text = _nameText;
+                    });
+                  }):
+
+                  IconButton(icon: Icon(Icons.done), onPressed: () {
+                    setState(() {
+                      isEditingName = false;
+                      _nameText = _textEditingController.text;
+                    });
+
+                    updateName();
+                  })
+                ],
+              ),
               SizedBox(
                 height: 8,
               ),
-              _screenState == ScreenState.to_edit ||
-                      _screenState == ScreenState.to_follow ||
-                      _screenState == ScreenState.to_unfollow
-                  ? Text(
-                      _descText,
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    )
-                  : Container(
-                      height: 30,
-                      width: 200,
-                      child: TextField(
-                        textAlign: TextAlign.center,
-                        controller: _descEditingController,
-                        onChanged: (text) => {},
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  !isEditingDesc ?               Text(
+              _descText,
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ): Container(width: 200, child: TextField(controller: _textEditingController,)),
+
+                  !isEditingDesc ? IconButton(icon: Icon(Icons.edit), onPressed: () {
+                    setState(() {
+                      isEditingDesc = true;
+                      _textEditingController.text = _descText;
+                    });
+                  }):
+
+                  IconButton(icon: Icon(Icons.done), onPressed: () {
+                    setState(() {
+                      isEditingDesc = false;
+                      _descText = _textEditingController.text;
+                    });
+                    updateDesc();
+                  })
+                ],
+              ),
+
               SizedBox(
                 height: 8,
               ),
@@ -470,6 +457,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
       ],
     );
+  }
+
+  updateName() async{
+    await usersRef.document(userId).updateData({'username': _nameText});
+  }
+
+  updateDesc() async{
+    await usersRef.document(userId).updateData({'description': _descText});
   }
 
   loadPosts() async {
@@ -562,9 +557,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _loading = false;
       _isBtnEnabled = true;
       AppUtil().showToast('You started following ' + _nameText);
-      _screenState = ScreenState.to_unfollow;
       _followers++;
+      isFollowing = true;
     });
+
+    checkUser();
   }
 
   void unfollowUser() async {
@@ -629,34 +626,159 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     setState(() {
-      _screenState = ScreenState.to_follow;
       _followers--;
       _loading = false;
       _isBtnEnabled = true;
+      isFollowing = false;
     });
+
+    checkUser();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: _build(),
-      floatingActionButton: _screenState == ScreenState.to_edit ||
-              _screenState == ScreenState.to_save
-          ? FloatingActionButton(
-              child: _screenState == ScreenState.to_edit
-                  ? Icon(MaterialIcons.getIconData('edit'))
-                  : Icon(MaterialIcons.getIconData('save')),
-              onPressed: _screenState == ScreenState.to_edit
-                  ? () {
-                      edit();
-                    }
-                  : () {
-                      if (_isBtnEnabled) {
-                        save();
-                      }
-                    },
-            )
-          : null,
     );
+  }
+
+  coverEdit() async {
+    if (_coverImageUrl == null && _coverImageFile == null) {
+      File image = await AppUtil.chooseImage();
+      setState(() {
+        _coverImageFile = image;
+        _coverImageUrl = null;
+      });
+
+      String url = await AppUtil.uploadFile(
+          _coverImageFile, context, 'cover_img/$userId');
+      setState(() {
+        _coverImageUrl = url;
+        _coverImageFile = null;
+      });
+    }
+
+    showDialog(
+        barrierDismissible: true,
+        child: Container(
+          width: Sizes.sm_profile_image_w,
+          height: Sizes.sm_profile_image_h,
+          child: ImageOverlay(
+            imageUrl: _coverImageUrl,
+            imageFile: _coverImageFile,
+            btnText: 'Edit',
+            btnFunction: () async {
+              File image = await AppUtil.chooseImage();
+              setState(() {
+                _coverImageFile = image;
+                _coverImageUrl = null;
+              });
+
+              String url = await AppUtil.uploadFile(
+                  _coverImageFile, context, 'cover_img/$userId');
+              setState(() {
+                _coverImageUrl = url;
+                _coverImageFile = null;
+              });
+
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+        context: context);
+  }
+
+  profileEdit() async {
+    if (_profileImageUrl == null && _profileImageFile == null) {
+      File image = await AppUtil.chooseImage();
+      setState(() {
+        _profileImageFile = image;
+        _profileImageUrl = null;
+      });
+
+      String url = await AppUtil.uploadFile(
+          _profileImageFile, context, 'cover_img/$userId');
+      setState(() {
+        _profileImageUrl = url;
+        _profileImageFile = null;
+      });
+    }
+
+    showDialog(
+        barrierDismissible: true,
+        child: Container(
+          width: Sizes.sm_profile_image_w,
+          height: Sizes.sm_profile_image_h,
+          child: ImageOverlay(
+            imageUrl: _profileImageUrl,
+            imageFile: _profileImageFile,
+            btnText: 'Edit',
+            btnFunction: () async {
+              File image = await AppUtil.chooseImage();
+              setState(() {
+                _profileImageFile = image;
+                _profileImageUrl = null;
+              });
+
+              String url = await AppUtil.uploadFile(
+                  _profileImageFile, context, 'profile_img/$userId');
+              setState(() {
+                _profileImageUrl = url;
+                _profileImageFile = null;
+              });
+
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+        context: context);
+  }
+
+  coverDownload() async {
+    if (_coverImageUrl == null && _coverImageFile == null)
+      return;
+    else {
+      showDialog(
+          barrierDismissible: true,
+          child: Container(
+            width: Sizes.sm_profile_image_w,
+            height: Sizes.sm_profile_image_h,
+            child: ImageOverlay(
+              imageUrl: _coverImageUrl,
+              imageFile: _coverImageFile,
+              btnText: 'Download',
+              btnFunction: () async {
+                //TODO implement download function
+
+                Navigator.of(context).pop();
+              },
+            ),
+          ),
+          context: context);
+    }
+  }
+
+  profileDownload() async {
+    if (_profileImageUrl == null && _profileImageFile == null)
+      return;
+    else {
+      showDialog(
+          barrierDismissible: true,
+          child: Container(
+            width: Sizes.sm_profile_image_w,
+            height: Sizes.sm_profile_image_h,
+            child: ImageOverlay(
+              imageUrl: _profileImageUrl,
+              imageFile: _profileImageFile,
+              btnText: 'Download',
+              btnFunction: () async {
+                //TODO implement download function
+
+                Navigator.of(context).pop();
+              },
+            ),
+          ),
+          context: context);
+    }
   }
 }

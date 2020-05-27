@@ -21,7 +21,7 @@ class AppUtil {
     return networkStatus;
   }
 
-  void showToast(String msg) {
+  showToast(String msg) {
     FlutterToast.showToast(
         msg: msg,
         toastLength: Toast.LENGTH_SHORT,

@@ -24,12 +24,12 @@ class DatabaseService {
   //Gets the posts of a certain user
   static Future<List<Post>> getUserPosts(String authorId) async {
     QuerySnapshot postSnapshot = await postsRef
-    .where('owner', isEqualTo: authorId)
+        .where('owner', isEqualTo: authorId)
         .orderBy('timestamp', descending: true)
         .limit(10)
         .getDocuments();
     List<Post> posts =
-    postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+        postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
     return posts;
   }
 
@@ -71,14 +71,25 @@ class DatabaseService {
   static Future<List<Post>> getUserNextPosts(
       Timestamp lastVisiblePostSnapShot, String authorId) async {
     QuerySnapshot postSnapshot = await postsRef
-    .where('owner', isEqualTo: authorId)
+        .where('owner', isEqualTo: authorId)
         .orderBy('timestamp', descending: true)
         .startAfter([lastVisiblePostSnapShot])
         .limit(10)
         .getDocuments();
     List<Post> posts =
-    postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+        postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
     return posts;
+  }
+
+  static deletePost(String postId) async {
+    await postsRef.document(postId).delete();
+  }
+
+  static addPostToCurrentUserBookmarks(String postId) async {
+    await usersRef
+        .document(Constants.currentUserID)
+        .collection('bookmarks')
+        .add({'post_id': postId, 'timestamp': FieldValue.serverTimestamp()});
   }
 
   // This function is used to get the recent posts (filtered by followed games)
@@ -453,6 +464,7 @@ class DatabaseService {
   }
 
   static Future<List> searchGames(text) async {
+    print('searching');
     QuerySnapshot gameSnapshot = await gamesRef
         .where('search', arrayContains: text)
         .orderBy('fullName', descending: false)

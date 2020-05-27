@@ -52,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   User loggedInUser;
   String username;
   //String profileImageUrl = '';
-  var _posts = [];
+  List<Post> _posts = [];
   FirebaseUser currentUser;
   Timestamp lastVisiblePostSnapShot;
   bool _noMorePosts = false;

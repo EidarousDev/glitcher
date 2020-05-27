@@ -652,11 +652,12 @@ class _PostItemState extends State<PostItem> {
   }
 
   dropDownOptions() {
-    if (HomeScreen.isBottomSheetVisible) {
+    if(HomeScreen.isBottomSheetVisible){
       Navigator.pop(context);
-    } else {
+    }else{
       HomeScreen.showMyBottomSheet(context);
     }
+
     setState(() {
       HomeScreen.isBottomSheetVisible = !HomeScreen.isBottomSheetVisible;
     });

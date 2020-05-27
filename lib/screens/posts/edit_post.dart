@@ -1,5 +1,4 @@
 import 'package:flutter_typeahead/flutter_typeahead.dart';
-import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/services/database_service.dart';
@@ -26,8 +25,6 @@ class NewPost extends StatefulWidget {
 }
 
 class _NewPostState extends State<NewPost> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   var _image;
   var _video;
   var _uploadedFileURL;
@@ -41,7 +38,6 @@ class _NewPostState extends State<NewPost> {
   //YoutubePlayer
   bool _showYoutubeUrl = false;
   String _youtubeId;
-
   //TODO: Fix YouTube Player
   //YoutubePlayerController _youtubeController = YoutubePlayerController();
   final uTubeTextController = TextEditingController();
@@ -116,84 +112,40 @@ class _NewPostState extends State<NewPost> {
     });
   }
 
+
   Future uploadPost(String text) async {
-    uploadPost(String text) async {
-      if (mainTextController.text.isEmpty) {
-        Functions.showInSnackBar(context, _scaffoldKey, "Post can't be empty");
-        return;
-      }
+    setState(() {
+      _loading = true;
+    });
 
-      if (selectedGame.isEmpty) {
-        Functions.showInSnackBar(
-            context, _scaffoldKey, "You have to choose a game topic");
-        return;
-      }
+    String postId = randomAlphaNumeric(20);
 
-
-      setState(() {
-        _loading = true;
-      });
-
-      String postId = randomAlphaNumeric(20);
-
-      if (_video != null) {
-        _uploadedFileURL =
-        await AppUtil.uploadFile(_video, context, 'posts_videos/' + postId);
-      } else if (_image != null) {
-        //await compressAndUploadFile(_image, 'glitchertemp.jpg');
-        _uploadedFileURL =
-        await AppUtil.uploadFile(_image, context, 'posts_images/' + postId);
-      }
-
-      await postsRef.document(postId).setData({
-        'owner': Constants.currentUserID,
-        'text': text,
-        'youtubeId': _youtubeId,
-        'video': _video != null ? _uploadedFileURL : null,
-        'image': _image != null ? _uploadedFileURL : null,
-        'likes': 0,
-        'dislikes': 0,
-        'comments': 0,
-        'timestamp': FieldValue.serverTimestamp(),
-        'game': selectedGame
-      });
-
-      setState(() {
-        _loading = false;
-        //Navigator.pop(context);
-      });
-      pushHomeScreen(context);
+    if (_video != null) {
+      _uploadedFileURL = await AppUtil.uploadFile(_video, context, 'posts_videos/' + postId);
+    } else if (_image != null) {
+      //await compressAndUploadFile(_image, 'glitchertemp.jpg');
+      _uploadedFileURL =  await  AppUtil.uploadFile(_image, context, 'posts_images/' + postId);
     }
 
+    await postsRef.document(postId).setData({
+      'owner': Constants.currentUserID,
+      'text': text,
+      'youtubeId': _youtubeId,
+      'video': _video != null ? _uploadedFileURL : null,
+      'image': _image != null ? _uploadedFileURL : null,
+      'likes': 0,
+      'dislikes': 0,
+      'comments': 0,
+      'timestamp': FieldValue.serverTimestamp(),
+      'game': selectedGame
+    });
 
-//  // 2. compress file and get file.
-//  compressAndUploadFile(File file, String targetPath) async {
-//    var result = await FlutterImageCompress.compressAndGetFile(
-//      file.absolute.path,
-//      targetPath,
-//      quality: 50,
-//      rotate: 270,
-//    );
-//
-//    print((result));
-//
-//    setState(() {
-//      this.$ranFileName = randomAlphaNumeric(5) + p.basename(file.path);
-//    });
-//    print((file));
-//    print('fileNameRandomized = ' + this.$ranFileName);
-//
-//    StorageReference storageReference = FirebaseStorage.instance
-//        .ref()
-//        .child('compressed_images/' + this.$ranFileName);
-//
-//    StorageUploadTask uploadTask = storageReference.putFile(result);
-//    await uploadTask.onComplete;
-//    print('Compressed File Uploaded');
-//
-//    print(file.lengthSync());
-//    return result;
-//  }
+    setState(() {
+      _loading = false;
+      //Navigator.pop(context);
+    });
+    pushHomeScreen(context);
+
   }
 
   Widget _buildWidget() {
@@ -211,17 +163,13 @@ class _NewPostState extends State<NewPost> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
-                  maxLength: 500,
-                  minLines: 5,
-                  maxLines: 15,
-                  maxLengthEnforced: true,
-                  autofocus: true,
-                  autocorrect: true,
-
                   controller: mainTextController,
                   decoration: new InputDecoration.collapsed(
                       hintText: 'What\'s in your mind?'),
-
+                  minLines: 5,
+                  maxLines: 10,
+                  autocorrect: true,
+                  autofocus: true,
                   style: TextStyle(
                       fontSize: 18
                   ),
@@ -337,7 +285,7 @@ class _NewPostState extends State<NewPost> {
                       child: IconButton(
                           icon: Icon(FontAwesome.getIconData("file-video-o")),
                           color: Colors.white,
-                          onPressed: () async {
+                          onPressed: () async{
                             clearVars();
                             _video = await AppUtil.chooseVideo();
                             playVideo();
@@ -373,7 +321,7 @@ class _NewPostState extends State<NewPost> {
                         child: IconButton(
                             icon: Icon(FontAwesome.getIconData("image")),
                             color: Colors.white,
-                            onPressed: () async {
+                            onPressed: () async{
                               PermissionsService().requestStoragePermission(
                                   onPermissionDenied: () {
                                     print('Permission has been denied');
@@ -404,10 +352,13 @@ class _NewPostState extends State<NewPost> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
-        flexibleSpace: gradientAppBar(),
+        automaticallyImplyLeading: true,
         title: Text('New Post'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => pushHomeScreen(context),
+        ),
       ),
       body: Stack(
         alignment: Alignment(0, 0),
@@ -423,4 +374,33 @@ class _NewPostState extends State<NewPost> {
       ),
     );
   }
+
+//  // 2. compress file and get file.
+//  compressAndUploadFile(File file, String targetPath) async {
+//    var result = await FlutterImageCompress.compressAndGetFile(
+//      file.absolute.path,
+//      targetPath,
+//      quality: 50,
+//      rotate: 270,
+//    );
+//
+//    print((result));
+//
+//    setState(() {
+//      this.$ranFileName = randomAlphaNumeric(5) + p.basename(file.path);
+//    });
+//    print((file));
+//    print('fileNameRandomized = ' + this.$ranFileName);
+//
+//    StorageReference storageReference = FirebaseStorage.instance
+//        .ref()
+//        .child('compressed_images/' + this.$ranFileName);
+//
+//    StorageUploadTask uploadTask = storageReference.putFile(result);
+//    await uploadTask.onComplete;
+//    print('Compressed File Uploaded');
+//
+//    print(file.lengthSync());
+//    return result;
+//  }
 }
