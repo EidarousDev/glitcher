@@ -20,6 +20,7 @@ import 'package:glitcher/screens/posts/add_comment.dart';
 import 'package:glitcher/screens/posts/post_preview.dart';
 import 'package:glitcher/screens/posts/new_post.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
+import 'package:page_transition/page_transition.dart';
 
 class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -45,11 +46,11 @@ class RouteGenerator {
 
       case '/post':
         // Validation of correct data type
-        return MaterialPageRoute(
-          builder: (_) => PostPreview(
-            postId: args['postId'],
-          ),
-        );
+        return PageTransition(
+            child: PostPreview(
+              postId: args['postId'],
+            ),
+            type: PageTransitionType.scale);
         // If args is not of the correct type, return an error page.
         // You can also throw an exception while in development.
         return _errorRoute();

@@ -69,6 +69,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   ScrollController _scrollController = ScrollController();
 
+  bool _postsReady = false;
+
   bool isEditingName = false;
   bool isEditingDesc = false;
 
@@ -94,8 +96,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
 
     checkUser();
-
-    loadPosts();
   }
 
   void checkUser() async {
@@ -127,6 +127,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (userData == null) {
       loadUserData();
+      loadPosts();
     }
   }
 
@@ -328,58 +329,75 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  !isEditingName ? Text(
-                    _nameText,
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ): Container(width: 200, child: TextField(controller: _textEditingController,)),
+                  !isEditingName
+                      ? Text(
+                          _nameText,
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
+                        )
+                      : Container(
+                          width: 200,
+                          child: TextField(
+                            controller: _textEditingController,
+                          )),
+                  !isEditingName
+                      ? IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () {
+                            setState(() {
+                              isEditingName = true;
+                              _textEditingController.text = _nameText;
+                            });
+                          })
+                      : IconButton(
+                          icon: Icon(Icons.done),
+                          onPressed: () {
+                            setState(() {
+                              isEditingName = false;
+                              _nameText = _textEditingController.text;
+                            });
 
-                  !isEditingName ? IconButton(icon: Icon(Icons.edit), onPressed: () {
-                    setState(() {
-                      isEditingName = true;
-                      _textEditingController.text = _nameText;
-                    });
-                  }):
-
-                  IconButton(icon: Icon(Icons.done), onPressed: () {
-                    setState(() {
-                      isEditingName = false;
-                      _nameText = _textEditingController.text;
-                    });
-
-                    updateName();
-                  })
+                            updateName();
+                          })
                 ],
               ),
               SizedBox(
                 height: 8,
               ),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  !isEditingDesc ?               Text(
-              _descText,
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ): Container(width: 200, child: TextField(controller: _textEditingController,)),
-
-                  !isEditingDesc ? IconButton(icon: Icon(Icons.edit), onPressed: () {
-                    setState(() {
-                      isEditingDesc = true;
-                      _textEditingController.text = _descText;
-                    });
-                  }):
-
-                  IconButton(icon: Icon(Icons.done), onPressed: () {
-                    setState(() {
-                      isEditingDesc = false;
-                      _descText = _textEditingController.text;
-                    });
-                    updateDesc();
-                  })
+                  !isEditingDesc
+                      ? Text(
+                          _descText,
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        )
+                      : Container(
+                          width: 200,
+                          child: TextField(
+                            controller: _textEditingController,
+                          )),
+                  !isEditingDesc
+                      ? IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () {
+                            setState(() {
+                              isEditingDesc = true;
+                              _textEditingController.text = _descText;
+                            });
+                          })
+                      : IconButton(
+                          icon: Icon(Icons.done),
+                          onPressed: () {
+                            setState(() {
+                              isEditingDesc = false;
+                              _descText = _textEditingController.text;
+                            });
+                            updateDesc();
+                          })
                 ],
               ),
-
               SizedBox(
                 height: 8,
               ),
@@ -420,24 +438,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 color: switchColor(
                     MyColors.lightLineBreak, MyColors.darkLineBreak),
               ),
-              ListView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                scrollDirection: Axis.vertical,
-                itemCount: _posts.length,
-                shrinkWrap: true,
-                itemBuilder: (BuildContext context, int index) {
-                  Post post = _posts[index];
-                  return FutureBuilder(
-                      future: DatabaseService.getUserWithId(post.authorId),
-                      builder: (BuildContext context, AsyncSnapshot snapshot) {
-                        if (!snapshot.hasData) {
-                          return SizedBox.shrink();
-                        }
-                        User author = snapshot.data;
-                        return PostItem(post: post, author: author);
-                      });
-                },
-              ),
+              _postsReady == true
+                  ? ListView.builder(
+                      physics: NeverScrollableScrollPhysics(),
+                      scrollDirection: Axis.vertical,
+                      itemCount: _posts.length,
+                      shrinkWrap: true,
+                      itemBuilder: (BuildContext context, int index) {
+                        Post post = _posts[index];
+                        return FutureBuilder(
+                            future:
+                                DatabaseService.getUserWithId(post.authorId),
+                            builder:
+                                (BuildContext context, AsyncSnapshot snapshot) {
+                              if (!snapshot.hasData) {
+                                return SizedBox.shrink();
+                              }
+                              User author = snapshot.data;
+                              return PostItem(post: post, author: author);
+                            });
+                      },
+                    )
+                  : Container(),
             ],
           ),
         ),
@@ -459,11 +481,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  updateName() async{
+  updateName() async {
     await usersRef.document(userId).updateData({'username': _nameText});
   }
 
-  updateDesc() async{
+  updateDesc() async {
     await usersRef.document(userId).updateData({'description': _descText});
   }
 
@@ -473,6 +495,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       _posts = posts;
       this.lastVisiblePostSnapShot = posts.last.timestamp;
+      _postsReady = true;
     });
   }
 

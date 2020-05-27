@@ -62,6 +62,7 @@ dependencies:
   pull_to_refresh: ^1.5.7
   readmore: ^1.0.0
   rate_my_app: ^0.6.1+2
+  page_transition: ^1.1.5
 
 dev_dependencies:
   flutter_test:
