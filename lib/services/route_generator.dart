@@ -17,6 +17,7 @@ import 'package:glitcher/screens/chats/group_details.dart';
 import 'package:glitcher/screens/games/game_screen.dart';
 import 'package:glitcher/screens/games/new_game.dart';
 import 'package:glitcher/screens/posts/add_comment.dart';
+import 'package:glitcher/screens/posts/new_post/create_post.dart';
 import 'package:glitcher/screens/posts/post_preview.dart';
 import 'package:glitcher/screens/posts/new_post.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
@@ -35,7 +36,7 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => AppPage());
 
       case '/new-post':
-        return MaterialPageRoute(builder: (_) => NewPost());
+        return MaterialPageRoute(builder: (_) => CreatePost());
 
       case '/user-profile':
         return MaterialPageRoute(
