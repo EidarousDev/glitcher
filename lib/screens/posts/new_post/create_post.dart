@@ -4,11 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
+import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/screens/home/home_screen.dart';
 import 'package:glitcher/screens/posts/new_post/widget/create_bottom_icon.dart';
 import 'package:glitcher/screens/posts/new_post/widget/create_post_image.dart';
@@ -26,6 +28,7 @@ class CreatePost extends StatefulWidget {
 }
 
 class _CreatePostReplyPageState extends State<CreatePost> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isScrollingDown = false;
   ScrollController scrollcontroller;
 
@@ -35,12 +38,13 @@ class _CreatePostReplyPageState extends State<CreatePost> {
   String selectedGame = "";
   GlobalKey<AutoCompleteTextFieldState<String>> autocompleteKey = GlobalKey();
   TextEditingController _textEditingController;
+  var _typeAheadController = TextEditingController();
 
   //YoutubePlayer
   bool _showYoutubeUrl = false;
   String _youtubeId;
 
-  bool canSubmit = true;
+  bool canSubmit = false;
 
   @override
   void dispose() {
@@ -77,13 +81,20 @@ class _CreatePostReplyPageState extends State<CreatePost> {
 
   /// Submit tweet to save in firebase database
   void _submitButton() async {
-    if (_textEditingController.text == null ||
-        _textEditingController.text.isEmpty ||
-        _textEditingController.text.length > Sizes.maxPostChars) {
+    if (selectedGame.isEmpty) {
+      AppUtil().customSnackBar(_scaffoldKey, 'You must choose a game category');
       return;
     }
+
     if (_textEditingController.text.isEmpty) {
-      Functions.showInSnackBar(context, widget.key, "Post can't be empty");
+      AppUtil().customSnackBar(_scaffoldKey, 'Post can\'t be empty');
+      return;
+    }
+
+    if (_textEditingController.text == null ||
+        _textEditingController.text.isEmpty ||
+        _textEditingController.text.length > Sizes.maxPostChars ||
+        selectedGame.isEmpty) {
       return;
     }
     glitcherLoader.showLoader(context);
@@ -132,6 +143,7 @@ class _CreatePostReplyPageState extends State<CreatePost> {
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
+        key: _scaffoldKey,
         appBar: AppBar(
           flexibleSpace: gradientAppBar(),
           title: Text('New Post'),
@@ -146,7 +158,9 @@ class _CreatePostReplyPageState extends State<CreatePost> {
               },
               icon: Icon(
                 Icons.send,
-                color: canSubmit ? MyColors.darkPrimary : MyColors.darkGrey,
+                color: canSubmit
+                    ? switchColor(MyColors.lightPrimary, MyColors.darkPrimary)
+                    : MyColors.darkGrey,
               ),
             )
           ],
@@ -269,6 +283,43 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                 ),
               )
             ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 8, bottom: 8),
+            child: TypeAheadFormField(
+              textFieldConfiguration: TextFieldConfiguration(
+                  controller: viewState._typeAheadController,
+                  decoration: InputDecoration(
+                      icon: Icon(Icons.videogame_asset),
+                      hintStyle: TextStyle(
+                        color: MyColors.darkGrey,
+                      ),
+                      hintText: 'Enter Game name')),
+              suggestionsCallback: (pattern) {
+                return DatabaseService.searchGames(pattern);
+              },
+              itemBuilder: (context, suggestion) {
+                Game game = suggestion as Game;
+
+                return ListTile(
+                  title: Text(game.fullName),
+                );
+              },
+              onSuggestionSelected: (suggestion) {
+                viewState._typeAheadController.text =
+                    (suggestion as Game).fullName;
+                viewState.setState(() {
+                  viewState.selectedGame = viewState._typeAheadController.text;
+                });
+              },
+              validator: (value) {
+                if (value.isEmpty) {
+                  return 'Please select a game';
+                }
+                return '';
+              },
+              onSaved: (value) => viewState.selectedGame = value,
+            ),
           ),
           Flexible(
             child: Stack(

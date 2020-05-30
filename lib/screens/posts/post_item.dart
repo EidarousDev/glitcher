@@ -18,6 +18,7 @@ import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
+import 'package:glitcher/widgets/post_bottom_sheet.dart';
 import 'package:readmore/readmore.dart';
 import 'package:share/share.dart';
 import 'package:video_player/video_player.dart';
@@ -63,6 +64,9 @@ class _PostItemState extends State<PostItem> {
   _buildPost(Post post, User author) {
     initLikes(post);
     return GestureDetector(
+      onLongPress: () {
+        onLongPressedPost(context, post.text);
+      },
       onTap: () {
         Navigator.of(context).pushNamed('/post',
             arguments: {'postId': post.id, 'commentsNo': post.commentsCount});
@@ -108,9 +112,7 @@ class _PostItemState extends State<PostItem> {
                 });
               },
             ),
-            trailing: InkWell(
-                onTap: () => dropDownOptions(),
-                child: Icon(Icons.keyboard_arrow_down)),
+            trailing: PostBottomSheet().postOptionIcon(context, post),
           ),
           Row(
             children: <Widget>[
@@ -200,8 +202,10 @@ class _PostItemState extends State<PostItem> {
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Text(
                           "${Functions.formatTimestamp(post.timestamp)}",
-                          style:
-                              TextStyle(fontSize: 13.0, color: Colors.white30),
+                          style: TextStyle(
+                              fontSize: 13.0,
+                              color: switchColor(
+                                  MyColors.darkGrey, Colors.white70)),
                         ),
                       ),
                     ],
@@ -652,14 +656,28 @@ class _PostItemState extends State<PostItem> {
   }
 
   dropDownOptions() {
-    if(HomeScreen.isBottomSheetVisible){
+    if (HomeScreen.isBottomSheetVisible) {
       Navigator.pop(context);
-    }else{
+    } else {
       HomeScreen.showMyBottomSheet(context);
     }
 
     setState(() {
       HomeScreen.isBottomSheetVisible = !HomeScreen.isBottomSheetVisible;
     });
+  }
+
+  void onLongPressedPost(BuildContext context, String postText) {
+    var text = ClipboardData(text: postText);
+    Clipboard.setData(text);
+    Scaffold.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.black,
+        content: Text(
+          'Post copied to clipboard',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+    );
   }
 }
