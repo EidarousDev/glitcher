@@ -32,22 +32,19 @@ class AppUtil {
 
   static Future chooseImage() async {
     File image = await ImagePicker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 80);
+        source: ImageSource.gallery, imageQuality: 80);
     return image;
-
   }
 
- static chooseVideo() async {
+  static chooseVideo() async {
     await ImagePicker.pickVideo(source: ImageSource.gallery);
   }
 
   static Future uploadFile(File file, BuildContext context, String path) async {
     if (file == null) return;
 
-    StorageReference storageReference = FirebaseStorage.instance
-        .ref()
-        .child(path);
+    StorageReference storageReference =
+        FirebaseStorage.instance.ref().child(path);
 
     StorageUploadTask uploadTask = storageReference.putFile(file);
 
@@ -56,5 +53,23 @@ class AppUtil {
     String url = await storageReference.getDownloadURL();
 
     return url;
+  }
+
+  void customSnackBar(GlobalKey<ScaffoldState> _scaffoldKey, String msg,
+      {double height = 30, Color backgroundColor = Colors.black}) {
+    if (_scaffoldKey == null || _scaffoldKey.currentState == null) {
+      return;
+    }
+    _scaffoldKey.currentState.hideCurrentSnackBar();
+    final snackBar = SnackBar(
+      backgroundColor: backgroundColor,
+      content: Text(
+        msg,
+        style: TextStyle(
+          color: Colors.white,
+        ),
+      ),
+    );
+    _scaffoldKey.currentState.showSnackBar(snackBar);
   }
 }

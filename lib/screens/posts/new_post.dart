@@ -50,8 +50,7 @@ class _NewPostState extends State<NewPost> {
   bool _loading = false;
 
   String selectedGame = "";
-  GlobalKey<AutoCompleteTextFieldState<String>> autocompleteKey =
-  new GlobalKey();
+  GlobalKey<AutoCompleteTextFieldState<String>> autocompleteKey = GlobalKey();
 
   var _typeAheadController = TextEditingController();
 
@@ -117,54 +116,51 @@ class _NewPostState extends State<NewPost> {
   }
 
   Future uploadPost(String text) async {
-    uploadPost(String text) async {
-      if (mainTextController.text.isEmpty) {
-        Functions.showInSnackBar(context, _scaffoldKey, "Post can't be empty");
-        return;
-      }
-
-      if (selectedGame.isEmpty) {
-        Functions.showInSnackBar(
-            context, _scaffoldKey, "You have to choose a game topic");
-        return;
-      }
-
-
-      setState(() {
-        _loading = true;
-      });
-
-      String postId = randomAlphaNumeric(20);
-
-      if (_video != null) {
-        _uploadedFileURL =
-        await AppUtil.uploadFile(_video, context, 'posts_videos/' + postId);
-      } else if (_image != null) {
-        //await compressAndUploadFile(_image, 'glitchertemp.jpg');
-        _uploadedFileURL =
-        await AppUtil.uploadFile(_image, context, 'posts_images/' + postId);
-      }
-
-      await postsRef.document(postId).setData({
-        'owner': Constants.currentUserID,
-        'text': text,
-        'youtubeId': _youtubeId,
-        'video': _video != null ? _uploadedFileURL : null,
-        'image': _image != null ? _uploadedFileURL : null,
-        'likes': 0,
-        'dislikes': 0,
-        'comments': 0,
-        'timestamp': FieldValue.serverTimestamp(),
-        'game': selectedGame
-      });
-
-      setState(() {
-        _loading = false;
-        //Navigator.pop(context);
-      });
-      pushHomeScreen(context);
+    if (mainTextController.text.isEmpty) {
+      Functions.showInSnackBar(context, _scaffoldKey, "Post can't be empty");
+      return;
     }
 
+    if (selectedGame.isEmpty) {
+      Functions.showInSnackBar(
+          context, _scaffoldKey, "You have to choose a game topic");
+      return;
+    }
+
+    setState(() {
+      _loading = true;
+    });
+
+    String postId = randomAlphaNumeric(20);
+
+    if (_video != null) {
+      _uploadedFileURL =
+          await AppUtil.uploadFile(_video, context, 'posts_videos/' + postId);
+    } else if (_image != null) {
+      //await compressAndUploadFile(_image, 'glitchertemp.jpg');
+      _uploadedFileURL =
+          await AppUtil.uploadFile(_image, context, 'posts_images/' + postId);
+    }
+
+    await postsRef.document(postId).setData({
+      'owner': Constants.currentUserID,
+      'text': text,
+      'youtubeId': _youtubeId,
+      'video': _video != null ? _uploadedFileURL : null,
+      'image': _image != null ? _uploadedFileURL : null,
+      'likes': 0,
+      'dislikes': 0,
+      'comments': 0,
+      'timestamp': FieldValue.serverTimestamp(),
+      'game': selectedGame
+    });
+
+    setState(() {
+      _loading = false;
+      //Navigator.pop(context);
+    });
+    pushHomeScreen(context);
+  }
 
 //  // 2. compress file and get file.
 //  compressAndUploadFile(File file, String targetPath) async {
@@ -194,7 +190,6 @@ class _NewPostState extends State<NewPost> {
 //    print(file.lengthSync());
 //    return result;
 //  }
-  }
 
   Widget _buildWidget() {
     return WillPopScope(
@@ -217,14 +212,10 @@ class _NewPostState extends State<NewPost> {
                   maxLengthEnforced: true,
                   autofocus: true,
                   autocorrect: true,
-
                   controller: mainTextController,
                   decoration: new InputDecoration.collapsed(
                       hintText: 'What\'s in your mind?'),
-
-                  style: TextStyle(
-                      fontSize: 18
-                  ),
+                  style: TextStyle(fontSize: 18),
                 ),
               ),
               Divider(
@@ -268,39 +259,39 @@ class _NewPostState extends State<NewPost> {
               ),
               _showYoutubeUrl
                   ? Row(
-                children: <Widget>[
-                  Expanded(
-                    flex: 11,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        controller: uTubeTextController,
-                        decoration: new InputDecoration.collapsed(
-                            hintText: 'Paste YOUTUBE Url here'),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Container(
-                      margin: EdgeInsets.only(right: 3),
-                      child: RaisedButton(
-                          child: Text('OK'),
-                          textColor: Colors.white,
-                          color: MyColors.darkPrimary,
-                          onPressed: () {
-                            setState(() {
-                              _youtubeId = YoutubePlayer.convertUrlToId(
-                                  uTubeTextController.text);
-                              _showYoutubeUrl = false;
-                              _video = null;
-                              _image = null;
-                            });
-                          }),
-                    ),
-                  )
-                ],
-              )
+                      children: <Widget>[
+                        Expanded(
+                          flex: 11,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: TextField(
+                              controller: uTubeTextController,
+                              decoration: new InputDecoration.collapsed(
+                                  hintText: 'Paste YOUTUBE Url here'),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            margin: EdgeInsets.only(right: 3),
+                            child: RaisedButton(
+                                child: Text('OK'),
+                                textColor: Colors.white,
+                                color: MyColors.darkPrimary,
+                                onPressed: () {
+                                  setState(() {
+                                    _youtubeId = YoutubePlayer.convertUrlToId(
+                                        uTubeTextController.text);
+                                    _showYoutubeUrl = false;
+                                    _video = null;
+                                    _image = null;
+                                  });
+                                }),
+                          ),
+                        )
+                      ],
+                    )
                   : Container(),
               _video != null ? playerWidget : Container(),
               //TODO: Fix the YouTube Player
@@ -325,7 +316,6 @@ class _NewPostState extends State<NewPost> {
 //                  )
 //                : Container(),
               _image != null ? Image.file(_image) : Container(),
-
 
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -376,8 +366,8 @@ class _NewPostState extends State<NewPost> {
                             onPressed: () async {
                               PermissionsService().requestStoragePermission(
                                   onPermissionDenied: () {
-                                    print('Permission has been denied');
-                                  });
+                                print('Permission has been denied');
+                              });
                               _image = await AppUtil.chooseImage();
                             })),
                     flex: 1,
@@ -416,9 +406,9 @@ class _NewPostState extends State<NewPost> {
           _loading
               ? LoaderTwo()
               : Container(
-            width: 0,
-            height: 0,
-          ),
+                  width: 0,
+                  height: 0,
+                ),
         ],
       ),
     );
