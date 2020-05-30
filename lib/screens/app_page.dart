@@ -35,6 +35,7 @@ class _AppPageState extends State<AppPage> {
   String username;
   String profileImageUrl;
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
 
   PackageInfo packageInfo = PackageInfo(
@@ -49,7 +50,8 @@ class _AppPageState extends State<AppPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Constants.connectionState != ConnectivityResult.none ? PageView(
+      key: _scaffoldKey,
+      body: PageView(
         physics: NeverScrollableScrollPhysics(),
         controller: _pageController,
         onPageChanged: onPageChanged,
@@ -59,8 +61,6 @@ class _AppPageState extends State<AppPage> {
           NotificationsScreen(),
           ProfileScreen(Constants.currentUserID),
         ],
-      ): Container(
-        child: Center(child: Text('No intenet')),
       ),
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
@@ -140,30 +140,16 @@ class _AppPageState extends State<AppPage> {
         Constants.connectionState = result;
       });
 
-      print('internet');
-//      SnackBar snackBar;
-//      // Got a new connectivity status!
-//      if(result == ConnectivityResult.none){
-//
-//        snackBar = SnackBar(
-//          content: Text(
-//            'No internet connection',
-//            style: TextStyle(color: Colors.white),
-//          ),
-//          backgroundColor: Colors.blue,
-//          duration: Duration(hours: 1),
-//          action: SnackBarAction(
-//            label: 'Try again',
-//            textColor: Colors.white,
-//            onPressed: () {},
-//          ),
-//        );
-//
-//        Scaffold.of(context).showSnackBar(snackBar);
-//      }
-//      else{
-//        Scaffold.of(context).hideCurrentSnackBar();
-//      }
+      // Got a new connectivity status!
+      if(result == ConnectivityResult.none){
+        print('No internet');
+        Functions.showInFixedSnackBar(context, _scaffoldKey, 'No internet connection.');
+
+      }
+      else{
+        _scaffoldKey.currentState.hideCurrentSnackBar();
+        //Scaffold.of(context).hideCurrentSnackBar();
+      }
     });
   }
 
