@@ -6,6 +6,7 @@ import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/widgets/fluttertoast.dart';
 
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AppUtil {
   static final AppUtil _instance = new AppUtil.internal();
@@ -19,6 +20,14 @@ class AppUtil {
 
   bool isNetworkWorking() {
     return networkStatus;
+  }
+
+  static launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      print('Could not launch $url');
+    }
   }
 
   showToast(String msg) {

@@ -11,14 +11,17 @@ import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/game_model.dart';
+import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/home/home_screen.dart';
 import 'package:glitcher/screens/posts/new_post/widget/create_bottom_icon.dart';
 import 'package:glitcher/screens/posts/new_post/widget/create_post_image.dart';
 import 'package:glitcher/screens/posts/new_post/widget/widget_view.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
+import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:random_string/random_string.dart';
 
@@ -104,6 +107,8 @@ class _CreatePostReplyPageState extends State<CreatePost> {
     /// After sucessfull image upload to firebase storage it returns image path
     /// Add this image path to tweet model and save to firebase database
     String postId = randomAlphaNumeric(20);
+
+    await checkIfContainsMention(_textEditingController.text, postId);
 
     if (_video != null) {
       _uploadedFileURL =
@@ -224,9 +229,28 @@ class _CreatePostReplyPageState extends State<CreatePost> {
         ) ??
         false;
   }
+
+  checkIfContainsMention(String post, String postId) async {
+    post.split(' ').forEach((word) async {
+      if (word.startsWith('@')) {
+        User user =
+        await DatabaseService.getUserWithUsername(word.substring(1));
+
+        await NotificationHandler.sendNotification(
+            user.id,
+            'New post mention',
+            Constants.loggedInUser.username + ' mentioned you in a post',
+            postId,
+            'mention');
+      }
+    });
+  }
 }
 
 class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
+  String _postText = '';
+  var words = [];
+
   _ComposeTweet(this.viewState) : super(viewState);
 
   final _CreatePostReplyPageState viewState;
@@ -256,8 +280,10 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                 width: 10,
               ),
               Expanded(
-                child: TextField(
+                child: TextFormField(
                   onChanged: (text) {
+
+
                     if (text.length > Sizes.maxPostChars) {
                       viewState.setState(() {
                         viewState.canSubmit = false;
@@ -268,6 +294,14 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                       });
                     }
                     // Mention Users
+                    viewState.setState(() {
+                      words = text.split(' ');
+                      _postText = words.length > 0 &&
+                          words[words.length - 1].startsWith('@')
+                          ? words[words.length - 1]
+                          : '';
+                      //_postText = text;
+                    });
                   },
                   maxLength: Sizes.maxPostChars,
                   minLines: 5,
@@ -281,7 +315,38 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                       hintText: 'What\'s in your mind?'),
                   style: TextStyle(fontSize: 18),
                 ),
+              ),
+              _postText.length > 1
+                  ? ListView.builder(
+                itemCount: Constants.userFriends.length,
+                itemBuilder: (context, index) {
+                  String s = Constants.userFriends[index].username;
+                  print('username:' + s);
+                  if (('@' + s).contains(_postText))
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: NetworkImage(
+                            Constants.userFriends[index].profileImageUrl),
+                      ),
+                      title: Text(Constants.userFriends[index].username),
+                      onTap: () {
+                        String tmp =
+                        _postText.substring(1, _postText.length);
+                        viewState.setState(() {
+                          _postText = '';
+                          viewState._textEditingController.text += s
+                              .substring(
+                              s.indexOf(tmp) + tmp.length, s.length)
+                              .replaceAll(' ', '_');
+                        });
+                      },
+                    );
+
+                  return SizedBox();
+                },
+                shrinkWrap: true,
               )
+                  : SizedBox(),
             ],
           ),
           Padding(
