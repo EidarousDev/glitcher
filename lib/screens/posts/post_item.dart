@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:audiofileplayer/audiofileplayer.dart';
 import 'package:chewie/chewie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
@@ -23,6 +24,7 @@ import 'package:readmore/readmore.dart';
 import 'package:share/share.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:glitcher/widgets/custom_url_text.dart';
 
 class PostItem extends StatefulWidget {
   final Post post;
@@ -124,16 +126,27 @@ class _PostItemState extends State<PostItem> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                      ReadMoreText(
-                        post.text ?? '',
-                        trimLines: 2,
-                        colorClickableText: Colors.pink,
-                        trimMode: TrimMode.Line,
-                        trimCollapsedText: ' ...Show more',
-                        trimExpandedText: ' show less',
+//                      ReadMoreText(
+//                        post.text ?? '',
+//                        trimLines: 2,
+//                        colorClickableText: Colors.pink,
+//                        trimMode: TrimMode.Line,
+//                        trimCollapsedText: ' ...Show more',
+//                        trimExpandedText: ' show less',
+//                        style: TextStyle(
+//                          fontSize: 16,
+//                        ),
+//                      ),
+                      UrlText(
+                        text: post.text,
+                        onMentionPressed: mentionedUserProfile(post.text),
                         style: TextStyle(
+                          color: Colors.white,
                           fontSize: 16,
+                          fontWeight: FontWeight.w400,
                         ),
+                        urlStyle: TextStyle(color: Colors.blue, fontWeight: FontWeight.w400),
+
                       ),
                       SizedBox(
                         height: 8.0,
@@ -642,7 +655,39 @@ class _PostItemState extends State<PostItem> {
                 size: 22.0,
                 color: MyColors.darkAccent,
               ),
-              onTap: () {}),
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: new AlertDialog(
+                      title: new Text('Are you sure?'),
+                      content:
+                          new Text('Do you really want to delete this post?'),
+                      actions: <Widget>[
+                        new GestureDetector(
+                          onTap: () => Navigator.of(context).pop(false),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text("NO"),
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                        new GestureDetector(
+                          onTap: () {
+                            DatabaseService.deletePost(this.widget.post.id);
+                            Navigator.of(context).pushReplacementNamed('/home');
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text("YES"),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
           InkWell(
               child: Icon(
                 Icons.edit,
@@ -653,6 +698,20 @@ class _PostItemState extends State<PostItem> {
         ],
       ),
     );
+  }
+
+  mentionedUserProfile(String w){
+    //TODO: Implement Mentioned user profile - Get UID from string then pass it to the navigator
+    var words = w.split(' ');
+    String username = words.length > 0 &&
+        words[words.length - 1].startsWith('@')
+        ? words[words.length - 1]
+        : '';
+    username = username.substring(1);
+//    User user = await DatabaseService.getUserWithUsername(username);
+//    Navigator.of(context)
+//        .pushNamed('/user-profile', arguments: {'userId': user.id});
+    print(username);
   }
 
   dropDownOptions() {

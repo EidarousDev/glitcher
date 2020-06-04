@@ -340,9 +340,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: TextField(
                             controller: _textEditingController,
                           )),
-                  !isEditingName
+                  userId == Constants.currentUserID ? !isEditingName
                       ? IconButton(
-                          icon: Icon(Icons.edit),
+                          icon: Icon(Icons.edit, size: 18,),
                           onPressed: () {
                             setState(() {
                               isEditingName = true;
@@ -350,7 +350,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             });
                           })
                       : IconButton(
-                          icon: Icon(Icons.done),
+                          icon: Icon(Icons.done, size: 18,),
                           onPressed: () {
                             setState(() {
                               isEditingName = false;
@@ -358,7 +358,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             });
 
                             updateName();
-                          })
+                          }) : Container(),
                 ],
               ),
               SizedBox(
@@ -378,9 +378,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: TextField(
                             controller: _textEditingController,
                           )),
-                  !isEditingDesc
+                  userId == Constants.currentUserID ? !isEditingDesc
                       ? IconButton(
-                          icon: Icon(Icons.edit),
+                          icon: Icon(Icons.edit, size: 18,),
                           onPressed: () {
                             setState(() {
                               isEditingDesc = true;
@@ -388,14 +388,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             });
                           })
                       : IconButton(
-                          icon: Icon(Icons.done),
+                          icon: Icon(Icons.done, size: 18,),
                           onPressed: () {
                             setState(() {
                               isEditingDesc = false;
                               _descText = _textEditingController.text;
                             });
                             updateDesc();
-                          })
+                          }) : Container(),
                 ],
               ),
               SizedBox(
@@ -579,7 +579,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       _loading = false;
       _isBtnEnabled = true;
-      AppUtil().showToast('You started following ' + _nameText);
+      //AppUtil().showToast('You started following ' + _nameText);
       _followers++;
       isFollowing = true;
     });
@@ -681,7 +681,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
     }
 
-    showDialog(
+    await showDialog(
         barrierDismissible: true,
         child: Container(
           width: Sizes.sm_profile_image_w,
@@ -697,18 +697,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _coverImageUrl = null;
               });
 
-              String url = await AppUtil.uploadFile(
-                  _coverImageFile, context, 'cover_img/$userId');
+              String url =
+              await AppUtil.uploadFile(_coverImageFile, context, 'cover_img/$userId');
               setState(() {
                 _coverImageUrl = url;
                 _coverImageFile = null;
               });
+
+              await usersRef.document(userId).updateData({'cover_url': _coverImageUrl});
 
               Navigator.of(context).pop();
             },
           ),
         ),
         context: context);
+
   }
 
   profileEdit() async {
@@ -749,6 +752,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _profileImageUrl = url;
                 _profileImageFile = null;
               });
+              
+              await usersRef.document(userId).updateData({'profile_url': _profileImageUrl});
 
               Navigator.of(context).pop();
             },

@@ -22,6 +22,14 @@ class AppUtil {
     return networkStatus;
   }
 
+  static launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      print('Could not launch $url');
+    }
+  }
+
   showToast(String msg) {
     FlutterToast.showToast(
         msg: msg,
