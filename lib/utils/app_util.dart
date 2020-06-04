@@ -6,6 +6,7 @@ import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/widgets/fluttertoast.dart';
 
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AppUtil {
   static final AppUtil _instance = new AppUtil.internal();
@@ -71,5 +72,28 @@ class AppUtil {
       ),
     );
     _scaffoldKey.currentState.showSnackBar(snackBar);
+  }
+
+  String getSocialLinks(String url) {
+    if (url != null && url.isNotEmpty) {
+      url = url.contains("https://www") || url.contains("http://www")
+          ? url
+          : url.contains("www") &&
+                  (!url.contains('https') && !url.contains('http'))
+              ? 'https://' + url
+              : 'https://www.' + url;
+    } else {
+      return null;
+    }
+    print('Launching URL : $url');
+    return url;
+  }
+
+  launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      print('Could not launch $url');
+    }
   }
 }

@@ -68,8 +68,8 @@ class CustomScreenLoader extends StatelessWidget {
   const CustomScreenLoader(
       {Key key,
       this.backgroundColor = const Color(0xfff8f8f8),
-      this.height = 30,
-      this.width = 30})
+      this.height = 200,
+      this.width = 200})
       : super(key: key);
 
   @override
@@ -81,7 +81,7 @@ class CustomScreenLoader extends StatelessWidget {
         width: height,
         alignment: Alignment.center,
         child: Container(
-          padding: EdgeInsets.all(50),
+          padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.all(Radius.circular(10))),
@@ -96,9 +96,9 @@ class CustomScreenLoader extends StatelessWidget {
                       strokeWidth: 2,
                     ),
               Image.asset(
-                'assets/images/icon-480.png',
-                height: 30,
-                width: 30,
+                'assets/images/glitcher_loader.gif',
+                height: 200,
+                width: 200,
               )
             ],
           ),

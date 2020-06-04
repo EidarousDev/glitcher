@@ -241,9 +241,8 @@ class _PostPreviewState extends State<PostPreview>
         ),
         onPressed: () {
           Navigator.of(context).pushNamed('/add-comment', arguments: {
-            'username': _author.name,
-            'userId': _author.id,
-            'postId': widget.postId,
+            'post': _currentPost,
+            'user': _author,
           });
         },
       ),

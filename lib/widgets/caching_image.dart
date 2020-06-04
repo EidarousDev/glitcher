@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_gifs/loading_gifs.dart';
 
 //enum CacheImageShape {
 //  Rounded,
@@ -62,8 +63,12 @@ class _CacheThisImageState extends State<CacheThisImage> {
                       DecorationImage(image: imageProvider, fit: BoxFit.cover),
                 ),
               ),
-              placeholder: (context, loggedInProfileImageURL) =>
-                  CircularProgressIndicator(),
+              placeholder: (context, loggedInProfileImageURL) => Center(
+                  child: Image.asset(
+                'assets/images/glitcher_loader.gif',
+                height: 80,
+                width: 80,
+              )),
               errorWidget: (context, loggedInProfileImageURL, error) =>
                   Icon(Icons.error),
             )

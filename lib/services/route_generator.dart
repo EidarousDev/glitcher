@@ -16,7 +16,7 @@ import 'package:glitcher/screens/chats/new_group.dart';
 import 'package:glitcher/screens/chats/group_details.dart';
 import 'package:glitcher/screens/games/game_screen.dart';
 import 'package:glitcher/screens/games/new_game.dart';
-import 'package:glitcher/screens/posts/add_comment.dart';
+import 'package:glitcher/screens/posts/comments/add_comment.dart';
 import 'package:glitcher/screens/posts/new_post/create_post.dart';
 import 'package:glitcher/screens/posts/post_preview.dart';
 import 'package:glitcher/screens/posts/new_post.dart';
@@ -59,11 +59,9 @@ class RouteGenerator {
       case '/add-comment':
         // Validation of correct data type
         return MaterialPageRoute(
-          builder: (_) => AddCommentScreen(
-            username: args['username'],
-            userId: args['userId'],
-            postId: args['postId'],
-            profileImageUrl: args['profileImageUrl'],
+          builder: (_) => AddComment(
+            post: args['post'],
+            user: args['user'],
           ),
         );
 
