@@ -3,11 +3,13 @@ import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/models/post_model.dart';
+import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
 
 class PostBottomSheet {
-  Widget postOptionIcon(BuildContext context, Post post) {
+  Widget postOptionIcon(BuildContext context, Post post, int postIndex) {
     return customInkWell(
         radius: BorderRadius.circular(20),
         context: context,
@@ -25,6 +27,7 @@ class PostBottomSheet {
   }
 
   void _openbottomSheet(BuildContext context, Post post) async {
+    User user = await DatabaseService.getUserWithId(post.authorId);
     bool isMyPost = Constants.currentUserID == post.authorId;
     await showModalBottomSheet(
       backgroundColor: Colors.transparent,
@@ -42,12 +45,13 @@ class PostBottomSheet {
                 topRight: Radius.circular(20),
               ),
             ),
-            child: _postOptions(context, isMyPost, post));
+            child: _postOptions(context, isMyPost, post, user));
       },
     );
   }
 
-  Widget _postOptions(BuildContext context, bool isMyPost, Post post) {
+  Widget _postOptions(
+      BuildContext context, bool isMyPost, Post post, User user) {
     return Column(
       children: <Widget>[
         Container(
@@ -95,21 +99,21 @@ class PostBottomSheet {
             : _widgetBottomSheetRow(
                 context,
                 Icon(Icons.indeterminate_check_box),
-                text: 'Unfollow ${post.authorId}',
+                text: 'Unfollow ${user.username}',
               ),
         isMyPost
             ? Container()
             : _widgetBottomSheetRow(
                 context,
                 Icon(Icons.volume_mute),
-                text: 'Mute ${post.authorId}',
+                text: 'Mute ${user.username}',
               ),
         isMyPost
             ? Container()
             : _widgetBottomSheetRow(
                 context,
                 Icon(Icons.block),
-                text: 'Block ${post.authorId}',
+                text: 'Block ${user.username}',
               ),
         isMyPost
             ? Container()
@@ -158,9 +162,39 @@ class PostBottomSheet {
     );
   }
 
-  void _deletePost(BuildContext context, String postId) {
+  void _deletePost(BuildContext context, String postId) async {
+    await showDialog(
+      context: context,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: new AlertDialog(
+          title: new Text('Are you sure?'),
+          content: new Text('Do you really want to delete this post?'),
+          actions: <Widget>[
+            new GestureDetector(
+              onTap: () =>
+                  // CLose bottom sheet
+                  Navigator.of(context).pop(),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text("NO"),
+              ),
+            ),
+            SizedBox(height: 16),
+            new GestureDetector(
+              onTap: () {
+                DatabaseService.deletePost(postId);
+                Navigator.of(context).pop();
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text("YES"),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
     print('deleting post!');
-    // CLose bottom sheet
-    Navigator.of(context).pop();
   }
 }

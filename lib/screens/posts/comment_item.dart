@@ -1,11 +1,14 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/constants/sizes.dart';
+import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
+import 'package:glitcher/widgets/caching_image.dart';
 
 class CommentItem extends StatefulWidget {
   final Comment comment;
@@ -27,24 +30,21 @@ class _CommentItemState extends State<CommentItem> {
         children: <Widget>[
           ListTile(
             leading: InkWell(
-                child: widget.commenter.profileImageUrl != null
-                    ? CircleAvatar(
-                        radius: 30.0,
-                        backgroundImage: NetworkImage(widget.commenter
-                            .profileImageUrl), // no matter how big it is, it won't overflow
-                      )
-                    : CircleAvatar(
-                        backgroundImage:
-                            AssetImage('assets/images/default_profile.png'),
-                      ),
+                child: CacheThisImage(
+                  imageUrl: widget.commenter.profileImageUrl,
+                  imageShape: BoxShape.circle,
+                  width: Sizes.sm_profile_image_w,
+                  height: Sizes.sm_profile_image_h,
+                  defaultAssetImage: Strings.default_profile_image,
+                ),
                 onTap: () {
                   Navigator.of(context).pushNamed('/user-profile', arguments: {
                     'userId': widget.comment.commenterID,
                   });
                 }),
             title: InkWell(
-              child: widget.commenter.name == null
-                  ? ''
+              child: widget.commenter.username == null
+                  ? Text('')
                   : RichText(
                       text: TextSpan(
                         // Note: Styles for TextSpans must be explicitly defined.
@@ -54,14 +54,17 @@ class _CommentItemState extends State<CommentItem> {
                           color: MyColors.darkPrimary,
                         ),
                         children: <TextSpan>[
-                          TextSpan(text: '${widget.commenter.name}'),
                           TextSpan(
                               text: ' @${widget.commenter.username}',
-                              style: TextStyle(color: MyColors.darkGrey)),
+                              style: TextStyle(
+                                  color: switchColor(MyColors.lightPrimary,
+                                      MyColors.darkPrimary))),
                           TextSpan(
                               text:
                                   ' - ${Functions.formatCommentsTimestamp(widget.comment.timestamp)}',
-                              style: TextStyle(color: MyColors.darkAccent)),
+                              style: TextStyle(
+                                  color: switchColor(
+                                      MyColors.darkGrey, MyColors.darkGrey))),
                         ],
                       ),
                     ),
@@ -72,7 +75,7 @@ class _CommentItemState extends State<CommentItem> {
               },
             ),
             subtitle: widget.comment.text == null
-                ? ''
+                ? Text('')
                 : Text.rich(
                     TextSpan(
                         text: '',
@@ -84,9 +87,7 @@ class _CommentItemState extends State<CommentItem> {
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () => mentionedUserProfile(w),
                                 )
-                              : TextSpan(
-                                  text: ' ' + w,
-                                  style: TextStyle(color: Colors.black));
+                              : TextSpan(text: ' ' + w);
                         }).toList()),
                   ),
             isThreeLine: true,

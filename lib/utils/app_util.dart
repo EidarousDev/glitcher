@@ -96,12 +96,4 @@ class AppUtil {
     print('Launching URL : $url');
     return url;
   }
-
-  launchURL(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      print('Could not launch $url');
-    }
-  }
 }

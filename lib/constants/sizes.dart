@@ -23,7 +23,9 @@ class Sizes {
   static const double appbar_offset_h = 1.0; // horizontal offest
   static const double appbar_offset_v = 1.0;
 
-  static const int maxPostChars = 289; // vertical   offset
+  static const int maxPostChars = 289;
+
+  static const int postExcerpt = 150; // vertical   offset
 
   static double fullWidth(BuildContext context) {
     // print(MediaQuery.of(context).size.width.toString());

@@ -1,36 +1,37 @@
 import 'dart:typed_data';
+
 import 'package:audiofileplayer/audiofileplayer.dart';
 import 'package:chewie/chewie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
+import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/home/home_screen.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/services/share_link.dart';
-import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
+import 'package:glitcher/widgets/custom_url_text.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
 import 'package:glitcher/widgets/post_bottom_sheet.dart';
-import 'package:readmore/readmore.dart';
 import 'package:share/share.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-import 'package:glitcher/widgets/custom_url_text.dart';
 
 class PostItem extends StatefulWidget {
   final Post post;
   final User author;
+  final int postIndex;
 
-  PostItem({Key key, @required this.post, @required this.author})
+  PostItem({Key key, @required this.post, @required this.author, @required this.postIndex})
       : super(key: key);
   @override
   _PostItemState createState() => _PostItemState();
@@ -54,6 +55,12 @@ class _PostItemState extends State<PostItem> {
   bool isDislikedEnabled = true;
   var likes = [];
   var dislikes = [];
+
+  String firstHalf;
+  String secondHalf;
+  bool flag = true;
+  Game currentGame;
+  final number = ValueNotifier(0);
 
   @override
   Widget build(BuildContext context) {
@@ -109,13 +116,16 @@ class _PostItemState extends State<PostItem> {
                     color: MyColors.darkGrey,
                   )),
               onTap: () {
-                Navigator.of(context).pushNamed('/user-profile', arguments: {
-                  'userId': author.id,
+                print('currentGame : ${currentGame.id}');
+                Navigator.of(context).pushNamed('/game-screen', arguments: {
+                  'game': currentGame,
                 });
               },
             ),
-            trailing: PostBottomSheet().postOptionIcon(context, post),
-          ),
+            trailing: ValueListenableBuilder<int>(valueListenable: number, builder: (context, value, child){
+              return PostBottomSheet().postOptionIcon(context, post, widget.postIndex);
+            },
+          ),),
           Row(
             children: <Widget>[
               Expanded(
@@ -126,27 +136,55 @@ class _PostItemState extends State<PostItem> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-//                      ReadMoreText(
-//                        post.text ?? '',
-//                        trimLines: 2,
-//                        colorClickableText: Colors.pink,
-//                        trimMode: TrimMode.Line,
-//                        trimCollapsedText: ' ...Show more',
-//                        trimExpandedText: ' show less',
-//                        style: TextStyle(
-//                          fontSize: 16,
-//                        ),
-//                      ),
-                      UrlText(
-                        text: post.text,
-                        onMentionPressed: mentionedUserProfile(post.text),
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
+                      secondHalf.isEmpty
+                          ? UrlText(
+                              context: context,
+                              text: post.text,
+                              onMentionPressed: (text) =>
+                                  mentionedUserProfile(post.text),
+                              style: TextStyle(
+                                color: switchColor(Colors.black, Colors.white),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                              ),
+                              urlStyle: TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.w400),
+                            )
+                          : UrlText(
+                              context: context,
+                              text: flag
+                                  ? (firstHalf + '...')
+                                  : (firstHalf + secondHalf),
+                              onMentionPressed: (text) =>
+                                  mentionedUserProfile(post.text),
+                              style: TextStyle(
+                                color: switchColor(Colors.black, Colors.white),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                              ),
+                              urlStyle: TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.w400),
+                            ),
+                      InkWell(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: <Widget>[
+                            secondHalf.isEmpty
+                                ? Text('')
+                                : Text(
+                                    flag ? 'Show more' : 'Show less',
+                                    style:
+                                        TextStyle(color: MyColors.darkPrimary),
+                                  )
+                          ],
                         ),
-                        urlStyle: TextStyle(color: Colors.blue, fontWeight: FontWeight.w400),
-
+                        onTap: () {
+                          setState(() {
+                            flag = !flag;
+                          });
+                        },
                       ),
                       SizedBox(
                         height: 8.0,
@@ -450,6 +488,16 @@ class _PostItemState extends State<PostItem> {
   void initState() {
     _loadAudioByteData();
     super.initState();
+
+    setCurrentGame();
+    if (widget.post.text.length > Sizes.postExcerpt) {
+      firstHalf = widget.post.text.substring(0, Sizes.postExcerpt);
+      secondHalf = widget.post.text
+          .substring(Sizes.postExcerpt, widget.post.text.length);
+    } else {
+      firstHalf = widget.post.text;
+      secondHalf = "";
+    }
   }
 
   Future<void> likeBtnHandler(Post post) async {
@@ -700,18 +748,19 @@ class _PostItemState extends State<PostItem> {
     );
   }
 
-  mentionedUserProfile(String w){
+  Future mentionedUserProfile(String w) async {
     //TODO: Implement Mentioned user profile - Get UID from string then pass it to the navigator
     var words = w.split(' ');
-    String username = words.length > 0 &&
-        words[words.length - 1].startsWith('@')
-        ? words[words.length - 1]
-        : '';
-    username = username.substring(1);
-//    User user = await DatabaseService.getUserWithUsername(username);
-//    Navigator.of(context)
-//        .pushNamed('/user-profile', arguments: {'userId': user.id});
+    String username =
+        words.length > 0 && words[words.length - 1].startsWith('@')
+            ? words[words.length - 1]
+            : '';
+    if (username.length > 1) username = username.substring(1);
     print(username);
+    User user = await DatabaseService.getUserWithUsername(username);
+    Navigator.of(context)
+        .pushNamed('/user-profile', arguments: {'userId': user.id});
+    print(user.id);
   }
 
   dropDownOptions() {
@@ -738,5 +787,9 @@ class _PostItemState extends State<PostItem> {
         ),
       ),
     );
+  }
+
+  void setCurrentGame() async {
+    currentGame = await DatabaseService.getGameWithGameName(widget.post.game);
   }
 }

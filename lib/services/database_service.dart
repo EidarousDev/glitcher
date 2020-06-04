@@ -1,13 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:glitcher/models/game_model.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/models/comment_model.dart';
+import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/notification_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/constants/constants.dart';
-import 'package:glitcher/utils/data.dart';
 
 class DatabaseService {
   // This function is used to get the recent posts (unfiltered)
@@ -514,5 +513,14 @@ class DatabaseService {
           .document(gameId)
           .delete();
     }
+  }
+
+  static Future<Game> getGameWithGameName(String gameName) async {
+    QuerySnapshot gameDocSnapshot =
+        await gamesRef.where('fullName', isEqualTo: gameName).getDocuments();
+    Game game =
+        gameDocSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList()[0];
+
+    return game;
   }
 }

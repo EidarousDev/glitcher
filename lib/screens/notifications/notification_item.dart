@@ -40,7 +40,7 @@ class _NotificationItemState extends State<NotificationItem> {
     return Container(
       color: notification.seen
           ? switchColor(MyColors.lightBG, MyColors.darkBG)
-          : switchColor(MyColors.lightCardBG, MyColors.lightCardBG),
+          : switchColor(MyColors.lightCardBG, MyColors.darkCardBG),
       child: Container(
         padding: EdgeInsets.all(7),
         child: ListTile(
@@ -56,7 +56,6 @@ class _NotificationItemState extends State<NotificationItem> {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-
             ),
           ),
           subtitle: Text("${widget.notification.body}"),
@@ -101,7 +100,8 @@ class _NotificationItemState extends State<NotificationItem> {
           ),
           onTap: () {
             NotificationHandler.makeNotificationSeen(widget.notification.id);
-            NotificationHandler.navigateToScreen(context, widget.notification.type, widget.notification.objectId);
+            NotificationHandler.navigateToScreen(context,
+                widget.notification.type, widget.notification.objectId);
           },
         ),
       ),

@@ -11,16 +11,16 @@ import 'package:glitcher/screens/chats/add_members_to_group.dart';
 import 'package:glitcher/screens/chats/chats.dart';
 import 'package:glitcher/screens/chats/conversation.dart';
 import 'package:glitcher/screens/chats/group_conversation.dart';
+import 'package:glitcher/screens/chats/group_details.dart';
 import 'package:glitcher/screens/chats/group_members.dart';
 import 'package:glitcher/screens/chats/new_group.dart';
-import 'package:glitcher/screens/chats/group_details.dart';
 import 'package:glitcher/screens/games/game_screen.dart';
 import 'package:glitcher/screens/games/new_game.dart';
 import 'package:glitcher/screens/posts/comments/add_comment.dart';
 import 'package:glitcher/screens/posts/new_post/create_post.dart';
 import 'package:glitcher/screens/posts/post_preview.dart';
-import 'package:glitcher/screens/posts/new_post.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
+import 'package:glitcher/screens/web_browser/in_app_browser.dart';
 import 'package:page_transition/page_transition.dart';
 
 class RouteGenerator {
@@ -120,6 +120,8 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => TermsOfService());
       case '/privacy-policy':
         return MaterialPageRoute(builder: (_) => PrivacyPolicy());
+      case '/browser':
+        return MaterialPageRoute(builder: (_) => InAppBrowser(args['url']));
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

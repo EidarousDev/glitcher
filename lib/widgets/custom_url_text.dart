@@ -1,14 +1,21 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:glitcher/utils/app_util.dart';
+
 class UrlText extends StatelessWidget {
+  final BuildContext context;
   final String text;
   final TextStyle style;
   final TextStyle urlStyle;
-  final Function(String) onHashTagPressed;
-  final Function(String) onMentionPressed;
+  final Future Function(String) onHashTagPressed;
+  final Future Function(String) onMentionPressed;
 
-  UrlText({this.text, this.style, this.urlStyle, this.onHashTagPressed, this.onMentionPressed});
+  UrlText(
+      {this.text,
+      this.style,
+      this.urlStyle,
+      this.onHashTagPressed,
+      this.onMentionPressed,
+      this.context});
 
   List<InlineSpan> getTextSpans() {
     List<InlineSpan> widgets = List<InlineSpan>();
@@ -42,11 +49,12 @@ class UrlText extends StatelessWidget {
     for (var result in resultMatches) {
       if (result.isUrl) {
         widgets.add(_LinkTextSpan(
+            context: this.context,
             onHashTagPressed: onHashTagPressed,
             onMentionPressed: onMentionPressed,
             text: result.text,
             style:
-            urlStyle != null ? urlStyle : TextStyle(color: Colors.blue)));
+                urlStyle != null ? urlStyle : TextStyle(color: Colors.blue)));
       } else {
         widgets.add(TextSpan(
             text: result.text,
@@ -65,25 +73,34 @@ class UrlText extends StatelessWidget {
 }
 
 class _LinkTextSpan extends TextSpan {
-  final Function(String) onHashTagPressed;
-  final Function(String) onMentionPressed;
+  final BuildContext context;
+  final Future Function(String) onHashTagPressed;
+  final Future Function(String) onMentionPressed;
 
-  _LinkTextSpan({TextStyle style, String text, this.onHashTagPressed, this.onMentionPressed})
+  _LinkTextSpan(
+      {this.context,
+      TextStyle style,
+      String text,
+      this.onHashTagPressed,
+      this.onMentionPressed})
       : super(
-      style: style,
-      text: text,
-      recognizer: TapGestureRecognizer()
-        ..onTap = () {
-          if(onHashTagPressed != null && (text.substring(0,1).contains("#") || text.substring(0,1).contains("#"))){
-            onHashTagPressed(text);
-          }
-          else if(onMentionPressed != null && (text.substring(0,1).contains("@") || text.substring(0,1).contains("@"))){
-            onMentionPressed(text);
-          }
-          else{
-            AppUtil.launchURL(text);
-          }
-        });
+            style: style,
+            text: text,
+            recognizer: TapGestureRecognizer()
+              ..onTap = () {
+                if (onHashTagPressed != null &&
+                    (text.contains("#") || text.contains("#"))) {
+                  onHashTagPressed(text);
+                } else if (onMentionPressed != null &&
+                    (text.contains("@") || text.contains("@"))) {
+                  onMentionPressed(text);
+                } else {
+                  print('text is $text');
+                  Navigator.of(context).pushNamed('/browser', arguments: {
+                    'url': text,
+                  });
+                }
+              });
 }
 
 class _ResultMatch {

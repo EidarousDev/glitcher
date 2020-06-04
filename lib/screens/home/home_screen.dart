@@ -378,7 +378,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           return SizedBox.shrink();
                         }
                         User author = snapshot.data;
-                        return PostItem(post: post, author: author);
+                        return PostItem(postIndex: index, post: post, author: author);
                       });
                 },
               ),

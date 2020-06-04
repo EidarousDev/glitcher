@@ -16,7 +16,7 @@ import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
-import 'package:glitcher/widgets/custom_url.dart';
+import 'package:glitcher/widgets/custom_url_text.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
 import 'package:glitcher/widgets/title_text.dart';
 
