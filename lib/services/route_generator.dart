@@ -16,6 +16,7 @@ import 'package:glitcher/screens/chats/group_members.dart';
 import 'package:glitcher/screens/chats/new_group.dart';
 import 'package:glitcher/screens/games/game_screen.dart';
 import 'package:glitcher/screens/games/new_game.dart';
+import 'package:glitcher/screens/hashtag_posts_screen.dart';
 import 'package:glitcher/screens/posts/comments/add_comment.dart';
 import 'package:glitcher/screens/posts/new_post/create_post.dart';
 import 'package:glitcher/screens/posts/post_preview.dart';
@@ -122,6 +123,8 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => PrivacyPolicy());
       case '/browser':
         return MaterialPageRoute(builder: (_) => InAppBrowser(args['url']));
+      case '/hashtag-posts':
+        return MaterialPageRoute(builder: (_) => HashtagPostsScreen(args['hashtag']));
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

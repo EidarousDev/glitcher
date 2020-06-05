@@ -1,8 +1,11 @@
+import 'dart:html';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/group_model.dart';
+import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/notification_model.dart';
 import 'package:glitcher/models/post_model.dart';
@@ -522,5 +525,69 @@ class DatabaseService {
         gameDocSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList()[0];
 
     return game;
+  }
+
+  static getHashtags() async {
+    QuerySnapshot hashtagsSnapshot =
+    await hashtagsRef.getDocuments();
+
+    List<Hashtag> hashtags =
+    hashtagsSnapshot.documents.map((doc) => Hashtag.fromDoc(doc)).toList();
+
+    return hashtags;
+  }
+
+  static Future<Hashtag> getHashtagWithText(String text) async {
+    QuerySnapshot hashtagDocSnapshot =
+    await hashtagsRef.where('text', isEqualTo: text).getDocuments();
+
+    if(hashtagDocSnapshot.documents.length == 0){
+      return null;
+    }
+    else{
+      Hashtag hashtag =
+      hashtagDocSnapshot.documents.map((doc) => Hashtag.fromDoc(doc)).toList()[0];
+
+      return hashtag;
+    }
+
+  }
+
+  // This function is used to get the recent posts for a certain tag
+  static Future<List<Post>> getHashtagPosts(String hashtagId) async {
+    QuerySnapshot postSnapshot = await hashtagsRef
+        .document(hashtagId)
+        .collection('posts')
+        .orderBy('timestamp', descending: true)
+        .limit(10)
+        .getDocuments();
+
+    List<Post> posts = [];
+
+    postSnapshot.documents.forEach((element) async{
+      posts.add(await getPostWithId(element.documentID));
+    });
+
+    return posts;
+  }
+
+  // This function is used to get the recent posts (filtered by a certain game)
+  static Future<List<Post>> getNextHashtagPosts(
+      Timestamp lastVisiblePostSnapShot, String hashtagId) async {
+    QuerySnapshot postSnapshot = await hashtagsRef
+        .document(hashtagId)
+        .collection('posts')
+        .orderBy('timestamp', descending: true)
+        .startAfter([lastVisiblePostSnapShot])
+        .limit(10)
+        .getDocuments();
+
+    List<Post> posts = [];
+
+    postSnapshot.documents.forEach((element) async{
+      posts.add(await getPostWithId(element.documentID));
+    });
+
+    return posts;
   }
 }

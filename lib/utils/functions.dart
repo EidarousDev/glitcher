@@ -5,6 +5,7 @@ import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/home/home.dart';
 import 'package:glitcher/screens/login_page.dart';
@@ -42,6 +43,14 @@ Future<List> getFriends() async {
       await DatabaseService.getFriends(Constants.currentUserID);
 
   return friends;
+}
+
+Future<List> getHashtags() async {
+  print('currentUID = ${Constants.currentUserID}');
+  List<Hashtag> hashtags =
+      await DatabaseService.getHashtags();
+
+  return hashtags;
 }
 
 Color switchColor(Color lightColor, Color darkColor) {

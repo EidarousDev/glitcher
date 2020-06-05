@@ -11,6 +11,7 @@ import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/game_model.dart';
+import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/home/home_screen.dart';
 import 'package:glitcher/screens/posts/new_post/widget/create_bottom_icon.dart';
@@ -48,6 +49,12 @@ class _CreatePostReplyPageState extends State<CreatePost> {
   String _youtubeId;
 
   bool canSubmit = false;
+
+  String _mentionText = '';
+  String _hashtagText = '';
+  bool newHashtag = true;
+
+  var words = [];
 
   @override
   void dispose() {
@@ -119,7 +126,7 @@ class _CreatePostReplyPageState extends State<CreatePost> {
           await AppUtil.uploadFile(_image, context, 'posts_images/' + postId);
     } else {}
 
-    await postsRef.document(postId).setData({
+    var postData = {
       'owner': Constants.currentUserID,
       'text': _textEditingController.text,
       'youtubeId': _youtubeId,
@@ -130,10 +137,15 @@ class _CreatePostReplyPageState extends State<CreatePost> {
       'comments': 0,
       'timestamp': FieldValue.serverTimestamp(),
       'game': selectedGame
-    });
+    };
+
+    await postsRef.document(postId).setData(postData);
+
+   await checkIfContainsHashtag(_textEditingController.text, postId);
+
 
     /// Checks for username in tweet description
-    /// If foud sends notification to all tagged user
+    /// If found sends notification to all tagged user
     /// If no user found or not compost tweet screen is closed and redirect back to home page.
 
     /// Hide running loader on screen
@@ -245,11 +257,34 @@ class _CreatePostReplyPageState extends State<CreatePost> {
       }
     });
   }
+
+  Future checkIfContainsHashtag(String post, String postId) async {
+    post.split(' ').forEach((word) async {
+      if (word.startsWith('#')) {
+        Hashtag hashtag =
+        await DatabaseService.getHashtagWithText(word);
+
+        if(newHashtag){
+          String hashtagId = randomAlphaNumeric(20);
+          await hashtagsRef.document(hashtagId).setData({
+            'text': _hashtagText,
+            'timestamp': FieldValue.serverTimestamp()
+          });
+
+          await hashtagsRef.document(hashtagId).collection('posts').document(postId).setData({'timestamp': FieldValue.serverTimestamp()});
+        }
+        else{
+          await hashtagsRef.document(hashtag.id).collection('posts').document(postId).setData({'timestamp': FieldValue.serverTimestamp()});
+        }
+
+        return hashtag;
+      }
+      else return null;
+    });
+  }
 }
 
 class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
-  String _postText = '';
-  var words = [];
 
   _ComposeTweet(this.viewState) : super(viewState);
 
@@ -293,14 +328,22 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                         viewState.canSubmit = true;
                       });
                     }
+
                     // Mention Users
                     viewState.setState(() {
-                      words = text.split(' ');
-                      _postText = words.length > 0 &&
-                          words[words.length - 1].startsWith('@')
-                          ? words[words.length - 1]
+                      viewState.words = text.split(' ');
+                      viewState._mentionText = viewState.words.length > 0 &&
+                          viewState.words[viewState.words.length - 1].startsWith('@')
+                          ? viewState.words[viewState.words.length - 1]
                           : '';
-                      //_postText = text;
+
+                      //Hashtag
+                      viewState.words = [];
+                      viewState.words = text.split(' ');
+                      viewState._hashtagText = viewState.words.length > 0 &&
+                          viewState.words[viewState.words.length - 1].startsWith('#')
+                          ? viewState.words[viewState.words.length - 1]
+                          : '';
                     });
                   },
                   maxLength: Sizes.maxPostChars,
@@ -316,39 +359,69 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                   style: TextStyle(fontSize: 18),
                 ),
               ),
-              _postText.length > 1
-                  ? ListView.builder(
-                itemCount: Constants.userFriends.length,
-                itemBuilder: (context, index) {
-                  String s = Constants.userFriends[index].username;
-                  print('username:' + s);
-                  if (('@' + s).contains(_postText))
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: NetworkImage(
-                            Constants.userFriends[index].profileImageUrl),
-                      ),
-                      title: Text(Constants.userFriends[index].username),
-                      onTap: () {
-                        String tmp =
-                        _postText.substring(1, _postText.length);
-                        viewState.setState(() {
-                          _postText = '';
-                          viewState._textEditingController.text += s
-                              .substring(
-                              s.indexOf(tmp) + tmp.length, s.length)
-                              .replaceAll(' ', '_');
-                        });
-                      },
-                    );
 
-                  return SizedBox();
-                },
-                shrinkWrap: true,
-              )
-                  : SizedBox(),
             ],
           ),
+          viewState._mentionText.length > 1
+              ? ListView.builder(
+            itemCount: Constants.userFriends.length,
+            itemBuilder: (context, index) {
+              String s = Constants.userFriends[index].username;
+              print('username:' + s);
+              if (('@' + s).contains(viewState._mentionText))
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: NetworkImage(
+                        Constants.userFriends[index].profileImageUrl),
+                  ),
+                  title: Text(Constants.userFriends[index].username),
+                  onTap: () {
+                    String tmp =
+                    viewState._mentionText.substring(1, viewState._mentionText.length);
+                    viewState.setState(() {
+                      viewState._mentionText = '';
+                      viewState._textEditingController.text += s
+                          .substring(
+                          s.indexOf(tmp) + tmp.length, s.length)
+                          .replaceAll(' ', '_');
+                    });
+                  },
+                );
+
+              return SizedBox();
+            },
+            shrinkWrap: true,
+          )
+              : SizedBox(),
+
+          viewState._hashtagText.length > 1
+              ? ListView.builder(
+            itemCount: Constants.hashtags.length,
+            itemBuilder: (context, index) {
+              String s = Constants.hashtags[index].text;
+              print('hashtag:' + s);
+              if (('#' + s).contains(viewState._hashtagText))
+                return ListTile(
+                  title: Text(Constants.hashtags[index].text),
+                  onTap: () {
+                    viewState.newHashtag = false;
+                    String tmp =
+                    viewState._hashtagText.substring(1, viewState._hashtagText.length);
+                    viewState.setState(() {
+                      viewState._hashtagText = '';
+                      viewState._textEditingController.text += s
+                          .substring(
+                          s.indexOf(tmp) + tmp.length, s.length)
+                          .replaceAll(' ', '_');
+                    });
+                  },
+                );
+
+              return SizedBox();
+            },
+            shrinkWrap: true,
+          )
+              : SizedBox(),
           Padding(
             padding: const EdgeInsets.only(left: 8, bottom: 8),
             child: TypeAheadFormField(

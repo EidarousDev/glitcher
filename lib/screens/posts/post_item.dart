@@ -11,6 +11,7 @@ import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/game_model.dart';
+import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/home/home_screen.dart';
@@ -142,6 +143,8 @@ class _PostItemState extends State<PostItem> {
                               text: post.text,
                               onMentionPressed: (text) =>
                                   mentionedUserProfile(post.text),
+                              onHashTagPressed: (text) =>
+                                  hashgtagScreen(post.text),
                               style: TextStyle(
                                 color: switchColor(Colors.black, Colors.white),
                                 fontSize: 16,
@@ -158,6 +161,8 @@ class _PostItemState extends State<PostItem> {
                                   : (firstHalf + secondHalf),
                               onMentionPressed: (text) =>
                                   mentionedUserProfile(post.text),
+                              onHashTagPressed: (text) =>
+                                  hashgtagScreen(post.text),
                               style: TextStyle(
                                 color: switchColor(Colors.black, Colors.white),
                                 fontSize: 16,
@@ -761,6 +766,20 @@ class _PostItemState extends State<PostItem> {
     Navigator.of(context)
         .pushNamed('/user-profile', arguments: {'userId': user.id});
     print(user.id);
+  }
+
+  Future hashgtagScreen(String w) async {
+    //TODO: Implement Mentioned user profile - Get UID from string then pass it to the navigator
+    var words = w.split(' ');
+    String hashtagText =
+        words.length > 0 && words[words.length - 1].startsWith('#')
+            ? words[words.length - 1]
+            : '';
+    print(hashtagText);
+    Hashtag hashtag = await DatabaseService.getHashtagWithText(hashtagText);
+    Navigator.of(context)
+        .pushNamed('/hashtag-posts', arguments: {'hashtag': hashtag});
+    print(hashtag.id);
   }
 
   dropDownOptions() {

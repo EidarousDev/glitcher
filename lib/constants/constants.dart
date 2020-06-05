@@ -2,6 +2,7 @@ import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/widgets/custom_loader.dart';
 
@@ -13,6 +14,7 @@ final postsRef = firestore.collection('posts');
 final usersRef = firestore.collection('users');
 final chatsRef = firestore.collection('chats');
 final gamesRef = firestore.collection('games');
+final hashtagsRef = firestore.collection('hashtags');
 final chatGroupsRef = firestore.collection('chat_groups');
 final glitcherLoader = CustomLoader();
 
@@ -45,6 +47,7 @@ class Constants {
   static List<String> followedGamesNames = [];
 
   static List<User> userFriends = [];
+  static List<Hashtag> hashtags = [];
 
   static ConnectivityResult connectionState;
 }

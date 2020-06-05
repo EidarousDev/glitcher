@@ -8,6 +8,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/strings.dart';
+import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/home/home_screen.dart';
 import 'package:glitcher/screens/notifications/notifications_screen.dart';
@@ -129,6 +130,7 @@ class _AppPageState extends State<AppPage> {
     userListener();
     _saveDeviceToken();
     setFriends();
+    setHashtags();
     print('User Firends = ${Constants.userFriends}');
 
     this.getCurrentTheme();
@@ -242,6 +244,14 @@ class _AppPageState extends State<AppPage> {
     // User Friends
     setState(() {
       Constants.userFriends = friends;
+    });
+  }
+
+  Future<void> setHashtags() async {
+    List<Hashtag> hashtags = await getHashtags();
+    // User Friends
+    setState(() {
+      Constants.hashtags = hashtags;
     });
   }
 
