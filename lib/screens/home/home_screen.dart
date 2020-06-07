@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +21,7 @@ import 'package:glitcher/widgets/caching_image.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:rate_my_app/rate_my_app.dart';
+import 'package:http/http.dart' as http;
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -378,7 +381,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           return SizedBox.shrink();
                         }
                         User author = snapshot.data;
-                        return PostItem(postIndex: index, post: post, author: author);
+                        return PostItem(
+                            postIndex: index, post: post, author: author);
                       });
                 },
               ),
@@ -392,6 +396,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
         onPressed: () {
           Navigator.of(context).pushNamed('/new-post');
+          //updateGames();
         },
       ),
       drawer: BuildDrawer(),
@@ -540,4 +545,52 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     });
     setState(() {});
   }
+}
+
+void updateGames() async {
+  int offset = 0;
+
+  while (true) {
+    try {
+      String url =
+          'https://www.gamespot.com/api/games/?api_key=ce94dc0741ab63f7017a0c3115b4f145b295b6b0&offset=$offset&sort=id:asc&format=json';
+      var response = await http.get(url);
+      String body = response.body;
+      List results = jsonDecode(body)['results'];
+
+      for (int i = 0; i < results.length; i++) {
+        String genre = '';
+        (results[i]['genres'] as List).forEach((element) {
+          genre += element['name'] + ' ';
+        });
+
+        List search = searchList(results[i]['name']);
+
+        await firestore
+            .collection('games')
+            .document(results[i]['id'].toString())
+            .setData({
+          'fullName': results[i]['name'],
+          'release_date': results[i]['release_date'],
+          'description': results[i]['description'],
+          'genre': genre,
+          'image': results[i]['image']['original'],
+          'timestamp': FieldValue.serverTimestamp(),
+          'search': search
+        });
+      }
+      offset += 100;
+    } catch (ex) {
+      break;
+    }
+
+  }
+}
+
+searchList(String text) {
+  List<String> list = [];
+  for (int i = 1; i <= text.length; i++) {
+    list.add(text.substring(0, i).toLowerCase());
+  }
+  return list;
 }

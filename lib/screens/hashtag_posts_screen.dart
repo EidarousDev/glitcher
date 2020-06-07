@@ -36,14 +36,11 @@ class _HashtagPostsScreenState extends State<HashtagPostsScreen> with WidgetsBin
     return Scaffold(
       appBar: AppBar(
         flexibleSpace: gradientAppBar(),
-        leading: Builder(
-          builder: (context) => Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: InkWell(
-              onTap: () => Scaffold.of(context).openDrawer(),
-              child: Icon(IconData(58311, fontFamily: 'MaterialIcons')),
-            ),
-          ),
+        leading: new IconButton(
+          icon: new Icon(Icons.arrow_back),
+          onPressed: () {
+            _onBackPressed();
+          },
         ),
         title: Text(hashtag.text),
         centerTitle: true,
@@ -67,6 +64,10 @@ class _HashtagPostsScreenState extends State<HashtagPostsScreen> with WidgetsBin
         },
       ),
     );
+  }
+
+  _onBackPressed() {
+    Navigator.of(context).pop();
   }
 
   _setupFeed() async {
