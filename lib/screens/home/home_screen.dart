@@ -18,10 +18,9 @@ import 'package:glitcher/screens/posts/post_item.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
+import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:rate_my_app/rate_my_app.dart';
-import 'package:http/http.dart' as http;
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -395,8 +394,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           Icons.add,
         ),
         onPressed: () {
-          Navigator.of(context).pushNamed('/new-post');
-          //updateGames();
+          //Navigator.of(context).pushNamed('/new-post');
+          updateGames();
         },
       ),
       drawer: BuildDrawer(),
@@ -548,42 +547,89 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 }
 
 void updateGames() async {
-  int offset = 0;
-
-  while (true) {
+  String url =
+      'https://api.rawg.io/api/games?dates=2000-01-01,2020-12-31&ordering=-added';
+  var response = await http.get(url);
+  String body = response.body;
+  while (jsonDecode(body)['next'] != null) {
     try {
-      String url =
-          'https://www.gamespot.com/api/games/?api_key=ce94dc0741ab63f7017a0c3115b4f145b295b6b0&offset=$offset&sort=id:asc&format=json';
       var response = await http.get(url);
+      print(url);
       String body = response.body;
       List results = jsonDecode(body)['results'];
 
       for (int i = 0; i < results.length; i++) {
-        String genre = '';
-        (results[i]['genres'] as List).forEach((element) {
-          genre += element['name'] + ' ';
+        List genres = [];
+        (results[i]['genres'] as List).forEach((genre) {
+          genres.add(genre['name']);
+        });
+
+        List platforms = [];
+        (results[i]['platforms'] as List).forEach((platform) {
+          platforms.add(platform['platform']['name']);
+        });
+
+        List stores = [];
+        (results[i]['stores'] as List).forEach((store) {
+          stores.add(store['store']['name']);
+        });
+
+        List tags = [];
+        (results[i]['tags'] as List).forEach((tag) {
+          tags.add(tag['name']);
+        });
+
+        String detailedUrl =
+            'https://api.rawg.io/api/games/${results[i]['id']}';
+        var detailedResponse = await http.get(detailedUrl);
+        String body = detailedResponse.body;
+        var gameDetails = jsonDecode(body);
+
+        List publishers = [];
+        (gameDetails['publishers'] as List).forEach((publisher) {
+          publishers.add(publisher['name']);
+        });
+
+        List developers = [];
+        (gameDetails['developers'] as List).forEach((developer) {
+          developers.add(developer['name']);
         });
 
         List search = searchList(results[i]['name']);
+
+        (gameDetails['alternative_names'] as List).forEach((element) {
+          search.addAll(searchList(element));
+        });
 
         await firestore
             .collection('games')
             .document(results[i]['id'].toString())
             .setData({
           'fullName': results[i]['name'],
-          'release_date': results[i]['release_date'],
-          'description': results[i]['description'],
-          'genre': genre,
-          'image': results[i]['image']['original'],
+          'slug': results[i]['slug'],
+          'tba': results[i]['tba'],
+          'release_date': results[i]['released'],
+          'description': gameDetails['description_raw'],
+          'website': gameDetails['website'],
+          'reddit_url': gameDetails['reddit_url'],
+          'alternative_names': gameDetails['alternative_names'],
+          'platforms': platforms,
+          'stores': stores,
+          'metacritic': results[i]['metacritic'],
+          'esrb_rating': gameDetails['esrb_rating']['name'],
+          'metacritic_url': gameDetails['metacritic_url'],
+          'genres': genres,
+          'image': results[i]['background_image'],
+          'publishers': publishers,
+          'developers': developers,
           'timestamp': FieldValue.serverTimestamp(),
           'search': search
         });
+        url = jsonDecode(body)['next'];
       }
-      offset += 100;
     } catch (ex) {
       break;
     }
-
   }
 }
 

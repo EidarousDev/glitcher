@@ -3,14 +3,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/common_widgets/drawer.dart';
 import 'package:glitcher/common_widgets/gradient_appbar.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/posts/post_item.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
-import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/utils/functions.dart';
 
 class GameScreen extends StatefulWidget {
@@ -72,49 +73,76 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
         slivers: <Widget>[
           SliverAppBar(
             pinned: false,
-            expandedHeight: 250,
+            expandedHeight: 500,
             leading: Container(),
             flexibleSpace: Container(
-              height: 250,
+              height: 500,
               color: switchColor(MyColors.lightBG, MyColors.darkBG),
               child: Column(
                 children: <Widget>[
                   SizedBox(
                     height: 15,
                   ),
-                  Container(
-                      height: 100,
-                      width: 100,
-                      child: Image.network(game.image)),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  Text(
-                    game.fullName,
-                    style: TextStyle(fontSize: 22),
+                  Stack(
+                    children: <Widget>[
+                      Container(
+                          height: 200,
+                          width: Sizes.fullWidth(context),
+                          child: Image.network(game.image)),
+                      Positioned.fill(
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: Colors.black54,
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular((5)))),
+                            padding: EdgeInsets.all(5),
+                            child: Text(
+                              game.fullName,
+                              style: TextStyle(fontSize: 22, shadows: [
+                                Shadow(
+                                  blurRadius: 5.0,
+                                  color: Colors.black,
+                                  offset: Offset(2.0, 2.0),
+                                ),
+                              ]),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(
                     height: 5,
                   ),
-                  Text(
-                    game.genre,
-                    style: TextStyle(fontSize: 12),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    game.description,
-                    style: TextStyle(fontSize: 12),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      "${game.genres}",
+                      style: TextStyle(fontSize: 14),
+                    ),
                   ),
                   SizedBox(
                     height: 10,
                   ),
-                  Container(
-                    height: 1,
-                    color: switchColor(
-                        MyColors.lightLineBreak, MyColors.darkLineBreak),
-                  )
+                  ExpansionTile(
+                    title: Text('Details'),
+                    children: <Widget>[
+                      Text(
+                        game.description,
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Container(
+                        height: 1,
+                        color: switchColor(
+                            MyColors.lightLineBreak, MyColors.darkLineBreak),
+                      )
+                    ],
+                  ),
                 ],
               ),
             ),

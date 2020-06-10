@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 
 class Game {
   final String id;
@@ -7,7 +6,7 @@ class Game {
   final String shortName;
   final String description;
   final String image;
-  final String genre;
+  final List genres;
   final List<dynamic> search;
   final dynamic timestamp;
 
@@ -17,7 +16,7 @@ class Game {
     this.shortName,
     this.description,
     this.image,
-    this.genre,
+    this.genres,
     this.search,
     this.timestamp,
   });
@@ -29,7 +28,7 @@ class Game {
       shortName: doc['shortName'],
       description: doc['description'],
       image: doc['image'],
-      genre: doc['genre'],
+      genres: doc['genres'],
       search: doc['search'],
       timestamp: doc['timestamp'],
     );

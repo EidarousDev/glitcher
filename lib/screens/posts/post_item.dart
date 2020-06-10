@@ -32,7 +32,11 @@ class PostItem extends StatefulWidget {
   final User author;
   final int postIndex;
 
-  PostItem({Key key, @required this.post, @required this.author, @required this.postIndex})
+  PostItem(
+      {Key key,
+      @required this.post,
+      @required this.author,
+      @required this.postIndex})
       : super(key: key);
   @override
   _PostItemState createState() => _PostItemState();
@@ -123,10 +127,14 @@ class _PostItemState extends State<PostItem> {
                 });
               },
             ),
-            trailing: ValueListenableBuilder<int>(valueListenable: number, builder: (context, value, child){
-              return PostBottomSheet().postOptionIcon(context, post, widget.postIndex);
-            },
-          ),),
+            trailing: ValueListenableBuilder<int>(
+              valueListenable: number,
+              builder: (context, value, child) {
+                return PostBottomSheet()
+                    .postOptionIcon(context, post, widget.postIndex);
+              },
+            ),
+          ),
           Row(
             children: <Widget>[
               Expanded(
