@@ -73,9 +73,6 @@ class _GroupConversationState extends State<GroupConversation>
   }
 
   Future<File> _localFile() async {
-//    final bytes = await _loadFileBytes(_url,
-//        onError: (Exception exception) =>
-//            print('_loadFile => exception $exception'));
     final path = await _localPath();
     print('path $path');
     var file = File('$path/glitcher_record.wav');
@@ -216,14 +213,15 @@ class _GroupConversationState extends State<GroupConversation>
   static const tick = const Duration(milliseconds: 1000);
 
   initRecorder() async {
-    File file = await _localFile();
+    //File file = await _localFile();
+    File file = new File('/data/user/0/com.eidarousdev.glitcher/app_flutter/glitcher_record.wav');
 
     if (await file.exists()) {
-      file.delete();
+      await file.delete();
     }
     print('MyFile : ${file.path}');
 
-    recorder = FlutterAudioRecorder(file.path); // .wav .aac .m4a
+    recorder = FlutterAudioRecorder('/data/user/0/com.eidarousdev.glitcher/app_flutter/glitcher_record.wav'); // .wav .aac .m4a
     await recorder.initialized;
   }
 
@@ -525,16 +523,15 @@ class _GroupConversationState extends State<GroupConversation>
                                     }
                                   },
                                   onLongPressEnd: (longPressDetails) async {
-                                    var result = await recorder.stop();
+                                    //var result = await recorder.stop();
                                     //_currentStatus = RecordingStatus.Stopped;
-                                    print(result.path);
+
                                     File file = await _stop();
 
-                                    AppUtil.uploadFile(
+                                    _url = await AppUtil.uploadFile(
                                         file,
                                         context,
-                                        'group_voice_messages/$groupId/' +
-                                            randomAlphaNumeric(20));
+                                        'group_voice_messages/$groupId/${randomAlphaNumeric(20)}');
 
                                     await DatabaseService.sendGroupMessage(
                                         groupId, 'audio', _url);
@@ -600,7 +597,7 @@ class _GroupConversationState extends State<GroupConversation>
           recordTime = t.tick.toString();
           _currentStatus = RecordingStatus.Recording;
         });
-        print('cyrrent ${recording.status}');
+        print('current ${recording.status}');
       });
     } catch (e) {
       print(e);
@@ -616,7 +613,7 @@ class _GroupConversationState extends State<GroupConversation>
     setState(() {
       _currentStatus = result.status;
     });
-
+    print('result:' + file.path);
     return file;
   }
 

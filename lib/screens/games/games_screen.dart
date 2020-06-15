@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/screens/games/game_item.dart';
 import 'package:glitcher/services/database_service.dart';
@@ -22,10 +23,20 @@ class _GamesScreenState extends State<GamesScreen> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         child: Icon(
-          Icons.add,
+          Icons.email,
         ),
-        onPressed: () {
-          Navigator.of(context).pushNamed('/new-game');
+        onPressed: () async{
+          //Navigator.of(context).pushNamed('/new-game');
+
+          final Email email = Email(
+            body: 'ARK Survival evolved.',
+            subject: 'Game suggestion',
+            recipients: ['ahmednab93@gmail.com'],
+            isHTML: false,
+          );
+
+          await FlutterEmailSender.send(email);
+
         },
       ),
       appBar: AppBar(

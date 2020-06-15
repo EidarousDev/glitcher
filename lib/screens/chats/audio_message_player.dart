@@ -120,7 +120,7 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
 
   Future play() async {
     initAudioPlayer();
-
+    print(this.url);
     await audioPlayer.play(this.url);
     setState(() {
       playerState = AudioPlayerState.PLAYING;

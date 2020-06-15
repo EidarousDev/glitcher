@@ -13,6 +13,7 @@ import 'package:glitcher/screens/posts/post_item.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/functions.dart';
+import 'package:readmore/readmore.dart';
 
 class GameScreen extends StatefulWidget {
   GameScreen({this.game});
@@ -67,88 +68,134 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
           ),
         ],
       ),
-      body: CustomScrollView(
+      body: SingleChildScrollView(
         controller: _scrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: <Widget>[
-          SliverAppBar(
-            pinned: false,
-            expandedHeight: 500,
-            leading: Container(),
-            flexibleSpace: Container(
-              height: 500,
-              color: switchColor(MyColors.lightBG, MyColors.darkBG),
-              child: Column(
-                children: <Widget>[
-                  SizedBox(
-                    height: 15,
-                  ),
-                  Stack(
-                    children: <Widget>[
-                      Container(
-                          height: 200,
-                          width: Sizes.fullWidth(context),
-                          child: Image.network(game.image)),
-                      Positioned.fill(
-                        child: Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Container(
-                            decoration: BoxDecoration(
-                                color: Colors.black54,
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular((5)))),
-                            padding: EdgeInsets.all(5),
-                            child: Text(
-                              game.fullName,
-                              style: TextStyle(fontSize: 22, shadows: [
-                                Shadow(
-                                  blurRadius: 5.0,
-                                  color: Colors.black,
-                                  offset: Offset(2.0, 2.0),
-                                ),
-                              ]),
-                            ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            SizedBox(
+              height: 15,
+            ),
+            Stack(
+              children: <Widget>[
+                Container(
+                    height: 200,
+                    width: Sizes.fullWidth(context),
+                    child: Image.network(game.image)),
+                Positioned.fill(
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius:
+                          BorderRadius.all(Radius.circular((5)))),
+                      padding: EdgeInsets.all(5),
+                      child: Text(
+                        game.fullName,
+                        style: TextStyle(fontSize: 22, shadows: [
+                          Shadow(
+                            blurRadius: 5.0,
+                            color: Colors.black,
+                            offset: Offset(2.0, 2.0),
                           ),
-                        ),
+                        ]),
                       ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 5,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      "${game.genres}",
-                      style: TextStyle(fontSize: 14),
                     ),
                   ),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 5,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                "${game.genres}",
+                style: TextStyle(fontSize: 14),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Flexible(
+              fit: FlexFit.loose,
+              child: ExpansionTile(
+                title: Text('Details', style: TextStyle(color: MyColors.darkPrimary),),
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ReadMoreText(
+                      game.description,
+                      colorClickableText: MyColors.darkPrimary,
+                      trimLength: 300,
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ),
+
                   SizedBox(
                     height: 10,
                   ),
-                  ExpansionTile(
-                    title: Text('Details'),
-                    children: <Widget>[
-                      Text(
-                        game.description,
-                        style: TextStyle(fontSize: 12),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Container(
-                        height: 1,
-                        color: switchColor(
-                            MyColors.lightLineBreak, MyColors.darkLineBreak),
-                      )
-                    ],
+                  Container(
+                    height: 1,
+                    color: switchColor(
+                        MyColors.lightLineBreak, Colors.grey.shade600),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text('Platforms: ${game.platforms}'),
+                  ),
+                  Container(
+                    height: 1,
+                    color: switchColor(
+                        MyColors.lightLineBreak, Colors.grey.shade600),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text('Stores: ${game.stores}'),
+                  ),
+                  Container(
+                    height: 1,
+                    color: switchColor(
+                        MyColors.lightLineBreak, Colors.grey.shade600),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text('ESRB Rating: ${game.esrbRating}'),
+                  ),
+                  Container(
+                    height: 1,
+                    color: switchColor(
+                        MyColors.lightLineBreak, Colors.grey.shade600),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text('Metacritic score: ${game.metacritic}'),
+                  ),
+                  Container(
+                    height: 1,
+                    color: switchColor(
+                        MyColors.lightLineBreak, Colors.grey.shade600),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text('Developers: ${game.developers}'),
+                  ),
+                  Container(
+                    height: 1,
+                    color: switchColor(
+                        MyColors.lightLineBreak, Colors.grey.shade600),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text('Release Date: ${game.tba ? 'TBA' : game.releaseDate}'),
                   ),
                 ],
               ),
             ),
-          ),
-          SliverList(
-              delegate: SliverChildListDelegate([
             ListView.builder(
               physics: NeverScrollableScrollPhysics(),
               scrollDirection: Axis.vertical,
@@ -167,8 +214,9 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                     });
               },
             ),
-          ]))
-        ],
+          ],
+        ),
+
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(
@@ -181,6 +229,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
       drawer: BuildDrawer(),
     );
   }
+
+
 
   _setupFeed() async {
     //print('what\'s happening?');

@@ -30,6 +30,7 @@ class AppUtil {
     }
   }
 
+
   showToast(String msg) {
     FlutterToast.showToast(
         msg: msg,

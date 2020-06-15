@@ -601,6 +601,9 @@ void updateGames() async {
           search.addAll(searchList(element));
         });
 
+        //print(gameDetails['description_raw']);
+        //print(utf8.decode(gameDetails['description_raw'].toString().runes.toList()));
+
         await firestore
             .collection('games')
             .document(results[i]['id'].toString())
@@ -609,7 +612,7 @@ void updateGames() async {
           'slug': results[i]['slug'],
           'tba': results[i]['tba'],
           'release_date': results[i]['released'],
-          'description': gameDetails['description_raw'],
+          'description': utf8.decode(gameDetails['description_raw'].toString().runes.toList()),
           'website': gameDetails['website'],
           'reddit_url': gameDetails['reddit_url'],
           'alternative_names': gameDetails['alternative_names'],
@@ -626,6 +629,7 @@ void updateGames() async {
           'search': search
         });
         url = jsonDecode(body)['next'];
+        print('next url: $url');
       }
     } catch (ex) {
       break;
