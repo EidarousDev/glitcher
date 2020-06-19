@@ -67,6 +67,7 @@ class _PostItemState extends State<PostItem> {
   Game currentGame;
   final number = ValueNotifier(0);
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -239,29 +240,29 @@ class _PostItemState extends State<PostItem> {
                       Container(
                         child: post.video == null ? null : playerWidget,
                       ),
-                      Container(child: null
-                          //TODO: Fix YouTube Player
-//                      post.youtubeId == null
-//                          ? null
-//                          : YoutubePlayer(
-//                              context: context,
-//                              videoId: post.youtubeId,
-//                              flags: YoutubePlayerFlags(
-//                                autoPlay: false,
-//                                showVideoProgressIndicator: true,
-//                                forceHideAnnotation: true,
-//                              ),
-//                              videoProgressIndicatorColor: Colors.red,
-//                              progressColors: ProgressColors(
-//                                playedColor: Colors.red,
-//                                handleColor: Colors.redAccent,
-//                              ),
-//                              onPlayerInitialized: (controller) {
-//                                _youtubeController = controller;
-//                                _youtubeController.addListener(listener);
-//                              },
-//                            ),
-                          ),
+                      Container(
+                        child:
+                            //TODO: Fix YouTube Player
+                            post.youtubeId == null
+                                ? null
+                                : YoutubePlayerBuilder(
+                                    player: YoutubePlayer(
+                                      controller: _youtubeController,
+                                      showVideoProgressIndicator: true,
+                                      bottomActions: [
+                                        CurrentPosition(),
+                                        ProgressBar(isExpanded: true),
+                                        RemainingDuration(),
+                                        FullScreenButton()
+                                      ],
+                                    ),
+                                    builder: (context, player) => player
+//                                        Scaffold(
+//                                      key: _scaffoldKey,
+//                                      body: SafeArea(child: player),
+//                                    ),
+                                  ),
+                      ),
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Text(
@@ -501,6 +502,14 @@ class _PostItemState extends State<PostItem> {
   void initState() {
     _loadAudioByteData();
     super.initState();
+
+    _youtubeController = YoutubePlayerController(
+      initialVideoId: widget.post.youtubeId ?? '',
+      flags: YoutubePlayerFlags(
+        autoPlay: false,
+        mute: false,
+      ),
+    );
 
     setCurrentGame();
     if (widget.post.text.length > Sizes.postExcerpt) {
