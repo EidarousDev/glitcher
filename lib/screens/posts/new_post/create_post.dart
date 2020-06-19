@@ -25,6 +25,7 @@ import 'package:glitcher/widgets/caching_image.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:random_string/random_string.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class CreatePost extends StatefulWidget {
   CreatePost({Key key}) : super(key: key);
@@ -45,8 +46,9 @@ class _CreatePostReplyPageState extends State<CreatePost> {
   var _typeAheadController = TextEditingController();
 
   //YoutubePlayer
-  bool _showYoutubeUrl = false;
+  //bool _showYoutubeUrl = false;
   String _youtubeId;
+  YoutubePlayerController _youtubeController = YoutubePlayerController(initialVideoId: 'youtube');
 
   bool canSubmit = false;
 
@@ -111,7 +113,7 @@ class _CreatePostReplyPageState extends State<CreatePost> {
 
     /// If tweet contain image
     /// First image is uploaded on firebase storage
-    /// After sucessfull image upload to firebase storage it returns image path
+    /// After successful image upload to firebase storage it returns image path
     /// Add this image path to tweet model and save to firebase database
     String postId = randomAlphaNumeric(20);
 
@@ -125,6 +127,8 @@ class _CreatePostReplyPageState extends State<CreatePost> {
       _uploadedFileURL =
           await AppUtil.uploadFile(_image, context, 'posts_images/' + postId);
     } else {}
+
+    print(_youtubeId);
 
     var postData = {
       'owner': Constants.currentUserID,
@@ -318,7 +322,6 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                 child: TextFormField(
                   onChanged: (text) {
 
-
                     if (text.length > Sizes.maxPostChars) {
                       viewState.setState(() {
                         viewState.canSubmit = false;
@@ -338,13 +341,23 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                           : '';
 
                       //Hashtag
-                      viewState.words = [];
-                      viewState.words = text.split(' ');
                       viewState._hashtagText = viewState.words.length > 0 &&
                           viewState.words[viewState.words.length - 1].startsWith('#')
                           ? viewState.words[viewState.words.length - 1]
                           : '';
+
+                      if(viewState._youtubeId == null){
+                        viewState._youtubeId = viewState.words.length > 0 &&(viewState.words[viewState.words.length - 1].contains('www.youtube.com')
+                            || viewState.words[viewState.words.length - 1].contains('https://youtu.be'))
+                            ? YoutubePlayer.convertUrlToId(viewState.words[viewState.words.length - 1])
+                            : null;
+                      }
+
                     });
+
+                    print(viewState.words[viewState.words.length - 1]);
+                    print('yotubeId: ${viewState._youtubeId}');
+
                   },
                   maxLength: Sizes.maxPostChars,
                   minLines: 5,
