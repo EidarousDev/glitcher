@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:glitcher/common_widgets/gradient_appbar.dart';
+import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/screens/games/game_item.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/models/game_model.dart';
+import 'package:glitcher/utils/functions.dart';
 
 class GamesScreen extends StatefulWidget {
   @override
@@ -18,14 +19,17 @@ class _GamesScreenState extends State<GamesScreen> {
 
   String lastVisibleGameSnapShot;
 
+  GlobalKey<ScaffoldState> _scaffoldKey;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       floatingActionButton: FloatingActionButton(
         child: Icon(
           Icons.email,
         ),
-        onPressed: () async{
+        onPressed: () async {
           //Navigator.of(context).pushNamed('/new-game');
 
           final Email email = Email(
@@ -36,7 +40,7 @@ class _GamesScreenState extends State<GamesScreen> {
           );
 
           await FlutterEmailSender.send(email);
-
+          Functions.showInSnackBar(context, _scaffoldKey, "Suggestion sent ");
         },
       ),
       appBar: AppBar(

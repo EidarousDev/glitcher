@@ -1,5 +1,3 @@
-import 'package:package_info/package_info.dart';
-
 class Strings {
   // App Strings - Those will be set anyway in the AppPage Class, so don't bother editing them from here
   static String packageName = 'com.eidarousdev.glitcher';
@@ -56,6 +54,8 @@ class Strings {
       'Submit your email address to receive an activation link.';
   static const String checkYourEmail = 'Check your email';
 
+  static const String SAVE_IMAGE = 'Save Image';
+
   static String activationLinkSent(String email) =>
       'We have sent an activation link to $email';
   static const String errorSendingEmail = 'Error sending email';
@@ -83,6 +83,8 @@ class Strings {
   static const String default_post_image = 'assets/images/default_profile.png';
   static const String like_sound = 'assets/sounds/like_sound.mp3';
   static const String dislike_sound = 'assets/sounds/dislikesfx.mp3';
+  static const String swipe_up_to_reload =
+      'assets/sounds/swipe_up_to_reload.mp3';
   String appFont = 'HelveticaNeuea';
   List<String> defaultProfilePics = [
     'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6TaCLCqU4K0ieF27ayjl51NmitWaJAh_X0r1rLX4gMvOe0MDaYw&s',

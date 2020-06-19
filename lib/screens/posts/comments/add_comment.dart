@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -18,7 +19,6 @@ import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/custom_url_text.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
-import 'package:glitcher/widgets/title_text.dart';
 
 class AddComment extends StatefulWidget {
   final Post post;
@@ -80,6 +80,7 @@ class _AddCommentPageState extends State<AddComment> {
 
   /// Submit Comment to save in firebase database
   void _submitButton() async {
+    glitcherLoader.showLoader(context);
     if (_textEditingController.text.isNotEmpty) {
       DatabaseService.addComment(widget.post.id, _textEditingController.text);
 

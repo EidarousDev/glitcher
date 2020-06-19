@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+import 'package:audiofileplayer/audiofileplayer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_icons/font_awesome.dart';
 import 'package:glitcher/common_widgets/card_icon_text.dart';
 import 'package:glitcher/common_widgets/drawer.dart';
@@ -70,6 +72,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   double sliverAppBarHeight = 120;
 
+  int _spawnedAudioCount = 0;
+  ByteData _swipeUpSFX;
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
 
@@ -448,6 +452,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     loadUserData();
     _setupFeed();
     RateApp(context).rateGlitcher();
+    _loadAudioByteData();
   }
 
   @override
@@ -525,6 +530,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _onRefresh() async {
+    _swipeUpSFX == null
+        ? null
+        : Audio.loadFromByteData(_swipeUpSFX,
+            onComplete: () => setState(() => --_spawnedAudioCount))
+      ..play()
+      ..dispose();
+    setState(() => ++_spawnedAudioCount);
     await _setupFeed();
     //await Future.delayed(Duration(milliseconds: 1000));
     _refreshController.refreshCompleted();
@@ -543,6 +555,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       dir.delete(recursive: true);
     });
     setState(() {});
+  }
+
+  void _loadAudioByteData() async {
+    _swipeUpSFX = await rootBundle.load(Strings.swipe_up_to_reload);
   }
 }
 
@@ -612,7 +628,8 @@ void updateGames() async {
           'slug': results[i]['slug'],
           'tba': results[i]['tba'],
           'release_date': results[i]['released'],
-          'description': utf8.decode(gameDetails['description_raw'].toString().runes.toList()),
+          'description': utf8
+              .decode(gameDetails['description_raw'].toString().runes.toList()),
           'website': gameDetails['website'],
           'reddit_url': gameDetails['reddit_url'],
           'alternative_names': gameDetails['alternative_names'],

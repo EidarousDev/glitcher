@@ -220,7 +220,7 @@ class _PostItemState extends State<PostItem> {
                                                     Sizes.sm_profile_image_h,
                                                 child: ImageOverlay(
                                                   imageUrl: post.imageUrl,
-                                                  btnText: 'Download',
+                                                  btnText: Strings.SAVE_IMAGE,
                                                   btnFunction: () {},
                                                 ),
                                               ),
