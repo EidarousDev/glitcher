@@ -105,14 +105,14 @@ class _BuildDrawerState extends State<BuildDrawer> {
           ),
           ListTile(
             onTap: () {
-              changeTheme(context);
-              Navigator.pop(context);
+              Navigator.of(context).pushNamed('/settings');
+              //Navigator.pop(context);
             },
             title: Text(
-              'Change Theme',
+              'Settings',
             ),
             leading: Icon(
-              Icons.apps,
+              Icons.settings,
             ),
           ),
           Container(

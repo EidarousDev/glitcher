@@ -104,4 +104,5 @@ class Strings {
   static const String help_center = 'Help Center';
   static const legal_notices = 'Legal Notices';
   static const terms_of_service = 'Terms of Service';
+  static const String settings = 'Settings';
 }

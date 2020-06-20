@@ -20,6 +20,7 @@ import 'package:glitcher/screens/hashtag_posts_screen.dart';
 import 'package:glitcher/screens/posts/comments/add_comment.dart';
 import 'package:glitcher/screens/posts/new_post/create_post.dart';
 import 'package:glitcher/screens/posts/post_preview.dart';
+import 'package:glitcher/screens/settings.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:glitcher/screens/web_browser/in_app_browser.dart';
 import 'package:page_transition/page_transition.dart';
@@ -125,6 +126,8 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => InAppBrowser(args['url']));
       case '/hashtag-posts':
         return MaterialPageRoute(builder: (_) => HashtagPostsScreen(args['hashtag']));
+      case '/settings':
+        return MaterialPageRoute(builder: (_) => SettingsScreen());
 
       default:
         // If there is no such named route in the switch statement, e.g. /third
