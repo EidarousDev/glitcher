@@ -261,7 +261,7 @@ class _PostItemState extends State<PostItem> {
 //                                      key: _scaffoldKey,
 //                                      body: SafeArea(child: player),
 //                                    ),
-                                  ),
+                                    ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
@@ -746,7 +746,7 @@ class _PostItemState extends State<PostItem> {
                         new GestureDetector(
                           onTap: () {
                             DatabaseService.deletePost(this.widget.post.id);
-                            Navigator.of(context).pushReplacementNamed('/home');
+                            (context as Element).rebuild();
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),

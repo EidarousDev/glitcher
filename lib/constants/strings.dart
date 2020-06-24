@@ -105,4 +105,7 @@ class Strings {
   static const legal_notices = 'Legal Notices';
   static const terms_of_service = 'Terms of Service';
   static const String settings = 'Settings';
+
+  //Theme
+  static const String lightTheme = "AvailableThemes.LIGHT_THEME";
 }

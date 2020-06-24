@@ -1,11 +1,8 @@
-import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
-import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/utils/functions.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -14,6 +11,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   int darkOrLight = 0;
+  int filter = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -23,41 +21,110 @@ class _SettingsScreenState extends State<SettingsScreen> {
         flexibleSpace: gradientAppBar(),
         centerTitle: true,
       ),
-      body: Column(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal:  16.0, vertical: 8),
-            child: Row(
+      body: Align(
+        alignment: Alignment.centerLeft,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+              child: Row(
+                children: <Widget>[
+                  Text('Theme: '),
+                  Radio(
+                      value: 0,
+                      groupValue: darkOrLight,
+                      onChanged: (value) {
+                        setTheme(context);
+                        setState(() {
+                          darkOrLight = value;
+                        });
+                      }),
+                  Text(
+                    'Dark',
+                  ),
+                  Radio(
+                      value: 1,
+                      groupValue: darkOrLight,
+                      onChanged: (value) {
+                        setTheme(context);
+                        setState(() {
+                          darkOrLight = value;
+                        });
+                      }),
+                  Text(
+                    'Light',
+                  ),
+                ],
+              ),
+            ),
+            Divider(
+              height: 2,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Favourite Feed filter: ',
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                Text('Theme: '),
-                Radio(
-                    value: 0,
-                    groupValue: darkOrLight,
-                    onChanged: (value) {
-                      changeTheme(context);
-                      setState(() {
-                        darkOrLight = value;
-                      });
-                    }),
-                Text(
-                  'Dark',
+                Row(
+                  children: <Widget>[
+                    Radio(
+                        value: 0,
+                        groupValue: filter,
+                        onChanged: (value) {
+                          setFavouriteFilter(context, value);
+                          setState(() {
+                            filter = value;
+                          });
+                        }),
+                    Text(
+                      'Recent Posts',
+                    ),
+                  ],
                 ),
-                Radio(
-                    value: 1,
-                    groupValue: darkOrLight,
-                    onChanged: (value) {
-                      changeTheme(context);
-                      setState(() {
-                        darkOrLight = value;
-                      });
-                    }),
-                Text(
-                  'Light',
+                Row(
+                  children: <Widget>[
+                    Radio(
+                        value: 1,
+                        groupValue: filter,
+                        onChanged: (value) {
+                          setFavouriteFilter(context, value);
+                          setState(() {
+                            filter = value;
+                          });
+                        }),
+                    Text(
+                      'Followed Gamers',
+                    ),
+                  ],
                 ),
+                Row(
+                  children: <Widget>[
+                    Radio(
+                        value: 2,
+                        groupValue: filter,
+                        onChanged: (value) {
+                          setFavouriteFilter(context, value);
+                          setState(() {
+                            filter = value;
+                          });
+                        }),
+                    Text(
+                      'Followed Games',
+                    ),
+                  ],
+                )
               ],
             ),
-          )
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -73,6 +140,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         darkOrLight = 0;
       });
     }
+
+    setState(() {
+      filter = Constants.favouriteFilter;
+    });
     super.initState();
   }
 }

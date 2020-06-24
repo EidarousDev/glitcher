@@ -1,6 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/user_model.dart';
@@ -42,7 +42,7 @@ class Constants {
   static List<String> games = [];
   static const genres = ['Action', 'Sports', 'Racing', 'Fighting'];
   static var currentTheme = AvailableThemes.DARK_THEME;
-
+  static int favouriteFilter;
   static List<String> followingIds = [];
   static List<String> followedGamesNames = [];
 

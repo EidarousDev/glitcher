@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/app_page.dart';
 import 'package:glitcher/screens/login_page.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/constants/constants.dart';
 
 class RootPage extends StatefulWidget {
   @override
@@ -70,8 +70,6 @@ class _RootPageState extends State<RootPage> {
         Constants.loggedInUser = loggedInUser;
         Constants.currentUser = user;
         Constants.currentUserID = user?.uid;
-        DatabaseService.getFollowedGames();
-        DatabaseService.getFollowing();
         authStatus = AuthStatus.LOGGED_IN;
       });
     } else {

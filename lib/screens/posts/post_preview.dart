@@ -1,7 +1,14 @@
+import 'dart:typed_data';
+
+import 'package:audiofileplayer/audiofileplayer.dart';
 import 'package:chewie/chewie.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:glitcher/common_widgets/gradient_appbar.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
@@ -9,8 +16,7 @@ import 'package:glitcher/screens/posts/comment_item.dart';
 import 'package:glitcher/screens/posts/comment_post_item.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/Loader.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:glitcher/constants/constants.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:video_player/video_player.dart';
 
 class PostPreview extends StatefulWidget {
@@ -66,10 +72,18 @@ class _PostPreviewState extends State<PostPreview>
   Animation _animation;
   FocusNode _focusNode = FocusNode();
 
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+
+  ByteData _swipeUpSFX;
+  int _spawnedAudioCount = 0;
+
   @override
   void initState() {
     loadPostData();
     super.initState();
+
+    _loadAudioByteData();
 
     ///Set up listener here
     _scrollController.addListener(() {
@@ -202,6 +216,31 @@ class _PostPreviewState extends State<PostPreview>
     );
   }
 
+  void _loadAudioByteData() async {
+    _swipeUpSFX = await rootBundle.load(Strings.swipe_up_to_reload);
+  }
+
+  void _onRefresh() async {
+    _swipeUpSFX == null
+        ? null
+        : Audio.loadFromByteData(_swipeUpSFX,
+            onComplete: () => setState(() => --_spawnedAudioCount))
+      ..play()
+      ..dispose();
+    setState(() => ++_spawnedAudioCount);
+    loadComments();
+    //await Future.delayed(Duration(milliseconds: 1000));
+    _refreshController.refreshCompleted();
+  }
+
+  void _onLoading() async {
+    // monitor network fetch
+    //await Future.delayed(Duration(milliseconds: 1000));
+    // if failed,use loadFailed(),if no data return,use LoadNodata()
+    if (mounted) setState(() {});
+    _refreshController.loadComplete();
+  }
+
   Widget _buildWidget() {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -222,16 +261,23 @@ class _PostPreviewState extends State<PostPreview>
         title: Text('New Comment'),
         flexibleSpace: gradientAppBar(),
       ),
-      body: new InkWell(
-        // to dismiss the keyboard when the user tabs out of the TextField
-        splashColor: Colors.transparent,
-        onTap: () {
-          FocusScope.of(context).requestFocus(FocusNode());
-        },
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          scrollDirection: Axis.vertical,
-          child: _loading ? Center(child: LoaderTwo()) : _buildWidget(),
+      body: SmartRefresher(
+        controller: _refreshController,
+        enablePullDown: true,
+        header: WaterDropHeader(),
+        onRefresh: _onRefresh,
+        onLoading: _onLoading,
+        child: new InkWell(
+          // to dismiss the keyboard when the user tabs out of the TextField
+          splashColor: Colors.transparent,
+          onTap: () {
+            FocusScope.of(context).requestFocus(FocusNode());
+          },
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            scrollDirection: Axis.vertical,
+            child: _loading ? Center(child: LoaderTwo()) : _buildWidget(),
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(

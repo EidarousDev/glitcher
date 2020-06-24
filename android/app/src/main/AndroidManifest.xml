@@ -18,10 +18,6 @@
         android:label="Glitcher"
         android:icon="@mipmap/ic_launcher">
 
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/ic_launcher" />
-
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
@@ -46,7 +42,14 @@
                 <action android:name="FLUTTER_NOTIFICATION_CLICK"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
-
         </activity>
+        <!-- Set custom default icon. This is used when no icon is set for incoming notification messages.
+     -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorPrimary" />
     </application>
 </manifest>

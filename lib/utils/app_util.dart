@@ -2,9 +2,7 @@ import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/widgets/fluttertoast.dart';
-
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -30,7 +28,6 @@ class AppUtil {
     }
   }
 
-
   showToast(String msg) {
     FlutterToast.showToast(
         msg: msg,
@@ -43,6 +40,7 @@ class AppUtil {
   static Future chooseImage() async {
     File image = await ImagePicker.pickImage(
         source: ImageSource.gallery, imageQuality: 80);
+    print('File size: ${image.lengthSync()}');
     return image;
   }
 

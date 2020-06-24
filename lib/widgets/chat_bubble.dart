@@ -1,4 +1,5 @@
 import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -42,6 +43,7 @@ class _ChatBubbleState extends State<ChatBubble> {
   @override
   void initState() {
     super.initState();
+    print('Message: ${widget.message}');
     audioPlayerWidget = AudioMessagePlayer(url: widget.message);
   }
 
@@ -178,8 +180,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                                   barrierDismissible: true,
                                   child: Container(
                                     width: Sizes.sm_profile_image_w,
-                                    height:
-                                    Sizes.sm_profile_image_h,
+                                    height: Sizes.sm_profile_image_h,
                                     child: ImageOverlay(
                                       imageUrl: widget.message,
                                       btnText: 'Download',

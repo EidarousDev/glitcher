@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -7,9 +8,13 @@ import 'package:image_picker/image_picker.dart';
 
 class CreatePostBottomIconWidget extends StatefulWidget {
   final TextEditingController textEditingController;
-  final Function(File) onImageIconSelcted;
+  final Function(File) onImageIconSelected;
+  final Function(File) onVideoIconSelected;
   CreatePostBottomIconWidget(
-      {Key key, this.textEditingController, this.onImageIconSelcted})
+      {Key key,
+      this.textEditingController,
+      this.onImageIconSelected,
+      this.onVideoIconSelected})
       : super(key: key);
 
   @override
@@ -74,6 +79,14 @@ class _CreatePostBottomIconWidgetState
                 Icons.camera_alt,
                 color: MyColors.darkPrimary,
               )),
+          IconButton(
+              onPressed: () {
+                setVideo(ImageSource.gallery);
+              },
+              icon: Icon(
+                Icons.videocam,
+                color: MyColors.darkPrimary,
+              )),
           Expanded(
               child: Align(
             alignment: Alignment.centerRight,
@@ -114,7 +127,18 @@ class _CreatePostBottomIconWidgetState
     ImagePicker.pickImage(source: source, imageQuality: 20).then((File file) {
       setState(() {
         // _image = file;
-        widget.onImageIconSelcted(file);
+        widget.onImageIconSelected(file);
+      });
+    });
+  }
+
+  void setVideo(ImageSource source) {
+    ImagePicker.pickVideo(
+      source: source,
+    ).then((File file) {
+      setState(() {
+        // _image = file;
+        widget.onVideoIconSelected(file);
       });
     });
   }

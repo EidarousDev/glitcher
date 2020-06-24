@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:badges/badges.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/hashtag_model.dart';
@@ -13,13 +15,10 @@ import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/home/home_screen.dart';
 import 'package:glitcher/screens/notifications/notifications_screen.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
-import 'package:badges/badges.dart';
-import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
-import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:package_info/package_info.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 import 'chats/chats.dart';
 
 class AppPage extends StatefulWidget {
@@ -37,7 +36,6 @@ class _AppPageState extends State<AppPage> {
   String profileImageUrl;
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
 
   PackageInfo packageInfo = PackageInfo(
     appName: 'Unknown',
@@ -134,21 +132,22 @@ class _AppPageState extends State<AppPage> {
     print('User Firends = ${Constants.userFriends}');
 
     this.getCurrentTheme();
+    this._getFavouriteFilter();
     NotificationHandler.receiveNotification(context);
 
-    connectivitySubscription = Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
-
+    connectivitySubscription = Connectivity()
+        .onConnectivityChanged
+        .listen((ConnectivityResult result) {
       setState(() {
         Constants.connectionState = result;
       });
 
       // Got a new connectivity status!
-      if(result == ConnectivityResult.none){
+      if (result == ConnectivityResult.none) {
         print('No internet');
-        Functions.showInFixedSnackBar(context, _scaffoldKey, 'No internet connection.');
-
-      }
-      else{
+        Functions.showInFixedSnackBar(
+            context, _scaffoldKey, 'No internet connection.');
+      } else {
         _scaffoldKey.currentState.hideCurrentSnackBar();
         //Scaffold.of(context).hideCurrentSnackBar();
       }
@@ -189,6 +188,14 @@ class _AppPageState extends State<AppPage> {
         Constants.currentTheme = AvailableThemes.DARK_THEME;
       });
     }
+  }
+
+  _getFavouriteFilter() async {
+    int favouriteFilter = await getFavouriteFilter();
+    setState(() {
+      Constants.favouriteFilter = favouriteFilter;
+    });
+    print('filter: ${Constants.favouriteFilter}');
   }
 
   userListener() {

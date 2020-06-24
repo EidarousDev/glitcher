@@ -1,9 +1,9 @@
 import 'dart:io';
+
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
@@ -13,17 +13,16 @@ import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/screens/home/home_screen.dart';
 import 'package:glitcher/screens/posts/new_post/widget/create_bottom_icon.dart';
 import 'package:glitcher/screens/posts/new_post/widget/create_post_image.dart';
+import 'package:glitcher/screens/posts/new_post/widget/create_post_video.dart';
 import 'package:glitcher/screens/posts/new_post/widget/widget_view.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
-import 'package:http/http.dart';
-import 'package:provider/provider.dart';
+import 'package:glitcher/widgets/custom_widgets.dart';
 import 'package:random_string/random_string.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -38,7 +37,7 @@ class _CreatePostReplyPageState extends State<CreatePost> {
   ScrollController scrollcontroller;
 
   File _image;
-  var _video;
+  File _video;
   var _uploadedFileURL;
   String selectedGame = "";
   GlobalKey<AutoCompleteTextFieldState<String>> autocompleteKey = GlobalKey();
@@ -48,7 +47,8 @@ class _CreatePostReplyPageState extends State<CreatePost> {
   //YoutubePlayer
   //bool _showYoutubeUrl = false;
   String _youtubeId;
-  YoutubePlayerController _youtubeController = YoutubePlayerController(initialVideoId: 'youtube');
+  YoutubePlayerController _youtubeController =
+      YoutubePlayerController(initialVideoId: 'youtube');
 
   bool canSubmit = false;
 
@@ -57,6 +57,8 @@ class _CreatePostReplyPageState extends State<CreatePost> {
   bool newHashtag = true;
 
   var words = [];
+
+  CreatePostVideo createPostVideo;
 
   @override
   void dispose() {
@@ -68,6 +70,12 @@ class _CreatePostReplyPageState extends State<CreatePost> {
   @override
   void initState() {
     scrollcontroller = ScrollController();
+
+    createPostVideo = CreatePostVideo(
+      video: _video,
+      onCrossIconPressed: _onCrossIconPressed,
+    );
+
     _textEditingController = TextEditingController();
     scrollcontroller..addListener(_scrollListener);
     DatabaseService.getGameNames();
@@ -82,13 +90,35 @@ class _CreatePostReplyPageState extends State<CreatePost> {
   void _onCrossIconPressed() {
     setState(() {
       _image = null;
+      _video = null;
     });
   }
 
-  void _onImageIconSelcted(File file) {
-    setState(() {
-      _image = file;
-    });
+  void _onImageIconSelected(File file) {
+    print('File size: ${file.lengthSync()}');
+    if (file.lengthSync() / (1024 * 1024) == 3) {
+      customSnackBar(_scaffoldKey, 'Image exceeded 3 Megabytes limit.');
+    } else {
+      setState(() {
+        _image = file;
+      });
+    }
+  }
+
+  void _onVideoIconSelected(File file) {
+    print('File size: ${file.lengthSync()}');
+    if (file.lengthSync() / (1024 * 1024) == 10) {
+      customSnackBar(_scaffoldKey, 'Video exceeded 10 Megabytes limit.');
+    } else {
+      setState(() {
+        _video = file;
+
+        createPostVideo = CreatePostVideo(
+          video: _video,
+          onCrossIconPressed: _onCrossIconPressed,
+        );
+      });
+    }
   }
 
   /// Submit tweet to save in firebase database
@@ -145,8 +175,7 @@ class _CreatePostReplyPageState extends State<CreatePost> {
 
     await postsRef.document(postId).setData(postData);
 
-   await checkIfContainsHashtag(_textEditingController.text, postId);
-
+    await checkIfContainsHashtag(_textEditingController.text, postId);
 
     /// Checks for username in tweet description
     /// If found sends notification to all tagged user
@@ -204,7 +233,8 @@ class _CreatePostReplyPageState extends State<CreatePost> {
                 alignment: Alignment.bottomCenter,
                 child: CreatePostBottomIconWidget(
                   textEditingController: _textEditingController,
-                  onImageIconSelcted: _onImageIconSelcted,
+                  onImageIconSelected: _onImageIconSelected,
+                  onVideoIconSelected: _onVideoIconSelected,
                 ),
               ),
             ],
@@ -250,7 +280,7 @@ class _CreatePostReplyPageState extends State<CreatePost> {
     post.split(' ').forEach((word) async {
       if (word.startsWith('@')) {
         User user =
-        await DatabaseService.getUserWithUsername(word.substring(1));
+            await DatabaseService.getUserWithUsername(word.substring(1));
 
         await NotificationHandler.sendNotification(
             user.id,
@@ -265,31 +295,36 @@ class _CreatePostReplyPageState extends State<CreatePost> {
   Future checkIfContainsHashtag(String post, String postId) async {
     post.split(' ').forEach((word) async {
       if (word.startsWith('#')) {
-        Hashtag hashtag =
-        await DatabaseService.getHashtagWithText(word);
+        Hashtag hashtag = await DatabaseService.getHashtagWithText(word);
 
-        if(newHashtag){
+        if (newHashtag) {
           String hashtagId = randomAlphaNumeric(20);
           await hashtagsRef.document(hashtagId).setData({
             'text': _hashtagText,
             'timestamp': FieldValue.serverTimestamp()
           });
 
-          await hashtagsRef.document(hashtagId).collection('posts').document(postId).setData({'timestamp': FieldValue.serverTimestamp()});
-        }
-        else{
-          await hashtagsRef.document(hashtag.id).collection('posts').document(postId).setData({'timestamp': FieldValue.serverTimestamp()});
+          await hashtagsRef
+              .document(hashtagId)
+              .collection('posts')
+              .document(postId)
+              .setData({'timestamp': FieldValue.serverTimestamp()});
+        } else {
+          await hashtagsRef
+              .document(hashtag.id)
+              .collection('posts')
+              .document(postId)
+              .setData({'timestamp': FieldValue.serverTimestamp()});
         }
 
         return hashtag;
-      }
-      else return null;
+      } else
+        return null;
     });
   }
 }
 
 class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
-
   _ComposeTweet(this.viewState) : super(viewState);
 
   final _CreatePostReplyPageState viewState;
@@ -321,7 +356,6 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
               Expanded(
                 child: TextFormField(
                   onChanged: (text) {
-
                     if (text.length > Sizes.maxPostChars) {
                       viewState.setState(() {
                         viewState.canSubmit = false;
@@ -336,28 +370,32 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                     viewState.setState(() {
                       viewState.words = text.split(' ');
                       viewState._mentionText = viewState.words.length > 0 &&
-                          viewState.words[viewState.words.length - 1].startsWith('@')
+                              viewState.words[viewState.words.length - 1]
+                                  .startsWith('@')
                           ? viewState.words[viewState.words.length - 1]
                           : '';
 
                       //Hashtag
                       viewState._hashtagText = viewState.words.length > 0 &&
-                          viewState.words[viewState.words.length - 1].startsWith('#')
+                              viewState.words[viewState.words.length - 1]
+                                  .startsWith('#')
                           ? viewState.words[viewState.words.length - 1]
                           : '';
 
-                      if(viewState._youtubeId == null){
-                        viewState._youtubeId = viewState.words.length > 0 &&(viewState.words[viewState.words.length - 1].contains('www.youtube.com')
-                            || viewState.words[viewState.words.length - 1].contains('https://youtu.be'))
-                            ? YoutubePlayer.convertUrlToId(viewState.words[viewState.words.length - 1])
+                      if (viewState._youtubeId == null) {
+                        viewState._youtubeId = viewState.words.length > 0 &&
+                                (viewState.words[viewState.words.length - 1]
+                                        .contains('www.youtube.com') ||
+                                    viewState.words[viewState.words.length - 1]
+                                        .contains('https://youtu.be'))
+                            ? YoutubePlayer.convertUrlToId(
+                                viewState.words[viewState.words.length - 1])
                             : null;
                       }
-
                     });
 
                     print(viewState.words[viewState.words.length - 1]);
                     print('yotubeId: ${viewState._youtubeId}');
-
                   },
                   maxLength: Sizes.maxPostChars,
                   minLines: 5,
@@ -372,68 +410,66 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                   style: TextStyle(fontSize: 18),
                 ),
               ),
-
             ],
           ),
           viewState._mentionText.length > 1
               ? ListView.builder(
-            itemCount: Constants.userFriends.length,
-            itemBuilder: (context, index) {
-              String s = Constants.userFriends[index].username;
-              print('username:' + s);
-              if (('@' + s).contains(viewState._mentionText))
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: NetworkImage(
-                        Constants.userFriends[index].profileImageUrl),
-                  ),
-                  title: Text(Constants.userFriends[index].username),
-                  onTap: () {
-                    String tmp =
-                    viewState._mentionText.substring(1, viewState._mentionText.length);
-                    viewState.setState(() {
-                      viewState._mentionText = '';
-                      viewState._textEditingController.text += s
-                          .substring(
-                          s.indexOf(tmp) + tmp.length, s.length)
-                          .replaceAll(' ', '_');
-                    });
+                  itemCount: Constants.userFriends.length,
+                  itemBuilder: (context, index) {
+                    String s = Constants.userFriends[index].username;
+                    print('username:' + s);
+                    if (('@' + s).contains(viewState._mentionText))
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: NetworkImage(
+                              Constants.userFriends[index].profileImageUrl),
+                        ),
+                        title: Text(Constants.userFriends[index].username),
+                        onTap: () {
+                          String tmp = viewState._mentionText
+                              .substring(1, viewState._mentionText.length);
+                          viewState.setState(() {
+                            viewState._mentionText = '';
+                            viewState._textEditingController.text += s
+                                .substring(
+                                    s.indexOf(tmp) + tmp.length, s.length)
+                                .replaceAll(' ', '_');
+                          });
+                        },
+                      );
+
+                    return SizedBox();
                   },
-                );
-
-              return SizedBox();
-            },
-            shrinkWrap: true,
-          )
+                  shrinkWrap: true,
+                )
               : SizedBox(),
-
           viewState._hashtagText.length > 1
               ? ListView.builder(
-            itemCount: Constants.hashtags.length,
-            itemBuilder: (context, index) {
-              String s = Constants.hashtags[index].text;
-              print('hashtag:' + s);
-              if (('#' + s).contains(viewState._hashtagText))
-                return ListTile(
-                  title: Text(Constants.hashtags[index].text),
-                  onTap: () {
-                    viewState.newHashtag = false;
-                    String tmp =
-                    viewState._hashtagText.substring(1, viewState._hashtagText.length);
-                    viewState.setState(() {
-                      viewState._hashtagText = '';
-                      viewState._textEditingController.text += s
-                          .substring(
-                          s.indexOf(tmp) + tmp.length, s.length)
-                          .replaceAll(' ', '_');
-                    });
-                  },
-                );
+                  itemCount: Constants.hashtags.length,
+                  itemBuilder: (context, index) {
+                    String s = Constants.hashtags[index].text;
+                    print('hashtag:' + s);
+                    if (('#' + s).contains(viewState._hashtagText))
+                      return ListTile(
+                        title: Text(Constants.hashtags[index].text),
+                        onTap: () {
+                          viewState.newHashtag = false;
+                          String tmp = viewState._hashtagText
+                              .substring(1, viewState._hashtagText.length);
+                          viewState.setState(() {
+                            viewState._hashtagText = '';
+                            viewState._textEditingController.text += s
+                                .substring(
+                                    s.indexOf(tmp) + tmp.length, s.length)
+                                .replaceAll(' ', '_');
+                          });
+                        },
+                      );
 
-              return SizedBox();
-            },
-            shrinkWrap: true,
-          )
+                    return SizedBox();
+                  },
+                  shrinkWrap: true,
+                )
               : SizedBox(),
           Padding(
             padding: const EdgeInsets.only(left: 8, bottom: 8),
@@ -482,6 +518,15 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
               ],
             ),
           ),
+          viewState._video == null
+              ? Flexible(
+                  child: Stack(
+                    children: <Widget>[
+                      viewState.createPostVideo,
+                    ],
+                  ),
+                )
+              : Container(),
         ],
       ),
     );

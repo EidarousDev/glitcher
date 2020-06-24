@@ -172,7 +172,7 @@ class _AddCommentPageState extends State<AddComment> {
                 alignment: Alignment.bottomCenter,
                 child: CreatePostBottomIconWidget(
                   textEditingController: _textEditingController,
-                  onImageIconSelcted: _onImageIconSelcted,
+                  onImageIconSelected: _onImageIconSelcted,
                 ),
               ),
             ],

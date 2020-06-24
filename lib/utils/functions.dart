@@ -2,15 +2,14 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/home/home.dart';
 import 'package:glitcher/screens/login_page.dart';
 import 'package:glitcher/services/database_service.dart';
-//import 'package:glitcher/utils/sound_manager.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -18,7 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/constants.dart';
 
-void changeTheme(BuildContext context) async {
+void setTheme(BuildContext context) async {
   if (Constants.currentTheme == AvailableThemes.LIGHT_THEME) {
     DynamicTheme.of(context).setThemeData(MyColors.darkTheme);
     Constants.currentTheme = AvailableThemes.DARK_THEME;
@@ -37,6 +36,17 @@ Future getTheme() async {
   return preferences.getString('theme');
 }
 
+void setFavouriteFilter(BuildContext context, int favouriteFilter) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Constants.favouriteFilter = favouriteFilter;
+  await prefs.setInt('favouriteFilter', favouriteFilter);
+}
+
+Future getFavouriteFilter() async {
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  return preferences.getInt('favouriteFilter');
+}
+
 Future<List> getFriends() async {
   print('currentUID = ${Constants.currentUserID}');
   List<User> friends =
@@ -47,8 +57,7 @@ Future<List> getFriends() async {
 
 Future<List> getHashtags() async {
   print('currentUID = ${Constants.currentUserID}');
-  List<Hashtag> hashtags =
-      await DatabaseService.getHashtags();
+  List<Hashtag> hashtags = await DatabaseService.getHashtags();
 
   return hashtags;
 }
@@ -175,7 +184,6 @@ class Functions {
     FocusScope.of(context).requestFocus(new FocusNode());
     _scaffoldKey.currentState?.removeCurrentSnackBar();
     _scaffoldKey.currentState.showSnackBar(new SnackBar(
-
       content: new Text(
         value,
         textAlign: TextAlign.center,
@@ -188,8 +196,6 @@ class Functions {
       duration: Duration(hours: 1),
     ));
   }
-
-
 
   /// Format Time
   static String formatTimestamp(Timestamp timestamp) {
