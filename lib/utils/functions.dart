@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,6 +11,7 @@ import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/home/home.dart';
 import 'package:glitcher/screens/login_page.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -44,7 +46,7 @@ void setFavouriteFilter(BuildContext context, int favouriteFilter) async {
 
 Future getFavouriteFilter() async {
   SharedPreferences preferences = await SharedPreferences.getInstance();
-  return preferences.getInt('favouriteFilter');
+  return preferences.getInt('favouriteFilter') ?? 0;
 }
 
 Future<List> getFriends() async {
@@ -145,6 +147,13 @@ void moveUserTo(
 class Functions {
   static FirebaseUser currentUser;
   static final _auth = FirebaseAuth.instance;
+
+  static void getUserCountryInfo() async {
+    String url = 'http://ip-api.com/json';
+    var response = await http.get(url);
+    String body = response.body;
+    Constants.country = jsonDecode(body)['country'];
+  }
 
   static void getCurrentUser() async {
     try {

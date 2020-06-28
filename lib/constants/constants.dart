@@ -50,4 +50,5 @@ class Constants {
   static List<Hashtag> hashtags = [];
 
   static ConnectivityResult connectionState;
+  static String country;
 }

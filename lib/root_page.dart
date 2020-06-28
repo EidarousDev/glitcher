@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/app_page.dart';
-import 'package:glitcher/screens/login_page.dart';
+import 'package:glitcher/screens/welcome/welcome_page.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/database_service.dart';
 
@@ -52,9 +52,8 @@ class _RootPageState extends State<RootPage> {
       case AuthStatus.NOT_DETERMINED:
         return buildWaitingScreen();
       case AuthStatus.NOT_LOGGED_IN:
-        return LoginPage(
-          onSignedIn: _signedIn,
-        );
+        return WelcomePage();
+      //LoginPage(onSignedIn: _signedIn,);
       case AuthStatus.LOGGED_IN:
         return AppPage();
     }

@@ -14,7 +14,7 @@ class PostBottomSheet {
         radius: BorderRadius.circular(20),
         context: context,
         onPressed: () {
-          _openbottomSheet(context, post);
+          _openBottomSheet(context, post);
         },
         child: Container(
           width: 25,
@@ -26,7 +26,7 @@ class PostBottomSheet {
         ));
   }
 
-  void _openbottomSheet(BuildContext context, Post post) async {
+  void _openBottomSheet(BuildContext context, Post post) async {
     User user = await DatabaseService.getUserWithId(post.authorId);
     bool isMyPost = Constants.currentUserID == post.authorId;
     await showModalBottomSheet(
@@ -195,6 +195,8 @@ class PostBottomSheet {
         ),
       ),
     );
+    Navigator.of(context).pop();
+    Navigator.of(context).pushReplacementNamed('/home');
     print('deleting post!');
   }
 }
