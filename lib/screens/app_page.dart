@@ -11,10 +11,12 @@ import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/hashtag_model.dart';
+import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/home/home_screen.dart';
 import 'package:glitcher/screens/notifications/notifications_screen.dart';
 import 'package:glitcher/screens/user_timeline/profile_screen.dart';
+import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:package_info/package_info.dart';
@@ -165,7 +167,8 @@ class _AppPageState extends State<AppPage> {
       print('test link $deepLink.path');
       String postId = deepLink.queryParameters['postId'];
       // perform your navigation operations here
-      Navigator.of(context).pushNamed('/post', arguments: {'postId': postId});
+      Post post = await DatabaseService.getPostWithId(postId);
+      Navigator.of(context).pushNamed('/post', arguments: {'post': post});
     }
   }
 

@@ -84,7 +84,7 @@ class _PostItemState extends State<PostItem> {
       },
       onTap: () {
         Navigator.of(context).pushNamed('/post',
-            arguments: {'postId': post.id, 'commentsNo': post.commentsCount});
+            arguments: {'post': post, 'commentsNo': post.commentsCount});
       },
       child: Column(
         children: <Widget>[
@@ -422,7 +422,7 @@ class _PostItemState extends State<PostItem> {
                   ),
                   onTap: () {
                     Navigator.of(context).pushNamed('/post', arguments: {
-                      'postId': post.id,
+                      'post': post,
                       'commentsNo': post.commentsCount
                     });
                   },

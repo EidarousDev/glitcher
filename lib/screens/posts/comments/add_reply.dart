@@ -8,6 +8,7 @@ import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
+import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/posts/new_post/widget/create_bottom_icon.dart';
@@ -20,18 +21,19 @@ import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/custom_url_text.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
 
-class AddComment extends StatefulWidget {
+class AddReply extends StatefulWidget {
   final Post post;
+  final Comment comment;
   final User user;
 
-  AddComment({Key key, this.post, this.user}) : super(key: key);
-  _AddCommentPageState createState() => _AddCommentPageState();
+  AddReply({Key key, this.post, this.comment, this.user}) : super(key: key);
+  _AddReplyPageState createState() => _AddReplyPageState();
 }
 
-class _AddCommentPageState extends State<AddComment> {
+class _AddReplyPageState extends State<AddReply> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isScrollingDown = false;
-  ScrollController scrollcontroller;
+  ScrollController scrollController;
 
   File _image;
   var _video;
@@ -47,22 +49,22 @@ class _AddCommentPageState extends State<AddComment> {
 
   @override
   void dispose() {
-    scrollcontroller.dispose();
+    scrollController.dispose();
     _textEditingController.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
-    scrollcontroller = ScrollController();
+    scrollController = ScrollController();
     _textEditingController = TextEditingController();
-    scrollcontroller..addListener(_scrollListener);
+    scrollController..addListener(_scrollListener);
     DatabaseService.getGameNames();
     super.initState();
   }
 
   _scrollListener() {
-    if (scrollcontroller.position.userScrollDirection ==
+    if (scrollController.position.userScrollDirection ==
         ScrollDirection.reverse) {}
   }
 
@@ -72,7 +74,7 @@ class _AddCommentPageState extends State<AddComment> {
     });
   }
 
-  void _onImageIconSelcted(File file) {
+  void _onImageIconSelected(File file) {
     setState(() {
       _image = file;
     });
@@ -82,13 +84,14 @@ class _AddCommentPageState extends State<AddComment> {
   void _submitButton() async {
     glitcherLoader.showLoader(context);
     if (_textEditingController.text.isNotEmpty) {
-      DatabaseService.addComment(widget.post.id, _textEditingController.text);
+      DatabaseService.addReply(
+          widget.post.id, widget.comment.id, _textEditingController.text);
 
       await NotificationHandler.sendNotification(
           widget.user.id,
           Constants.loggedInUser.username + ' commented on your post',
           _textEditingController.text,
-          widget.post.id,
+          widget.comment.id,
           'comment');
 
       checkIfContainsMention(_textEditingController.text);
@@ -134,7 +137,7 @@ class _AddCommentPageState extends State<AddComment> {
         key: _scaffoldKey,
         appBar: AppBar(
           flexibleSpace: gradientAppBar(),
-          title: Text('New Comment'),
+          title: Text('New Reply'),
           actions: <Widget>[
             IconButton(
               onPressed: () {
@@ -164,14 +167,14 @@ class _AddCommentPageState extends State<AddComment> {
           child: Stack(
             children: <Widget>[
               SingleChildScrollView(
-                controller: scrollcontroller,
+                controller: scrollController,
                 child: _ComposeTweet(this),
               ),
               Align(
                 alignment: Alignment.bottomCenter,
                 child: CreatePostBottomIconWidget(
                   textEditingController: _textEditingController,
-                  onImageIconSelected: _onImageIconSelcted,
+                  onImageIconSelected: _onImageIconSelected,
                 ),
               ),
             ],
@@ -199,8 +202,8 @@ class _AddCommentPageState extends State<AddComment> {
                 ),
                 SizedBox(height: 16),
                 new GestureDetector(
-                  onTap: () => Navigator.of(context).pushNamed('/post',
-                      arguments: {'postId': widget.post.id}),
+                  onTap: () => Navigator.of(context)
+                      .pushNamed('/post', arguments: {'post': widget.post}),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text("YES"),
@@ -223,17 +226,17 @@ class _AddCommentPageState extends State<AddComment> {
             user.id,
             'New post mention',
             Constants.loggedInUser.username + ' mentioned you in a comment',
-            widget.post.id,
+            widget.comment.id,
             'mention');
       }
     });
   }
 }
 
-class _ComposeTweet extends WidgetView<AddComment, _AddCommentPageState> {
+class _ComposeTweet extends WidgetView<AddReply, _AddReplyPageState> {
   _ComposeTweet(this.viewState) : super(viewState);
 
-  final _AddCommentPageState viewState;
+  final _AddReplyPageState viewState;
 
   Widget _tweerCard(BuildContext context) {
     return Row(
@@ -261,7 +264,7 @@ class _ComposeTweet extends WidgetView<AddComment, _AddCommentPageState> {
                     child: Container(
                       width: Sizes.fullWidth(context) - 100,
                       child: UrlText(
-                        text: widget.post.text ?? '',
+                        text: widget.comment.text ?? '',
                         style: TextStyle(
                           color: switchColor(
                               MyColors.darkGrey, MyColors.lightCardBG),
@@ -336,7 +339,7 @@ class _ComposeTweet extends WidgetView<AddComment, _AddCommentPageState> {
                 Padding(
                   padding: const EdgeInsets.only(top: 2.0),
                   child: customText(
-                      '- ${Functions.formatTimestamp(widget.post.timestamp)}',
+                      '- ${Functions.formatTimestamp(widget.comment.timestamp)}',
                       style: TextStyle(
                           color: switchColor(MyColors.darkGrey, Colors.white70),
                           fontSize: 12)),
@@ -394,7 +397,7 @@ class _ComposeTweet extends WidgetView<AddComment, _AddCommentPageState> {
                   decoration: InputDecoration(
                       counterText: "",
                       border: InputBorder.none,
-                      hintText: 'Post your comment...'),
+                      hintText: 'Post your reply...'),
                   style: TextStyle(fontSize: 18),
                 ),
               )

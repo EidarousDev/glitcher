@@ -6,6 +6,7 @@ class Comment {
   final String text;
   int likesCount;
   int disLikesCount;
+  int repliesCount;
   final Timestamp timestamp;
 
   Comment({
@@ -14,6 +15,7 @@ class Comment {
     this.text,
     this.likesCount,
     this.disLikesCount,
+    this.repliesCount,
     this.timestamp,
   });
 
@@ -24,6 +26,7 @@ class Comment {
       text: doc['text'],
       likesCount: doc['likes'],
       disLikesCount: doc['dislikes'],
+      repliesCount: doc['replies'],
       timestamp: doc['timestamp'],
     );
   }

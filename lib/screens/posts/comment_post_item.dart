@@ -2,15 +2,15 @@ import 'package:chewie/chewie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/services/share_link.dart';
-import 'package:glitcher/constants/constants.dart';
-import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:share/share.dart';
 import 'package:video_player/video_player.dart';
@@ -35,7 +35,9 @@ class _CommentPostItemState extends State<CommentPostItem> {
   String dropdownValue = 'Edit';
 
   bool isLiked = false;
+  bool isLikeEnabled = true;
   bool isDisliked = false;
+  bool isDislikedEnabled = true;
   var likes = [];
   var dislikes = [];
 
@@ -151,14 +153,14 @@ class _CommentPostItemState extends State<CommentPostItem> {
 //                              },
 //                            ),
                         ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        "${Functions.formatTimestamp(post.timestamp)}",
-                        style:
-                            TextStyle(fontSize: 13.0, color: MyColors.darkGrey),
-                      ),
-                    ),
+//                    Padding(
+//                      padding: const EdgeInsets.all(8.0),
+//                      child: Text(
+//                        "${Functions.formatTimestamp(post.timestamp)}",
+//                        style:
+//                            TextStyle(fontSize: 13.0, color: MyColors.darkGrey),
+//                      ),
+//                    ),
                   ],
                 ),
               ),
@@ -196,7 +198,7 @@ class _CommentPostItemState extends State<CommentPostItem> {
                             ? Icon(
                                 FontAwesome.getIconData('thumbs-up'),
                                 size: 18.0,
-                                color: Colors.blue,
+                                color: MyColors.darkPrimary,
                               )
                             : Icon(
                                 FontAwesome.getIconData('thumbs-o-up'),
@@ -242,7 +244,7 @@ class _CommentPostItemState extends State<CommentPostItem> {
                             ? Icon(
                                 FontAwesome.getIconData('thumbs-down'),
                                 size: 18.0,
-                                color: Colors.blue,
+                                color: MyColors.darkPrimary,
                               )
                             : Icon(
                                 FontAwesome.getIconData('thumbs-o-down'),
@@ -286,7 +288,7 @@ class _CommentPostItemState extends State<CommentPostItem> {
                   ),
                   onPressed: () {
                     Navigator.of(context).pushNamed('/post', arguments: {
-                      'postId': post.id,
+                      'post': post,
                       'commentsNo': post.commentsCount
                     });
                   },
@@ -324,8 +326,6 @@ class _CommentPostItemState extends State<CommentPostItem> {
                 ),
                 onTap: () async {
                   await sharePost(post.id, post.text, post.imageUrl);
-
-
                 },
               ),
             ],
@@ -371,85 +371,162 @@ class _CommentPostItemState extends State<CommentPostItem> {
     super.initState();
   }
 
-  void likeBtnHandler(Post post) async {
-    if (isLiked) {
+  Future<void> likeBtnHandler(Post post) async {
+    setState(() {
+      isLikeEnabled = false;
+    });
+    if (isLiked == true && isDisliked == false) {
+      await postsRef
+          .document(post.id)
+          .collection('likes')
+          .document(Constants.currentUserID)
+          .delete();
+      await postsRef
+          .document(post.id)
+          .updateData({'likes': FieldValue.increment(-1)});
       setState(() {
         isLiked = false;
-        post.likesCount--;
+        //post.likesCount = likesNo;
       });
+    } else if (isDisliked == true && isLiked == false) {
       await postsRef
           .document(post.id)
-          .collection('likes')
+          .collection('dislikes')
           .document(Constants.currentUserID)
           .delete();
-      await postsRef.document(post.id).updateData({'likes': post.likesCount});
-    } else {
-      if (isDisliked) {
-        setState(() {
-          isDisliked = false;
-          post.disLikesCount--;
-        });
-        await postsRef
-            .document(post.id)
-            .collection('dislikes')
-            .document(Constants.currentUserID)
-            .delete();
-        await postsRef
-            .document(post.id)
-            .updateData({'dislikes': post.disLikesCount});
-      }
-      setState(() {
-        isLiked = true;
-        post.likesCount++;
-      });
       await postsRef
           .document(post.id)
-          .collection('likes')
-          .document(Constants.currentUserID)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
-      await postsRef.document(post.id).updateData({'likes': post.likesCount});
+          .updateData({'dislikes': FieldValue.increment(-1)});
 
-      await NotificationHandler.sendNotification(
-          post.authorId, 'New Post Like', 'likes your post', post.id, 'like');
-    }
-  }
-
-  void dislikeBtnHandler(Post post) {
-    if (isDisliked) {
       setState(() {
         isDisliked = false;
-        post.disLikesCount--;
+        //post.disLikesCount = dislikesNo;
       });
-      postsRef
+      await postsRef
+          .document(post.id)
+          .collection('likes')
+          .document(Constants.currentUserID)
+          .setData({'timestamp': FieldValue.serverTimestamp()});
+      await postsRef
+          .document(post.id)
+          .updateData({'likes': FieldValue.increment(1)});
+
+      setState(() {
+        isLiked = true;
+        //post.likesCount = likesNo;
+      });
+
+      await NotificationHandler.sendNotification(
+          post.authorId,
+          'New Post Like',
+          Constants.loggedInUser.username + ' likes your post',
+          post.id,
+          'like');
+    } else if (isLiked == false && isDisliked == false) {
+      await postsRef
+          .document(post.id)
+          .collection('likes')
+          .document(Constants.currentUserID)
+          .setData({'timestamp': FieldValue.serverTimestamp()});
+      await postsRef
+          .document(post.id)
+          .updateData({'likes': FieldValue.increment(1)});
+      setState(() {
+        isLiked = true;
+        //post.likesCount = likesNo;
+      });
+
+      await NotificationHandler.sendNotification(
+          post.authorId,
+          'New Post Like',
+          Constants.loggedInUser.username + ' likes your post',
+          post.id,
+          'like');
+    } else {
+      throw Exception('Unconditional Event Occurred!');
+    }
+    var postMeta = await DatabaseService.getPostMeta(post.id);
+    setState(() {
+      post.likesCount = postMeta['likes'];
+      post.disLikesCount = postMeta['dislikes'];
+      isLikeEnabled = true;
+    });
+
+    print(
+        'likes = ${postMeta['likes']} and dislikes = ${postMeta['dislikes']}');
+  }
+
+  Future<void> dislikeBtnHandler(Post post) async {
+    setState(() {
+      isDislikedEnabled = false;
+    });
+    if (isDisliked == true && isLiked == false) {
+      await postsRef
           .document(post.id)
           .collection('dislikes')
           .document(Constants.currentUserID)
           .delete();
-      postsRef.document(post.id).updateData({'dislikes': post.disLikesCount});
-    } else {
-      if (isLiked) {
-        setState(() {
-          isLiked = false;
-          post.likesCount--;
-        });
-        postsRef
-            .document(post.id)
-            .collection('likes')
-            .document(Constants.currentUserID)
-            .delete();
-        postsRef.document(post.id).updateData({'likes': post.likesCount});
-      }
+      await postsRef
+          .document(post.id)
+          .updateData({'dislikes': FieldValue.increment(-1)});
       setState(() {
-        isDisliked = true;
-        post.disLikesCount++;
+        isDisliked = false;
+        //post.disLikesCount = dislikesNo;
       });
-      postsRef
+    } else if (isLiked == true && isDisliked == false) {
+      await postsRef
+          .document(post.id)
+          .collection('likes')
+          .document(Constants.currentUserID)
+          .delete();
+      await postsRef
+          .document(post.id)
+          .updateData({'likes': FieldValue.increment(-1)});
+      setState(() {
+        isLiked = false;
+        //post.likesCount = likesNo;
+      });
+      await postsRef
           .document(post.id)
           .collection('dislikes')
           .document(Constants.currentUserID)
           .setData({'timestamp': FieldValue.serverTimestamp()});
-      postsRef.document(post.id).updateData({'dislikes': post.disLikesCount});
+      await postsRef
+          .document(post.id)
+          .updateData({'dislikes': FieldValue.increment(1)});
+
+      setState(() {
+        isDisliked = true;
+        //post.disLikesCount = dislikesNo;
+      });
+    } else if (isDisliked == false && isLiked == false) {
+      await postsRef
+          .document(post.id)
+          .collection('dislikes')
+          .document(Constants.currentUserID)
+          .setData({'timestamp': FieldValue.serverTimestamp()});
+      await postsRef
+          .document(post.id)
+          .updateData({'dislikes': FieldValue.increment(1)});
+
+      setState(() {
+        isDisliked = true;
+        //post.disLikesCount = dislikesNo;
+      });
+    } else {
+      throw Exception('Unconditional Event Occurred.');
     }
+
+    var postMeta = await DatabaseService.getPostMeta(post.id);
+
+    setState(() {
+      post.likesCount = postMeta['likes'];
+      post.disLikesCount = postMeta['dislikes'];
+      isDislikedEnabled = true;
+    });
+
+    print(
+        'likes = ${postMeta['likes']} and dislikes = ${postMeta['dislikes']}');
   }
 
   void initLikes(Post post) async {

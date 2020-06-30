@@ -18,6 +18,7 @@ import 'package:glitcher/screens/games/game_screen.dart';
 import 'package:glitcher/screens/games/new_game.dart';
 import 'package:glitcher/screens/hashtag_posts_screen.dart';
 import 'package:glitcher/screens/posts/comments/add_comment.dart';
+import 'package:glitcher/screens/posts/comments/add_reply.dart';
 import 'package:glitcher/screens/posts/new_post/create_post.dart';
 import 'package:glitcher/screens/posts/post_preview.dart';
 import 'package:glitcher/screens/settings.dart';
@@ -51,7 +52,7 @@ class RouteGenerator {
         // Validation of correct data type
         return PageTransition(
             child: PostPreview(
-              postId: args['postId'],
+              post: args['post'],
             ),
             type: PageTransitionType.scale);
         // If args is not of the correct type, return an error page.
@@ -125,9 +126,19 @@ class RouteGenerator {
       case '/browser':
         return MaterialPageRoute(builder: (_) => InAppBrowser(args['url']));
       case '/hashtag-posts':
-        return MaterialPageRoute(builder: (_) => HashtagPostsScreen(args['hashtag']));
+        return MaterialPageRoute(
+            builder: (_) => HashtagPostsScreen(args['hashtag']));
       case '/settings':
         return MaterialPageRoute(builder: (_) => SettingsScreen());
+      case '/add-reply':
+        // Validation of correct data type
+        return MaterialPageRoute(
+          builder: (_) => AddReply(
+            post: args['postId'],
+            comment: args['comment'],
+            user: args['user'],
+          ),
+        );
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

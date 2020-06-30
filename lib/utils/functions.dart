@@ -153,6 +153,7 @@ class Functions {
     var response = await http.get(url);
     String body = response.body;
     Constants.country = jsonDecode(body)['country'];
+    print('Country: ${Constants.country}');
   }
 
   static void getCurrentUser() async {

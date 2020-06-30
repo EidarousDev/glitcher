@@ -6,6 +6,7 @@ import 'package:glitcher/screens/app_page.dart';
 import 'package:glitcher/screens/welcome/welcome_page.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/utils/functions.dart';
 
 class RootPage extends StatefulWidget {
   @override
@@ -19,6 +20,7 @@ class _RootPageState extends State<RootPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     authAssignment();
+    Functions.getUserCountryInfo();
   }
 
   void _signedIn() {

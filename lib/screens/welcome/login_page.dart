@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/services/auth.dart';
@@ -152,19 +153,43 @@ class _LoginPageState extends State<LoginPage> {
           ),
           Expanded(
             flex: 5,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Color(0xff2872ba),
-                borderRadius: BorderRadius.only(
-                    bottomRight: Radius.circular(5),
-                    topRight: Radius.circular(5)),
+            child: GestureDetector(
+              onTap: () async {
+                final facebookLogin = FacebookLogin();
+
+                // Let's force the users to login using the login dialog based on WebViews. Yay!
+                facebookLogin.loginBehavior = FacebookLoginBehavior.webViewOnly;
+
+                final result = await facebookLogin.logIn(['email']);
+
+                switch (result.status) {
+                  case FacebookLoginStatus.loggedIn:
+                    print('facebook login success');
+                    //_sendTokenToServer(result.accessToken.token);
+                    //_showLoggedInUI();
+                    break;
+                  case FacebookLoginStatus.cancelledByUser:
+                    //_showCancelledMessage();
+                    break;
+                  case FacebookLoginStatus.error:
+                    //_showErrorOnUI(result.errorMessage);
+                    break;
+                }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Color(0xff2872ba),
+                  borderRadius: BorderRadius.only(
+                      bottomRight: Radius.circular(5),
+                      topRight: Radius.circular(5)),
+                ),
+                alignment: Alignment.center,
+                child: Text('Log in with Facebook',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w400)),
               ),
-              alignment: Alignment.center,
-              child: Text('Log in with Facebook',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w400)),
             ),
           ),
         ],

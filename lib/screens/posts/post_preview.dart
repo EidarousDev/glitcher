@@ -20,8 +20,8 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:video_player/video_player.dart';
 
 class PostPreview extends StatefulWidget {
-  final String postId;
-  PostPreview({@required this.postId});
+  final Post post;
+  PostPreview({@required this.post});
   @override
   _PostPreviewState createState() => _PostPreviewState();
 }
@@ -110,7 +110,7 @@ class _PostPreviewState extends State<PostPreview>
   }
 
   void loadComments() async {
-    List<Comment> comments = await DatabaseService.getComments(widget.postId);
+    List<Comment> comments = await DatabaseService.getComments(widget.post.id);
     if (comments.length > 0) {
       setState(() {
         _comments = comments;
@@ -166,7 +166,7 @@ class _PostPreviewState extends State<PostPreview>
       _loading = true;
     });
 
-    DatabaseService.addComment(widget.postId, _commentText);
+    DatabaseService.addComment(widget.post.id, _commentText);
 
     setState(() {
       _loading = false;
@@ -178,7 +178,7 @@ class _PostPreviewState extends State<PostPreview>
       fit: FlexFit.loose,
       child: StreamBuilder<QuerySnapshot>(
         stream: postsRef
-            .document(widget.postId)
+            .document(widget.post.id)
             ?.collection('comments')
             ?.snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -204,8 +204,10 @@ class _PostPreviewState extends State<PostPreview>
                         User commenter = snapshot.data;
                         print('commenter: $commenter and comment: $comment');
                         return CommentItem(
+                          post: widget.post,
                           comment: comment,
                           commenter: commenter,
+                          isReply: false,
                         );
                       });
                 },
@@ -296,7 +298,7 @@ class _PostPreviewState extends State<PostPreview>
   }
 
   void loadPostData() async {
-    _currentPost = await DatabaseService.getPostWithId(widget.postId);
+    _currentPost = await DatabaseService.getPostWithId(widget.post.id);
     _author = await DatabaseService.getUserWithId(_currentPost.authorId);
     print('currentPost = $_currentPost and author= $_author');
     loadComments();

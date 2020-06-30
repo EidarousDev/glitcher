@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/models/comment_model.dart';
@@ -50,9 +49,26 @@ class DatabaseService {
     if (postDocSnapshot.exists) {
       postMeta['likes'] = postDocSnapshot.data['likes'];
       postMeta['dislikes'] = postDocSnapshot.data['dislikes'];
-      postMeta['comments'] = postDocSnapshot.data['dislikes'];
+      postMeta['comments'] = postDocSnapshot.data['comments'];
     }
     return postMeta;
+  }
+
+  // Get Post Meta Info of a specific post
+  static Future<Map> getCommentMeta(String postId, String commentId) async {
+    var commentMeta = Map();
+    DocumentSnapshot commentDocSnapshot = await postsRef
+        .document(postId)
+        .collection('comments')
+        .document(commentId)
+        .get();
+
+    if (commentDocSnapshot.exists) {
+      commentMeta['likes'] = commentDocSnapshot.data['likes'];
+      commentMeta['dislikes'] = commentDocSnapshot.data['dislikes'];
+      commentMeta['replies'] = commentDocSnapshot.data['replies'];
+    }
+    return commentMeta;
   }
 
   // This function is used to get the recent posts (unfiltered)
@@ -422,6 +438,21 @@ class DatabaseService {
     return comments;
   }
 
+  static Future<List<Comment>> getCommentReplies(
+      String postId, String commentId) async {
+    QuerySnapshot commentSnapshot = await postsRef
+        .document(postId)
+        .collection('comments')
+        .document(commentId)
+        .collection('replies')
+        ?.orderBy('timestamp', descending: true)
+        ?.limit(10)
+        ?.getDocuments();
+    List<Comment> comments =
+        commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
+    return comments;
+  }
+
   // This function is used to get the author info of each post
   static Future<Game> getGameWithId(String gameId) async {
     DocumentSnapshot gameDocSnapshot = await gamesRef.document(gameId).get();
@@ -487,6 +518,25 @@ class DatabaseService {
         .updateData({'comments': FieldValue.increment(1)});
   }
 
+  static void addReply(
+      String postId, String commentId, String replyText) async {
+    await postsRef
+        .document(postId)
+        .collection('comments')
+        .document(commentId)
+        .collection('replies')
+        .add({
+      'commenter': Constants.currentUserID,
+      'text': replyText,
+      'timestamp': FieldValue.serverTimestamp()
+    });
+    await postsRef
+        .document(postId)
+        .collection('comments')
+        .document(commentId)
+        .updateData({'replies': FieldValue.increment(1)});
+  }
+
   static followGame(String gameId) async {
     DocumentSnapshot gameDocSnapshot = await usersRef
         .document(Constants.currentUserID)
@@ -527,29 +577,27 @@ class DatabaseService {
   }
 
   static getHashtags() async {
-    QuerySnapshot hashtagsSnapshot =
-    await hashtagsRef.getDocuments();
+    QuerySnapshot hashtagsSnapshot = await hashtagsRef.getDocuments();
 
     List<Hashtag> hashtags =
-    hashtagsSnapshot.documents.map((doc) => Hashtag.fromDoc(doc)).toList();
+        hashtagsSnapshot.documents.map((doc) => Hashtag.fromDoc(doc)).toList();
 
     return hashtags;
   }
 
   static Future<Hashtag> getHashtagWithText(String text) async {
     QuerySnapshot hashtagDocSnapshot =
-    await hashtagsRef.where('text', isEqualTo: text).getDocuments();
+        await hashtagsRef.where('text', isEqualTo: text).getDocuments();
 
-    if(hashtagDocSnapshot.documents.length == 0){
+    if (hashtagDocSnapshot.documents.length == 0) {
       return null;
-    }
-    else{
-      Hashtag hashtag =
-      hashtagDocSnapshot.documents.map((doc) => Hashtag.fromDoc(doc)).toList()[0];
+    } else {
+      Hashtag hashtag = hashtagDocSnapshot.documents
+          .map((doc) => Hashtag.fromDoc(doc))
+          .toList()[0];
 
       return hashtag;
     }
-
   }
 
   // This function is used to get the recent posts for a certain tag
@@ -563,7 +611,7 @@ class DatabaseService {
 
     List<Post> posts = [];
 
-    postSnapshot.documents.forEach((element) async{
+    postSnapshot.documents.forEach((element) async {
       posts.add(await getPostWithId(element.documentID));
     });
 
@@ -583,7 +631,7 @@ class DatabaseService {
 
     List<Post> posts = [];
 
-    postSnapshot.documents.forEach((element) async{
+    postSnapshot.documents.forEach((element) async {
       posts.add(await getPostWithId(element.documentID));
     });
 
