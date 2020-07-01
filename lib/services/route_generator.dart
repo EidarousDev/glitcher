@@ -7,6 +7,7 @@ import 'package:glitcher/screens/about/legal_notices.dart';
 import 'package:glitcher/screens/about/privacy_policy.dart';
 import 'package:glitcher/screens/about/terms_of_service.dart';
 import 'package:glitcher/screens/app_page.dart';
+import 'package:glitcher/screens/bookmarks.dart';
 import 'package:glitcher/screens/chats/add_members_to_group.dart';
 import 'package:glitcher/screens/chats/chats.dart';
 import 'package:glitcher/screens/chats/conversation.dart';
@@ -139,6 +140,8 @@ class RouteGenerator {
             user: args['user'],
           ),
         );
+      case '/bookmarks':
+        return MaterialPageRoute(builder: (_) => BookmarksScreen());
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

@@ -637,4 +637,42 @@ class DatabaseService {
 
     return posts;
   }
+
+  static Future<List<Post>> getBookmarksPosts() async {
+    QuerySnapshot postSnapshot = await usersRef.document(Constants.currentUserID)
+        .collection('bookmarks')
+        .orderBy('timestamp', descending: true)
+        .limit(10)
+        .getDocuments();
+
+    List<Post> posts = [];
+
+    postSnapshot.documents.forEach((element) async{
+      posts.add(await getPostWithId(element.documentID));
+    });
+
+    return posts;
+  }
+
+  static Future<List<Post>> getNextBookmarksPosts(
+      Timestamp lastVisiblePostSnapShot) async {
+    QuerySnapshot postSnapshot = await usersRef.document(Constants.currentUserID)
+        .collection('bookmarks')
+        .orderBy('timestamp', descending: true)
+        .startAfter([lastVisiblePostSnapShot])
+        .limit(10)
+        .getDocuments();
+
+    List<Post> posts = [];
+
+    postSnapshot.documents.forEach((element) async{
+      posts.add(await getPostWithId(element.documentID));
+    });
+
+    return posts;
+  }
+
+  static addPostToBookmarks(String postId) async{
+    await usersRef.document(Constants.currentUserID).collection('bookmarks').document(postId).setData({'timestamp': FieldValue.serverTimestamp()});
+  }
 }

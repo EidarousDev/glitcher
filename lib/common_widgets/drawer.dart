@@ -96,6 +96,9 @@ class _BuildDrawerState extends State<BuildDrawer> {
             ),
           ),
           ListTile(
+            onTap: (){
+              Navigator.of(context).pushNamed('/bookmarks');
+            },
             title: Text(
               'Bookmarks',
             ),

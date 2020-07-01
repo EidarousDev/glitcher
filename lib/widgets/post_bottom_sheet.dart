@@ -69,17 +69,23 @@ class PostBottomSheet {
           Icon(Icons.link),
           text: 'Copy link to post',
         ),
-        isMyPost
+        _widgetBottomSheetRow(
+          context,
+          Icon(Icons.bookmark),
+          text: 'Bookmark this post',
+          onPressed: () {
+            _bookmarkPost(post.id);
+          },
+        ),
+        !isMyPost
             ? _widgetBottomSheetRow(
-                context,
-                Icon(Icons.favorite),
-                text: 'Pin to profile',
-              )
-            : _widgetBottomSheetRow(
                 context,
                 Icon(Icons.android),
                 text: 'Not interested in this',
-              ),
+                onPressed: () {
+                },
+              )
+            : Container(),
         isMyPost
             ? _widgetBottomSheetRow(
                 context,
@@ -198,5 +204,8 @@ class PostBottomSheet {
     Navigator.of(context).pop();
     Navigator.of(context).pushReplacementNamed('/home');
     print('deleting post!');
+  }
+  void _bookmarkPost(String postId) async{
+    await DatabaseService.addPostToBookmarks(postId);
   }
 }
