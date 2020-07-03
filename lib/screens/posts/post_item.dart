@@ -246,6 +246,10 @@ class _PostItemState extends State<PostItem> {
                             post.youtubeId == null
                                 ? null
                                 : YoutubePlayerBuilder(
+                                    onExitFullScreen: () {
+                                      SystemChrome.setPreferredOrientations(
+                                          DeviceOrientation.values);
+                                    },
                                     player: YoutubePlayer(
                                       controller: _youtubeController,
                                       showVideoProgressIndicator: true,
@@ -256,12 +260,7 @@ class _PostItemState extends State<PostItem> {
                                         FullScreenButton()
                                       ],
                                     ),
-                                    builder: (context, player) => player
-//                                        Scaffold(
-//                                      key: _scaffoldKey,
-//                                      body: SafeArea(child: player),
-//                                    ),
-                                    ),
+                                    builder: (context, player) => player),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),

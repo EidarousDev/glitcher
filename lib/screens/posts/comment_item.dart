@@ -51,6 +51,8 @@ class _CommentItemState extends State<CommentItem> {
 
   List<Comment> replies = [];
 
+  ScrollController scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     print(
@@ -78,260 +80,271 @@ class _CommentItemState extends State<CommentItem> {
   }
 
   Widget commentListTile(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        ListTile(
-          leading: InkWell(
-              child: CacheThisImage(
-                imageUrl: widget.commenter.profileImageUrl,
-                imageShape: BoxShape.circle,
-                width: Sizes.sm_profile_image_w,
-                height: Sizes.sm_profile_image_h,
-                defaultAssetImage: Strings.default_profile_image,
-              ),
+    return SingleChildScrollView(
+      controller: scrollController,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          ListTile(
+            leading: InkWell(
+                child: CacheThisImage(
+                  imageUrl: widget.commenter.profileImageUrl,
+                  imageShape: BoxShape.circle,
+                  width: Sizes.sm_profile_image_w,
+                  height: Sizes.sm_profile_image_h,
+                  defaultAssetImage: Strings.default_profile_image,
+                ),
+                onTap: () {
+                  Navigator.of(context).pushNamed('/user-profile', arguments: {
+                    'userId': widget.comment.commenterID,
+                  });
+                }),
+            title: InkWell(
+              child: widget.commenter.username == null
+                  ? Text('')
+                  : RichText(
+                      text: TextSpan(
+                        // Note: Styles for TextSpans must be explicitly defined.
+                        // Child text spans will inherit styles from parent
+                        style: TextStyle(
+                          fontSize: 15.0,
+                          color: MyColors.darkPrimary,
+                        ),
+                        children: <TextSpan>[
+                          TextSpan(
+                              text: ' @${widget.commenter.username}',
+                              style: TextStyle(
+                                  color: switchColor(MyColors.lightPrimary,
+                                      MyColors.darkPrimary))),
+                          TextSpan(
+                              text:
+                                  ' - ${Functions.formatCommentsTimestamp(widget.comment.timestamp)}',
+                              style: TextStyle(
+                                  color: switchColor(
+                                      MyColors.darkGrey, MyColors.darkGrey))),
+                        ],
+                      ),
+                    ),
               onTap: () {
                 Navigator.of(context).pushNamed('/user-profile', arguments: {
                   'userId': widget.comment.commenterID,
                 });
-              }),
-          title: InkWell(
-            child: widget.commenter.username == null
+              },
+            ),
+            subtitle: widget.comment.text == null
                 ? Text('')
-                : RichText(
-                    text: TextSpan(
-                      // Note: Styles for TextSpans must be explicitly defined.
-                      // Child text spans will inherit styles from parent
-                      style: TextStyle(
-                        fontSize: 15.0,
-                        color: MyColors.darkPrimary,
+                : Text.rich(
+                    TextSpan(
+                        text: '',
+                        children: widget.comment.text.split(' ').map((w) {
+                          return w.startsWith('@') && w.length > 1
+                              ? TextSpan(
+                                  text: ' ' + w,
+                                  style: TextStyle(color: Colors.blue),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () => mentionedUserProfile(w),
+                                )
+                              : TextSpan(text: ' ' + w);
+                        }).toList()),
+                  ),
+            isThreeLine: true,
+          ),
+          !widget.isReply
+              ? InkWell(
+                  onTap: () {
+                    setState(() {
+                      repliesVisible = !repliesVisible;
+                    });
+                  },
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Text(
+                        repliesVisible
+                            ? 'hide replies'
+                            : 'view ${widget.comment.repliesCount} replies',
+                        style: TextStyle(color: MyColors.darkPrimary),
                       ),
-                      children: <TextSpan>[
-                        TextSpan(
-                            text: ' @${widget.commenter.username}',
-                            style: TextStyle(
-                                color: switchColor(MyColors.lightPrimary,
-                                    MyColors.darkPrimary))),
-                        TextSpan(
-                            text:
-                                ' - ${Functions.formatCommentsTimestamp(widget.comment.timestamp)}',
-                            style: TextStyle(
-                                color: switchColor(
-                                    MyColors.darkGrey, MyColors.darkGrey))),
-                      ],
                     ),
                   ),
-            onTap: () {
-              Navigator.of(context).pushNamed('/user-profile', arguments: {
-                'userId': widget.comment.commenterID,
-              });
-            },
-          ),
-          subtitle: widget.comment.text == null
-              ? Text('')
-              : Text.rich(
-                  TextSpan(
-                      text: '',
-                      children: widget.comment.text.split(' ').map((w) {
-                        return w.startsWith('@') && w.length > 1
-                            ? TextSpan(
-                                text: ' ' + w,
-                                style: TextStyle(color: Colors.blue),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () => mentionedUserProfile(w),
+                )
+              : Container(),
+          !widget.isReply
+              ? Expanded(
+                  flex: 5,
+                  child: Container(
+                    height: 200,
+                    child: ListView.builder(
+                        itemCount: replies.length,
+                        physics: NeverScrollableScrollPhysics(),
+                        scrollDirection: Axis.vertical,
+                        shrinkWrap: true,
+                        itemBuilder: (BuildContext context, int index) {
+                          return CommentItem(
+                            post: widget.post,
+                            comment: widget.comment,
+                            commenter: widget.commenter,
+                            isReply: true,
+                          );
+                        }),
+                  ),
+                )
+              : Container(),
+          Container(
+            height: Sizes.inline_break,
+            color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
+                ? MyColors.lightCardBG
+                : MyColors.darkCardBG,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                InkWell(
+                  child: Row(
+                    children: <Widget>[
+                      SizedBox(
+                        child: isLiked
+                            ? Icon(
+                                FontAwesome.getIconData('thumbs-up'),
+                                size: Sizes.small_card_btn_size,
+                                color: MyColors.darkPrimary,
                               )
-                            : TextSpan(text: ' ' + w);
-                      }).toList()),
+                            : Icon(
+                                FontAwesome.getIconData('thumbs-o-up'),
+                                size: Sizes.small_card_btn_size,
+                              ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 16.0),
+                        child: Text(
+                          widget.comment.likesCount == null
+                              ? 0.toString()
+                              : widget.comment.likesCount.toString(),
+                        ),
+                      ),
+                    ],
+                  ),
+                  onTap: () async {
+                    if (isLikeEnabled) {
+                      _likeSFX == null
+                          ? null
+                          : Audio.loadFromByteData(_likeSFX,
+                              onComplete: () =>
+                                  setState(() => --_spawnedAudioCount))
+                        ..play()
+                        ..dispose();
+                      setState(() => ++_spawnedAudioCount);
+                      await likeBtnHandler(widget.post, widget.comment);
+                    }
+                  },
                 ),
-          isThreeLine: true,
-        ),
-        !widget.isReply
-            ? InkWell(
-                onTap: () {
-                  setState(() {
-                    repliesVisible = !repliesVisible;
-                  });
-                },
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: Text(
-                      repliesVisible
-                          ? 'hide replies'
-                          : 'view ${widget.comment.repliesCount} replies',
-                      style: TextStyle(color: MyColors.darkPrimary),
-                    ),
+                SizedBox(
+                  width: 1.0,
+                  height: Sizes.inline_break,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                        color:
+                            Constants.currentTheme == AvailableThemes.LIGHT_THEME
+                                ? MyColors.lightInLineBreak
+                                : MyColors.darkLineBreak),
                   ),
                 ),
-              )
-            : Container(),
-        !widget.isReply
-            ? Expanded(
-                child: ListView.builder(
-                    itemCount: replies.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return CommentItem(
-                        post: widget.post,
-                        comment: widget.comment,
-                        commenter: widget.commenter,
-                        isReply: true,
-                      );
-                    }),
-              )
-            : Container(),
-        Container(
-          height: Sizes.inline_break,
-          color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
-              ? MyColors.lightCardBG
-              : MyColors.darkCardBG,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              InkWell(
-                child: Row(
-                  children: <Widget>[
-                    SizedBox(
-                      child: isLiked
-                          ? Icon(
-                              FontAwesome.getIconData('thumbs-up'),
-                              size: Sizes.small_card_btn_size,
-                              color: MyColors.darkPrimary,
-                            )
-                          : Icon(
-                              FontAwesome.getIconData('thumbs-o-up'),
-                              size: Sizes.small_card_btn_size,
-                            ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 16.0),
-                      child: Text(
-                        widget.comment.likesCount == null
-                            ? 0.toString()
-                            : widget.comment.likesCount.toString(),
+                InkWell(
+                  child: Row(
+                    children: <Widget>[
+                      SizedBox(
+                        child: isDisliked
+                            ? Icon(
+                                FontAwesome.getIconData('thumbs-down'),
+                                size: Sizes.small_card_btn_size,
+                                color: MyColors.darkPrimary,
+                              )
+                            : Icon(
+                                FontAwesome.getIconData('thumbs-o-down'),
+                                size: Sizes.small_card_btn_size,
+                              ),
                       ),
-                    ),
-                  ],
-                ),
-                onTap: () async {
-                  if (isLikeEnabled) {
-                    _likeSFX == null
-                        ? null
-                        : Audio.loadFromByteData(_likeSFX,
-                            onComplete: () =>
-                                setState(() => --_spawnedAudioCount))
-                      ..play()
-                      ..dispose();
-                    setState(() => ++_spawnedAudioCount);
-                    await likeBtnHandler(widget.post, widget.comment);
-                  }
-                },
-              ),
-              SizedBox(
-                width: 1.0,
-                height: Sizes.inline_break,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                      color:
-                          Constants.currentTheme == AvailableThemes.LIGHT_THEME
-                              ? MyColors.lightInLineBreak
-                              : MyColors.darkLineBreak),
-                ),
-              ),
-              InkWell(
-                child: Row(
-                  children: <Widget>[
-                    SizedBox(
-                      child: isDisliked
-                          ? Icon(
-                              FontAwesome.getIconData('thumbs-down'),
-                              size: Sizes.small_card_btn_size,
-                              color: MyColors.darkPrimary,
-                            )
-                          : Icon(
-                              FontAwesome.getIconData('thumbs-o-down'),
-                              size: Sizes.small_card_btn_size,
-                            ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 16.0),
-                      child: Text(
-                        widget.comment.disLikesCount == null
-                            ? 0.toString()
-                            : widget.comment.disLikesCount.toString(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 16.0),
+                        child: Text(
+                          widget.comment.disLikesCount == null
+                              ? 0.toString()
+                              : widget.comment.disLikesCount.toString(),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  onTap: () async {
+                    if (isDislikedEnabled) {
+                      _dislikeSFX == null
+                          ? null
+                          : Audio.loadFromByteData(_dislikeSFX,
+                              onComplete: () =>
+                                  setState(() => --_spawnedAudioCount))
+                        ..play()
+                        ..dispose();
+                      setState(() => ++_spawnedAudioCount);
+                      await dislikeBtnHandler(widget.post, widget.comment);
+                    }
+                  },
                 ),
-                onTap: () async {
-                  if (isDislikedEnabled) {
-                    _dislikeSFX == null
-                        ? null
-                        : Audio.loadFromByteData(_dislikeSFX,
-                            onComplete: () =>
-                                setState(() => --_spawnedAudioCount))
-                      ..play()
-                      ..dispose();
-                    setState(() => ++_spawnedAudioCount);
-                    await dislikeBtnHandler(widget.post, widget.comment);
-                  }
-                },
-              ),
-              SizedBox(
-                width: 1.0,
-                height: Sizes.inline_break,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                      color:
-                          Constants.currentTheme == AvailableThemes.LIGHT_THEME
-                              ? MyColors.lightInLineBreak
-                              : MyColors.darkLineBreak),
+                SizedBox(
+                  width: 1.0,
+                  height: Sizes.inline_break,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                        color:
+                            Constants.currentTheme == AvailableThemes.LIGHT_THEME
+                                ? MyColors.lightInLineBreak
+                                : MyColors.darkLineBreak),
+                  ),
                 ),
-              ),
-              InkWell(
-                child: Row(
-                  children: <Widget>[
-                    SizedBox(
-                      child: Icon(
-                        Icons.chat_bubble_outline,
-                        size: Sizes.small_card_btn_size,
+                InkWell(
+                  child: Row(
+                    children: <Widget>[
+                      SizedBox(
+                        child: Icon(
+                          Icons.chat_bubble_outline,
+                          size: Sizes.small_card_btn_size,
+                        ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 16.0),
-                      child: Text(
-                        widget.comment.repliesCount == null
-                            ? 0.toString()
-                            : widget.comment.repliesCount.toString(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 16.0),
+                        child: Text(
+                          widget.comment.repliesCount == null
+                              ? 0.toString()
+                              : widget.comment.repliesCount.toString(),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  onTap: () {
+                    Navigator.of(context).pushNamed('/add-reply', arguments: {
+                      'postId': widget.post,
+                      'comment': widget.comment,
+                      'user': widget.commenter
+                    });
+                  },
                 ),
-                onTap: () {
-                  Navigator.of(context).pushNamed('/add-reply', arguments: {
-                    'postId': widget.post,
-                    'comment': widget.comment,
-                    'user': widget.commenter
-                  });
-                },
-              ),
-              SizedBox(
-                width: 1.0,
-                height: Sizes.inline_break,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                      color:
-                          Constants.currentTheme == AvailableThemes.LIGHT_THEME
-                              ? MyColors.lightInLineBreak
-                              : MyColors.darkLineBreak),
+                SizedBox(
+                  width: 1.0,
+                  height: Sizes.inline_break,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                        color:
+                            Constants.currentTheme == AvailableThemes.LIGHT_THEME
+                                ? MyColors.lightInLineBreak
+                                : MyColors.darkLineBreak),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

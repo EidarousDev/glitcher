@@ -400,7 +400,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         onPressed: () {
           //(context as Element).rebuild();
           //Navigator.of(context).pushNamed('/new-post');
-          //updateGames();
+          updateGames();
         },
       ),
       drawer: BuildDrawer(),
@@ -582,7 +582,7 @@ void updateGames() async {
   while (jsonDecode(body)['next'] != null) {
     try {
       var response = await http.get(url);
-      print(url);
+      //print(url);
       String body = response.body;
       List results = jsonDecode(body)['results'];
 
@@ -610,8 +610,8 @@ void updateGames() async {
         String detailedUrl =
             'https://api.rawg.io/api/games/${results[i]['id']}';
         var detailedResponse = await http.get(detailedUrl);
-        String body = detailedResponse.body;
-        var gameDetails = jsonDecode(body);
+        String gameDetailsBody = detailedResponse.body;
+        var gameDetails = jsonDecode(gameDetailsBody);
 
         List publishers = [];
         (gameDetails['publishers'] as List).forEach((publisher) {
@@ -631,7 +631,7 @@ void updateGames() async {
 
         //print(gameDetails['description_raw']);
         //print(utf8.decode(gameDetails['description_raw'].toString().runes.toList()));
-
+        print(results[i]['name']);
         await firestore
             .collection('games')
             .document(results[i]['id'].toString())
@@ -657,9 +657,10 @@ void updateGames() async {
           'timestamp': FieldValue.serverTimestamp(),
           'search': search
         });
-        url = jsonDecode(body)['next'];
-        print('next url: $url');
       }
+
+      url = jsonDecode(body)['next'];
+      print('next url: $url');
     } catch (ex) {
       break;
     }
