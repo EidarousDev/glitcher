@@ -4,6 +4,8 @@ class Sizes {
   /// User Profile Sizes
   static const double sm_profile_image_w = 50.0;
   static const double sm_profile_image_h = 50.0;
+  static const double vsm_profile_image_w = 40.0;
+  static const double vsm_profile_image_h = 20.0;
   static const double md_profile_image_w = 60.0;
   static const double md_profile_image_h = 60.0;
   static const double lg_profile_image_w = 120.0;

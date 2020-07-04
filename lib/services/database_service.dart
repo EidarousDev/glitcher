@@ -71,6 +71,23 @@ class DatabaseService {
     return commentMeta;
   }
 
+  static Future<Map> getReplyMeta(String postId, String commentId, String replyId) async {
+    var replyMeta = Map();
+    DocumentSnapshot replyDocSnapshot = await postsRef
+        .document(postId)
+        .collection('comments')
+        .document(commentId)
+        .collection('replies')
+        .document(replyId)
+        .get();
+
+    if (replyDocSnapshot.exists) {
+      replyMeta['likes'] = replyDocSnapshot.data['likes'];
+      replyMeta['dislikes'] = replyDocSnapshot.data['dislikes'];
+    }
+    return replyMeta;
+  }
+
   // This function is used to get the recent posts (unfiltered)
   static Future<List<Post>> getNextPosts(
       Timestamp lastVisiblePostSnapShot) async {
