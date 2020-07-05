@@ -23,7 +23,7 @@ class CommentItem extends StatefulWidget {
   final Comment comment;
   final User commenter;
   final bool isReply;
-  final String parentCommentId;
+  final Comment parentComment;
 
   CommentItem(
       {Key key,
@@ -31,7 +31,7 @@ class CommentItem extends StatefulWidget {
       @required this.comment,
       @required this.commenter,
       @required this.isReply,
-      this.parentCommentId})
+      this.parentComment})
       : super(key: key);
   @override
   _CommentItemState createState() => _CommentItemState();
@@ -81,8 +81,12 @@ class _CommentItemState extends State<CommentItem> {
                 child: CacheThisImage(
                   imageUrl: widget.commenter.profileImageUrl,
                   imageShape: BoxShape.circle,
-                  width: widget.isReply ? Sizes.vsm_profile_image_w : Sizes.sm_profile_image_w,
-                  height: widget.isReply ? Sizes.vsm_profile_image_w : Sizes.sm_profile_image_h,
+                  width: widget.isReply
+                      ? Sizes.vsm_profile_image_w
+                      : Sizes.sm_profile_image_w,
+                  height: widget.isReply
+                      ? Sizes.vsm_profile_image_w
+                      : Sizes.sm_profile_image_h,
                   defaultAssetImage: Strings.default_profile_image,
                 ),
                 onTap: () {
@@ -205,11 +209,11 @@ class _CommentItemState extends State<CommentItem> {
                         ..play()
                         ..dispose();
                       setState(() => ++_spawnedAudioCount);
-                      if(!widget.isReply){
+                      if (!widget.isReply) {
                         await likeBtnHandler(widget.post, widget.comment);
-                      }
-                      else{
-                        await repliesLikeBtnHandler(widget.post, widget.comment, widget.parentCommentId);
+                      } else {
+                        await repliesLikeBtnHandler(widget.post, widget.comment,
+                            widget.parentComment.id);
                       }
                     }
                   },
@@ -219,10 +223,10 @@ class _CommentItemState extends State<CommentItem> {
                   height: Sizes.inline_break,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                        color:
-                            Constants.currentTheme == AvailableThemes.LIGHT_THEME
-                                ? MyColors.lightInLineBreak
-                                : MyColors.darkLineBreak),
+                        color: Constants.currentTheme ==
+                                AvailableThemes.LIGHT_THEME
+                            ? MyColors.lightInLineBreak
+                            : MyColors.darkLineBreak),
                   ),
                 ),
                 InkWell(
@@ -262,27 +266,27 @@ class _CommentItemState extends State<CommentItem> {
                         ..dispose();
                       setState(() => ++_spawnedAudioCount);
 
-                      if(!widget.isReply){
+                      if (!widget.isReply) {
                         await dislikeBtnHandler(widget.post, widget.comment);
-                      }
-                      else{
-                        await repliesDislikeBtnHandler(widget.post, widget.comment, widget.parentCommentId);
+                      } else {
+                        await repliesDislikeBtnHandler(widget.post,
+                            widget.comment, widget.parentComment.id);
                       }
                     }
                   },
                 ),
-                !widget.isReply? SizedBox(
+                SizedBox(
                   width: 1.0,
                   height: Sizes.inline_break,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                        color:
-                            Constants.currentTheme == AvailableThemes.LIGHT_THEME
-                                ? MyColors.lightInLineBreak
-                                : MyColors.darkLineBreak),
+                        color: Constants.currentTheme ==
+                                AvailableThemes.LIGHT_THEME
+                            ? MyColors.lightInLineBreak
+                            : MyColors.darkLineBreak),
                   ),
-                ):Container(),
-                !widget.isReply? InkWell(
+                ),
+                InkWell(
                   child: Row(
                     children: <Widget>[
                       SizedBox(
@@ -303,13 +307,16 @@ class _CommentItemState extends State<CommentItem> {
                     ],
                   ),
                   onTap: () {
+                    print('Mention reply : ${widget.commenter.username}');
+
                     Navigator.of(context).pushNamed('/add-reply', arguments: {
                       'postId': widget.post,
-                      'comment': widget.comment,
-                      'user': widget.commenter
+                      'comment': widget.isReply? widget.parentComment: widget.comment,
+                      'user': widget.commenter,
+                      'mention': widget.isReply ? '@${widget.commenter.username} ' : '',
                     });
                   },
-                ):Container(),
+                ),
               ],
             ),
           ),
@@ -328,26 +335,26 @@ class _CommentItemState extends State<CommentItem> {
           ),
           !widget.isReply && repliesVisible
               ? Flexible(
-                fit: FlexFit.loose,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 40.0),
-                  child: ListView.builder(
-                      controller: scrollController,
-                      itemCount: replies.length,
-                      physics: NeverScrollableScrollPhysics(),
-                      scrollDirection: Axis.vertical,
-                      shrinkWrap: true,
-                      itemBuilder: (BuildContext context, int index) {
-                        return CommentItem(
-                          post: widget.post,
-                          comment: replies[index],
-                          parentCommentId: widget.comment.id,
-                          commenter: widget.commenter,
-                          isReply: true,
-                        );
-                      }),
-                ),
-              )
+                  fit: FlexFit.loose,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 40.0),
+                    child: ListView.builder(
+                        controller: scrollController,
+                        itemCount: replies.length,
+                        physics: NeverScrollableScrollPhysics(),
+                        scrollDirection: Axis.vertical,
+                        shrinkWrap: true,
+                        itemBuilder: (BuildContext context, int index) {
+                          return CommentItem(
+                            post: widget.post,
+                            comment: replies[index],
+                            parentComment: widget.comment,
+                            commenter: widget.commenter,
+                            isReply: true,
+                          );
+                        }),
+                  ),
+                )
               : Container(),
         ],
       ),
@@ -570,7 +577,8 @@ class _CommentItemState extends State<CommentItem> {
     }
   }
 
-  Future<void> repliesLikeBtnHandler(Post post, Comment comment, String parentCommentId) async {
+  Future<void> repliesLikeBtnHandler(
+      Post post, Comment comment, String parentCommentId) async {
     setState(() {
       isLikeEnabled = false;
     });
@@ -677,8 +685,8 @@ class _CommentItemState extends State<CommentItem> {
     } else {
       throw Exception('Unconditional Event Occurred!');
     }
-    var replyMeta =
-        await DatabaseService.getReplyMeta(post.id, parentCommentId, widget.comment.id);
+    var replyMeta = await DatabaseService.getReplyMeta(
+        post.id, parentCommentId, widget.comment.id);
     setState(() {
       widget.comment.likesCount = replyMeta['likes'];
       widget.comment.disLikesCount = replyMeta['dislikes'];
@@ -689,7 +697,8 @@ class _CommentItemState extends State<CommentItem> {
         'likes = ${replyMeta['likes']} and dislikes = ${replyMeta['dislikes']}');
   }
 
-  Future<void> repliesDislikeBtnHandler(Post post, Comment comment, String parentCommentId) async {
+  Future<void> repliesDislikeBtnHandler(
+      Post post, Comment comment, String parentCommentId) async {
     setState(() {
       isDislikedEnabled = false;
     });
@@ -782,7 +791,8 @@ class _CommentItemState extends State<CommentItem> {
       throw Exception('Unconditional Event Occurred.');
     }
 
-    var replyMeta = await DatabaseService.getReplyMeta(post.id, parentCommentId, comment.id);
+    var replyMeta = await DatabaseService.getReplyMeta(
+        post.id, parentCommentId, comment.id);
 
     setState(() {
       widget.comment.likesCount = replyMeta['likes'];
@@ -794,7 +804,8 @@ class _CommentItemState extends State<CommentItem> {
         'likes = ${replyMeta['likes']} and dislikes = ${replyMeta['dislikes']}');
   }
 
-  void repliesInitLikes(String postId, Comment comment, String parentCommentId) async {
+  void repliesInitLikes(
+      String postId, Comment comment, String parentCommentId) async {
     DocumentSnapshot likedSnapshot = await postsRef
         .document(postId)
         .collection('comments')
@@ -835,31 +846,29 @@ class _CommentItemState extends State<CommentItem> {
       this.replies = replies;
     });
 
-    this.replies.forEach((element) { });
+    this.replies.forEach((element) {});
   }
 
   @override
   void initState() {
     super.initState();
     _loadAudioByteData();
-    if(!widget.isReply){
+    if (!widget.isReply) {
       initLikes(widget.post.id, widget.comment);
       loadReplies(widget.post.id, widget.comment.id);
+    } else {
+      repliesInitLikes(widget.post.id, widget.comment, widget.parentComment.id);
     }
-    else{
-      repliesInitLikes(widget.post.id, widget.comment, widget.parentCommentId);
-    }
-
 
     ///Set up listener here
     scrollController.addListener(() {
       if (scrollController.offset >=
-          scrollController.position.maxScrollExtent &&
+              scrollController.position.maxScrollExtent &&
           !scrollController.position.outOfRange) {
         print('reached the bottom');
         //nextComments();
       } else if (scrollController.offset <=
-          scrollController.position.minScrollExtent &&
+              scrollController.position.minScrollExtent &&
           !scrollController.position.outOfRange) {
         print("reached the top");
       } else {}

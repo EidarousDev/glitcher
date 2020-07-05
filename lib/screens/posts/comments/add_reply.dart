@@ -25,8 +25,9 @@ class AddReply extends StatefulWidget {
   final Post post;
   final Comment comment;
   final User user;
+  final String mention;
 
-  AddReply({Key key, this.post, this.comment, this.user}) : super(key: key);
+  AddReply({Key key, this.post, this.comment, this.user, this.mention}) : super(key: key);
   _AddReplyPageState createState() => _AddReplyPageState();
 }
 
@@ -60,7 +61,13 @@ class _AddReplyPageState extends State<AddReply> {
     _textEditingController = TextEditingController();
     scrollController..addListener(_scrollListener);
     DatabaseService.getGameNames();
+
     super.initState();
+
+    print('Mention reply : ${widget.mention}');
+    setState(() {
+      _textEditingController.text = widget.mention;
+    });
   }
 
   _scrollListener() {

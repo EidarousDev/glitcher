@@ -138,6 +138,7 @@ class RouteGenerator {
             post: args['postId'],
             comment: args['comment'],
             user: args['user'],
+            mention: args['mention'],
           ),
         );
       case '/bookmarks':
