@@ -1,20 +1,17 @@
 import 'dart:async';
-import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:glitcher/screens/app_page.dart';
-import 'package:glitcher/services/auth_provider.dart';
-import 'package:glitcher/utils/Loader.dart';
-import 'package:glitcher/constants/constants.dart';
-import 'package:glitcher/utils/functions.dart';
-import 'package:glitcher/services/auth.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:glitcher/screens/home/home.dart';
+import 'package:glitcher/services/auth.dart';
+import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/style/theme.dart' as Theme;
-import 'package:glitcher/utils/bubble_indication_painter.dart';
+import 'package:glitcher/utils/Loader.dart';
 import 'package:glitcher/utils/app_util.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:glitcher/utils/bubble_indication_painter.dart';
+import 'package:glitcher/utils/functions.dart';
 
 class LoginPage extends StatefulWidget {
   static const String id = 'login_screen';
@@ -223,8 +220,6 @@ class _LoginPageState extends State<LoginPage>
     Map<String, dynamic> userMap = {
       'username': _username,
       'description': 'Write something about yourself',
-      'followers': 0,
-      'following': 0,
       'notificationsNumber': 0
     };
 

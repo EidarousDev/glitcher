@@ -24,6 +24,7 @@ import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
 import 'package:random_string/random_string.dart';
+import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class CreatePost extends StatefulWidget {
@@ -111,10 +112,15 @@ class _CreatePostReplyPageState extends State<CreatePost> {
       customSnackBar(_scaffoldKey, 'Video exceeded 10 Megabytes limit.');
     } else {
       setState(() {
-        _video = file;
+        print('File xx: ${file.path}');
 
+        _video = file;
+        VideoPlayerController controller =
+            VideoPlayerController.file(File(_video.path));
+        VideoPlayer playerWidget = VideoPlayer(controller);
         createPostVideo = CreatePostVideo(
           video: _video,
+          playerWidget: playerWidget,
           onCrossIconPressed: _onCrossIconPressed,
         );
       });
@@ -518,7 +524,7 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
               ],
             ),
           ),
-          viewState._video == null
+          viewState._video != null
               ? Flexible(
                   child: Stack(
                     children: <Widget>[

@@ -7,13 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
-import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/posts/comment_item.dart';
-import 'package:glitcher/screens/posts/comment_post_item.dart';
+import 'package:glitcher/screens/posts/post_item.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/Loader.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -249,7 +248,7 @@ class _PostPreviewState extends State<PostPreview>
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        CommentPostItem(post: _currentPost, author: _author),
+        PostItem(post: _currentPost, author: _author),
         getList(),
       ],
     );
@@ -285,7 +284,7 @@ class _PostPreviewState extends State<PostPreview>
       floatingActionButton: FloatingActionButton(
         child: Icon(
           Icons.comment,
-          color: MyColors.darkGrey,
+          color: Colors.white70,
         ),
         onPressed: () {
           Navigator.of(context).pushNamed('/add-comment', arguments: {

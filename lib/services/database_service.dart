@@ -8,6 +8,7 @@ import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/notification_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/services/notification_handler.dart';
 
 class DatabaseService {
   // This function is used to get the recent posts (unfiltered)
@@ -71,7 +72,8 @@ class DatabaseService {
     return commentMeta;
   }
 
-  static Future<Map> getReplyMeta(String postId, String commentId, String replyId) async {
+  static Future<Map> getReplyMeta(
+      String postId, String commentId, String replyId) async {
     var replyMeta = Map();
     DocumentSnapshot replyDocSnapshot = await postsRef
         .document(postId)
@@ -117,6 +119,35 @@ class DatabaseService {
 
   static deletePost(String postId) async {
     await postsRef.document(postId).delete();
+  }
+
+  static deleteComment(
+      String postId, String commentId, String parentCommentId) async {
+    if (parentCommentId == null) {
+      await postsRef
+          .document(postId)
+          .collection('comments')
+          .document(commentId)
+          .delete();
+
+      await postsRef
+          .document(postId)
+          .updateData({'comments': FieldValue.increment(-1)});
+    } else {
+      await postsRef
+          .document(postId)
+          .collection('comments')
+          .document(parentCommentId)
+          .collection('replies')
+          .document(commentId)
+          .delete();
+
+      await postsRef
+          .document(postId)
+          .collection('comments')
+          .document(parentCommentId)
+          .updateData({'replies': FieldValue.increment(-1)});
+    }
   }
 
   static addPostToCurrentUserBookmarks(String postId) async {
@@ -166,6 +197,37 @@ class DatabaseService {
     }
 
     return friends;
+  }
+
+  static getFollowing(String userId) async {
+    QuerySnapshot followingSnapshot =
+        await usersRef.document(userId).collection('following').getDocuments();
+
+    List<User> following =
+        followingSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
+
+    for (int i = 0; i < following.length; i++) {
+      following[i] = await DatabaseService.getUserWithId(following[i].id);
+    }
+
+    for (DocumentSnapshot doc in followingSnapshot.documents) {
+      Constants.followingIds.add(doc.documentID);
+    }
+
+    return following;
+  }
+
+  static getFollowers(String userId) async {
+    QuerySnapshot followersSnapshot =
+        await usersRef.document(userId).collection('followers').getDocuments();
+
+    List<User> followers =
+        followersSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
+
+    for (int i = 0; i < followers.length; i++) {
+      followers[i] = await DatabaseService.getUserWithId(followers[i].id);
+    }
+    return followers;
   }
 
   // This function is used to get the recent posts (filtered by a certain game)
@@ -304,17 +366,6 @@ class DatabaseService {
       'timestamp': FieldValue.serverTimestamp(),
       'type': type
     });
-  }
-
-  static getFollowing() async {
-    QuerySnapshot following = await usersRef
-        .document(Constants.currentUserID)
-        .collection('following')
-        .getDocuments();
-
-    for (DocumentSnapshot doc in following.documents) {
-      Constants.followingIds.add(doc.documentID);
-    }
   }
 
   static getFollowedGames() async {
@@ -537,6 +588,7 @@ class DatabaseService {
 
   static void addReply(
       String postId, String commentId, String replyText) async {
+    print('current user replying ${Constants.currentUserID}');
     await postsRef
         .document(postId)
         .collection('comments')
@@ -656,7 +708,8 @@ class DatabaseService {
   }
 
   static Future<List<Post>> getBookmarksPosts() async {
-    QuerySnapshot postSnapshot = await usersRef.document(Constants.currentUserID)
+    QuerySnapshot postSnapshot = await usersRef
+        .document(Constants.currentUserID)
         .collection('bookmarks')
         .orderBy('timestamp', descending: true)
         .limit(10)
@@ -664,7 +717,7 @@ class DatabaseService {
 
     List<Post> posts = [];
 
-    postSnapshot.documents.forEach((element) async{
+    postSnapshot.documents.forEach((element) async {
       posts.add(await getPostWithId(element.documentID));
     });
 
@@ -673,7 +726,8 @@ class DatabaseService {
 
   static Future<List<Post>> getNextBookmarksPosts(
       Timestamp lastVisiblePostSnapShot) async {
-    QuerySnapshot postSnapshot = await usersRef.document(Constants.currentUserID)
+    QuerySnapshot postSnapshot = await usersRef
+        .document(Constants.currentUserID)
         .collection('bookmarks')
         .orderBy('timestamp', descending: true)
         .startAfter([lastVisiblePostSnapShot])
@@ -682,14 +736,128 @@ class DatabaseService {
 
     List<Post> posts = [];
 
-    postSnapshot.documents.forEach((element) async{
+    postSnapshot.documents.forEach((element) async {
       posts.add(await getPostWithId(element.documentID));
     });
 
     return posts;
   }
 
-  static addPostToBookmarks(String postId) async{
-    await usersRef.document(Constants.currentUserID).collection('bookmarks').document(postId).setData({'timestamp': FieldValue.serverTimestamp()});
+  static addPostToBookmarks(String postId) async {
+    await usersRef
+        .document(Constants.currentUserID)
+        .collection('bookmarks')
+        .document(postId)
+        .setData({'timestamp': FieldValue.serverTimestamp()});
+  }
+
+  static unfollowUser(String userId) async {
+    await usersRef
+        .document(Constants.currentUserID)
+        .collection('following')
+        .document(userId)
+        .delete();
+
+    await usersRef
+        .document(userId)
+        .collection('followers')
+        .document(Constants.currentUserID)
+        .delete();
+
+    DocumentSnapshot doc = await usersRef
+        .document(Constants.currentUserID)
+        .collection('friends')
+        .document(userId)
+        .get();
+
+    if (doc.exists) {
+      await usersRef
+          .document(Constants.currentUserID)
+          .collection('friends')
+          .document(userId)
+          .delete();
+    }
+
+    DocumentSnapshot doc2 = await usersRef
+        .document(userId)
+        .collection('friends')
+        .document(Constants.currentUserID)
+        .get();
+
+    if (doc2.exists) {
+      await usersRef
+          .document(userId)
+          .collection('friends')
+          .document(Constants.currentUserID)
+          .delete();
+    }
+
+    List<User> friends = await getFriends(Constants.currentUserID);
+    Constants.userFriends = friends;
+    List<User> following = await getFollowing(Constants.currentUserID);
+    Constants.userFollowing = following;
+    List<User> followers = await getFollowers(Constants.currentUserID);
+    Constants.userFollowers = followers;
+  }
+
+  static followUser(String userId) async {
+    FieldValue timestamp = FieldValue.serverTimestamp();
+
+    await usersRef
+        .document(userId)
+        .collection('followers')
+        .document(Constants.currentUserID)
+        .setData({
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+
+    await usersRef
+        .document(Constants.currentUserID)
+        .collection('following')
+        .document(userId)
+        .setData({
+      'timestamp': timestamp,
+    });
+
+    DocumentSnapshot doc = await usersRef
+        .document(userId)
+        .collection('following')
+        .document(Constants.currentUserID)
+        .get();
+
+    if (doc.exists) {
+      await usersRef
+          .document(Constants.currentUserID)
+          .collection('friends')
+          .document(userId)
+          .setData({'timestamp': FieldValue.serverTimestamp()});
+
+      await usersRef
+          .document(userId)
+          .collection('friends')
+          .document(Constants.currentUserID)
+          .setData({'timestamp': FieldValue.serverTimestamp()});
+
+      NotificationHandler.sendNotification(
+          userId,
+          '${Constants.loggedInUser.username} followed you',
+          'You are now friends',
+          Constants.currentUserID,
+          'follow');
+    } else {
+      NotificationHandler.sendNotification(
+          userId,
+          '${Constants.loggedInUser.username} followed you',
+          'Follow him back to be friends',
+          Constants.currentUserID,
+          'follow');
+    }
+
+    List<User> friends = await getFriends(Constants.currentUserID);
+    Constants.userFriends = friends;
+    List<User> following = await getFollowing(Constants.currentUserID);
+    Constants.userFollowing = following;
+    List<User> followers = await getFollowers(Constants.currentUserID);
+    Constants.userFollowers = followers;
   }
 }

@@ -7,9 +7,6 @@ class User {
   final String profileImageUrl;
   final String email;
   final String description;
-  final int followersCount;
-  final int followingCount;
-  final int friendsCount;
   final dynamic online;
   final int notificationsNumber;
 
@@ -20,9 +17,6 @@ class User {
       this.profileImageUrl,
       this.email,
       this.description,
-      this.followersCount,
-      this.followingCount,
-      this.friendsCount,
       this.online,
       this.notificationsNumber});
 
@@ -34,9 +28,6 @@ class User {
         profileImageUrl: doc['profile_url'],
         email: doc['email'],
         description: doc['description'] ?? '',
-        followersCount: doc['followers'],
-        followingCount: doc['following'],
-        friendsCount: doc['friendsCount'],
         online: doc['online'],
         notificationsNumber: doc['notificationsNumber']);
   }

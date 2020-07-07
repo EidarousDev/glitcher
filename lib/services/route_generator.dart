@@ -15,6 +15,7 @@ import 'package:glitcher/screens/chats/group_conversation.dart';
 import 'package:glitcher/screens/chats/group_details.dart';
 import 'package:glitcher/screens/chats/group_members.dart';
 import 'package:glitcher/screens/chats/new_group.dart';
+import 'package:glitcher/screens/friends/users_screen.dart';
 import 'package:glitcher/screens/games/game_screen.dart';
 import 'package:glitcher/screens/games/new_game.dart';
 import 'package:glitcher/screens/hashtag_posts_screen.dart';
@@ -22,8 +23,8 @@ import 'package:glitcher/screens/posts/comments/add_comment.dart';
 import 'package:glitcher/screens/posts/comments/add_reply.dart';
 import 'package:glitcher/screens/posts/new_post/create_post.dart';
 import 'package:glitcher/screens/posts/post_preview.dart';
+import 'package:glitcher/screens/profile/profile_screen.dart';
 import 'package:glitcher/screens/settings.dart';
-import 'package:glitcher/screens/user_timeline/profile_screen.dart';
 import 'package:glitcher/screens/web_browser/in_app_browser.dart';
 import 'package:page_transition/page_transition.dart';
 
@@ -143,6 +144,11 @@ class RouteGenerator {
         );
       case '/bookmarks':
         return MaterialPageRoute(builder: (_) => BookmarksScreen());
+      case '/users':
+        return MaterialPageRoute(
+            builder: (_) => UsersScreen(
+                  screenType: args['screen_type'],
+                ));
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

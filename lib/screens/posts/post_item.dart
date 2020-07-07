@@ -30,14 +30,12 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 class PostItem extends StatefulWidget {
   final Post post;
   final User author;
-  final int postIndex;
 
-  PostItem(
-      {Key key,
-      @required this.post,
-      @required this.author,
-      @required this.postIndex})
-      : super(key: key);
+  PostItem({
+    Key key,
+    @required this.post,
+    @required this.author,
+  }) : super(key: key);
   @override
   _PostItemState createState() => _PostItemState();
 }
@@ -103,17 +101,22 @@ class _PostItemState extends State<PostItem> {
                     'userId': post.authorId,
                   });
                 }),
-            title: InkWell(
-              child: Text('@${author.username}' ?? '',
-                  style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: MyColors.darkPrimary)),
-              onTap: () {
-                Navigator.of(context).pushNamed('/user-profile', arguments: {
-                  'userId': author.id,
-                });
-              },
+            title: Row(
+              children: <Widget>[
+                InkWell(
+                  child: Text('@${author.username}' ?? '',
+                      style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: MyColors.darkPrimary)),
+                  onTap: () {
+                    Navigator.of(context)
+                        .pushNamed('/user-profile', arguments: {
+                      'userId': author.id,
+                    });
+                  },
+                ),
+              ],
             ),
             subtitle: InkWell(
               child: Text('↳ ${post.game}' ?? '',
@@ -131,8 +134,7 @@ class _PostItemState extends State<PostItem> {
             trailing: ValueListenableBuilder<int>(
               valueListenable: number,
               builder: (context, value, child) {
-                return PostBottomSheet()
-                    .postOptionIcon(context, post, widget.postIndex);
+                return PostBottomSheet().postOptionIcon(context, post);
               },
             ),
           ),

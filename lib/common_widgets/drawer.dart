@@ -1,12 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/common_widgets/rate_app.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/screens/chats/chats.dart';
 import 'package:glitcher/screens/games/games_screen.dart';
-import 'package:glitcher/screens/notifications/notifications_screen.dart';
-import 'package:glitcher/screens/user_timeline/profile_screen.dart';
-import 'package:glitcher/constants/constants.dart';
-import 'package:glitcher/utils/functions.dart';
+import 'package:glitcher/screens/profile/profile_screen.dart';
 
 class BuildDrawer extends StatefulWidget {
   @override
@@ -96,7 +94,7 @@ class _BuildDrawerState extends State<BuildDrawer> {
             ),
           ),
           ListTile(
-            onTap: (){
+            onTap: () {
               Navigator.of(context).pushNamed('/bookmarks');
             },
             title: Text(

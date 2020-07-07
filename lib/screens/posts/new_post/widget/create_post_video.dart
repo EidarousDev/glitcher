@@ -7,8 +7,10 @@ import 'package:video_player/video_player.dart';
 class CreatePostVideo extends StatefulWidget {
   final File video;
   final Function onCrossIconPressed;
+  final playerWidget;
 
-  const CreatePostVideo({Key key, this.video, this.onCrossIconPressed})
+  const CreatePostVideo(
+      {Key key, this.video, this.playerWidget, this.onCrossIconPressed})
       : super(key: key);
 
   @override
@@ -28,16 +30,12 @@ class _CreatePostVideoState extends State<CreatePostVideo> {
 
   @override
   void initState() {
-    setState(() {
-      videoPlayerController = VideoPlayerController.file(video);
-    });
     super.initState();
   }
 
   @override
   void dispose() {
     super.dispose();
-    videoPlayerController.dispose();
   }
 
   @override
@@ -50,10 +48,9 @@ class _CreatePostVideoState extends State<CreatePostVideo> {
                 Container(
                   alignment: Alignment.topRight,
                   child: Container(
-                    height: 220,
-                    width: Sizes.fullWidth(context) * .8,
-                    child: playerWidget,
-                  ),
+                      height: 220,
+                      width: Sizes.fullWidth(context) * .8,
+                      child: playerWidget),
                 ),
                 Align(
                   alignment: Alignment.topRight,

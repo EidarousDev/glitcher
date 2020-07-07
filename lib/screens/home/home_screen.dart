@@ -130,14 +130,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         header: WaterDropHeader(),
         onRefresh: _onRefresh,
         onLoading: _onLoading,
-        child: CustomScrollView(
+        child: SingleChildScrollView(
           controller: _scrollController,
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: <Widget>[
-            SliverAppBar(
-              expandedHeight: sliverAppBarHeight,
-              leading: Container(),
-              flexibleSpace: Container(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Container(
                 height: sliverAppBarHeight,
                 color: switchColor(MyColors.lightBG, MyColors.darkBG),
                 child: Column(
@@ -367,9 +365,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ],
                 ),
               ),
-            ),
-            SliverList(
-                delegate: SliverChildListDelegate([
               ListView.builder(
                 physics: NeverScrollableScrollPhysics(),
                 scrollDirection: Axis.vertical,
@@ -384,13 +379,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           return SizedBox.shrink();
                         }
                         User author = snapshot.data;
-                        return PostItem(
-                            postIndex: index, post: post, author: author);
+                        return PostItem(post: post, author: author);
                       });
                 },
               ),
-            ]))
-          ],
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -408,8 +402,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   _setupFeed() async {
-    await getFollowed();
-
     List<Post> posts;
     feedFilter = await getFavouriteFilter();
 
@@ -566,11 +558,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _loadAudioByteData() async {
     _swipeUpSFX = await rootBundle.load(Strings.swipe_up_to_reload);
-  }
-
-  getFollowed() async {
-    await DatabaseService.getFollowedGames();
-    await DatabaseService.getFollowing();
   }
 }
 

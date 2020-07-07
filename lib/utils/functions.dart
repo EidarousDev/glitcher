@@ -8,8 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/screens/home/home.dart';
-import 'package:glitcher/screens/login_page.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_cropper/image_cropper.dart';
@@ -50,11 +48,21 @@ Future getFavouriteFilter() async {
 }
 
 Future<List> getFriends() async {
-  print('currentUID = ${Constants.currentUserID}');
   List<User> friends =
       await DatabaseService.getFriends(Constants.currentUserID);
-
   return friends;
+}
+
+Future<List> getFollowing() async {
+  List<User> following =
+      await DatabaseService.getFollowing(Constants.currentUserID);
+  return following;
+}
+
+Future<List> getFollowers() async {
+  List<User> followers =
+      await DatabaseService.getFollowers(Constants.currentUserID);
+  return followers;
 }
 
 Future<List> getHashtags() async {
@@ -154,20 +162,6 @@ class Functions {
     String body = response.body;
     Constants.country = jsonDecode(body)['country'];
     print('Country: ${Constants.country}');
-  }
-
-  static void getCurrentUser() async {
-    try {
-      currentUser = await _auth.currentUser();
-      if (currentUser != null) {
-        //Navigator.pushNamed(context, HomePage.id);
-        print("User logged: " + currentUser.email);
-      } else {
-        moveUserTo(widget: LoginPage(), routeId: HomePage.id);
-      }
-    } catch (e) {
-      print(e);
-    }
   }
 
   /* Alert Error - SnackBar */

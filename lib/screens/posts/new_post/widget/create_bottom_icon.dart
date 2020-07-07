@@ -81,7 +81,7 @@ class _CreatePostBottomIconWidgetState
               )),
           IconButton(
               onPressed: () {
-                setVideo(ImageSource.gallery);
+                setVideo();
               },
               icon: Icon(
                 Icons.videocam,
@@ -132,13 +132,14 @@ class _CreatePostBottomIconWidgetState
     });
   }
 
-  void setVideo(ImageSource source) {
-    ImagePicker.pickVideo(
-      source: source,
-    ).then((File file) {
+  void setVideo() async {
+    ImagePicker imagePicker = ImagePicker();
+    await imagePicker.getVideo(source: ImageSource.camera).then((value) async {
+      print(value.path);
+      File file = File(value.path);
       setState(() {
-        // _image = file;
         widget.onVideoIconSelected(file);
+        print('file video xx $file');
       });
     });
   }

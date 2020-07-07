@@ -1,24 +1,21 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:glitcher/common_widgets/circular_clipper.dart';
-import 'package:glitcher/common_widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/screens/fullscreen_overaly.dart';
 import 'package:glitcher/screens/posts/post_item.dart';
+import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/Loader.dart';
 import 'package:glitcher/utils/app_util.dart';
-import 'package:glitcher/services/auth.dart';
-import 'package:flutter_icons/flutter_icons.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
@@ -50,10 +47,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String userId;
 
   var userData;
-
-  int _followers = 0;
-
-  int _following = 0;
 
   bool _loading = false;
   bool _isBtnEnabled = true;
@@ -155,9 +148,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _descText = onValue.data['description'];
         _profileImageUrl = onValue.data['profile_url'];
         _coverImageUrl = onValue.data['cover_url'];
-        _followers = onValue.data['followers'];
-        _following = onValue.data['following'];
-
         _profileImageFile = null;
         _coverImageFile = null;
         _loading = false;
@@ -340,25 +330,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: TextField(
                             controller: _textEditingController,
                           )),
-                  userId == Constants.currentUserID ? !isEditingName
-                      ? IconButton(
-                          icon: Icon(Icons.edit, size: 18,),
-                          onPressed: () {
-                            setState(() {
-                              isEditingName = true;
-                              _textEditingController.text = _nameText;
-                            });
-                          })
-                      : IconButton(
-                          icon: Icon(Icons.done, size: 18,),
-                          onPressed: () {
-                            setState(() {
-                              isEditingName = false;
-                              _nameText = _textEditingController.text;
-                            });
+                  userId == Constants.currentUserID
+                      ? !isEditingName
+                          ? IconButton(
+                              icon: Icon(
+                                Icons.edit,
+                                size: 18,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  isEditingName = true;
+                                  _textEditingController.text = _nameText;
+                                });
+                              })
+                          : IconButton(
+                              icon: Icon(
+                                Icons.done,
+                                size: 18,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  isEditingName = false;
+                                  _nameText = _textEditingController.text;
+                                });
 
-                            updateName();
-                          }) : Container(),
+                                updateName();
+                              })
+                      : Container(),
                 ],
               ),
               SizedBox(
@@ -378,24 +376,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: TextField(
                             controller: _textEditingController,
                           )),
-                  userId == Constants.currentUserID ? !isEditingDesc
-                      ? IconButton(
-                          icon: Icon(Icons.edit, size: 18,),
-                          onPressed: () {
-                            setState(() {
-                              isEditingDesc = true;
-                              _textEditingController.text = _descText;
-                            });
-                          })
-                      : IconButton(
-                          icon: Icon(Icons.done, size: 18,),
-                          onPressed: () {
-                            setState(() {
-                              isEditingDesc = false;
-                              _descText = _textEditingController.text;
-                            });
-                            updateDesc();
-                          }) : Container(),
+                  userId == Constants.currentUserID
+                      ? !isEditingDesc
+                          ? IconButton(
+                              icon: Icon(
+                                Icons.edit,
+                                size: 18,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  isEditingDesc = true;
+                                  _textEditingController.text = _descText;
+                                });
+                              })
+                          : IconButton(
+                              icon: Icon(
+                                Icons.done,
+                                size: 18,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  isEditingDesc = false;
+                                  _descText = _textEditingController.text;
+                                });
+                                updateDesc();
+                              })
+                      : Container(),
                 ],
               ),
               SizedBox(
@@ -404,33 +410,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
               SizedBox(
                 height: 8,
               ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Column(
-                    children: <Widget>[
-                      Text(
-                        'Followers',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                      Text(_followers.toString())
-                    ],
-                  ),
-                  SizedBox(
-                    width: 50,
-                  ),
-                  Column(
-                    children: <Widget>[
-                      Text(
-                        'Following',
-                        style: TextStyle(color: Colors.grey, fontSize: 14),
-                      ),
-                      Text(_following.toString())
-                    ],
-                  ),
-                ],
-              ),
+              userId == Constants.currentUserID
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        InkWell(
+                          onTap: () => Navigator.of(context).pushNamed('/users',
+                              arguments: {'screen_type': 'Followers'}),
+                          child: Column(
+                            children: <Widget>[
+                              Text(
+                                'Followers',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                              Text(Constants.userFollowers.length.toString())
+                            ],
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () => Navigator.of(context).pushNamed('/users',
+                              arguments: {'screen_type': 'Following'}),
+                          child: Column(
+                            children: <Widget>[
+                              Text(
+                                'Following',
+                                style:
+                                    TextStyle(color: Colors.grey, fontSize: 14),
+                              ),
+                              Text(Constants.userFollowing.length.toString())
+                            ],
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            Navigator.of(context).pushNamed('/users',
+                                arguments: {'screen_type': 'Friends'});
+                          },
+                          child: Column(
+                            children: <Widget>[
+                              Text(
+                                'Friends',
+                                style:
+                                    TextStyle(color: Colors.grey, fontSize: 14),
+                              ),
+                              Text(Constants.userFriends.length.toString())
+                            ],
+                          ),
+                        ),
+                      ],
+                    )
+                  : Container(),
               SizedBox(
                 height: 8,
               ),
@@ -505,86 +535,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _loading = true;
     });
 
-    FieldValue timestamp = FieldValue.serverTimestamp();
-
-    await usersRef
-        .document(userId)
-        .collection('followers')
-        .document(Constants.currentUserID)
-        .setData({
-      'timestamp': FieldValue.serverTimestamp(),
-    });
-
-    await usersRef.document(userId).updateData({
-      'followers': FieldValue.increment(1),
-    });
-
-    await firestore
-        .collection('users')
-        .document(Constants.currentUserID)
-        .updateData({
-      'following': FieldValue.increment(1),
-    });
-
-    await usersRef
-        .document(Constants.currentUserID)
-        .collection('following')
-        .document(userId)
-        .setData({
-      'timestamp': timestamp,
-    });
-
-    DocumentSnapshot doc = await usersRef
-        .document(userId)
-        .collection('following')
-        .document(Constants.currentUserID)
-        .get();
-
-    if (doc.exists) {
-      await usersRef
-          .document(Constants.currentUserID)
-          .collection('friends')
-          .document(userId)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
-
-      await usersRef
-          .document(Constants.currentUserID)
-          .updateData({'friends': FieldValue.increment(1)});
-
-      await usersRef
-          .document(userId)
-          .collection('friends')
-          .document(Constants.currentUserID)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
-
-      await usersRef
-          .document(userId)
-          .updateData({'friends': FieldValue.increment(1)});
-
-      NotificationHandler.sendNotification(
-          userId,
-          '${Constants.loggedInUser.username} followed you',
-          'You are now friends',
-          Constants.currentUserID,
-          'follow');
-    } else {
-      NotificationHandler.sendNotification(
-          userId,
-          '${Constants.loggedInUser.username} followed you',
-          'Follow him back to be friends',
-          Constants.currentUserID,
-          'follow');
-    }
+    await DatabaseService.followUser(userId);
+    checkUser();
 
     setState(() {
       _loading = false;
       _isBtnEnabled = true;
-      //AppUtil().showToast('You started following ' + _nameText);
-      _followers++;
-      isFollowing = true;
+      isFollowing = false;
     });
-
-    checkUser();
   }
 
   void unfollowUser() async {
@@ -592,70 +550,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _isBtnEnabled = false;
       _loading = true;
     });
-    await usersRef
-        .document(Constants.currentUserID)
-        .collection('following')
-        .document(userId)
-        .delete();
 
-    await usersRef.document(Constants.currentUserID).updateData({
-      'following': FieldValue.increment(-1),
-    });
+    await DatabaseService.unfollowUser(userId);
 
-    await usersRef
-        .document(userId)
-        .collection('followers')
-        .document(Constants.currentUserID)
-        .delete();
-
-    await usersRef.document(userId).updateData({
-      'followers': FieldValue.increment(-1),
-    });
-
-    DocumentSnapshot doc = await usersRef
-        .document(Constants.currentUserID)
-        .collection('friends')
-        .document(userId)
-        .get();
-
-    if (doc.exists) {
-      await usersRef
-          .document(Constants.currentUserID)
-          .collection('friends')
-          .document(userId)
-          .delete();
-
-      await usersRef
-          .document(Constants.currentUserID)
-          .updateData({'friends': FieldValue.increment(-1)});
-    }
-
-    DocumentSnapshot doc2 = await usersRef
-        .document(userId)
-        .collection('friends')
-        .document(Constants.currentUserID)
-        .get();
-
-    if (doc2.exists) {
-      await usersRef
-          .document(userId)
-          .collection('friends')
-          .document(Constants.currentUserID)
-          .delete();
-
-      await usersRef
-          .document(userId)
-          .updateData({'friends': FieldValue.increment(-1)});
-    }
+    checkUser();
 
     setState(() {
-      _followers--;
       _loading = false;
       _isBtnEnabled = true;
       isFollowing = false;
     });
-
-    checkUser();
   }
 
   @override
@@ -697,21 +601,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _coverImageUrl = null;
               });
 
-              String url =
-              await AppUtil.uploadFile(_coverImageFile, context, 'cover_img/$userId');
+              String url = await AppUtil.uploadFile(
+                  _coverImageFile, context, 'cover_img/$userId');
               setState(() {
                 _coverImageUrl = url;
                 _coverImageFile = null;
               });
 
-              await usersRef.document(userId).updateData({'cover_url': _coverImageUrl});
+              await usersRef
+                  .document(userId)
+                  .updateData({'cover_url': _coverImageUrl});
 
               Navigator.of(context).pop();
             },
           ),
         ),
         context: context);
-
   }
 
   profileEdit() async {
@@ -752,8 +657,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _profileImageUrl = url;
                 _profileImageFile = null;
               });
-              
-              await usersRef.document(userId).updateData({'profile_url': _profileImageUrl});
+
+              await usersRef
+                  .document(userId)
+                  .updateData({'profile_url': _profileImageUrl});
 
               Navigator.of(context).pop();
             },

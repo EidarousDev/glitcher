@@ -2,19 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
+import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
 
-class PostBottomSheet {
-  Widget postOptionIcon(BuildContext context, Post post) {
+class CommentBottomSheet {
+  Widget commentOptionIcon(
+      BuildContext context, Post post, Comment comment, Comment parentComment) {
     return customInkWell(
         radius: BorderRadius.circular(20),
         context: context,
         onPressed: () {
-          _openBottomSheet(context, post);
+          _openBottomSheet(context, post, comment, parentComment);
         },
         child: Container(
           width: 25,
@@ -26,16 +28,17 @@ class PostBottomSheet {
         ));
   }
 
-  void _openBottomSheet(BuildContext context, Post post) async {
-    User user = await DatabaseService.getUserWithId(post.authorId);
-    bool isMyPost = Constants.currentUserID == post.authorId;
+  void _openBottomSheet(BuildContext context, Post post, Comment comment,
+      Comment parentComment) async {
+    User user = await DatabaseService.getUserWithId(comment.commenterID);
+    bool isMyComment = Constants.currentUserID == comment.commenterID;
     await showModalBottomSheet(
       backgroundColor: Colors.transparent,
       context: context,
       builder: (context) {
         return Container(
             padding: EdgeInsets.only(top: 5, bottom: 0),
-            height: Sizes.fullHeight(context) * (isMyPost ? .25 : .44),
+            height: Sizes.fullHeight(context) * (isMyComment ? .25 : .44),
             width: Sizes.fullWidth(context),
             decoration: BoxDecoration(
               color: switchColor(
@@ -45,13 +48,14 @@ class PostBottomSheet {
                 topRight: Radius.circular(20),
               ),
             ),
-            child: _postOptions(context, isMyPost, post, user));
+            child: _commentOptions(
+                context, isMyComment, post, comment, parentComment, user));
       },
     );
   }
 
-  Widget _postOptions(
-      BuildContext context, bool isMyPost, Post post, User user) {
+  Widget _commentOptions(BuildContext context, bool isMyPost, Post post,
+      Comment comment, Comment parentComment, User user) {
     return Column(
       children: <Widget>[
         Container(
@@ -64,37 +68,23 @@ class PostBottomSheet {
             ),
           ),
         ),
-        _widgetBottomSheetRow(
-          context,
-          Icon(Icons.link),
-          text: 'Copy link to post',
-        ),
-        _widgetBottomSheetRow(
-          context,
-          Icon(Icons.bookmark),
-          text: 'Bookmark this post',
-          onPressed: () {
-            _bookmarkPost(post.id);
-          },
-        ),
-        !isMyPost
+        isMyPost
             ? _widgetBottomSheetRow(
                 context,
-                Icon(Icons.android),
-                text: 'Not interested in this',
+                Icon(Icons.edit),
+                text: 'Edit Comment',
                 onPressed: () {},
+                isEnable: true,
               )
             : Container(),
         isMyPost
             ? _widgetBottomSheetRow(
                 context,
                 Icon(Icons.delete_forever),
-                text: 'Delete Post',
+                text: 'Delete Comment',
                 onPressed: () {
-                  _deletePost(
-                    context,
-                    post.id,
-                  );
+                  _deleteComment(context, post.id, comment.id,
+                      parentComment == null ? null : parentComment.id);
                 },
                 isEnable: true,
               )
@@ -167,14 +157,15 @@ class PostBottomSheet {
     );
   }
 
-  void _deletePost(BuildContext context, String postId) async {
+  void _deleteComment(BuildContext context, String postId, String commentId,
+      String parentCommentId) async {
     await showDialog(
       context: context,
       builder: (context) => Padding(
         padding: const EdgeInsets.all(16.0),
         child: new AlertDialog(
           title: new Text('Are you sure?'),
-          content: new Text('Do you really want to delete this post?'),
+          content: new Text('Do you really want to delete this comment?'),
           actions: <Widget>[
             new GestureDetector(
               onTap: () =>
@@ -187,9 +178,12 @@ class PostBottomSheet {
             ),
             SizedBox(height: 16),
             new GestureDetector(
-              onTap: () {
-                DatabaseService.deletePost(postId);
+              onTap: () async {
+                await DatabaseService.deleteComment(
+                    postId, commentId, parentCommentId);
                 Navigator.of(context).pop();
+                Navigator.of(context)
+                    .pushReplacementNamed('/post', arguments: {'post': postId});
               },
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -201,8 +195,7 @@ class PostBottomSheet {
       ),
     );
     Navigator.of(context).pop();
-    Navigator.of(context).pushReplacementNamed('/home');
-    print('deleting post!');
+    print('deleting comment!');
   }
 
   void _bookmarkPost(String postId) async {

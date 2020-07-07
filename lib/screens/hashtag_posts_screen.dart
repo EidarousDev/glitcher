@@ -17,7 +17,8 @@ class HashtagPostsScreen extends StatefulWidget {
   _HashtagPostsScreenState createState() => _HashtagPostsScreenState(hashtag);
 }
 
-class _HashtagPostsScreenState extends State<HashtagPostsScreen> with WidgetsBindingObserver{
+class _HashtagPostsScreenState extends State<HashtagPostsScreen>
+    with WidgetsBindingObserver {
   final Hashtag hashtag;
   User loggedInUser;
   String username;
@@ -32,7 +33,6 @@ class _HashtagPostsScreenState extends State<HashtagPostsScreen> with WidgetsBin
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         flexibleSpace: gradientAppBar(),
@@ -45,7 +45,7 @@ class _HashtagPostsScreenState extends State<HashtagPostsScreen> with WidgetsBin
         title: Text(hashtag.text),
         centerTitle: true,
       ),
-      body:  ListView.builder(
+      body: ListView.builder(
         physics: NeverScrollableScrollPhysics(),
         scrollDirection: Axis.vertical,
         itemCount: _posts.length,
@@ -59,7 +59,7 @@ class _HashtagPostsScreenState extends State<HashtagPostsScreen> with WidgetsBin
                   return SizedBox.shrink();
                 }
                 User author = snapshot.data;
-                return PostItem(postIndex: index, post: post, author: author);
+                return PostItem(post: post, author: author);
               });
         },
       ),
@@ -88,12 +88,12 @@ class _HashtagPostsScreenState extends State<HashtagPostsScreen> with WidgetsBin
     _scrollController
       ..addListener(() {
         if (_scrollController.offset >=
-            _scrollController.position.maxScrollExtent &&
+                _scrollController.position.maxScrollExtent &&
             !_scrollController.position.outOfRange) {
           print('reached the bottom');
           nextHashtagPosts();
         } else if (_scrollController.offset <=
-            _scrollController.position.minScrollExtent &&
+                _scrollController.position.minScrollExtent &&
             !_scrollController.position.outOfRange) {
           print("reached the top");
         } else {}

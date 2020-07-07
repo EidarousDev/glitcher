@@ -9,13 +9,13 @@ import 'package:glitcher/screens/posts/post_item.dart';
 import 'package:glitcher/services/database_service.dart';
 
 class BookmarksScreen extends StatefulWidget {
-
-
   @override
   _BookmarksScreenState createState() => _BookmarksScreenState();
 }
 
-class _BookmarksScreenState extends State<BookmarksScreen> with WidgetsBindingObserver{
+class _BookmarksScreenState extends State<BookmarksScreen>
+    with WidgetsBindingObserver {
+  ScrollController _scrollController = ScrollController();
   User loggedInUser;
   String username;
   String profileImageUrl = '';
@@ -23,11 +23,9 @@ class _BookmarksScreenState extends State<BookmarksScreen> with WidgetsBindingOb
   FirebaseUser currentUser;
   Timestamp lastVisiblePostSnapShot;
 
-  ScrollController _scrollController = ScrollController();
-
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       appBar: AppBar(
         flexibleSpace: gradientAppBar(),
         leading: new IconButton(
@@ -39,23 +37,26 @@ class _BookmarksScreenState extends State<BookmarksScreen> with WidgetsBindingOb
         title: Text('Bookmarks'),
         centerTitle: true,
       ),
-      body:  ListView.builder(
-        physics: NeverScrollableScrollPhysics(),
-        scrollDirection: Axis.vertical,
-        itemCount: _posts.length,
-        shrinkWrap: true,
-        itemBuilder: (BuildContext context, int index) {
-          Post post = _posts[index];
-          return FutureBuilder(
-              future: DatabaseService.getUserWithId(post.authorId),
-              builder: (BuildContext context, AsyncSnapshot snapshot) {
-                if (!snapshot.hasData) {
-                  return SizedBox.shrink();
-                }
-                User author = snapshot.data;
-                return PostItem(postIndex: index, post: post, author: author);
-              });
-        },
+      body: SingleChildScrollView(
+        controller: _scrollController,
+        child: ListView.builder(
+          physics: NeverScrollableScrollPhysics(),
+          scrollDirection: Axis.vertical,
+          itemCount: _posts.length,
+          shrinkWrap: true,
+          itemBuilder: (BuildContext context, int index) {
+            Post post = _posts[index];
+            return FutureBuilder(
+                future: DatabaseService.getUserWithId(post.authorId),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (!snapshot.hasData) {
+                    return SizedBox.shrink();
+                  }
+                  User author = snapshot.data;
+                  return PostItem(post: post, author: author);
+                });
+          },
+        ),
       ),
     );
   }
@@ -82,12 +83,12 @@ class _BookmarksScreenState extends State<BookmarksScreen> with WidgetsBindingOb
     _scrollController
       ..addListener(() {
         if (_scrollController.offset >=
-            _scrollController.position.maxScrollExtent &&
+                _scrollController.position.maxScrollExtent &&
             !_scrollController.position.outOfRange) {
           print('reached the bottom');
           nextBookmarksPosts();
         } else if (_scrollController.offset <=
-            _scrollController.position.minScrollExtent &&
+                _scrollController.position.minScrollExtent &&
             !_scrollController.position.outOfRange) {
           print("reached the top");
         } else {}
@@ -134,8 +135,8 @@ class _BookmarksScreenState extends State<BookmarksScreen> with WidgetsBindingOb
   }
 
   void nextBookmarksPosts() async {
-    var posts = await DatabaseService.getNextBookmarksPosts(
-        lastVisiblePostSnapShot);
+    var posts =
+        await DatabaseService.getNextBookmarksPosts(lastVisiblePostSnapShot);
     if (posts.length > 0) {
       setState(() {
         posts.forEach((element) => _posts.add(element));

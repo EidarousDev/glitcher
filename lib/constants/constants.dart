@@ -47,6 +47,8 @@ class Constants {
   static List<String> followedGamesNames = [];
 
   static List<User> userFriends = [];
+  static List<User> userFollowing = [];
+  static List<User> userFollowers = [];
   static List<Hashtag> hashtags = [];
 
   static ConnectivityResult connectionState;

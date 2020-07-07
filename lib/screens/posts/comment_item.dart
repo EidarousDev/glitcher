@@ -17,6 +17,7 @@ import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
+import 'package:glitcher/widgets/comment_bottom_sheet.dart';
 
 class CommentItem extends StatefulWidget {
   final Post post;
@@ -54,6 +55,10 @@ class _CommentItemState extends State<CommentItem> {
   List<Comment> replies = [];
 
   ScrollController scrollController = ScrollController();
+
+  List<User> repliers = [];
+
+  final number = ValueNotifier(0);
 
   @override
   Widget build(BuildContext context) {
@@ -142,6 +147,13 @@ class _CommentItemState extends State<CommentItem> {
                               : TextSpan(text: ' ' + w);
                         }).toList()),
                   ),
+            trailing: ValueListenableBuilder<int>(
+              valueListenable: number,
+              builder: (context, value, child) {
+                return CommentBottomSheet().commentOptionIcon(
+                    context, widget.post, widget.comment, widget.parentComment);
+              },
+            ),
             isThreeLine: true,
           ),
           !widget.isReply
@@ -166,7 +178,7 @@ class _CommentItemState extends State<CommentItem> {
                 )
               : Container(),
           Container(
-            height: !widget.isReply ? Sizes.inline_break : 20,
+            height: Sizes.inline_break,
             color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
                 ? MyColors.lightCardBG
                 : MyColors.darkCardBG,
@@ -311,9 +323,13 @@ class _CommentItemState extends State<CommentItem> {
 
                     Navigator.of(context).pushNamed('/add-reply', arguments: {
                       'postId': widget.post,
-                      'comment': widget.isReply? widget.parentComment: widget.comment,
+                      'comment': widget.isReply
+                          ? widget.parentComment
+                          : widget.comment,
                       'user': widget.commenter,
-                      'mention': widget.isReply ? '@${widget.commenter.username} ' : '',
+                      'mention': widget.isReply
+                          ? '@${widget.commenter.username} '
+                          : '',
                     });
                   },
                 ),
@@ -349,7 +365,7 @@ class _CommentItemState extends State<CommentItem> {
                             post: widget.post,
                             comment: replies[index],
                             parentComment: widget.comment,
-                            commenter: widget.commenter,
+                            commenter: repliers[index],
                             isReply: true,
                           );
                         }),
@@ -846,7 +862,12 @@ class _CommentItemState extends State<CommentItem> {
       this.replies = replies;
     });
 
-    this.replies.forEach((element) {});
+    this.replies.forEach((element) async {
+      User user = await DatabaseService.getUserWithId(element.commenterID);
+      setState(() {
+        this.repliers.add(user);
+      });
+    });
   }
 
   @override

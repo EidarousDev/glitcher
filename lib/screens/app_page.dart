@@ -15,7 +15,7 @@ import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/home/home_screen.dart';
 import 'package:glitcher/screens/notifications/notifications_screen.dart';
-import 'package:glitcher/screens/user_timeline/profile_screen.dart';
+import 'package:glitcher/screens/profile/profile_screen.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/functions.dart';
@@ -130,6 +130,8 @@ class _AppPageState extends State<AppPage> {
     userListener();
     _saveDeviceToken();
     setFriends();
+    setFollowing();
+    setFollowers();
     setHashtags();
     print('User Firends = ${Constants.userFriends}');
 
@@ -254,6 +256,22 @@ class _AppPageState extends State<AppPage> {
     // User Friends
     setState(() {
       Constants.userFriends = friends;
+    });
+  }
+
+  Future<void> setFollowing() async {
+    List<User> friends = await getFollowing();
+    // User Friends
+    setState(() {
+      Constants.userFollowing = friends;
+    });
+  }
+
+  Future<void> setFollowers() async {
+    List<User> followers = await getFollowing();
+    // User Friends
+    setState(() {
+      Constants.userFollowers = followers;
     });
   }
 
