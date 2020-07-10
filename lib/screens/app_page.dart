@@ -235,7 +235,7 @@ class _AppPageState extends State<AppPage> {
           .document(Constants.currentUserID)
           .collection('tokens')
           .document(token)
-          .setData({'modifiedAt': FieldValue.serverTimestamp()});
+          .setData({'modifiedAt': FieldValue.serverTimestamp(), 'signed': true});
     }
     print('token = $token');
   }

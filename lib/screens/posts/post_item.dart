@@ -30,11 +30,13 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 class PostItem extends StatefulWidget {
   final Post post;
   final User author;
+  final String route;
 
   PostItem({
     Key key,
     @required this.post,
     @required this.author,
+    @required this.route
   }) : super(key: key);
   @override
   _PostItemState createState() => _PostItemState();
@@ -134,7 +136,7 @@ class _PostItemState extends State<PostItem> {
             trailing: ValueListenableBuilder<int>(
               valueListenable: number,
               builder: (context, value, child) {
-                return PostBottomSheet().postOptionIcon(context, post);
+                return PostBottomSheet().postOptionIcon(context, post, widget.route);
               },
             ),
           ),
@@ -155,7 +157,7 @@ class _PostItemState extends State<PostItem> {
                               onMentionPressed: (text) =>
                                   mentionedUserProfile(post.text),
                               onHashTagPressed: (text) =>
-                                  hashgtagScreen(post.text),
+                                  hashtagScreen(post.text),
                               style: TextStyle(
                                 color: switchColor(Colors.black, Colors.white),
                                 fontSize: 16,
@@ -173,7 +175,7 @@ class _PostItemState extends State<PostItem> {
                               onMentionPressed: (text) =>
                                   mentionedUserProfile(post.text),
                               onHashTagPressed: (text) =>
-                                  hashgtagScreen(post.text),
+                                  hashtagScreen(post.text),
                               style: TextStyle(
                                 color: switchColor(Colors.black, Colors.white),
                                 fontSize: 16,
@@ -786,7 +788,7 @@ class _PostItemState extends State<PostItem> {
     print(user.id);
   }
 
-  Future hashgtagScreen(String w) async {
+  Future hashtagScreen(String w) async {
     //TODO: Implement Mentioned user profile - Get UID from string then pass it to the navigator
     var words = w.split(' ');
     String hashtagText =

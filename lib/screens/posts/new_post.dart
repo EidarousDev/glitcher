@@ -143,7 +143,7 @@ class _NewPostState extends State<NewPost> {
     }
 
     await postsRef.document(postId).setData({
-      'owner': Constants.currentUserID,
+      'author': Constants.currentUserID,
       'text': text,
       'youtubeId': _youtubeId,
       'video': _video != null ? _uploadedFileURL : null,

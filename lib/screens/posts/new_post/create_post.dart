@@ -167,7 +167,7 @@ class _CreatePostReplyPageState extends State<CreatePost> {
     print(_youtubeId);
 
     var postData = {
-      'owner': Constants.currentUserID,
+      'author': Constants.currentUserID,
       'text': _textEditingController.text,
       'youtubeId': _youtubeId,
       'video': _video != null ? _uploadedFileURL : null,
@@ -306,7 +306,7 @@ class _CreatePostReplyPageState extends State<CreatePost> {
         if (newHashtag) {
           String hashtagId = randomAlphaNumeric(20);
           await hashtagsRef.document(hashtagId).setData({
-            'text': _hashtagText,
+            'text': word,
             'timestamp': FieldValue.serverTimestamp()
           });
 

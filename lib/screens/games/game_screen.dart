@@ -48,25 +48,15 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
             padding: const EdgeInsets.all(8.0),
             child: InkWell(
               onTap: () => Scaffold.of(context).openDrawer(),
-              child: Icon(IconData(58311, fontFamily: 'MaterialIcons')),
+              child: IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () => Navigator.of(context).pushReplacementNamed('/home'),
+              ),
             ),
           ),
         ),
-        title: Text("Feeds"),
+        title: Text(game.fullName),
         centerTitle: true,
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(
-              Icons.filter_list,
-            ),
-            onPressed: () {
-              PermissionsService().requestContactsPermission(
-                  onPermissionDenied: () {
-                print('Permission has been denied');
-              });
-            },
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         controller: _scrollController,

@@ -1,4 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/common_widgets/rate_app.dart';
 import 'package:glitcher/constants/constants.dart';
@@ -158,6 +160,13 @@ class _BuildDrawerState extends State<BuildDrawer> {
             onTap: () async {
               try {
                 auth.signOut();
+                String token = await FirebaseMessaging().getToken();
+                usersRef
+                    .document(Constants.currentUserID)
+                    .collection('tokens')
+                    .document(token)
+                    .setData({'modifiedAt': FieldValue.serverTimestamp(), 'signed': false});
+
                 setState(() {
                   authStatus = AuthStatus.NOT_LOGGED_IN;
                 });

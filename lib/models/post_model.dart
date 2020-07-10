@@ -36,7 +36,7 @@ class Post {
       likesCount: doc['likes'],
       disLikesCount: doc['dislikes'],
       commentsCount: doc['comments'],
-      authorId: doc['owner'],
+      authorId: doc['author'],
       video: doc['video'],
       youtubeId: doc['youtubeId'],
       timestamp: doc['timestamp'],

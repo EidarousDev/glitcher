@@ -43,7 +43,7 @@ class HomeScreen extends StatefulWidget {
             },
             builder: (BuildContext context) {
               return Container(
-                color: Colors.blue,
+                color: MyColors.darkPrimary,
                 height: 120,
               );
             },
@@ -75,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int _spawnedAudioCount = 0;
   ByteData _swipeUpSFX;
   RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshController(initialRefresh: false);
 
   @override
   Widget build(BuildContext context) {
@@ -142,85 +142,85 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   children: <Widget>[
                     isFiltering
                         ? Padding(
-                            padding: const EdgeInsets.only(
-                                left: 10, top: 2, right: 10),
-                            child: Container(
-                              child: Column(
-                                children: <Widget>[
-                                  Text(
-                                    'Filter by:',
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  Row(
-                                    children: <Widget>[
-                                      Radio(
-                                          value: 0,
-                                          groupValue: feedFilter,
-                                          onChanged: (value) {
-                                            setState(() {
-                                              //arePostsFilteredByFollowedGames = false;
-                                              feedFilter = value;
-                                            });
-                                          }),
-                                      Text(
-                                        'Recent Posts',
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: <Widget>[
-                                      Radio(
-                                          value: 1,
-                                          groupValue: feedFilter,
-                                          onChanged: (value) {
-                                            setState(() {
-                                              //arePostsFilteredByFollowedGames = false;
-                                              feedFilter = value;
-                                            });
-                                          }),
-                                      Text(
-                                        'Followed Gamers',
-                                      ),
-                                      Radio(
-                                          value: 2,
-                                          groupValue: feedFilter,
-                                          onChanged: (value) {
-                                            setState(() {
-                                              //arePostsFilteredByFollowedGames = true;
-                                              feedFilter = value;
-                                            });
-                                          }),
-                                      Text(
-                                        'Followed Games',
-                                      ),
-                                    ],
-                                  ),
-                                  Align(
-                                    alignment: Alignment.bottomRight,
-                                    child: MaterialButton(
-                                      color: MyColors.darkPrimary,
-                                      child: Text('Filter'),
-                                      onPressed: () {
-                                        _setupFeed();
-                                        setState(() {
-                                          isFiltering = false;
-                                          sliverAppBarHeight = 120;
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 8.0),
-                                    child: Divider(
-                                      height: 1,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                ],
+                      padding: const EdgeInsets.only(
+                          left: 10, top: 2, right: 10),
+                      child: Container(
+                        child: Column(
+                          children: <Widget>[
+                            Text(
+                              'Filter by:',
+                              style: TextStyle(fontSize: 18),
+                            ),
+                            Row(
+                              children: <Widget>[
+                                Radio(
+                                    value: 0,
+                                    groupValue: feedFilter,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        //arePostsFilteredByFollowedGames = false;
+                                        feedFilter = value;
+                                      });
+                                    }),
+                                Text(
+                                  'Recent Posts',
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: <Widget>[
+                                Radio(
+                                    value: 1,
+                                    groupValue: feedFilter,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        //arePostsFilteredByFollowedGames = false;
+                                        feedFilter = value;
+                                      });
+                                    }),
+                                Text(
+                                  'Followed Gamers',
+                                ),
+                                Radio(
+                                    value: 2,
+                                    groupValue: feedFilter,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        //arePostsFilteredByFollowedGames = true;
+                                        feedFilter = value;
+                                      });
+                                    }),
+                                Text(
+                                  'Followed Games',
+                                ),
+                              ],
+                            ),
+                            Align(
+                              alignment: Alignment.bottomRight,
+                              child: MaterialButton(
+                                color: MyColors.darkPrimary,
+                                child: Text('Filter'),
+                                onPressed: () {
+                                  _setupFeed();
+                                  setState(() {
+                                    isFiltering = false;
+                                    sliverAppBarHeight = 120;
+                                  });
+                                },
                               ),
                             ),
-                          )
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0),
+                              child: Divider(
+                                height: 1,
+                                color: Colors.white,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    )
                         : Container(),
                     Row(
                       children: <Widget>[
@@ -241,10 +241,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 height: 40,
                                 decoration: BoxDecoration(
                                   borderRadius:
-                                      BorderRadius.all(Radius.circular(20)),
+                                  BorderRadius.all(Radius.circular(20)),
                                   border: Border.all(
                                       color: Constants.currentTheme ==
-                                              AvailableThemes.LIGHT_THEME
+                                          AvailableThemes.LIGHT_THEME
                                           ? MyColors.lightPrimary
                                           : MyColors.darkPrimary,
                                       width: 1),
@@ -259,7 +259,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                         hintStyle: TextStyle(
                                             fontWeight: FontWeight.w400,
                                             color: Constants.currentTheme ==
-                                                    AvailableThemes.LIGHT_THEME
+                                                AvailableThemes.LIGHT_THEME
                                                 ? MyColors.lightPrimary
                                                 : MyColors.darkPrimary)),
                                   ),
@@ -280,7 +280,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       child: DecoratedBox(
                         decoration: BoxDecoration(
                             color: Constants.currentTheme ==
-                                    AvailableThemes.LIGHT_THEME
+                                AvailableThemes.LIGHT_THEME
                                 ? MyColors.lightCardBG
                                 : MyColors.darkLineBreak),
                       ),
@@ -292,62 +292,62 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         children: <Widget>[
                           Expanded(
                               child: CardIconText(
-                            tStyle: TextStyle(fontWeight: FontWeight.bold),
-                            icon: FontAwesome.getIconData("image"),
-                            text: "Image",
-                            color: Constants.currentTheme ==
+                                tStyle: TextStyle(fontWeight: FontWeight.bold),
+                                icon: FontAwesome.getIconData("image"),
+                                text: "Image",
+                                color: Constants.currentTheme ==
                                     AvailableThemes.LIGHT_THEME
-                                ? MyColors.lightBG
-                                : MyColors.darkLineBreak,
-                            ccolor:
+                                    ? MyColors.lightBG
+                                    : MyColors.darkLineBreak,
+                                ccolor:
                                 switchColor(MyColors.lightPrimary, Colors.blue),
-                          )),
+                              )),
                           SizedBox(
                             height: 25,
                             width: 1.0,
                             child: DecoratedBox(
                               decoration: BoxDecoration(
                                   color: Constants.currentTheme ==
-                                          AvailableThemes.LIGHT_THEME
+                                      AvailableThemes.LIGHT_THEME
                                       ? MyColors.lightLineBreak
                                       : MyColors.darkLineBreak),
                             ),
                           ),
                           Expanded(
                               child: CardIconText(
-                            tStyle: TextStyle(fontWeight: FontWeight.bold),
-                            icon: FontAwesome.getIconData("file-video-o"),
-                            text: "Video",
-                            color: Constants.currentTheme ==
+                                tStyle: TextStyle(fontWeight: FontWeight.bold),
+                                icon: FontAwesome.getIconData("file-video-o"),
+                                text: "Video",
+                                color: Constants.currentTheme ==
                                     AvailableThemes.LIGHT_THEME
-                                ? MyColors.lightBG
-                                : MyColors.darkLineBreak,
-                            ccolor: switchColor(
-                                MyColors.lightPrimary, Colors.greenAccent),
-                          )),
+                                    ? MyColors.lightBG
+                                    : MyColors.darkLineBreak,
+                                ccolor: switchColor(
+                                    MyColors.lightPrimary, Colors.greenAccent),
+                              )),
                           SizedBox(
                             height: 25,
                             width: 1.0,
                             child: DecoratedBox(
                               decoration: BoxDecoration(
                                   color: Constants.currentTheme ==
-                                          AvailableThemes.LIGHT_THEME
+                                      AvailableThemes.LIGHT_THEME
                                       ? MyColors.lightLineBreak
                                       : MyColors.darkLineBreak),
                             ),
                           ),
                           Expanded(
                               child: CardIconText(
-                            tStyle: TextStyle(fontWeight: FontWeight.bold),
-                            icon: FontAwesome.getIconData("youtube"),
-                            text: "YouTube",
-                            color: Constants.currentTheme ==
+                                tStyle: TextStyle(fontWeight: FontWeight.bold),
+                                icon: FontAwesome.getIconData("youtube"),
+                                text: "YouTube",
+                                color: Constants.currentTheme ==
                                     AvailableThemes.LIGHT_THEME
-                                ? MyColors.lightBG
-                                : MyColors.darkLineBreak,
-                            ccolor:
+                                    ? MyColors.lightBG
+                                    : MyColors.darkLineBreak,
+                                ccolor:
                                 switchColor(MyColors.lightPrimary, Colors.pink),
-                          )),
+                              )),
                         ],
                       ),
                     ),
@@ -357,7 +357,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       child: DecoratedBox(
                         decoration: BoxDecoration(
                             color: Constants.currentTheme ==
-                                    AvailableThemes.LIGHT_THEME
+                                AvailableThemes.LIGHT_THEME
                                 ? MyColors.lightCardBG
                                 : MyColors.darkLineBreak),
                       ),
@@ -437,12 +437,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _scrollController
       ..addListener(() {
         if (_scrollController.offset >=
-                _scrollController.position.maxScrollExtent &&
+            _scrollController.position.maxScrollExtent &&
             !_scrollController.position.outOfRange) {
           print('reached the bottom');
           nextPosts();
         } else if (_scrollController.offset <=
-                _scrollController.position.minScrollExtent &&
+            _scrollController.position.minScrollExtent &&
             !_scrollController.position.outOfRange) {
           print("reached the top");
         } else {}
@@ -532,7 +532,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _swipeUpSFX == null
         ? null
         : Audio.loadFromByteData(_swipeUpSFX,
-            onComplete: () => setState(() => --_spawnedAudioCount))
+        onComplete: () => setState(() => --_spawnedAudioCount))
       ..play()
       ..dispose();
     setState(() => ++_spawnedAudioCount);

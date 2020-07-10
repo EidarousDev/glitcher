@@ -1,14 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/message_model.dart';
-import 'package:glitcher/models/notification_model.dart';
+import 'package:glitcher/models/notification_model.dart'as notification;
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/services/notification_handler.dart';
+import 'package:glitcher/services/notification_handler.dart' ;
 
 class DatabaseService {
   // This function is used to get the recent posts (unfiltered)
@@ -25,7 +26,7 @@ class DatabaseService {
   //Gets the posts of a certain user
   static Future<List<Post>> getUserPosts(String authorId) async {
     QuerySnapshot postSnapshot = await postsRef
-        .where('owner', isEqualTo: authorId)
+        .where('author', isEqualTo: authorId)
         .orderBy('timestamp', descending: true)
         .limit(10)
         .getDocuments();
@@ -107,7 +108,7 @@ class DatabaseService {
   static Future<List<Post>> getUserNextPosts(
       Timestamp lastVisiblePostSnapShot, String authorId) async {
     QuerySnapshot postSnapshot = await postsRef
-        .where('owner', isEqualTo: authorId)
+        .where('author', isEqualTo: authorId)
         .orderBy('timestamp', descending: true)
         .startAfter([lastVisiblePostSnapShot])
         .limit(10)
@@ -150,13 +151,6 @@ class DatabaseService {
     }
   }
 
-  static addPostToCurrentUserBookmarks(String postId) async {
-    await usersRef
-        .document(Constants.currentUserID)
-        .collection('bookmarks')
-        .add({'post_id': postId, 'timestamp': FieldValue.serverTimestamp()});
-  }
-
   // This function is used to get the recent posts (filtered by followed games)
   static Future<List<Post>> getNextPostsFilteredByFollowedGames(
       Timestamp lastVisiblePostSnapShot) async {
@@ -175,7 +169,7 @@ class DatabaseService {
   static Future<List<Post>> getNextPostsFilteredByFollowing(
       Timestamp lastVisiblePostSnapShot) async {
     QuerySnapshot postSnapshot = await postsRef
-        .where('owner', whereIn: Constants.followingIds)
+        .where('author', whereIn: Constants.followingIds)
         .orderBy('timestamp', descending: true)
         .startAfter([lastVisiblePostSnapShot])
         .limit(10)
@@ -269,7 +263,7 @@ class DatabaseService {
 
   static Future<List<Post>> getPostsFilteredByFollowing() async {
     QuerySnapshot postSnapshot = await postsRef
-        .where('owner', whereIn: Constants.followingIds)
+        .where('author', whereIn: Constants.followingIds)
         .orderBy('timestamp', descending: true)
         .limit(10)
         .getDocuments();
@@ -278,15 +272,15 @@ class DatabaseService {
     return posts;
   }
 
-  static Future<List<Notification>> getNotifications() async {
+  static Future<List<notification.Notification>> getNotifications() async {
     QuerySnapshot notificationSnapshot = await usersRef
         .document(Constants.currentUserID)
         .collection('notifications')
         .orderBy('timestamp', descending: true)
         .limit(10)
         .getDocuments();
-    List<Notification> notifications = notificationSnapshot.documents
-        .map((doc) => Notification.fromDoc(doc))
+    List<notification.Notification> notifications = notificationSnapshot.documents
+        .map((doc) => notification.Notification.fromDoc(doc))
         .toList();
     return notifications;
   }
@@ -564,7 +558,6 @@ class DatabaseService {
   }
 
   static Future<List> searchGames(text) async {
-    print('searching');
     QuerySnapshot gameSnapshot = await gamesRef
         .where('search', arrayContains: text)
         .orderBy('fullName', descending: false)
@@ -588,7 +581,6 @@ class DatabaseService {
 
   static void addReply(
       String postId, String commentId, String replyText) async {
-    print('current user replying ${Constants.currentUserID}');
     await postsRef
         .document(postId)
         .collection('comments')
@@ -680,9 +672,20 @@ class DatabaseService {
 
     List<Post> posts = [];
 
-    postSnapshot.documents.forEach((element) async {
-      posts.add(await getPostWithId(element.documentID));
-    });
+    for(DocumentSnapshot doc in postSnapshot.documents){
+      DocumentSnapshot postDoc =
+      await postsRef.document(doc.documentID).get();
+
+      if (postDoc.exists) {
+        posts.add(await getPostWithId(doc.documentID));
+      } else {
+        hashtagsRef
+            .document(hashtagId)
+            .collection('posts')
+            .document(doc.documentID)
+            .delete();
+      }
+    }
 
     return posts;
   }
@@ -700,9 +703,20 @@ class DatabaseService {
 
     List<Post> posts = [];
 
-    postSnapshot.documents.forEach((element) async {
-      posts.add(await getPostWithId(element.documentID));
-    });
+    for(DocumentSnapshot doc in postSnapshot.documents){
+      DocumentSnapshot postDoc =
+      await postsRef.document(doc.documentID).get();
+
+      if (postDoc.exists) {
+        posts.add(await getPostWithId(doc.documentID));
+      } else {
+        hashtagsRef
+            .document(hashtagId)
+            .collection('posts')
+            .document(doc.documentID)
+            .delete();
+      }
+    }
 
     return posts;
   }
@@ -717,16 +731,29 @@ class DatabaseService {
 
     List<Post> posts = [];
 
-    postSnapshot.documents.forEach((element) async {
-      posts.add(await getPostWithId(element.documentID));
-    });
+    for(DocumentSnapshot doc in postSnapshot.documents){
+      DocumentSnapshot postDoc =
+      await postsRef.document(doc.documentID).get();
 
+      if (postDoc.exists) {
+        Post post = await getPostWithId(doc.documentID);
+
+        posts.add(post);
+      } else {
+        posts.add(Post(id: doc.documentID, authorId: 'deleted'));
+//        usersRef
+//            .document(Constants.currentUserID)
+//            .collection('bookmarks')
+//            .document(doc.documentID)
+//            .delete();
+      }
+    }
     return posts;
   }
 
   static Future<List<Post>> getNextBookmarksPosts(
       Timestamp lastVisiblePostSnapShot) async {
-    QuerySnapshot postSnapshot = await usersRef
+    QuerySnapshot postsSnapshot = await usersRef
         .document(Constants.currentUserID)
         .collection('bookmarks')
         .orderBy('timestamp', descending: true)
@@ -736,9 +763,21 @@ class DatabaseService {
 
     List<Post> posts = [];
 
-    postSnapshot.documents.forEach((element) async {
-      posts.add(await getPostWithId(element.documentID));
-    });
+    for(DocumentSnapshot doc in postsSnapshot.documents){
+      DocumentSnapshot postDoc =
+      await postsRef.document(doc.documentID).get();
+
+      if (postDoc.exists) {
+        posts.add(await getPostWithId(doc.documentID));
+      } else {
+        usersRef
+            .document(Constants.currentUserID)
+            .collection('bookmarks')
+            .document(doc.documentID)
+            .delete();
+      }
+    }
+
 
     return posts;
   }

@@ -14,12 +14,11 @@ class HashtagPostsScreen extends StatefulWidget {
 
   const HashtagPostsScreen(this.hashtag);
   @override
-  _HashtagPostsScreenState createState() => _HashtagPostsScreenState(hashtag);
+  _HashtagPostsScreenState createState() => _HashtagPostsScreenState();
 }
 
 class _HashtagPostsScreenState extends State<HashtagPostsScreen>
     with WidgetsBindingObserver {
-  final Hashtag hashtag;
   User loggedInUser;
   String username;
   String profileImageUrl = '';
@@ -29,7 +28,7 @@ class _HashtagPostsScreenState extends State<HashtagPostsScreen>
 
   ScrollController _scrollController = ScrollController();
 
-  _HashtagPostsScreenState(this.hashtag);
+  _HashtagPostsScreenState();
 
   @override
   Widget build(BuildContext context) {
@@ -42,26 +41,29 @@ class _HashtagPostsScreenState extends State<HashtagPostsScreen>
             _onBackPressed();
           },
         ),
-        title: Text(hashtag.text),
+        title: Text(widget.hashtag.text),
         centerTitle: true,
       ),
-      body: ListView.builder(
-        physics: NeverScrollableScrollPhysics(),
-        scrollDirection: Axis.vertical,
-        itemCount: _posts.length,
-        shrinkWrap: true,
-        itemBuilder: (BuildContext context, int index) {
-          Post post = _posts[index];
-          return FutureBuilder(
-              future: DatabaseService.getUserWithId(post.authorId),
-              builder: (BuildContext context, AsyncSnapshot snapshot) {
-                if (!snapshot.hasData) {
-                  return SizedBox.shrink();
-                }
-                User author = snapshot.data;
-                return PostItem(post: post, author: author);
-              });
-        },
+      body: SingleChildScrollView(
+        controller: _scrollController,
+        child: ListView.builder(
+          physics: NeverScrollableScrollPhysics(),
+          scrollDirection: Axis.vertical,
+          itemCount: _posts.length,
+          shrinkWrap: true,
+          itemBuilder: (BuildContext context, int index) {
+            Post post = _posts[index];
+            return FutureBuilder(
+                future: DatabaseService.getUserWithId(post.authorId),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (!snapshot.hasData) {
+                    return SizedBox.shrink();
+                  }
+                  User author = snapshot.data;
+                  return PostItem(post: post, author: author);
+                });
+          },
+        ),
       ),
     );
   }
@@ -72,7 +74,7 @@ class _HashtagPostsScreenState extends State<HashtagPostsScreen>
 
   _setupFeed() async {
     //print('what\'s happening?');
-    List<Post> posts = await DatabaseService.getHashtagPosts(hashtag.id);
+    List<Post> posts = await DatabaseService.getHashtagPosts(widget.hashtag.id);
     setState(() {
       _posts = posts;
       this.lastVisiblePostSnapShot = posts.last.timestamp;
@@ -83,7 +85,7 @@ class _HashtagPostsScreenState extends State<HashtagPostsScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-
+    print('hashtag: ${widget.hashtag.text}');
     ///Set up listener here
     _scrollController
       ..addListener(() {
@@ -141,7 +143,7 @@ class _HashtagPostsScreenState extends State<HashtagPostsScreen>
 
   void nextHashtagPosts() async {
     var posts = await DatabaseService.getNextHashtagPosts(
-        lastVisiblePostSnapShot, hashtag.id);
+        lastVisiblePostSnapShot, widget.hashtag.id);
     if (posts.length > 0) {
       setState(() {
         posts.forEach((element) => _posts.add(element));

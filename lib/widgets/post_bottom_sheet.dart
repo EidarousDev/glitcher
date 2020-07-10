@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -9,12 +10,12 @@ import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
 
 class PostBottomSheet {
-  Widget postOptionIcon(BuildContext context, Post post) {
+  Widget postOptionIcon(BuildContext context, Post post, String route) {
     return customInkWell(
         radius: BorderRadius.circular(20),
         context: context,
         onPressed: () {
-          _openBottomSheet(context, post);
+          _openBottomSheet(context, post, route);
         },
         child: Container(
           width: 25,
@@ -26,7 +27,8 @@ class PostBottomSheet {
         ));
   }
 
-  void _openBottomSheet(BuildContext context, Post post) async {
+  void _openBottomSheet(BuildContext context, Post post, String route) async {
+    print('route: $route');
     User user = await DatabaseService.getUserWithId(post.authorId);
     bool isMyPost = Constants.currentUserID == post.authorId;
     await showModalBottomSheet(
@@ -45,13 +47,13 @@ class PostBottomSheet {
                 topRight: Radius.circular(20),
               ),
             ),
-            child: _postOptions(context, isMyPost, post, user));
+            child: _postOptions(context, isMyPost, post, user, route));
       },
     );
   }
 
   Widget _postOptions(
-      BuildContext context, bool isMyPost, Post post, User user) {
+      BuildContext context, bool isMyPost, Post post, User user, String route) {
     return Column(
       children: <Widget>[
         Container(
@@ -69,12 +71,20 @@ class PostBottomSheet {
           Icon(Icons.link),
           text: 'Copy link to post',
         ),
+//        route == '/bookmarks' ? _widgetBottomSheetRow(
+//          context,
+//          Icon(FontAwesome.getIconData('bookmark-remove')),
+//          text: 'Unbookmark this post',
+//          onPressed: () {
+//            _bookmarkPost(post.id, context);
+//          },
+//        ) :
         _widgetBottomSheetRow(
           context,
           Icon(Icons.bookmark),
           text: 'Bookmark this post',
           onPressed: () {
-            _bookmarkPost(post.id);
+            _bookmarkPost(post.id, context);
           },
         ),
         !isMyPost
@@ -102,17 +112,11 @@ class PostBottomSheet {
         isMyPost
             ? Container()
             : _widgetBottomSheetRow(
-                context,
-                Icon(Icons.indeterminate_check_box),
-                text: 'Unfollow ${user.username}',
-              ),
-        isMyPost
-            ? Container()
-            : _widgetBottomSheetRow(
-                context,
-                Icon(Icons.volume_mute),
-                text: 'Mute ${user.username}',
-              ),
+                context, Icon(Icons.indeterminate_check_box),
+                text: 'Unfollow ${user.username}', onPressed: () async{
+          unfollowUser(context, user);
+
+        }),
         isMyPost
             ? Container()
             : _widgetBottomSheetRow(
@@ -205,7 +209,46 @@ class PostBottomSheet {
     print('deleting post!');
   }
 
-  void _bookmarkPost(String postId) async {
+  void unfollowUser(BuildContext context, User user) async {
+    await showDialog(
+      context: context,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: new AlertDialog(
+          title: new Text('Are you sure?'),
+          content: new Text('Do you really want to unfollow ${user.username}?'),
+          actions: <Widget>[
+            new GestureDetector(
+              onTap: () =>
+                  // CLose bottom sheet
+                  Navigator.of(context).pop(),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text("NO"),
+              ),
+            ),
+            SizedBox(height: 16),
+            new GestureDetector(
+              onTap: () {
+                DatabaseService.unfollowUser(user.id);
+                Navigator.of(context).pop();
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text("YES"),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    Navigator.of(context).pop();
+    Navigator.of(context).pushReplacementNamed('/home');
+    print('deleting post!');
+  }
+
+  void _bookmarkPost(String postId, BuildContext context) async {
     await DatabaseService.addPostToBookmarks(postId);
+    Navigator.of(context).pop();
   }
 }
