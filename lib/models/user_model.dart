@@ -8,17 +8,19 @@ class User {
   final String email;
   final String description;
   final dynamic online;
+  final int violations;
   final int notificationsNumber;
 
   User(
       {this.id,
-      this.name,
-      this.username,
-      this.profileImageUrl,
-      this.email,
-      this.description,
-      this.online,
-      this.notificationsNumber});
+        this.name,
+        this.username,
+        this.profileImageUrl,
+        this.email,
+        this.description,
+        this.online,
+        this.violations,
+        this.notificationsNumber});
 
   factory User.fromDoc(DocumentSnapshot doc) {
     return User(
@@ -29,6 +31,7 @@ class User {
         email: doc['email'],
         description: doc['description'] ?? '',
         online: doc['online'],
+        violations: doc['violations'],
         notificationsNumber: doc['notificationsNumber']);
   }
 }

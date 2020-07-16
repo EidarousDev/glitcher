@@ -5,6 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/style/theme.dart' as Theme;
@@ -220,10 +221,11 @@ class _LoginPageState extends State<LoginPage>
     Map<String, dynamic> userMap = {
       'username': _username,
       'description': 'Write something about yourself',
-      'notificationsNumber': 0
+      'notificationsNumber': 0,
+      'violations': 0,
     };
 
-    _firestore.collection('users').document(id).setData(userMap);
+    usersRef.document(id).setData(userMap);
   }
 
   Future<bool> isUsernameTaken(String name) async {

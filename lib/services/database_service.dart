@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/game_model.dart';
@@ -571,6 +570,16 @@ class DatabaseService {
   static void addComment(String postId, String commentText) async {
     await postsRef.document(postId).collection('comments').add({
       'commenter': Constants.currentUserID,
+      'text': commentText,
+      'timestamp': FieldValue.serverTimestamp()
+    });
+    await postsRef
+        .document(postId)
+        .updateData({'comments': FieldValue.increment(1)});
+  }
+
+  static void editComment(String postId, String commentId, String commentText) async {
+    await postsRef.document(postId).collection('comments').document(commentId).updateData({
       'text': commentText,
       'timestamp': FieldValue.serverTimestamp()
     });

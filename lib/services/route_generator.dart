@@ -21,9 +21,12 @@ import 'package:glitcher/screens/games/new_game.dart';
 import 'package:glitcher/screens/hashtag_posts_screen.dart';
 import 'package:glitcher/screens/posts/comments/add_comment.dart';
 import 'package:glitcher/screens/posts/comments/add_reply.dart';
+import 'package:glitcher/screens/posts/comments/edit_comment.dart';
 import 'package:glitcher/screens/posts/new_post/create_post.dart';
+import 'package:glitcher/screens/posts/new_post/edit_post.dart';
 import 'package:glitcher/screens/posts/post_preview.dart';
 import 'package:glitcher/screens/profile/profile_screen.dart';
+import 'package:glitcher/screens/report_post_screen.dart';
 import 'package:glitcher/screens/settings.dart';
 import 'package:glitcher/screens/web_browser/in_app_browser.dart';
 import 'package:page_transition/page_transition.dart';
@@ -42,6 +45,9 @@ class RouteGenerator {
 
       case '/new-post':
         return MaterialPageRoute(builder: (_) => CreatePost());
+
+      case '/edit-post':
+        return MaterialPageRoute(builder: (_) => EditPost(post: args['post']));
 
       case '/user-profile':
         return MaterialPageRoute(
@@ -67,6 +73,16 @@ class RouteGenerator {
           builder: (_) => AddComment(
             post: args['post'],
             user: args['user'],
+          ),
+        );
+
+      case '/edit-comment':
+        // Validation of correct data type
+        return MaterialPageRoute(
+          builder: (_) => EditComment(
+            post: args['post'],
+            user: args['user'],
+            comment: args['comment'],
           ),
         );
 
@@ -144,11 +160,15 @@ class RouteGenerator {
         );
       case '/bookmarks':
         return MaterialPageRoute(builder: (_) => BookmarksScreen());
+
       case '/users':
         return MaterialPageRoute(
             builder: (_) => UsersScreen(
                   screenType: args['screen_type'],
                 ));
+
+      case '/report-post':
+        return MaterialPageRoute(builder: (_) => ReportPostScreen(postAuthor: args['post_author'], postId: args['post_id'],));
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

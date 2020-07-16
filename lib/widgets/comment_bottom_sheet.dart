@@ -54,7 +54,7 @@ class CommentBottomSheet {
     );
   }
 
-  Widget _commentOptions(BuildContext context, bool isMyPost, Post post,
+  Widget _commentOptions(BuildContext context, bool isMyComment, Post post,
       Comment comment, Comment parentComment, User user) {
     return Column(
       children: <Widget>[
@@ -68,16 +68,18 @@ class CommentBottomSheet {
             ),
           ),
         ),
-        isMyPost
+        isMyComment
             ? _widgetBottomSheetRow(
                 context,
                 Icon(Icons.edit),
                 text: 'Edit Comment',
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/edit-comment', arguments: {'post': post, 'user': user, 'comment': comment});
+                },
                 isEnable: true,
               )
             : Container(),
-        isMyPost
+        isMyComment
             ? _widgetBottomSheetRow(
                 context,
                 Icon(Icons.delete_forever),
@@ -89,28 +91,28 @@ class CommentBottomSheet {
                 isEnable: true,
               )
             : Container(),
-        isMyPost
+        isMyComment
             ? Container()
             : _widgetBottomSheetRow(
                 context,
                 Icon(Icons.indeterminate_check_box),
                 text: 'Unfollow ${user.username}',
               ),
-        isMyPost
+        isMyComment
             ? Container()
             : _widgetBottomSheetRow(
                 context,
                 Icon(Icons.volume_mute),
                 text: 'Mute ${user.username}',
               ),
-        isMyPost
+        isMyComment
             ? Container()
             : _widgetBottomSheetRow(
                 context,
                 Icon(Icons.block),
                 text: 'Block ${user.username}',
               ),
-        isMyPost
+        isMyComment
             ? Container()
             : _widgetBottomSheetRow(
                 context,

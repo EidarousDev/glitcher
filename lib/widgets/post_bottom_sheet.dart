@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:glitcher/constants/constants.dart';
@@ -87,12 +88,14 @@ class PostBottomSheet {
             _bookmarkPost(post.id, context);
           },
         ),
-        !isMyPost
+        isMyPost
             ? _widgetBottomSheetRow(
                 context,
-                Icon(Icons.android),
-                text: 'Not interested in this',
-                onPressed: () {},
+                Icon(Icons.edit),
+                text: 'Edit this post',
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/edit-post', arguments: {'post': post});
+                },
               )
             : Container(),
         isMyPost
@@ -113,10 +116,9 @@ class PostBottomSheet {
             ? Container()
             : _widgetBottomSheetRow(
                 context, Icon(Icons.indeterminate_check_box),
-                text: 'Unfollow ${user.username}', onPressed: () async{
-          unfollowUser(context, user);
-
-        }),
+                text: 'Unfollow ${user.username}', onPressed: () async {
+                unfollowUser(context, user);
+              }),
         isMyPost
             ? Container()
             : _widgetBottomSheetRow(
@@ -124,13 +126,14 @@ class PostBottomSheet {
                 Icon(Icons.block),
                 text: 'Block ${user.username}',
               ),
-        isMyPost
-            ? Container()
-            : _widgetBottomSheetRow(
-                context,
-                Icon(Icons.report),
-                text: 'Report Post',
-              ),
+//        isMyPost
+//            ? Container()
+//            :
+        _widgetBottomSheetRow(context, Icon(Icons.report), text: 'Report Post',
+            onPressed: () async {
+          Navigator.of(context).pushNamed('/report-post',
+              arguments: {'post_author': post.authorId, 'post_id': post.id});
+        }),
       ],
     );
   }

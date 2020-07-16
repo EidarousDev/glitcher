@@ -184,7 +184,9 @@ class _ChatBubbleState extends State<ChatBubble> {
                                     child: ImageOverlay(
                                       imageUrl: widget.message,
                                       btnText: 'Download',
-                                      btnFunction: () {},
+                                      btnFunction: () {
+                                        //TODO implement download image
+                                      },
                                     ),
                                   ),
                                   context: context);
