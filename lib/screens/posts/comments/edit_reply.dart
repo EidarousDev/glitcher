@@ -21,17 +21,18 @@ import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/custom_url_text.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
 
-class AddReply extends StatefulWidget {
+class EditReply extends StatefulWidget {
   final Post post;
   final Comment comment;
+  final Comment reply;
   final User user;
   final String mention;
 
-  AddReply({Key key, this.post, this.comment, this.user, this.mention}) : super(key: key);
+  EditReply({Key key, this.post, this.comment, this.user, this.mention, this.reply}) : super(key: key);
   _AddReplyPageState createState() => _AddReplyPageState();
 }
 
-class _AddReplyPageState extends State<AddReply> {
+class _AddReplyPageState extends State<EditReply> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isScrollingDown = false;
   ScrollController scrollController;
@@ -239,7 +240,7 @@ class _AddReplyPageState extends State<AddReply> {
   }
 }
 
-class _ComposeTweet extends WidgetView<AddReply, _AddReplyPageState> {
+class _ComposeTweet extends WidgetView<EditReply, _AddReplyPageState> {
   _ComposeTweet(this.viewState) : super(viewState);
 
   final _AddReplyPageState viewState;

@@ -607,6 +607,25 @@ class DatabaseService {
         .updateData({'replies': FieldValue.increment(1)});
   }
 
+  static void editReply(
+      String postId, String commentId, String replyId, String replyText) async {
+    await postsRef
+        .document(postId)
+        .collection('comments')
+        .document(commentId)
+        .collection('replies')
+        .document(replyId)
+        .updateData({
+      'text': replyText,
+      'timestamp': FieldValue.serverTimestamp()
+    });
+    await postsRef
+        .document(postId)
+        .collection('comments')
+        .document(commentId)
+        .updateData({'replies': FieldValue.increment(1)});
+  }
+
   static followGame(String gameId) async {
     DocumentSnapshot gameDocSnapshot = await usersRef
         .document(Constants.currentUserID)

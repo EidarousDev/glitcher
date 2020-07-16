@@ -22,6 +22,7 @@ import 'package:glitcher/screens/hashtag_posts_screen.dart';
 import 'package:glitcher/screens/posts/comments/add_comment.dart';
 import 'package:glitcher/screens/posts/comments/add_reply.dart';
 import 'package:glitcher/screens/posts/comments/edit_comment.dart';
+import 'package:glitcher/screens/posts/comments/edit_reply.dart';
 import 'package:glitcher/screens/posts/new_post/create_post.dart';
 import 'package:glitcher/screens/posts/new_post/edit_post.dart';
 import 'package:glitcher/screens/posts/post_preview.dart';
@@ -148,6 +149,7 @@ class RouteGenerator {
             builder: (_) => HashtagPostsScreen(args['hashtag']));
       case '/settings':
         return MaterialPageRoute(builder: (_) => SettingsScreen());
+
       case '/add-reply':
         // Validation of correct data type
         return MaterialPageRoute(
@@ -158,6 +160,20 @@ class RouteGenerator {
             mention: args['mention'],
           ),
         );
+
+        case '/edit-reply':
+        // Validation of correct data type
+        return MaterialPageRoute(
+          builder: (_) => EditReply(
+            post: args['postId'],
+            comment: args['comment'],
+            reply: args['reply'],
+            user: args['user'],
+            mention: args['mention'],
+          ),
+        );
+
+
       case '/bookmarks':
         return MaterialPageRoute(builder: (_) => BookmarksScreen());
 
