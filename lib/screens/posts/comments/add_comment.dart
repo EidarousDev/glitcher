@@ -199,8 +199,10 @@ class _AddCommentPageState extends State<AddComment> {
                 ),
                 SizedBox(height: 16),
                 new GestureDetector(
-                  onTap: () => Navigator.of(context).pushNamed('/post',
-                      arguments: {'postId': widget.post.id}),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                  },
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text("YES"),

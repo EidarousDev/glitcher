@@ -26,9 +26,8 @@ class EditReply extends StatefulWidget {
   final Comment comment;
   final Comment reply;
   final User user;
-  final String mention;
 
-  EditReply({Key key, this.post, this.comment, this.user, this.mention, this.reply}) : super(key: key);
+  EditReply({Key key, this.post, this.comment, this.user, this.reply}) : super(key: key);
   _AddReplyPageState createState() => _AddReplyPageState();
 }
 
@@ -47,7 +46,7 @@ class _AddReplyPageState extends State<EditReply> {
   bool _showYoutubeUrl = false;
   String _youtubeId;
 
-  bool canSubmit = false;
+  bool canSubmit = true;
 
   @override
   void dispose() {
@@ -65,9 +64,8 @@ class _AddReplyPageState extends State<EditReply> {
 
     super.initState();
 
-    print('Mention reply : ${widget.mention}');
     setState(() {
-      _textEditingController.text = widget.mention;
+      _textEditingController.text = widget.reply.text;
     });
   }
 
@@ -92,15 +90,15 @@ class _AddReplyPageState extends State<EditReply> {
   void _submitButton() async {
     glitcherLoader.showLoader(context);
     if (_textEditingController.text.isNotEmpty) {
-      DatabaseService.addReply(
-          widget.post.id, widget.comment.id, _textEditingController.text);
+      DatabaseService.editReply(
+          widget.post.id, widget.comment.id, widget.reply.id, _textEditingController.text);
 
-      await NotificationHandler.sendNotification(
-          widget.user.id,
-          Constants.loggedInUser.username + ' commented on your post',
-          _textEditingController.text,
-          widget.comment.id,
-          'comment');
+//      await NotificationHandler.sendNotification(
+//          widget.user.id,
+//          Constants.loggedInUser.username + ' commented on your post',
+//          _textEditingController.text,
+//          widget.comment.id,
+//          'comment');
 
       checkIfContainsMention(_textEditingController.text);
 
@@ -144,7 +142,7 @@ class _AddReplyPageState extends State<EditReply> {
         key: _scaffoldKey,
         appBar: AppBar(
           flexibleSpace: gradientAppBar(),
-          title: Text('New Reply'),
+          title: Text('Edit Reply'),
           actions: <Widget>[
             IconButton(
               onPressed: () {

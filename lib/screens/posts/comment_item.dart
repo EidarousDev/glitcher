@@ -167,16 +167,32 @@ class _CommentItemState extends State<CommentItem> {
                     alignment: Alignment.centerRight,
                     child: Padding(
                       padding: const EdgeInsets.only(right: 8),
-                      child: Text(
-                        repliesVisible
-                            ? 'hide replies'
-                            : 'view ${widget.comment.repliesCount} replies',
-                        style: TextStyle(color: MyColors.darkPrimary),
-                      ),
+                      child: (widget.comment.repliesCount != null &&
+                              widget.comment.repliesCount != 0)
+                          ? Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                                !repliesVisible
+                                    ? 'view ${widget.comment.repliesCount} replies'
+                                    : 'hide replies',
+                                style: TextStyle(color: MyColors.darkPrimary),
+                              ),
+                          )
+                          : Container(),
                     ),
                   ),
                 )
               : Container(),
+          SizedBox(
+            height: 1.0,
+            width: double.infinity,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                  color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
+                      ? MyColors.lightLineBreak
+                      : MyColors.darkLineBreak),
+            ),
+          ),
           Container(
             height: Sizes.inline_break,
             color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
@@ -322,7 +338,7 @@ class _CommentItemState extends State<CommentItem> {
                     print('Mention reply : ${widget.commenter.username}');
 
                     Navigator.of(context).pushNamed('/add-reply', arguments: {
-                      'postId': widget.post,
+                      'post': widget.post,
                       'comment': widget.isReply
                           ? widget.parentComment
                           : widget.comment,
@@ -336,17 +352,14 @@ class _CommentItemState extends State<CommentItem> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: SizedBox(
-              height: 1.0,
-              width: double.infinity,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                    color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
-                        ? MyColors.lightLineBreak
-                        : MyColors.darkLineBreak),
-              ),
+          SizedBox(
+            height: 1.0,
+            width: double.infinity,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                  color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
+                      ? MyColors.lightLineBreak
+                      : MyColors.darkLineBreak),
             ),
           ),
           !widget.isReply && repliesVisible

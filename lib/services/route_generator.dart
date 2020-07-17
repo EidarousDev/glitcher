@@ -154,7 +154,7 @@ class RouteGenerator {
         // Validation of correct data type
         return MaterialPageRoute(
           builder: (_) => AddReply(
-            post: args['postId'],
+            post: args['post'],
             comment: args['comment'],
             user: args['user'],
             mention: args['mention'],
@@ -165,11 +165,10 @@ class RouteGenerator {
         // Validation of correct data type
         return MaterialPageRoute(
           builder: (_) => EditReply(
-            post: args['postId'],
+            post: args['post'],
             comment: args['comment'],
             reply: args['reply'],
             user: args['user'],
-            mention: args['mention'],
           ),
         );
 

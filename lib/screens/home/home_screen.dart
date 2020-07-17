@@ -75,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int _spawnedAudioCount = 0;
   ByteData _swipeUpSFX;
   RefreshController _refreshController =
-  RefreshController(initialRefresh: false);
+      RefreshController(initialRefresh: false);
 
   @override
   Widget build(BuildContext context) {
@@ -142,85 +142,85 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   children: <Widget>[
                     isFiltering
                         ? Padding(
-                      padding: const EdgeInsets.only(
-                          left: 10, top: 2, right: 10),
-                      child: Container(
-                        child: Column(
-                          children: <Widget>[
-                            Text(
-                              'Filter by:',
-                              style: TextStyle(fontSize: 18),
-                            ),
-                            Row(
-                              children: <Widget>[
-                                Radio(
-                                    value: 0,
-                                    groupValue: feedFilter,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        //arePostsFilteredByFollowedGames = false;
-                                        feedFilter = value;
-                                      });
-                                    }),
-                                Text(
-                                  'Recent Posts',
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: <Widget>[
-                                Radio(
-                                    value: 1,
-                                    groupValue: feedFilter,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        //arePostsFilteredByFollowedGames = false;
-                                        feedFilter = value;
-                                      });
-                                    }),
-                                Text(
-                                  'Followed Gamers',
-                                ),
-                                Radio(
-                                    value: 2,
-                                    groupValue: feedFilter,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        //arePostsFilteredByFollowedGames = true;
-                                        feedFilter = value;
-                                      });
-                                    }),
-                                Text(
-                                  'Followed Games',
-                                ),
-                              ],
-                            ),
-                            Align(
-                              alignment: Alignment.bottomRight,
-                              child: MaterialButton(
-                                color: MyColors.darkPrimary,
-                                child: Text('Filter'),
-                                onPressed: () {
-                                  _setupFeed();
-                                  setState(() {
-                                    isFiltering = false;
-                                    sliverAppBarHeight = 120;
-                                  });
-                                },
+                            padding: const EdgeInsets.only(
+                                left: 10, top: 2, right: 10),
+                            child: Container(
+                              child: Column(
+                                children: <Widget>[
+                                  Text(
+                                    'Filter by:',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                                  Row(
+                                    children: <Widget>[
+                                      Radio(
+                                          value: 0,
+                                          groupValue: feedFilter,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              //arePostsFilteredByFollowedGames = false;
+                                              feedFilter = value;
+                                            });
+                                          }),
+                                      Text(
+                                        'Recent Posts',
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: <Widget>[
+                                      Radio(
+                                          value: 1,
+                                          groupValue: feedFilter,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              //arePostsFilteredByFollowedGames = false;
+                                              feedFilter = value;
+                                            });
+                                          }),
+                                      Text(
+                                        'Followed Gamers',
+                                      ),
+                                      Radio(
+                                          value: 2,
+                                          groupValue: feedFilter,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              //arePostsFilteredByFollowedGames = true;
+                                              feedFilter = value;
+                                            });
+                                          }),
+                                      Text(
+                                        'Followed Games',
+                                      ),
+                                    ],
+                                  ),
+                                  Align(
+                                    alignment: Alignment.bottomRight,
+                                    child: MaterialButton(
+                                      color: MyColors.darkPrimary,
+                                      child: Text('Filter'),
+                                      onPressed: () {
+                                        _setupFeed();
+                                        setState(() {
+                                          isFiltering = false;
+                                          sliverAppBarHeight = 120;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                    child: Divider(
+                                      height: 1,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                ],
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 8.0),
-                              child: Divider(
-                                height: 1,
-                                color: Colors.white,
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    )
+                          )
                         : Container(),
                     Row(
                       children: <Widget>[
@@ -241,10 +241,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 height: 40,
                                 decoration: BoxDecoration(
                                   borderRadius:
-                                  BorderRadius.all(Radius.circular(20)),
+                                      BorderRadius.all(Radius.circular(20)),
                                   border: Border.all(
                                       color: Constants.currentTheme ==
-                                          AvailableThemes.LIGHT_THEME
+                                              AvailableThemes.LIGHT_THEME
                                           ? MyColors.lightPrimary
                                           : MyColors.darkPrimary,
                                       width: 1),
@@ -259,7 +259,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                         hintStyle: TextStyle(
                                             fontWeight: FontWeight.w400,
                                             color: Constants.currentTheme ==
-                                                AvailableThemes.LIGHT_THEME
+                                                    AvailableThemes.LIGHT_THEME
                                                 ? MyColors.lightPrimary
                                                 : MyColors.darkPrimary)),
                                   ),
@@ -280,7 +280,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       child: DecoratedBox(
                         decoration: BoxDecoration(
                             color: Constants.currentTheme ==
-                                AvailableThemes.LIGHT_THEME
+                                    AvailableThemes.LIGHT_THEME
                                 ? MyColors.lightCardBG
                                 : MyColors.darkLineBreak),
                       ),
@@ -292,62 +292,62 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         children: <Widget>[
                           Expanded(
                               child: CardIconText(
-                                tStyle: TextStyle(fontWeight: FontWeight.bold),
-                                icon: FontAwesome.getIconData("image"),
-                                text: "Image",
-                                color: Constants.currentTheme ==
+                            tStyle: TextStyle(fontWeight: FontWeight.bold),
+                            icon: FontAwesome.getIconData("image"),
+                            text: "Image",
+                            color: Constants.currentTheme ==
                                     AvailableThemes.LIGHT_THEME
-                                    ? MyColors.lightBG
-                                    : MyColors.darkLineBreak,
-                                ccolor:
+                                ? MyColors.lightBG
+                                : MyColors.darkLineBreak,
+                            ccolor:
                                 switchColor(MyColors.lightPrimary, Colors.blue),
-                              )),
+                          )),
                           SizedBox(
                             height: 25,
                             width: 1.0,
                             child: DecoratedBox(
                               decoration: BoxDecoration(
                                   color: Constants.currentTheme ==
-                                      AvailableThemes.LIGHT_THEME
+                                          AvailableThemes.LIGHT_THEME
                                       ? MyColors.lightLineBreak
                                       : MyColors.darkLineBreak),
                             ),
                           ),
                           Expanded(
                               child: CardIconText(
-                                tStyle: TextStyle(fontWeight: FontWeight.bold),
-                                icon: FontAwesome.getIconData("file-video-o"),
-                                text: "Video",
-                                color: Constants.currentTheme ==
+                            tStyle: TextStyle(fontWeight: FontWeight.bold),
+                            icon: FontAwesome.getIconData("file-video-o"),
+                            text: "Video",
+                            color: Constants.currentTheme ==
                                     AvailableThemes.LIGHT_THEME
-                                    ? MyColors.lightBG
-                                    : MyColors.darkLineBreak,
-                                ccolor: switchColor(
-                                    MyColors.lightPrimary, Colors.greenAccent),
-                              )),
+                                ? MyColors.lightBG
+                                : MyColors.darkLineBreak,
+                            ccolor: switchColor(
+                                MyColors.lightPrimary, Colors.greenAccent),
+                          )),
                           SizedBox(
                             height: 25,
                             width: 1.0,
                             child: DecoratedBox(
                               decoration: BoxDecoration(
                                   color: Constants.currentTheme ==
-                                      AvailableThemes.LIGHT_THEME
+                                          AvailableThemes.LIGHT_THEME
                                       ? MyColors.lightLineBreak
                                       : MyColors.darkLineBreak),
                             ),
                           ),
                           Expanded(
                               child: CardIconText(
-                                tStyle: TextStyle(fontWeight: FontWeight.bold),
-                                icon: FontAwesome.getIconData("youtube"),
-                                text: "YouTube",
-                                color: Constants.currentTheme ==
+                            tStyle: TextStyle(fontWeight: FontWeight.bold),
+                            icon: FontAwesome.getIconData("youtube"),
+                            text: "YouTube",
+                            color: Constants.currentTheme ==
                                     AvailableThemes.LIGHT_THEME
-                                    ? MyColors.lightBG
-                                    : MyColors.darkLineBreak,
-                                ccolor:
+                                ? MyColors.lightBG
+                                : MyColors.darkLineBreak,
+                            ccolor:
                                 switchColor(MyColors.lightPrimary, Colors.pink),
-                              )),
+                          )),
                         ],
                       ),
                     ),
@@ -357,7 +357,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       child: DecoratedBox(
                         decoration: BoxDecoration(
                             color: Constants.currentTheme ==
-                                AvailableThemes.LIGHT_THEME
+                                    AvailableThemes.LIGHT_THEME
                                 ? MyColors.lightCardBG
                                 : MyColors.darkLineBreak),
                       ),
@@ -392,7 +392,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           Icons.add,
         ),
         onPressed: () {
-          //(context as Element).rebuild();
           //Navigator.of(context).pushNamed('/new-post');
           updateGames();
         },
@@ -437,12 +436,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _scrollController
       ..addListener(() {
         if (_scrollController.offset >=
-            _scrollController.position.maxScrollExtent &&
+                _scrollController.position.maxScrollExtent &&
             !_scrollController.position.outOfRange) {
           print('reached the bottom');
           nextPosts();
         } else if (_scrollController.offset <=
-            _scrollController.position.minScrollExtent &&
+                _scrollController.position.minScrollExtent &&
             !_scrollController.position.outOfRange) {
           print("reached the top");
         } else {}
@@ -532,7 +531,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _swipeUpSFX == null
         ? null
         : Audio.loadFromByteData(_swipeUpSFX,
-        onComplete: () => setState(() => --_spawnedAudioCount))
+            onComplete: () => setState(() => --_spawnedAudioCount))
       ..play()
       ..dispose();
     setState(() => ++_spawnedAudioCount);
@@ -563,94 +562,111 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
 void updateGames() async {
   String url =
-      'https://api.rawg.io/api/games?dates=2000-01-01,2020-12-31&ordering=-added';
+      'https://api.rawg.io/api/games?dates=2000-01-01%2C2020-12-31&ordering=-added&page=382';
   var response = await http.get(url);
   String body = response.body;
   while (jsonDecode(body)['next'] != null) {
-    try {
-      var response = await http.get(url);
-      //print(url);
-      String body = response.body;
-      List results = jsonDecode(body)['results'];
+    var response = await http.get(url);
+    //print(url);
+    String body = response.body;
+    List results = jsonDecode(body)['results'];
 
-      for (int i = 0; i < results.length; i++) {
-        List genres = [];
-        (results[i]['genres'] as List).forEach((genre) {
-          genres.add(genre['name']);
-        });
+    for (int i = 0; i < results.length; i++) {
+      List genres = [];
+      (results[i]['genres'] as List).forEach((genre) {
+        genres.add(genre['name']);
+      });
 
-        List platforms = [];
+//      List platforms = [];
+//      (results[i]['platforms'] as List).forEach((platform) {
+//        platforms.add(platform['platform']['name']);
+//      });
+
+      List platforms = [];
+      if(results[i]['platforms'] != null){
         (results[i]['platforms'] as List).forEach((platform) {
           platforms.add(platform['platform']['name']);
         });
+      }
+      else{
+      }
 
-        List stores = [];
+      List stores = [];
+      if(results[i]['stores'] != null){
         (results[i]['stores'] as List).forEach((store) {
           stores.add(store['store']['name']);
         });
-
-        List tags = [];
-        (results[i]['tags'] as List).forEach((tag) {
-          tags.add(tag['name']);
-        });
-
-        String detailedUrl =
-            'https://api.rawg.io/api/games/${results[i]['id']}';
-        var detailedResponse = await http.get(detailedUrl);
-        String gameDetailsBody = detailedResponse.body;
-        var gameDetails = jsonDecode(gameDetailsBody);
-
-        List publishers = [];
-        (gameDetails['publishers'] as List).forEach((publisher) {
-          publishers.add(publisher['name']);
-        });
-
-        List developers = [];
-        (gameDetails['developers'] as List).forEach((developer) {
-          developers.add(developer['name']);
-        });
-
-        List search = searchList(results[i]['name']);
-
-        (gameDetails['alternative_names'] as List).forEach((element) {
-          search.addAll(searchList(element));
-        });
-
-        //print(gameDetails['description_raw']);
-        //print(utf8.decode(gameDetails['description_raw'].toString().runes.toList()));
-        print(results[i]['name']);
-        await firestore
-            .collection('games')
-            .document(results[i]['id'].toString())
-            .setData({
-          'fullName': results[i]['name'],
-          'slug': results[i]['slug'],
-          'tba': results[i]['tba'],
-          'release_date': results[i]['released'],
-          'description': utf8
-              .decode(gameDetails['description_raw'].toString().runes.toList()),
-          'website': gameDetails['website'],
-          'reddit_url': gameDetails['reddit_url'],
-          'alternative_names': gameDetails['alternative_names'],
-          'platforms': platforms,
-          'stores': stores,
-          'metacritic': results[i]['metacritic'],
-          'esrb_rating': gameDetails['esrb_rating']['name'],
-          'metacritic_url': gameDetails['metacritic_url'],
-          'genres': genres,
-          'image': results[i]['background_image'],
-          'publishers': publishers,
-          'developers': developers,
-          'timestamp': FieldValue.serverTimestamp(),
-          'search': search
-        });
+      }
+      else{
       }
 
-      url = jsonDecode(body)['next'];
-      print('next url: $url');
-    } catch (ex) {
-      break;
+
+      List tags = [];
+      (results[i]['tags'] as List).forEach((tag) {
+        tags.add(tag['name']);
+      });
+
+      String detailedUrl = 'https://api.rawg.io/api/games/${results[i]['id']}';
+      var detailedResponse = await http.get(detailedUrl);
+      String gameDetailsBody = detailedResponse.body;
+      var gameDetails = jsonDecode(gameDetailsBody);
+
+      List publishers = [];
+      (gameDetails['publishers'] as List).forEach((publisher) {
+        publishers.add(publisher['name']);
+      });
+
+      List developers = [];
+      (gameDetails['developers'] as List).forEach((developer) {
+        developers.add(developer['name']);
+      });
+
+      List search = searchList(results[i]['name']);
+
+      (gameDetails['alternative_names'] as List).forEach((element) {
+        search.addAll(searchList(element));
+      });
+
+      //print(gameDetails['description_raw']);
+      //print(utf8.decode(gameDetails['description_raw'].toString().runes.toList()));
+      print('Game: ${fixString(results[i]['name'])}');
+      await firestore
+          .collection('games')
+          .document(results[i]['id'].toString())
+          .setData({
+        'fullName': fixString(results[i]['name']),
+        'slug': results[i]['slug'],
+        'tba': results[i]['tba'],
+        'release_date': results[i]['released'],
+        'description': fixString(gameDetails['description_raw'].toString()),
+        'website': gameDetails['website'],
+        'reddit_url': gameDetails['reddit_url'],
+        'alternative_names': gameDetails['alternative_names'],
+        'platforms': platforms,
+        'stores': stores,
+        'metacritic': results[i]['metacritic'],
+        'esrb_rating': gameDetails['esrb_rating'] == null ? null :  gameDetails['esrb_rating']['name'],
+        'metacritic_url': gameDetails['metacritic_url'],
+        'genres': genres,
+        'image': results[i]['background_image'],
+        'publishers': publishers,
+        'developers': developers,
+        'timestamp': FieldValue.serverTimestamp(),
+        'search': search
+      });
     }
+
+    url = jsonDecode(body)['next'];
+    print('next url: $url');
+  }
+}
+
+fixString(String s){
+  try{
+    return utf8.decode(s.runes.toList());
+  }
+  catch(ex){
+    return s;
   }
 }
 

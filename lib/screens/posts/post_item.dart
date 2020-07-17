@@ -32,12 +32,12 @@ class PostItem extends StatefulWidget {
   final User author;
   final String route;
 
-  PostItem({
-    Key key,
-    @required this.post,
-    @required this.author,
-    @required this.route
-  }) : super(key: key);
+  PostItem(
+      {Key key,
+      @required this.post,
+      @required this.author,
+      @required this.route})
+      : super(key: key);
   @override
   _PostItemState createState() => _PostItemState();
 }
@@ -78,395 +78,408 @@ class _PostItemState extends State<PostItem> {
 
   _buildPost(Post post, User author) {
     initLikes(post);
-    return GestureDetector(
-      onLongPress: () {
-        onLongPressedPost(context, post.text);
-      },
-      onTap: () {
-        Navigator.of(context).pushNamed('/post',
-            arguments: {'post': post, 'commentsNo': post.commentsCount});
-      },
-      child: Column(
-        children: <Widget>[
-          ListTile(
-            contentPadding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
-            leading: InkWell(
-                child: CacheThisImage(
-                  imageUrl: author.profileImageUrl,
-                  imageShape: BoxShape.circle,
-                  width: Sizes.md_profile_image_w,
-                  height: Sizes.md_profile_image_h,
-                  defaultAssetImage: Strings.default_profile_image,
+    return Column(
+      children: <Widget>[
+        GestureDetector(
+          onTap: () {
+            Navigator.of(context).pushNamed('/post', arguments: {
+              'post': post,
+            });
+          },
+          child: Column(
+            children: [
+              ListTile(
+                contentPadding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+                leading: InkWell(
+                    child: CacheThisImage(
+                      imageUrl: author.profileImageUrl,
+                      imageShape: BoxShape.circle,
+                      width: Sizes.md_profile_image_w,
+                      height: Sizes.md_profile_image_h,
+                      defaultAssetImage: Strings.default_profile_image,
+                    ),
+                    onTap: () {
+                      Navigator.of(context)
+                          .pushNamed('/user-profile', arguments: {
+                        'userId': post.authorId,
+                      });
+                    }),
+                title: Row(
+                  children: <Widget>[
+                    InkWell(
+                      child: Text('@${author.username}' ?? '',
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: MyColors.darkPrimary)),
+                      onTap: () {
+                        Navigator.of(context)
+                            .pushNamed('/user-profile', arguments: {
+                          'userId': author.id,
+                        });
+                      },
+                    ),
+                  ],
                 ),
-                onTap: () {
-                  Navigator.of(context).pushNamed('/user-profile', arguments: {
-                    'userId': post.authorId,
-                  });
-                }),
-            title: Row(
-              children: <Widget>[
-                InkWell(
-                  child: Text('@${author.username}' ?? '',
+                subtitle: InkWell(
+                  child: Text('↳ ${post.game}' ?? '',
                       style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: MyColors.darkPrimary)),
+                        fontSize: 14,
+                        color: MyColors.darkGrey,
+                      )),
                   onTap: () {
-                    Navigator.of(context)
-                        .pushNamed('/user-profile', arguments: {
-                      'userId': author.id,
+                    print('currentGame : ${currentGame.id}');
+                    Navigator.of(context).pushNamed('/game-screen', arguments: {
+                      'game': currentGame,
                     });
                   },
                 ),
-              ],
-            ),
-            subtitle: InkWell(
-              child: Text('↳ ${post.game}' ?? '',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: MyColors.darkGrey,
-                  )),
-              onTap: () {
-                print('currentGame : ${currentGame.id}');
-                Navigator.of(context).pushNamed('/game-screen', arguments: {
-                  'game': currentGame,
-                });
-              },
-            ),
-            trailing: ValueListenableBuilder<int>(
-              valueListenable: number,
-              builder: (context, value, child) {
-                return PostBottomSheet().postOptionIcon(context, post, widget.route);
-              },
-            ),
-          ),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      secondHalf.isEmpty
-                          ? UrlText(
-                              context: context,
-                              text: post.text,
-                              onMentionPressed: (text) =>
-                                  mentionedUserProfile(post.text),
-                              onHashTagPressed: (text) =>
-                                  hashtagScreen(post.text),
-                              style: TextStyle(
-                                color: switchColor(Colors.black, Colors.white),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                              ),
-                              urlStyle: TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.w400),
-                            )
-                          : UrlText(
-                              context: context,
-                              text: flag
-                                  ? (firstHalf + '...')
-                                  : (firstHalf + secondHalf),
-                              onMentionPressed: (text) =>
-                                  mentionedUserProfile(post.text),
-                              onHashTagPressed: (text) =>
-                                  hashtagScreen(post.text),
-                              style: TextStyle(
-                                color: switchColor(Colors.black, Colors.white),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                              ),
-                              urlStyle: TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.w400),
+                trailing: ValueListenableBuilder<int>(
+                  valueListenable: number,
+                  builder: (context, value, child) {
+                    return PostBottomSheet()
+                        .postOptionIcon(context, post, widget.route);
+                  },
+                ),
+              ),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          secondHalf.isEmpty
+                              ? UrlText(
+                                  context: context,
+                                  text: post.text,
+                                  onMentionPressed: (text) =>
+                                      mentionedUserProfile(post.text),
+                                  onHashTagPressed: (text) =>
+                                      hashtagScreen(post.text),
+                                  style: TextStyle(
+                                    color:
+                                        switchColor(Colors.black, Colors.white),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                  urlStyle: TextStyle(
+                                      color: Colors.blue,
+                                      fontWeight: FontWeight.w400),
+                                )
+                              : UrlText(
+                                  context: context,
+                                  text: flag
+                                      ? (firstHalf + '...')
+                                      : (firstHalf + secondHalf),
+                                  onMentionPressed: (text) =>
+                                      mentionedUserProfile(post.text),
+                                  onHashTagPressed: (text) =>
+                                      hashtagScreen(post.text),
+                                  style: TextStyle(
+                                    color:
+                                        switchColor(Colors.black, Colors.white),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                  urlStyle: TextStyle(
+                                      color: Colors.blue,
+                                      fontWeight: FontWeight.w400),
+                                ),
+                          InkWell(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: <Widget>[
+                                secondHalf.isEmpty
+                                    ? Text('')
+                                    : Text(
+                                        flag ? 'Show more' : 'Show less',
+                                        style: TextStyle(
+                                            color: MyColors.darkPrimary),
+                                      )
+                              ],
                             ),
-                      InkWell(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: <Widget>[
-                            secondHalf.isEmpty
-                                ? Text('')
-                                : Text(
-                                    flag ? 'Show more' : 'Show less',
-                                    style:
-                                        TextStyle(color: MyColors.darkPrimary),
-                                  )
-                          ],
-                        ),
-                        onTap: () {
-                          setState(() {
-                            flag = !flag;
-                          });
-                        },
-                      ),
-                      SizedBox(
-                        height: 8.0,
-                      ),
-                      Container(
-                        child: post.imageUrl == null
-                            ? null
-                            : Container(
-                                width: Sizes.home_post_image_w,
-                                height: Sizes.home_post_image_h,
-                                child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: InkWell(
-                                        onTap: () {
-                                          showDialog(
-                                              barrierDismissible: true,
-                                              child: Container(
-                                                width: Sizes.sm_profile_image_w,
-                                                height:
-                                                    Sizes.sm_profile_image_h,
-                                                child: ImageOverlay(
-                                                  imageUrl: post.imageUrl,
-                                                  btnText: Strings.SAVE_IMAGE,
-                                                  btnFunction: () {},
-                                                ),
-                                              ),
-                                              context: context);
-                                        },
-                                        child: CacheThisImage(
-                                          imageUrl: post.imageUrl,
-                                          imageShape: BoxShape.rectangle,
-                                          width: Sizes.home_post_image_w,
-                                          height: Sizes.home_post_image_h,
-                                          defaultAssetImage:
-                                              Strings.default_post_image,
-                                        ))),
-                              ),
-                      ),
-                      Container(
-                        child: post.video == null ? null : playerWidget,
-                      ),
-                      Container(
-                        child:
-                            //TODO: Fix YouTube Player
-                            post.youtubeId == null
+                            onTap: () {
+                              setState(() {
+                                flag = !flag;
+                              });
+                            },
+                          ),
+                          SizedBox(
+                            height: 8.0,
+                          ),
+                          Container(
+                            child: post.imageUrl == null
                                 ? null
-                                : YoutubePlayerBuilder(
-                                    onExitFullScreen: () {
-                                      SystemChrome.setPreferredOrientations(
-                                          DeviceOrientation.values);
-                                    },
-                                    player: YoutubePlayer(
-                                      controller: _youtubeController,
-                                      showVideoProgressIndicator: true,
-                                      bottomActions: [
-                                        CurrentPosition(),
-                                        ProgressBar(isExpanded: true),
-                                        RemainingDuration(),
-                                        FullScreenButton()
-                                      ],
-                                    ),
-                                    builder: (context, player) => player),
+                                : Container(
+                                    width: Sizes.home_post_image_w,
+                                    height: Sizes.home_post_image_h,
+                                    child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                        child: InkWell(
+                                            onTap: () {
+                                              showDialog(
+                                                  barrierDismissible: true,
+                                                  child: Container(
+                                                    width: Sizes
+                                                        .sm_profile_image_w,
+                                                    height: Sizes
+                                                        .sm_profile_image_h,
+                                                    child: ImageOverlay(
+                                                      imageUrl: post.imageUrl,
+                                                      btnText:
+                                                          Strings.SAVE_IMAGE,
+                                                      btnFunction: () {},
+                                                    ),
+                                                  ),
+                                                  context: context);
+                                            },
+                                            child: CacheThisImage(
+                                              imageUrl: post.imageUrl,
+                                              imageShape: BoxShape.rectangle,
+                                              width: Sizes.home_post_image_w,
+                                              height: Sizes.home_post_image_h,
+                                              defaultAssetImage:
+                                                  Strings.default_post_image,
+                                            ))),
+                                  ),
+                          ),
+                          Container(
+                            child: post.video == null ? null : playerWidget,
+                          ),
+                          Container(
+                            child:
+                                //TODO: Fix YouTube Player
+                                post.youtubeId == null
+                                    ? null
+                                    : YoutubePlayerBuilder(
+                                        onExitFullScreen: () {
+                                          SystemChrome.setPreferredOrientations(
+                                              DeviceOrientation.values);
+                                        },
+                                        player: YoutubePlayer(
+                                          controller: _youtubeController,
+                                          showVideoProgressIndicator: true,
+                                          bottomActions: [
+                                            CurrentPosition(),
+                                            ProgressBar(isExpanded: true),
+                                            RemainingDuration(),
+                                            FullScreenButton()
+                                          ],
+                                        ),
+                                        builder: (context, player) => player),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              "${Functions.formatTimestamp(post.timestamp)}",
+                              style: TextStyle(
+                                  fontSize: 13.0,
+                                  color: switchColor(
+                                      MyColors.darkGrey, Colors.white70)),
+                            ),
+                          ),
+                        ],
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Text(
-                          "${Functions.formatTimestamp(post.timestamp)}",
-                          style: TextStyle(
-                              fontSize: 13.0,
-                              color: switchColor(
-                                  MyColors.darkGrey, Colors.white70)),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Container(
+                  width: double.infinity,
+                  height: .5,
                 ),
               ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Container(
-              width: double.infinity,
-              height: .5,
-            ),
+        ),
+        SizedBox(
+          height: 1.0,
+          width: double.infinity,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+                color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
+                    ? MyColors.lightLineBreak
+                    : MyColors.darkLineBreak),
           ),
-          SizedBox(
-            height: 1.0,
-            width: double.infinity,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                  color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
-                      ? MyColors.lightLineBreak
-                      : MyColors.darkLineBreak),
-            ),
-          ),
-          Container(
-            height: Sizes.inline_break,
-            color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
-                ? MyColors.lightCardBG
-                : MyColors.darkCardBG,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                InkWell(
-                  child: Row(
-                    children: <Widget>[
-                      SizedBox(
-                        child: isLiked
-                            ? Icon(
-                                FontAwesome.getIconData('thumbs-up'),
-                                size: Sizes.card_btn_size,
-                                color: MyColors.darkPrimary,
-                              )
-                            : Icon(
-                                FontAwesome.getIconData('thumbs-o-up'),
-                                size: Sizes.card_btn_size,
-                              ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 16.0),
-                        child: Text(
-                          post.likesCount.toString(),
-                        ),
-                      ),
-                    ],
-                  ),
-                  onTap: () async {
-                    if (isLikeEnabled) {
-                      _likeSFX == null
-                          ? null
-                          : Audio.loadFromByteData(_likeSFX,
-                              onComplete: () =>
-                                  setState(() => --_spawnedAudioCount))
-                        ..play()
-                        ..dispose();
-                      setState(() => ++_spawnedAudioCount);
-                      await likeBtnHandler(post);
-                    }
-                  },
-                ),
-                SizedBox(
-                  width: 1.0,
-                  height: Sizes.inline_break,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                        color: Constants.currentTheme ==
-                                AvailableThemes.LIGHT_THEME
-                            ? MyColors.lightInLineBreak
-                            : MyColors.darkLineBreak),
-                  ),
-                ),
-                InkWell(
-                  child: Row(
-                    children: <Widget>[
-                      SizedBox(
-                        child: isDisliked
-                            ? Icon(
-                                FontAwesome.getIconData('thumbs-down'),
-                                size: Sizes.card_btn_size,
-                                color: MyColors.darkPrimary,
-                              )
-                            : Icon(
-                                FontAwesome.getIconData('thumbs-o-down'),
-                                size: Sizes.card_btn_size,
-                              ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 16.0),
-                        child: Text(
-                          post.disLikesCount.toString(),
-                        ),
-                      ),
-                    ],
-                  ),
-                  onTap: () async {
-                    if (isDislikedEnabled) {
-                      _dislikeSFX == null
-                          ? null
-                          : Audio.loadFromByteData(_dislikeSFX,
-                              onComplete: () =>
-                                  setState(() => --_spawnedAudioCount))
-                        ..play()
-                        ..dispose();
-                      setState(() => ++_spawnedAudioCount);
-                      await dislikeBtnHandler(post);
-                    }
-                  },
-                ),
-                SizedBox(
-                  width: 1.0,
-                  height: Sizes.inline_break,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                        color: Constants.currentTheme ==
-                                AvailableThemes.LIGHT_THEME
-                            ? MyColors.lightInLineBreak
-                            : MyColors.darkLineBreak),
-                  ),
-                ),
-                InkWell(
-                  child: Row(
-                    children: <Widget>[
-                      SizedBox(
-                        child: Icon(
-                          Icons.chat_bubble_outline,
-                          size: Sizes.card_btn_size,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 16.0),
-                        child: Text(
-                          post.commentsCount.toString(),
-                        ),
-                      ),
-                    ],
-                  ),
-                  onTap: () {
-                    Navigator.of(context).pushNamed('/post', arguments: {
-                      'post': post,
-                      'commentsNo': post.commentsCount
-                    });
-                  },
-                ),
-                SizedBox(
-                  width: 1.0,
-                  height: Sizes.inline_break,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                        color: Constants.currentTheme ==
-                                AvailableThemes.LIGHT_THEME
-                            ? MyColors.lightInLineBreak
-                            : MyColors.darkLineBreak),
-                  ),
-                ),
-                InkWell(
-                  child: SizedBox(
-                    child: Icon(
-                      Icons.share,
-                      size: Sizes.card_btn_size,
+        ),
+        Container(
+          height: Sizes.inline_break,
+          color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
+              ? MyColors.lightCardBG
+              : MyColors.darkCardBG,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              InkWell(
+                child: Row(
+                  children: <Widget>[
+                    SizedBox(
+                      child: isLiked
+                          ? Icon(
+                              FontAwesome.getIconData('thumbs-up'),
+                              size: Sizes.card_btn_size,
+                              color: MyColors.darkPrimary,
+                            )
+                          : Icon(
+                              FontAwesome.getIconData('thumbs-o-up'),
+                              size: Sizes.card_btn_size,
+                            ),
                     ),
-                  ),
-                  onTap: () async {
-                    await sharePost(post.id, post.text, post.imageUrl);
-                  },
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: Text(
+                        post.likesCount.toString(),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+                onTap: () async {
+                  if (isLikeEnabled) {
+                    _likeSFX == null
+                        ? null
+                        : Audio.loadFromByteData(_likeSFX,
+                            onComplete: () =>
+                                setState(() => --_spawnedAudioCount))
+                      ..play()
+                      ..dispose();
+                    setState(() => ++_spawnedAudioCount);
+                    await likeBtnHandler(post);
+                  }
+                },
+              ),
+              SizedBox(
+                width: 1.0,
+                height: Sizes.inline_break,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                      color:
+                          Constants.currentTheme == AvailableThemes.LIGHT_THEME
+                              ? MyColors.lightInLineBreak
+                              : MyColors.darkLineBreak),
+                ),
+              ),
+              InkWell(
+                child: Row(
+                  children: <Widget>[
+                    SizedBox(
+                      child: isDisliked
+                          ? Icon(
+                              FontAwesome.getIconData('thumbs-down'),
+                              size: Sizes.card_btn_size,
+                              color: MyColors.darkPrimary,
+                            )
+                          : Icon(
+                              FontAwesome.getIconData('thumbs-o-down'),
+                              size: Sizes.card_btn_size,
+                            ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: Text(
+                        post.disLikesCount.toString(),
+                      ),
+                    ),
+                  ],
+                ),
+                onTap: () async {
+                  if (isDislikedEnabled) {
+                    _dislikeSFX == null
+                        ? null
+                        : Audio.loadFromByteData(_dislikeSFX,
+                            onComplete: () =>
+                                setState(() => --_spawnedAudioCount))
+                      ..play()
+                      ..dispose();
+                    setState(() => ++_spawnedAudioCount);
+                    await dislikeBtnHandler(post);
+                  }
+                },
+              ),
+              SizedBox(
+                width: 1.0,
+                height: Sizes.inline_break,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                      color:
+                          Constants.currentTheme == AvailableThemes.LIGHT_THEME
+                              ? MyColors.lightInLineBreak
+                              : MyColors.darkLineBreak),
+                ),
+              ),
+              InkWell(
+                child: Row(
+                  children: <Widget>[
+                    SizedBox(
+                      child: Icon(
+                        Icons.chat_bubble_outline,
+                        size: Sizes.card_btn_size,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
+                      child: Text(
+                        post.commentsCount.toString(),
+                      ),
+                    ),
+                  ],
+                ),
+                onTap: () {
+//                    Navigator.of(context).pushNamed('/post', arguments: {
+//                      'post': post,
+//                      'commentsNo': post.commentsCount
+//                    });
+                  Navigator.of(context).pushNamed('/add-comment', arguments: {
+                    'post': post,
+                    'user': author,
+                  });
+                },
+              ),
+              SizedBox(
+                width: 1.0,
+                height: Sizes.inline_break,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                      color:
+                          Constants.currentTheme == AvailableThemes.LIGHT_THEME
+                              ? MyColors.lightInLineBreak
+                              : MyColors.darkLineBreak),
+                ),
+              ),
+              InkWell(
+                child: SizedBox(
+                  child: Icon(
+                    Icons.share,
+                    size: Sizes.card_btn_size,
+                  ),
+                ),
+                onTap: () async {
+                  await sharePost(post.id, post.text, post.imageUrl);
+                },
+              ),
+            ],
           ),
-          SizedBox(
-            height: 14.0,
-            width: double.infinity,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                  color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
-                      ? MyColors.lightLineBreak
-                      : MyColors.darkLineBreak),
-            ),
+        ),
+        SizedBox(
+          height: 14.0,
+          width: double.infinity,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+                color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
+                    ? MyColors.lightLineBreak
+                    : MyColors.darkLineBreak),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

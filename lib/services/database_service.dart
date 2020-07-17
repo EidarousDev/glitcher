@@ -583,9 +583,6 @@ class DatabaseService {
       'text': commentText,
       'timestamp': FieldValue.serverTimestamp()
     });
-    await postsRef
-        .document(postId)
-        .updateData({'comments': FieldValue.increment(1)});
   }
 
   static void addReply(
@@ -619,11 +616,6 @@ class DatabaseService {
       'text': replyText,
       'timestamp': FieldValue.serverTimestamp()
     });
-    await postsRef
-        .document(postId)
-        .collection('comments')
-        .document(commentId)
-        .updateData({'replies': FieldValue.increment(1)});
   }
 
   static followGame(String gameId) async {

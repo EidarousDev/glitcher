@@ -259,7 +259,7 @@ class _PostPreviewState extends State<PostPreview>
     return Scaffold(
       resizeToAvoidBottomPadding: true,
       appBar: AppBar(
-        title: Text('New Comment'),
+        title: Text('Post Preview'),
         flexibleSpace: gradientAppBar(),
       ),
       body: SmartRefresher(
@@ -281,18 +281,18 @@ class _PostPreviewState extends State<PostPreview>
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(
-          Icons.comment,
-          color: Colors.white70,
-        ),
-        onPressed: () {
-          Navigator.of(context).pushNamed('/add-comment', arguments: {
-            'post': _currentPost,
-            'user': _author,
-          });
-        },
-      ),
+//      floatingActionButton: FloatingActionButton(
+//        child: Icon(
+//          Icons.comment,
+//          color: Colors.white70,
+//        ),
+//        onPressed: () {
+//          Navigator.of(context).pushNamed('/add-comment', arguments: {
+//            'post': _currentPost,
+//            'user': _author,
+//          });
+//        },
+//      ),
     );
   }
 

@@ -74,7 +74,12 @@ class CommentBottomSheet {
                 Icon(Icons.edit),
                 text: 'Edit Comment',
                 onPressed: () {
-                  Navigator.of(context).pushNamed('/edit-comment', arguments: {'post': post, 'user': user, 'comment': comment});
+                  if(parentComment == null){
+                    Navigator.of(context).pushNamed('/edit-comment', arguments: {'post': post, 'user': user, 'comment': comment});
+                  }
+                  else{
+                    Navigator.of(context).pushNamed('/edit-reply', arguments: {'post': post, 'comment': parentComment, 'reply': comment, 'user': user});
+                  }
                 },
                 isEnable: true,
               )
