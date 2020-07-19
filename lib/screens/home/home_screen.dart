@@ -6,10 +6,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_icons/font_awesome.dart';
-import 'package:glitcher/common_widgets/card_icon_text.dart';
-import 'package:glitcher/common_widgets/drawer.dart';
-import 'package:glitcher/common_widgets/gradient_appbar.dart';
-import 'package:glitcher/common_widgets/rate_app.dart';
+import 'file:///D:/Work/FlutterProjects/glitcher/lib/widgets/card_icon_text.dart';
+import 'package:glitcher/widgets/drawer.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
+import 'package:glitcher/widgets/rate_app.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -70,8 +70,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   bool isFiltering = false;
 
-  double sliverAppBarHeight = 120;
-
   int _spawnedAudioCount = 0;
   ByteData _swipeUpSFX;
   RefreshController _refreshController =
@@ -110,11 +108,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             onPressed: () {
               setState(() {
                 isFiltering = !isFiltering;
-                if (isFiltering) {
-                  sliverAppBarHeight = 320;
-                } else {
-                  sliverAppBarHeight = 120;
-                }
               });
 //              PermissionsService().requestContactsPermission(
 //                  onPermissionDenied: () {
@@ -136,7 +129,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Container(
-                height: sliverAppBarHeight,
+                height: 70,
+                //height: 120,//TODO use this if video fixed
                 color: switchColor(MyColors.lightBG, MyColors.darkBG),
                 child: Column(
                   children: <Widget>[
@@ -204,7 +198,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                         _setupFeed();
                                         setState(() {
                                           isFiltering = false;
-                                          sliverAppBarHeight = 120;
                                         });
                                       },
                                     ),
@@ -254,7 +247,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                   child: TextField(
                                     decoration: InputDecoration(
                                         border: InputBorder.none,
-                                        hintText: "What's on your mind?",
+                                        hintText: "Any thoughts?",
                                         enabled: false,
                                         hintStyle: TextStyle(
                                             fontWeight: FontWeight.w400,
@@ -285,72 +278,73 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 : MyColors.darkLineBreak),
                       ),
                     ),
-                    Center(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Expanded(
-                              child: CardIconText(
-                            tStyle: TextStyle(fontWeight: FontWeight.bold),
-                            icon: FontAwesome.getIconData("image"),
-                            text: "Image",
-                            color: Constants.currentTheme ==
-                                    AvailableThemes.LIGHT_THEME
-                                ? MyColors.lightBG
-                                : MyColors.darkLineBreak,
-                            ccolor:
-                                switchColor(MyColors.lightPrimary, Colors.blue),
-                          )),
-                          SizedBox(
-                            height: 25,
-                            width: 1.0,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                  color: Constants.currentTheme ==
-                                          AvailableThemes.LIGHT_THEME
-                                      ? MyColors.lightLineBreak
-                                      : MyColors.darkLineBreak),
-                            ),
-                          ),
-                          Expanded(
-                              child: CardIconText(
-                            tStyle: TextStyle(fontWeight: FontWeight.bold),
-                            icon: FontAwesome.getIconData("file-video-o"),
-                            text: "Video",
-                            color: Constants.currentTheme ==
-                                    AvailableThemes.LIGHT_THEME
-                                ? MyColors.lightBG
-                                : MyColors.darkLineBreak,
-                            ccolor: switchColor(
-                                MyColors.lightPrimary, Colors.greenAccent),
-                          )),
-                          SizedBox(
-                            height: 25,
-                            width: 1.0,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                  color: Constants.currentTheme ==
-                                          AvailableThemes.LIGHT_THEME
-                                      ? MyColors.lightLineBreak
-                                      : MyColors.darkLineBreak),
-                            ),
-                          ),
-                          Expanded(
-                              child: CardIconText(
-                            tStyle: TextStyle(fontWeight: FontWeight.bold),
-                            icon: FontAwesome.getIconData("youtube"),
-                            text: "YouTube",
-                            color: Constants.currentTheme ==
-                                    AvailableThemes.LIGHT_THEME
-                                ? MyColors.lightBG
-                                : MyColors.darkLineBreak,
-                            ccolor:
-                                switchColor(MyColors.lightPrimary, Colors.pink),
-                          )),
-                        ],
-                      ),
-                    ),
+//TODO uncomment after fixing video
+//                    Center(
+//                      child: Row(
+//                        crossAxisAlignment: CrossAxisAlignment.center,
+//                        mainAxisAlignment: MainAxisAlignment.center,
+//                        children: <Widget>[
+//                          Expanded(
+//                              child: CardIconText(
+//                            tStyle: TextStyle(fontWeight: FontWeight.bold),
+//                            icon: FontAwesome.getIconData("image"),
+//                            text: "Image",
+//                            color: Constants.currentTheme ==
+//                                    AvailableThemes.LIGHT_THEME
+//                                ? MyColors.lightBG
+//                                : MyColors.darkLineBreak,
+//                            ccolor:
+//                                switchColor(MyColors.lightPrimary, Colors.blue),
+//                          )),
+//                          SizedBox(
+//                            height: 25,
+//                            width: 1.0,
+//                            child: DecoratedBox(
+//                              decoration: BoxDecoration(
+//                                  color: Constants.currentTheme ==
+//                                          AvailableThemes.LIGHT_THEME
+//                                      ? MyColors.lightLineBreak
+//                                      : MyColors.darkLineBreak),
+//                            ),
+//                          ),
+//                          Expanded(
+//                              child: CardIconText(
+//                            tStyle: TextStyle(fontWeight: FontWeight.bold),
+//                            icon: FontAwesome.getIconData("file-video-o"),
+//                            text: "Video",
+//                            color: Constants.currentTheme ==
+//                                    AvailableThemes.LIGHT_THEME
+//                                ? MyColors.lightBG
+//                                : MyColors.darkLineBreak,
+//                            ccolor: switchColor(
+//                                MyColors.lightPrimary, Colors.greenAccent),
+//                          )),
+//                          SizedBox(
+//                            height: 25,
+//                            width: 1.0,
+//                            child: DecoratedBox(
+//                              decoration: BoxDecoration(
+//                                  color: Constants.currentTheme ==
+//                                          AvailableThemes.LIGHT_THEME
+//                                      ? MyColors.lightLineBreak
+//                                      : MyColors.darkLineBreak),
+//                            ),
+//                          ),
+//                          Expanded(
+//                              child: CardIconText(
+//                            tStyle: TextStyle(fontWeight: FontWeight.bold),
+//                            icon: FontAwesome.getIconData("youtube"),
+//                            text: "YouTube",
+//                            color: Constants.currentTheme ==
+//                                    AvailableThemes.LIGHT_THEME
+//                                ? MyColors.lightBG
+//                                : MyColors.darkLineBreak,
+//                            ccolor:
+//                                switchColor(MyColors.lightPrimary, Colors.pink),
+//                          )),
+//                        ],
+//                      ),
+//                    ),
                     SizedBox(
                       height: 1,
                       width: double.infinity,

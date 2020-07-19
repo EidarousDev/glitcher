@@ -2,12 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/sizes.dart';
-import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
 
 class CreatePostVideo extends StatefulWidget {
   final File video;
   final Function onCrossIconPressed;
-  final playerWidget;
+  final Chewie playerWidget; //Video player
 
   const CreatePostVideo(
       {Key key, this.video, this.playerWidget, this.onCrossIconPressed})
@@ -21,8 +21,6 @@ class CreatePostVideo extends StatefulWidget {
 class _CreatePostVideoState extends State<CreatePostVideo> {
   final File video;
   final Function onCrossIconPressed;
-  VideoPlayerController videoPlayerController;
-  VideoPlayer playerWidget;
 
   _CreatePostVideoState(this.video, this.onCrossIconPressed);
 
@@ -50,7 +48,7 @@ class _CreatePostVideoState extends State<CreatePostVideo> {
                   child: Container(
                       height: 220,
                       width: Sizes.fullWidth(context) * .8,
-                      child: playerWidget),
+                      child: widget.playerWidget),
                 ),
                 Align(
                   alignment: Alignment.topRight,

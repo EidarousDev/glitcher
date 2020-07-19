@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:glitcher/common_widgets/platform_widget.dart';
+import 'package:glitcher/widgets/platform_widget.dart';
 import 'package:glitcher/constants/keys.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';

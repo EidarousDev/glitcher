@@ -79,14 +79,14 @@ class _CreatePostBottomIconWidgetState
                 Icons.camera_alt,
                 color: MyColors.darkPrimary,
               )),
-          IconButton(
-              onPressed: () {
-                setVideo();
-              },
-              icon: Icon(
-                Icons.videocam,
-                color: MyColors.darkPrimary,
-              )),
+//          IconButton(
+//              onPressed: () {
+//                setVideo();
+//              },
+//              icon: Icon(
+//                Icons.videocam,
+//                color: MyColors.darkPrimary,
+//              )),
           Expanded(
               child: Align(
             alignment: Alignment.centerRight,
@@ -134,7 +134,7 @@ class _CreatePostBottomIconWidgetState
 
   void setVideo() async {
     ImagePicker imagePicker = ImagePicker();
-    await imagePicker.getVideo(source: ImageSource.camera).then((value) async {
+    await imagePicker.getVideo(source: ImageSource.gallery).then((value) async {
       print(value.path);
       File file = File(value.path);
       setState(() {

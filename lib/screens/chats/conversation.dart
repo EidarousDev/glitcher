@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:glitcher/common_widgets/gradient_appbar.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/message_model.dart';
@@ -12,10 +12,8 @@ import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/chat_bubble.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
 import 'package:glitcher/constants/sizes.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:random_string/random_string.dart';
 
 class Conversation extends StatefulWidget {

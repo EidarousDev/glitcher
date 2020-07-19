@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:glitcher/common_widgets/rate_app.dart';
+import 'package:glitcher/widgets/rate_app.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/screens/chats/chats.dart';
 import 'package:glitcher/screens/games/games_screen.dart';

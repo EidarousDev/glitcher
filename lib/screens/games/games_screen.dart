@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
-import 'package:glitcher/common_widgets/gradient_appbar.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/screens/games/game_item.dart';

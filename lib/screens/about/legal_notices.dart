@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:glitcher/common_widgets/gradient_appbar.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'dart:async';
 import 'package:webview_media/webview_flutter.dart';

@@ -1,4 +1,4 @@
-import 'package:glitcher/common_widgets/platform_alert_dialog.dart';
+import 'file:///D:/Work/FlutterProjects/glitcher/lib/widgets/platform_alert_dialog.dart';
 import 'package:flutter/services.dart';
 
 class PlatformExceptionAlertDialog extends PlatformAlertDialog {

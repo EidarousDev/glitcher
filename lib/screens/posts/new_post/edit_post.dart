@@ -1,11 +1,12 @@
 import 'dart:io';
 
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
+import 'package:chewie/chewie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
-import 'package:glitcher/common_widgets/gradient_appbar.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -132,8 +133,13 @@ class _CreatePostReplyPageState extends State<EditPost> {
 
         _video = file;
         VideoPlayerController controller =
-            VideoPlayerController.file(File(_video.path));
-        VideoPlayer playerWidget = VideoPlayer(controller);
+        VideoPlayerController.file(File(_video.path));
+        ChewieController chewieController = ChewieController(
+          videoPlayerController: controller,
+          autoPlay: false,
+          looping: false,
+        );
+        Chewie playerWidget = Chewie(controller: chewieController,);
         createPostVideo = CreatePostVideo(
           video: _video,
           playerWidget: playerWidget,
@@ -442,7 +448,7 @@ class _ComposeTweet extends WidgetView<EditPost, _CreatePostReplyPageState> {
                   decoration: InputDecoration(
                       counterText: "",
                       border: InputBorder.none,
-                      hintText: 'What\'s in your mind?'),
+                      hintText: 'Any thoughts?'),
                   style: TextStyle(fontSize: 18),
                 ),
               ),
