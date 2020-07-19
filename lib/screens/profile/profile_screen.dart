@@ -19,6 +19,7 @@ import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
+import 'package:random_string/random_string.dart';
 
 enum ScreenState { to_edit, to_follow, to_save, to_unfollow }
 
@@ -39,10 +40,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   double _coverHeight = 200;
 
   String _descText = 'Description here';
-  String _nameText = 'Username';
+  String _usernameText = 'Username';
+  String _nameText = 'name';
   var _descEditingController = TextEditingController()
     ..text = 'Description here';
-  var _textEditingController = TextEditingController()..text = '';
+  var _usernameEditingController = TextEditingController()..text = '';
+  var _nameEditingController = TextEditingController()..text = '';
 
   String userId;
 
@@ -64,6 +67,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   bool _postsReady = false;
 
+  bool isEditingUsername = false;
   bool isEditingName = false;
   bool isEditingDesc = false;
 
@@ -144,7 +148,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await firestore.collection('users').document(userId).get().then((onValue) {
       setState(() {
         userData = onValue.data;
-        _nameText = onValue.data['username'];
+        _usernameText = onValue.data['username'];
+        _nameText = onValue.data['name'];
         _descText = onValue.data['description'];
         _profileImageUrl = onValue.data['profile_url'];
         _coverImageUrl = onValue.data['cover_url'];
@@ -160,9 +165,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _loading = true;
       _isBtnEnabled = false;
       _descText = _descEditingController.text;
-      _nameText = _textEditingController.text;
+      _usernameText = _usernameEditingController.text;
+      _nameText = _nameEditingController.text;
     });
 
+    userData['username'] = _usernameText;
     userData['name'] = _nameText;
     userData['description'] = _descText;
 
@@ -227,7 +234,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     imageUrl: _coverImageUrl,
                     imageShape: BoxShape.rectangle,
                     width: double.infinity,
-                    height: 400.0,
+                    height: 300.0,
                     defaultAssetImage: Strings.default_profile_image,
                   ),
                 )),
@@ -319,16 +326,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  !isEditingName
+                  !isEditingUsername
                       ? Text(
-                          _nameText,
+                          _usernameText,
                           style: TextStyle(
                               fontSize: 24, fontWeight: FontWeight.bold),
                         )
                       : Container(
                           width: 200,
                           child: TextField(
-                            controller: _textEditingController,
+                            controller: _usernameEditingController,
+                          )),
+                  userId == Constants.currentUserID
+                      ? !isEditingUsername
+                          ? IconButton(
+                              icon: Icon(
+                                Icons.edit,
+                                size: 18,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  isEditingUsername = true;
+                                  _usernameEditingController.text = _usernameText;
+                                });
+                              })
+                          : IconButton(
+                              icon: Icon(
+                                Icons.done,
+                                size: 18,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  isEditingUsername = false;
+                                  _usernameText = _usernameEditingController.text;
+                                });
+
+                                updateUsername();
+                              })
+                      : Container(),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  !isEditingName
+                      ? Text(
+                          _nameText,
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        )
+                      : Container(
+                          width: 200,
+                          child: TextField(
+                            controller: _nameEditingController,
                           )),
                   userId == Constants.currentUserID
                       ? !isEditingName
@@ -340,7 +391,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               onPressed: () {
                                 setState(() {
                                   isEditingName = true;
-                                  _textEditingController.text = _nameText;
+                                  _nameEditingController.text = _nameText;
                                 });
                               })
                           : IconButton(
@@ -351,16 +402,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               onPressed: () {
                                 setState(() {
                                   isEditingName = false;
-                                  _nameText = _textEditingController.text;
+                                  _nameText = _nameEditingController.text;
                                 });
 
                                 updateName();
                               })
                       : Container(),
                 ],
-              ),
-              SizedBox(
-                height: 8,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -374,7 +422,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       : Container(
                           width: 200,
                           child: TextField(
-                            controller: _textEditingController,
+                            controller: _descEditingController,
                           )),
                   userId == Constants.currentUserID
                       ? !isEditingDesc
@@ -386,7 +434,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               onPressed: () {
                                 setState(() {
                                   isEditingDesc = true;
-                                  _textEditingController.text = _descText;
+                                  _descEditingController.text = _descText;
                                 });
                               })
                           : IconButton(
@@ -397,15 +445,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               onPressed: () {
                                 setState(() {
                                   isEditingDesc = false;
-                                  _descText = _textEditingController.text;
+                                  _descText = _descEditingController.text;
                                 });
                                 updateDesc();
                               })
                       : Container(),
                 ],
-              ),
-              SizedBox(
-                height: 8,
               ),
               SizedBox(
                 height: 8,
@@ -511,8 +556,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  updateUsername() async {
+    await usersRef.document(userId).updateData({'username': _usernameText});
+  }
+
   updateName() async {
-    await usersRef.document(userId).updateData({'username': _nameText});
+    await usersRef.document(userId).updateData({'name': _nameText});
   }
 
   updateDesc() async {
@@ -683,8 +732,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               imageFile: _coverImageFile,
               btnText: 'Download',
               btnFunction: () async {
-                //TODO implement download function
-
+                downloadImage(_coverImageUrl, randomAlphaNumeric(20) + '_cover');
                 Navigator.of(context).pop();
               },
             ),
@@ -707,8 +755,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               imageFile: _profileImageFile,
               btnText: 'Download',
               btnFunction: () async {
-                //TODO implement download function
-
+                await downloadImage(_profileImageUrl, randomAlphaNumeric(20) + '_profile');
                 Navigator.of(context).pop();
               },
             ),

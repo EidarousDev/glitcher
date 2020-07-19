@@ -36,7 +36,7 @@ class PostItem extends StatefulWidget {
       {Key key,
       @required this.post,
       @required this.author,
-      @required this.route})
+      this.route})
       : super(key: key);
   @override
   _PostItemState createState() => _PostItemState();
@@ -72,11 +72,11 @@ class _PostItemState extends State<PostItem> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 5),
-      child: _buildPost(widget.post, widget.author),
+      child: _buildPost(widget.post, widget.author, widget.route),
     );
   }
 
-  _buildPost(Post post, User author) {
+  _buildPost(Post post, User author, String route) {
     initLikes(post);
     return Column(
       children: <Widget>[
@@ -138,7 +138,7 @@ class _PostItemState extends State<PostItem> {
                   valueListenable: number,
                   builder: (context, value, child) {
                     return PostBottomSheet()
-                        .postOptionIcon(context, post, widget.route);
+                        .postOptionIcon(context, post, route);
                   },
                 ),
               ),
@@ -268,7 +268,7 @@ class _PostItemState extends State<PostItem> {
                                             CurrentPosition(),
                                             ProgressBar(isExpanded: true),
                                             RemainingDuration(),
-                                            FullScreenButton()
+                                            //FullScreenButton()
                                           ],
                                         ),
                                         builder: (context, player) => player),
@@ -787,7 +787,6 @@ class _PostItemState extends State<PostItem> {
   }
 
   Future mentionedUserProfile(String w) async {
-    //TODO: Implement Mentioned user profile - Get UID from string then pass it to the navigator
     var words = w.split(' ');
     String username =
         words.length > 0 && words[words.length - 1].startsWith('@')
@@ -802,7 +801,6 @@ class _PostItemState extends State<PostItem> {
   }
 
   Future hashtagScreen(String w) async {
-    //TODO: Implement Mentioned user profile - Get UID from string then pass it to the navigator
     var words = w.split(' ');
     String hashtagText =
         words.length > 0 && words[words.length - 1].startsWith('#')

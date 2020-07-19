@@ -29,6 +29,7 @@ import 'package:glitcher/screens/posts/post_preview.dart';
 import 'package:glitcher/screens/profile/profile_screen.dart';
 import 'package:glitcher/screens/report_post_screen.dart';
 import 'package:glitcher/screens/settings.dart';
+import 'package:glitcher/screens/suggestion_screen.dart';
 import 'package:glitcher/screens/web_browser/in_app_browser.dart';
 import 'package:page_transition/page_transition.dart';
 
@@ -184,6 +185,9 @@ class RouteGenerator {
 
       case '/report-post':
         return MaterialPageRoute(builder: (_) => ReportPostScreen(postAuthor: args['post_author'], postId: args['post_id'],));
+
+      case '/suggestion':
+        return MaterialPageRoute(builder: (_) => SuggestionScreen(initialTitle: args['initial_title'], initialDetails: args['initial_details'], gameId: args['game_id'],));
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

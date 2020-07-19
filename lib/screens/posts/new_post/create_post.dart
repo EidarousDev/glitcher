@@ -488,6 +488,7 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                         color: MyColors.darkGrey,
                       ),
                       hintText: 'Enter Game name')),
+
               suggestionsCallback: (pattern) {
                 return DatabaseService.searchGames(pattern);
               },

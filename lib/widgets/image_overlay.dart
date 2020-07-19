@@ -46,7 +46,7 @@ imageOverlay(
       ),
       actions: <Widget>[
         PopupMenuButton<String>(
-          onSelected: handleClick,
+          onSelected: (s) => btnFunction(),
           itemBuilder: (BuildContext context) {
             return {btnText ?? ''}.map((String choice) {
               return PopupMenuItem<String>(
@@ -67,10 +67,7 @@ imageOverlay(
 }
 
 void handleClick(String value) {
-  switch (value) {
-    case (Strings.SAVE_IMAGE):
-      break;
-  }
+
 }
 
 Future<bool> _onBackPressed() {}

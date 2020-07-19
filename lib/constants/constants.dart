@@ -13,6 +13,7 @@ final storageRef = FirebaseStorage.instance.ref();
 final postsRef = firestore.collection('posts');
 final usersRef = firestore.collection('users');
 final reportsRef = firestore.collection('reports');
+final suggestionsRef = firestore.collection('suggestions');
 final chatsRef = firestore.collection('chats');
 final gamesRef = firestore.collection('games');
 final hashtagsRef = firestore.collection('hashtags');

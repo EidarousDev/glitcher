@@ -910,7 +910,6 @@ class _CommentItemState extends State<CommentItem> {
   }
 
   mentionedUserProfile(String w) async {
-    //TODO: Implement Mentioned user profile - Get UID from string then pass it to the navigator
     String username = w.substring(1);
     User user = await DatabaseService.getUserWithUsername(username);
     Navigator.of(context)

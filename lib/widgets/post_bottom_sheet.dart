@@ -72,14 +72,16 @@ class PostBottomSheet {
           Icon(Icons.link),
           text: 'Copy link to post',
         ),
-//        route == '/bookmarks' ? _widgetBottomSheetRow(
+        route == '/bookmarks'
+          ?
+//          _widgetBottomSheetRow(
 //          context,
 //          Icon(FontAwesome.getIconData('bookmark-remove')),
 //          text: 'Unbookmark this post',
 //          onPressed: () {
-//            _bookmarkPost(post.id, context);
 //          },
-//        ) :
+    Container()
+         :
         _widgetBottomSheetRow(
           context,
           Icon(Icons.bookmark),

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/screens/chats/audio_message_player.dart';
 import 'package:glitcher/utils/functions.dart';
+import 'package:random_string/random_string.dart';
 
 import 'image_overlay.dart';
 
@@ -185,7 +186,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                                       imageUrl: widget.message,
                                       btnText: 'Download',
                                       btnFunction: () {
-                                        //TODO implement download image
+                                        downloadImage(widget.message, randomAlphaNumeric(20));
                                       },
                                     ),
                                   ),

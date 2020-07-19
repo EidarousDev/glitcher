@@ -10,9 +10,11 @@ import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/constants.dart';
@@ -34,6 +36,21 @@ void setTheme(BuildContext context) async {
 Future getTheme() async {
   SharedPreferences preferences = await SharedPreferences.getInstance();
   return preferences.getString('theme');
+}
+
+downloadImage(String url, String id) async {
+  var response = await get(url);
+  //var documentDirectory = await getApplicationSupportDirectory();
+  //var firstPath = documentDirectory.path + "/Glitcher";
+  //var filePathAndName = documentDirectory.path + '/Glitcher/$id.jpg';
+
+  var firstPath = '/sdcard/download/';
+  var filePathAndName = firstPath + '$id.jpg';
+  //await Directory(firstPath).create(recursive: true);
+  File file2 = new File(filePathAndName);
+  file2.writeAsBytesSync(response.bodyBytes);
+
+  //return File(filePathAndName);
 }
 
 void setFavouriteFilter(BuildContext context, int favouriteFilter) async {

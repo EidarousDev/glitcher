@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:glitcher/common_widgets/gradient_appbar.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/screens/games/game_item.dart';
 import 'package:glitcher/services/database_service.dart';
@@ -31,15 +32,17 @@ class _GamesScreenState extends State<GamesScreen> {
         ),
         onPressed: () async {
           //Navigator.of(context).pushNamed('/new-game');
+//
+//          final Email email = Email(
+//            body: 'ARK Survival evolved.',
+//            subject: 'Game suggestion',
+//            recipients: ['ahmednab93@gmail.com'],
+//            isHTML: false,
+//          );
 
-          final Email email = Email(
-            body: 'ARK Survival evolved.',
-            subject: 'Game suggestion',
-            recipients: ['ahmednab93@gmail.com'],
-            isHTML: false,
-          );
+//          await FlutterEmailSender.send(email);
 
-          await FlutterEmailSender.send(email);
+        Navigator.of(context).pushNamed('/suggestion', arguments: {'initial_title': 'New game suggestion', 'initial_details': 'I (${Constants.loggedInUser.username}) suggest adding the following game: '});
           Functions.showInSnackBar(context, _scaffoldKey, "Suggestion sent ");
         },
       ),

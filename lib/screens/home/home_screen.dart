@@ -577,11 +577,6 @@ void updateGames() async {
         genres.add(genre['name']);
       });
 
-//      List platforms = [];
-//      (results[i]['platforms'] as List).forEach((platform) {
-//        platforms.add(platform['platform']['name']);
-//      });
-
       List platforms = [];
       if(results[i]['platforms'] != null){
         (results[i]['platforms'] as List).forEach((platform) {

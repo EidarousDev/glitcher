@@ -26,7 +26,6 @@ class GameScreen extends StatefulWidget {
 class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   _GameScreenState({this.game});
 
-  User loggedInUser;
   Game game;
   String username;
   String profileImageUrl = '';
@@ -210,10 +209,11 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(
-          Icons.add,
+          Icons.email,
         ),
         onPressed: () {
-          Navigator.of(context).pushNamed('/new-post');
+          Navigator.of(context).pushNamed('/suggestion', arguments: {'initial_title': '${game.fullName} edit suggestion',
+            'initial_details': 'I (${Constants.loggedInUser.username}) suggest the following edit:', 'game_id': game.id});
         },
       ),
       drawer: BuildDrawer(),
@@ -250,7 +250,6 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
           print("reached the top");
         } else {}
       });
-    loadUserData();
     _setupFeed();
   }
 
@@ -278,18 +277,6 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     }
   }
 
-  void loadUserData() async {
-    currentUser = await auth.currentUser();
-    //print('currentUserID: ${currentUser.uid}');
-    // here you write the codes to input the data into firestore
-    loggedInUser = await DatabaseService.getUserWithId(currentUser.uid);
-
-    setState(() {
-      profileImageUrl = loggedInUser.profileImageUrl;
-      username = loggedInUser.username;
-      print('profileImageUrl = $profileImageUrl and username = $username');
-    });
-  }
 
   void nextGamePosts() async {
     var posts = await DatabaseService.getNextGamePosts(

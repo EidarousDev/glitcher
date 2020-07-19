@@ -117,13 +117,13 @@ class CommentBottomSheet {
                 Icon(Icons.block),
                 text: 'Block ${user.username}',
               ),
-        isMyComment
-            ? Container()
-            : _widgetBottomSheetRow(
-                context,
-                Icon(Icons.report),
-                text: 'Report Post',
-              ),
+//        isMyComment
+//            ? Container()
+//            : _widgetBottomSheetRow(
+//                context,
+//                Icon(Icons.report),
+//                text: 'Report Post',
+//              ),
       ],
     );
   }
