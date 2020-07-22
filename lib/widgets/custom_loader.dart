@@ -48,7 +48,7 @@ class CustomLoader {
     }
   }
 
-  buildLoader(BuildContext context, {height = 100, width = 100}) {
+  buildLoader(BuildContext context, {height = 100.0, width = 100.0}) {
     return Center(
         child: Image.asset(
           'assets/images/glitcher_loader.gif',
