@@ -8,6 +8,7 @@ import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
+import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:math' show Random;
@@ -68,6 +69,8 @@ class _GroupDetailsState extends State<GroupDetails>
                   child: IconButton(
                     icon: Icon(Icons.edit),
                     onPressed: () async{
+                      ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
+                      bottomSheet.optionIcon(context);
                       File image = await AppUtil.chooseImage();
                       showDialog(
                           barrierDismissible: true,

@@ -9,7 +9,7 @@ import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/screens/posts/post_item.dart';
+import 'file:///D:/Work/FlutterProjects/glitcher/lib/list_items/post_item.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/functions.dart';

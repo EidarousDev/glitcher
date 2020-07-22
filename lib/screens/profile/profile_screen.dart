@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
 import 'package:glitcher/widgets/circular_clipper.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
@@ -11,7 +12,7 @@ import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/screens/posts/post_item.dart';
+import 'file:///D:/Work/FlutterProjects/glitcher/lib/list_items/post_item.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/Loader.dart';
@@ -547,7 +548,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         _loading
-            ? LoaderTwo()
+            ? Center(
+            child: Image.asset(
+              'assets/images/glitcher_loader.gif',
+              height: 250,
+              width: 250,
+            ))
             : Container(
                 width: 0,
                 height: 0,
@@ -620,7 +626,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   coverEdit() async {
     if (_coverImageUrl == null && _coverImageFile == null) {
-      File image = await AppUtil.chooseImage();
+      ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
+      await bottomSheet.openBottomSheet(context);
+      File image = await AppUtil.chooseImage(source: bottomSheet.choice);
       setState(() {
         _coverImageFile = image;
         _coverImageUrl = null;
@@ -644,7 +652,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             imageFile: _coverImageFile,
             btnText: 'Edit',
             btnFunction: () async {
-              File image = await AppUtil.chooseImage();
+              ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
+              await bottomSheet.openBottomSheet(context);
+              File image = await AppUtil.chooseImage(source: bottomSheet.choice);
               setState(() {
                 _coverImageFile = image;
                 _coverImageUrl = null;
@@ -670,7 +680,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   profileEdit() async {
     if (_profileImageUrl == null && _profileImageFile == null) {
-      File image = await AppUtil.chooseImage();
+      ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
+      bottomSheet.openBottomSheet(context);
+      File image = await AppUtil.chooseImage(source: bottomSheet.choice);
       setState(() {
         _profileImageFile = image;
         _profileImageUrl = null;
@@ -694,7 +706,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             imageFile: _profileImageFile,
             btnText: 'Edit',
             btnFunction: () async {
-              File image = await AppUtil.chooseImage();
+              ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
+              await bottomSheet.openBottomSheet(context);
+              File image = await AppUtil.chooseImage(source: bottomSheet.choice);
               setState(() {
                 _profileImageFile = image;
                 _profileImageUrl = null;

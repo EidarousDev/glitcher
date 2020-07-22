@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -17,17 +18,17 @@ class AudioMessagePlayer extends StatefulWidget {
   AudioMessagePlayer({Key key, @required this.url}) : super(key: key);
 
   @override
-  _AudioMessagePlayerState createState() => _AudioMessagePlayerState(this.url);
+  _AudioMessagePlayerState createState() => _AudioMessagePlayerState();
 }
 
 class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
-  String url;
-  _AudioMessagePlayerState(this.url);
+  _AudioMessagePlayerState();
 
-  Duration duration;
+  Duration _duration;
   Duration position;
 
-  AudioPlayer audioPlayer = AudioPlayer();
+  AudioPlayer advancedPlayer = AudioPlayer();
+  AudioCache audioCache;
 
   String localFilePath;
 
@@ -37,7 +38,7 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
   get isPaused => playerState == AudioPlayerState.PAUSED;
 
   get durationText =>
-      duration != null ? duration.toString().split('.').first : '';
+      _duration != null ? _duration.toString().split('.').first : '';
 
   get positionText =>
       position != null ? position.toString().split('.').first : '';
@@ -57,88 +58,77 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
   void dispose() {
     //_positionSubscription.cancel();
     //_audioPlayerStateSubscription.cancel();
-    audioPlayer.stop();
+    advancedPlayer.stop();
     super.dispose();
   }
 
   void initAudioPlayer() {
-    audioPlayer = AudioPlayer();
-
-    _positionSubscription =
-        audioPlayer.onAudioPositionChanged.listen((Duration p) {
-      //print('Current position: $p');
-      setState(() => position = p);
+    advancedPlayer = AudioPlayer();
+    audioCache = AudioCache(fixedPlayer: advancedPlayer);
+    advancedPlayer.durationHandler = (d) => setState((){
+     _duration = d;
     });
 
-    _audioPlayerStateSubscription =
-        audioPlayer.onPlayerStateChanged.listen((AudioPlayerState s) {
-      // print('Current player state: $s');
-      if (mounted) setState(() => playerState = s);
+    advancedPlayer.positionHandler = (p) => setState((){
+     position = p;
     });
 
-    audioPlayer.onDurationChanged.listen((Duration d) {
-      //print('Max duration: $d');
-      setState(() => duration = d);
-    });
 
-    audioPlayer.onPlayerCompletion.listen((event) {
-      setState(() {
-        position = duration;
-        playerState = AudioPlayerState.STOPPED;
-      });
-    });
-
-    audioPlayer.onPlayerError.listen((msg) {
-      print('audioPlayer error : $msg');
-      setState(() {
-        playerState = AudioPlayerState.STOPPED;
-        duration = Duration(seconds: 0);
-        position = Duration(seconds: 0);
-      });
-    });
-//    _positionSubscription = audioPlayer.onAudioPositionChanged
-//        .listen((p) => setState(() => position = p));
-
+//    _positionSubscription =
+//        advancedPlayer.onAudioPositionChanged.listen((Duration p) {
+//      //print('Current position: $p');
+//      setState(() => position = p);
+//    });
+//
 //    _audioPlayerStateSubscription =
-//        audioPlayer.onPlayerStateChanged.listen((s) {
-//      if (s == AudioPlayerState.PLAYING) {
-//        setState(() => duration = audioPlayer.duration);
-//      } else if (s == AudioPlayerState.STOPPED) {
-//        onComplete();
-//        setState(() {
-//          position = duration;
-//        });
-//      }
-//    }, onError: (msg) {
+//        advancedPlayer.onPlayerStateChanged.listen((AudioPlayerState s) {
+//      // print('Current player state: $s');
+//      if (mounted) setState(() => playerState = s);
+//    });
+//
+//    advancedPlayer.onDurationChanged.listen((Duration d) {
+//      //print('Max duration: $d');
+//      setState(() => _duration = d);
+//    });
+//
+//    advancedPlayer.onPlayerCompletion.listen((event) {
 //      setState(() {
-//        playerState = PlayerState.stopped;
-//        duration = Duration(seconds: 0);
+//        position = _duration;
+//        playerState = AudioPlayerState.STOPPED;
+//      });
+//    });
+//
+//    advancedPlayer.onPlayerError.listen((msg) {
+//      print('audioPlayer error : $msg');
+//      setState(() {
+//        playerState = AudioPlayerState.STOPPED;
+//        _duration = Duration(seconds: 0);
 //        position = Duration(seconds: 0);
 //      });
 //    });
+
   }
 
   Future play() async {
-    initAudioPlayer();
-    print('audio url: ${this.url}');
-    await audioPlayer.play(this.url);
+    //print('audio url: ${widget.url}');
+    await advancedPlayer.play(widget.url);
     setState(() {
       playerState = AudioPlayerState.PLAYING;
     });
   }
 
   Future _playLocal() async {
-    await audioPlayer.play(localFilePath, isLocal: true);
+    await advancedPlayer.play(localFilePath, isLocal: true);
     setState(() => playerState = AudioPlayerState.PLAYING);
   }
 
   Future pause() async {
-    await audioPlayer.pause();
+    await advancedPlayer.pause();
     setState(() => playerState = AudioPlayerState.PAUSED);
   }
 
   Future stop() async {
-    await audioPlayer.stop();
+    await advancedPlayer.stop();
     setState(() {
       playerState = AudioPlayerState.STOPPED;
       position = Duration();
@@ -159,7 +149,7 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
   }
 
   Future _loadFile() async {
-    final bytes = await _loadFileBytes(this.url,
+    final bytes = await _loadFileBytes(widget.url,
         onError: (Exception exception) =>
             print('_loadFile => exception $exception'));
 
@@ -189,7 +179,7 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
                   icon: Icon(Icons.pause),
                   color: Colors.cyan,
                 ),
-          duration == null
+          _duration == null
               ? Container()
               : SliderTheme(
                   data: SliderTheme.of(context).copyWith(
@@ -198,11 +188,11 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
                     overlayShape: RoundSliderOverlayShape(overlayRadius: 12.0),
                   ),
                   child: Slider(
-                      value: position?.inMilliseconds?.toDouble() ?? 0.0,
+                      value: position?.inSeconds?.toDouble() ?? 0.0,
                       onChanged: (double value) =>
-                          audioPlayer.seek(Duration(seconds: value ~/ 1000)),
+                          advancedPlayer.seek(Duration(seconds: value ~/ 1000)),
                       min: 0.0,
-                      max: duration.inMilliseconds.toDouble()),
+                      max: _duration.inSeconds.toDouble()),
                 ),
         ]),
       );
@@ -214,7 +204,7 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
         child: CircularProgressIndicator(
           value: position != null && position.inMilliseconds > 0
               ? (position?.inMilliseconds?.toDouble() ?? 0.0) /
-                  (duration?.inMilliseconds?.toDouble() ?? 0.0)
+                  (_duration?.inMilliseconds?.toDouble() ?? 0.0)
               : 0.0,
           valueColor: AlwaysStoppedAnimation(Colors.cyan),
           backgroundColor: Colors.grey.shade400,
@@ -223,7 +213,7 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
       Text(
         position != null
             ? "${positionText ?? ''} / ${durationText ?? ''}"
-            : duration != null ? durationText : '',
+            : _duration != null ? durationText : '',
         style: TextStyle(fontSize: 16.0),
       )
     ]);

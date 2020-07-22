@@ -3,7 +3,7 @@ import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/models/game_model.dart';
-import 'package:glitcher/screens/games/game_item.dart';
+import 'file:///D:/Work/FlutterProjects/glitcher/lib/list_items/game_item.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
 
@@ -51,8 +51,8 @@ class _GamesScreenState extends State<GamesScreen> {
             builder: (context) => Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: InkWell(
-                    onTap: () => Scaffold.of(context).openDrawer(),
-                    child: Icon(IconData(58311, fontFamily: 'MaterialIcons')),
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Icon(Icons.arrow_back),
                   ),
                 )),
         title: Text("Games"),

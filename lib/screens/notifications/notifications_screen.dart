@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/screens/notifications/notification_item.dart';
+import 'file:///D:/Work/FlutterProjects/glitcher/lib/list_items/notification_item.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/models/notification_model.dart' as notification_model;
 

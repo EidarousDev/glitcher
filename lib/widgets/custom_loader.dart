@@ -48,16 +48,13 @@ class CustomLoader {
     }
   }
 
-  buildLoader(BuildContext context, {Color backgroundColor}) {
-    if (backgroundColor == null) {
-      backgroundColor = const Color(0xffa8a8a8).withOpacity(.5);
-    }
-    var height = 150.0;
-    return CustomScreenLoader(
-      height: height,
-      width: height,
-      backgroundColor: backgroundColor,
-    );
+  buildLoader(BuildContext context, {height = 100, width = 100}) {
+    return Center(
+        child: Image.asset(
+          'assets/images/glitcher_loader.gif',
+          height: height,
+          width: width,
+        ));
   }
 }
 

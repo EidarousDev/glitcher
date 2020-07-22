@@ -212,7 +212,12 @@ class _NewGameState extends State<NewGame> {
         children: <Widget>[
           _buildWidget(),
           _loading
-              ? LoaderTwo()
+              ? Center(
+              child: Image.asset(
+                'assets/images/glitcher_loader.gif',
+                height: 250,
+                width: 250,
+              ))
               : Container(
                   width: 0,
                   height: 0,

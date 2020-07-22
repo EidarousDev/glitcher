@@ -9,9 +9,12 @@ import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/services/audio_recorder.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/app_util.dart';
+import 'package:glitcher/utils/functions.dart';
+import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
 import 'package:glitcher/widgets/chat_bubble.dart';
 import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
@@ -24,19 +27,22 @@ import 'package:random_string/random_string.dart';
 
 class GroupConversation extends StatefulWidget {
   final String groupId;
-
+  final _GroupConversationState state = _GroupConversationState();
   GroupConversation({this.groupId});
 
   @override
-  _GroupConversationState createState() =>
-      _GroupConversationState(groupId: groupId);
+  _GroupConversationState createState() => state;
+
+  updateRecordTime(String recordTime) {
+    print('recordTime: $recordTime');
+    state.updateRecordTime(recordTime);
+  }
 }
 
 class _GroupConversationState extends State<GroupConversation>
     with WidgetsBindingObserver {
   Timestamp firstVisibleGameSnapShot;
   String messageText;
-
   List<Message> _messages;
 
   TextEditingController messageController = TextEditingController();
@@ -48,7 +54,6 @@ class _GroupConversationState extends State<GroupConversation>
 
   ScrollController _scrollController = ScrollController();
 
-  String groupId;
   Group group;
 
   Map<String, User> usersMap = {};
@@ -59,12 +64,14 @@ class _GroupConversationState extends State<GroupConversation>
 
   bool _typing = false;
 
-  FlutterAudioRecorder recorder;
-
   String recordTime;
   final formatter = new NumberFormat("##");
 
-  _GroupConversationState({this.groupId});
+  var _currentStatus;
+
+  AudioRecorder recorder;
+
+  _GroupConversationState();
 
   Future<String> _localPath() async {
     final directory = await getApplicationDocumentsDirectory();
@@ -87,12 +94,11 @@ class _GroupConversationState extends State<GroupConversation>
     setState(() {
       this.group = group;
     });
-
     await getGroupUsersData();
   }
 
   void getGroupMessages() async {
-    var messages = await DatabaseService.getGroupMessages(groupId);
+    var messages = await DatabaseService.getGroupMessages(widget.groupId);
     setState(() {
       this._messages = messages;
 
@@ -105,7 +111,7 @@ class _GroupConversationState extends State<GroupConversation>
   void getPrevGroupMessages() async {
     var messages;
     messages = await DatabaseService.getPrevGroupMessages(
-        firstVisibleGameSnapShot, groupId);
+        firstVisibleGameSnapShot, widget.groupId);
 
     if (messages.length > 0) {
       setState(() {
@@ -117,7 +123,7 @@ class _GroupConversationState extends State<GroupConversation>
 
   void listenToMessagesChanges() async {
     messagesSubscription = chatGroupsRef
-        .document(groupId)
+        .document(widget.groupId)
         .collection('messages')
         .orderBy('timestamp', descending: true)
         .snapshots()
@@ -136,49 +142,11 @@ class _GroupConversationState extends State<GroupConversation>
     });
   }
 
-  String formatTimestamp(Timestamp timestamp) {
-    var now = Timestamp.now().toDate();
-    var date = new DateTime.fromMillisecondsSinceEpoch(
-        timestamp.millisecondsSinceEpoch);
-    var diff = now.difference(date);
-    var time = '';
-
-    if (diff.inSeconds <= 60) {
-      time = 'now';
-    } else if (diff.inMinutes > 0 && diff.inMinutes < 60) {
-      if (diff.inMinutes == 1) {
-        time = 'A minute ago';
-      } else {
-        time = diff.inMinutes.toString() + ' minutes ago';
-      }
-    } else if (diff.inHours > 0 && diff.inHours < 24) {
-      if (diff.inHours == 1) {
-        time = 'An hour ago';
-      } else {
-        time = diff.inHours.toString() + ' hours ago';
-      }
-    } else if (diff.inDays > 0 && diff.inDays < 7) {
-      if (diff.inDays == 1) {
-        time = 'Yesterday';
-      } else {
-        time = diff.inDays.toString() + ' DAYS AGO';
-      }
-    } else {
-      if (diff.inDays == 7) {
-        time = 'A WEEK AGO';
-      } else {
-        time = timestamp.toDate().toString();
-      }
-    }
-
-    return time;
-  }
-
   getGroupUsersData() async {
     List<Map<String, dynamic>> users = [];
     List<String> usersIds = [];
     QuerySnapshot usersSnapshot = await chatGroupsRef
-        .document(groupId)
+        .document(widget.groupId)
         .collection('users')
         .getDocuments();
     usersSnapshot.documents.forEach((doc) {
@@ -207,22 +175,9 @@ class _GroupConversationState extends State<GroupConversation>
     }
   }
 
-  RecordingStatus _currentStatus = RecordingStatus.Unset;
-  Recording _current;
-
-  static const tick = const Duration(milliseconds: 1000);
-
   initRecorder() async {
-    //File file = await _localFile();
-    File file = new File('/data/user/0/com.eidarousdev.glitcher/app_flutter/glitcher_record.wav');
-
-    if (await file.exists()) {
-      await file.delete();
-    }
-    print('MyFile : ${file.path}');
-
-    recorder = FlutterAudioRecorder('/data/user/0/com.eidarousdev.glitcher/app_flutter/glitcher_record.wav'); // .wav .aac .m4a
-    await recorder.initialized;
+    recorder = AudioRecorder();
+    await recorder.init();
   }
 
   @override
@@ -231,10 +186,8 @@ class _GroupConversationState extends State<GroupConversation>
     WidgetsBinding.instance.addObserver(this);
     getGroupMessages();
     listenToMessagesChanges();
-    loadGroupData(groupId);
-
+    loadGroupData(widget.groupId);
     initRecorder();
-
     _focusNode.addListener(_onFocusChange);
 
     ///Set up listener here
@@ -307,12 +260,11 @@ class _GroupConversationState extends State<GroupConversation>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      SizedBox(height: 15.0),
                       Text(
                         group.name ?? '',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                          fontSize: 16,
                         ),
                       ),
                     ],
@@ -360,7 +312,7 @@ class _GroupConversationState extends State<GroupConversation>
                             message: msg.message,
                             username: usersMap[msg.sender].username,
                             time: msg.timestamp != null
-                                ? formatTimestamp(msg.timestamp)
+                                ? Functions.formatTimestamp(msg.timestamp)
                                 : 'now',
                             type: msg.type,
                             replyText: null,
@@ -410,8 +362,11 @@ class _GroupConversationState extends State<GroupConversation>
                               color: Colors.white70,
                             ),
                             onPressed: () async {
-                              File image = await AppUtil.chooseImage();
-
+                              ImageEditBottomSheet bottomSheet =
+                                  ImageEditBottomSheet();
+                              bottomSheet.optionIcon(context);
+                              File image = await AppUtil.chooseImage(
+                                  source: bottomSheet.choice);
                               showDialog(
                                   barrierDismissible: true,
                                   child: Container(
@@ -424,12 +379,12 @@ class _GroupConversationState extends State<GroupConversation>
                                         _url = await AppUtil.uploadFile(
                                             image,
                                             context,
-                                            'image_messages/$groupId/' +
+                                            'image_messages/${widget.groupId}/' +
                                                 randomAlphaNumeric(20));
 
                                         messageController.clear();
                                         await DatabaseService.sendGroupMessage(
-                                            groupId, 'image', _url);
+                                            widget.groupId, 'image', _url);
 
                                         Navigator.of(context).pop();
                                       },
@@ -489,7 +444,7 @@ class _GroupConversationState extends State<GroupConversation>
                                   onPressed: () async {
                                     messageController.clear();
                                     await DatabaseService.sendGroupMessage(
-                                        groupId, 'text', messageText);
+                                        widget.groupId, 'text', messageText);
                                   },
                                 )
                               : GestureDetector(
@@ -501,7 +456,12 @@ class _GroupConversationState extends State<GroupConversation>
                                     });
 
                                     if (isGranted) {
-                                      _start();
+                                      setState(() {
+                                        _currentStatus =
+                                            RecordingStatus.Recording;
+                                      });
+                                      await recorder.startRecording(
+                                          conversation: this.widget);
                                     } else {
                                       showDialog(
                                           context: context,
@@ -522,19 +482,33 @@ class _GroupConversationState extends State<GroupConversation>
                                           });
                                     }
                                   },
-                                  onLongPressEnd: (longPressDetails) async {
-                                    //var result = await recorder.stop();
-                                    //_currentStatus = RecordingStatus.Stopped;
-
-                                    File file = await _stop();
-
+                                  onLongPressUp: () async {
+                                    setState(() {
+                                      _currentStatus = RecordingStatus.Stopped;
+                                    });
+                                    Recording result =
+                                    await recorder.stopRecording();
                                     _url = await AppUtil.uploadFile(
-                                        file,
+                                        File(result.path),
                                         context,
-                                        'group_voice_messages/$groupId/${randomAlphaNumeric(20)}');
+                                        'group_voice_messages/${widget.groupId}/${randomAlphaNumeric(20)}');
 
                                     await DatabaseService.sendGroupMessage(
-                                        groupId, 'audio', _url);
+                                        widget.groupId, 'audio', _url);
+                                  },
+                                  onLongPressEnd: (longPressDetails) async {
+                                    setState(() {
+                                      _currentStatus = RecordingStatus.Stopped;
+                                    });
+                                    Recording result =
+                                        await recorder.stopRecording();
+                                    _url = await AppUtil.uploadFile(
+                                        File(result.path),
+                                        context,
+                                        'group_voice_messages/${widget.groupId}/${randomAlphaNumeric(20)}');
+
+                                    await DatabaseService.sendGroupMessage(
+                                        widget.groupId, 'audio', _url);
                                   },
                                   child: IconButton(
                                     icon: Icon(
@@ -560,13 +534,13 @@ class _GroupConversationState extends State<GroupConversation>
   void _select(String value) {
     switch (value) {
       case 'Members':
-        Navigator.of(context)
-            .pushNamed('/group-members', arguments: {'groupId': groupId});
+        Navigator.of(context).pushNamed('/group-members',
+            arguments: {'groupId': widget.groupId});
         break;
 
       case 'Group Details':
-        Navigator.of(context)
-            .pushNamed('/group-details', arguments: {'groupId': groupId});
+        Navigator.of(context).pushNamed('/group-details',
+            arguments: {'groupId': widget.groupId});
     }
   }
 
@@ -579,44 +553,6 @@ class _GroupConversationState extends State<GroupConversation>
     }
   }
 
-  _start() async {
-    initRecorder();
-    try {
-      await recorder.start();
-      var recording = await recorder.current(channel: 0);
-      setState(() {
-        _current = recording;
-      });
-
-      new Timer.periodic(tick, (Timer t) async {
-        if (_currentStatus == RecordingStatus.Stopped) {
-          t.cancel();
-        }
-
-        setState(() {
-          recordTime = t.tick.toString();
-          _currentStatus = RecordingStatus.Recording;
-        });
-        print('current ${recording.status}');
-      });
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  Future<File> _stop() async {
-    var result = await recorder.stop();
-    print("Stop recording: ${result.path} + ${result.status}");
-    print("Stop recording: ${result.duration}");
-    File file = File(result.path);
-    print("File length: ${await file.length()}");
-    setState(() {
-      _currentStatus = result.status;
-    });
-    print('result:' + file.path);
-    return file;
-  }
-
   Future<Uint8List> _loadFileBytes(String url, {OnError onError}) async {
     Uint8List bytes;
     try {
@@ -625,5 +561,13 @@ class _GroupConversationState extends State<GroupConversation>
       rethrow;
     }
     return bytes;
+  }
+
+  void updateRecordTime(String rt) {
+    if (mounted) {
+      setState(() {
+        recordTime = rt;
+      });
+    }
   }
 }

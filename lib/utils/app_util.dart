@@ -37,9 +37,9 @@ class AppUtil {
         textcolor: '#ffffff');
   }
 
-  static Future chooseImage() async {
+  static Future chooseImage({ImageSource source = ImageSource.gallery}) async {
     File image = await ImagePicker.pickImage(
-        source: ImageSource.gallery, imageQuality: 80);
+        source: source, imageQuality: 80);
     print('File size: ${image.lengthSync()}');
     return image;
   }

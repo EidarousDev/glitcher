@@ -7,7 +7,7 @@ import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
-import 'package:glitcher/widgets/chat_item.dart';
+import 'file:///D:/Work/FlutterProjects/glitcher/lib/list_items/chat_item.dart';
 
 class Chats extends StatefulWidget {
   @override
@@ -95,11 +95,11 @@ class _ChatsState extends State<Chats>
               Icons.search,
               size: 28.0,
             ),
-            suffixIcon: IconButton(
+            suffixIcon: _searching ? IconButton(
                 icon: Icon(Icons.close),
                 onPressed: () {
                   _searchController.clear();
-                }),
+                }): null,
             hintText: 'Search',
           ),
           onChanged: (text) {
@@ -116,7 +116,7 @@ class _ChatsState extends State<Chats>
             }
             if (_tabController.index == 0) {
               chats.forEach((chatItem) {
-                if (chatItem.name.contains(text)) {
+                if (chatItem.name.toLowerCase().contains(text.toLowerCase())) {
                   setState(() {
                     filteredChats.add(chatItem);
                   });
@@ -124,7 +124,7 @@ class _ChatsState extends State<Chats>
               });
             } else {
               groups.forEach((groupItem) {
-                if (groupItem.name.contains(text)) {
+                if (groupItem.name.toLowerCase().contains(text.toLowerCase())) {
                   setState(() {
                     filteredGroups.add(groupItem);
                   });

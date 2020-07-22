@@ -2,6 +2,10 @@ import 'dart:async';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
+import 'package:glitcher/services/audio_recorder.dart';
+import 'package:glitcher/services/permissions_service.dart';
+import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
@@ -14,15 +18,21 @@ import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/chat_bubble.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
 import 'package:glitcher/constants/sizes.dart';
+import 'package:intl/intl.dart';
 import 'package:random_string/random_string.dart';
 
 class Conversation extends StatefulWidget {
   final String otherUid;
-
+  final _ConversationState state = _ConversationState();
   Conversation({this.otherUid});
 
+  updateRecordTime(String recordTime) {
+    print('recordTime: $recordTime');
+    state.updateRecordTime(recordTime);
+  }
+
   @override
-  _ConversationState createState() => _ConversationState(otherUid: otherUid);
+  _ConversationState createState() => state;
 }
 
 class _ConversationState extends State<Conversation>
@@ -33,21 +43,33 @@ class _ConversationState extends State<Conversation>
 //  String profileImage;
 
   User otherUser = User();
-  final String otherUid;
   Timestamp firstVisibleGameSnapShot;
   String messageText;
-
+  bool _typing = false;
+  FocusScopeNode _focusNode = FocusScopeNode();
+  AudioRecorder recorder;
+  var _url;
   List<Message> _messages;
 
   TextEditingController messageController = TextEditingController();
 
   var seen = false;
+  final formatter = new NumberFormat("##");
 
   StreamSubscription<QuerySnapshot> messagesSubscription;
 
   ScrollController _scrollController = ScrollController();
 
-  _ConversationState({this.otherUid});
+  String recordTime;
+
+  var _currentStatus;
+
+  _ConversationState();
+
+  initRecorder() async {
+    recorder = AudioRecorder();
+    await recorder.init();
+  }
 
   void loadUserData(String uid) async {
     User user;
@@ -58,7 +80,7 @@ class _ConversationState extends State<Conversation>
   }
 
   void getMessages() async {
-    var messages = await DatabaseService.getMessages(otherUid);
+    var messages = await DatabaseService.getMessages(widget.otherUid);
     setState(() {
       this._messages = messages;
       this.firstVisibleGameSnapShot = messages.last.timestamp;
@@ -68,7 +90,7 @@ class _ConversationState extends State<Conversation>
   void getPrevMessages() async {
     var messages;
     messages = await DatabaseService.getPrevMessages(
-        firstVisibleGameSnapShot, otherUid);
+        firstVisibleGameSnapShot, widget.otherUid);
 
     if (messages.length > 0) {
       setState(() {
@@ -83,7 +105,7 @@ class _ConversationState extends State<Conversation>
         .collection('chats')
         .document(Constants.currentUserID)
         .collection('conversations')
-        .document(otherUid)
+        .document(widget.otherUid)
         .collection('messages')
         .orderBy('timestamp', descending: true)
         .snapshots()
@@ -99,7 +121,7 @@ class _ConversationState extends State<Conversation>
           }
         }
 
-        if (Message.fromDoc(change.document).sender == otherUid) {
+        if (Message.fromDoc(change.document).sender == widget.otherUid) {
           print('made seen');
           makeMessagesSeen();
         }
@@ -112,7 +134,7 @@ class _ConversationState extends State<Conversation>
         .collection('chats')
         .document(Constants.currentUserID)
         .collection('conversations')
-        .document(otherUid)
+        .document(widget.otherUid)
         .collection('messages')
         .snapshots()
         .listen((querySnapshot) {
@@ -132,7 +154,7 @@ class _ConversationState extends State<Conversation>
   void otherUserListener() {
     usersRef.snapshots().listen((querySnapshot) {
       querySnapshot.documentChanges.forEach((change) {
-        if (change.document.documentID == otherUid) {
+        if (change.document.documentID == widget.otherUid) {
           setState(() {
             otherUser = User.fromDoc(change.document);
           });
@@ -203,7 +225,7 @@ class _ConversationState extends State<Conversation>
 
     await _firestore
         .collection('chats')
-        .document(otherUid)
+        .document(widget.otherUid)
         .collection('conversations')
         .document(Constants.currentUserID)
         .setData({'isSeen': true});
@@ -214,15 +236,24 @@ class _ConversationState extends State<Conversation>
         .collection('chats')
         .document(Constants.currentUserID)
         .collection('conversations')
-        .document(otherUid)
+        .document(widget.otherUid)
         .setData({'isSeen': false});
 
     await _firestore
         .collection('chats')
-        .document(otherUid)
+        .document(widget.otherUid)
         .collection('conversations')
         .document(Constants.currentUserID)
         .setData({'isSeen': false});
+  }
+
+  void _onFocusChange() {
+    if (_focusNode.hasFocus) {
+      _typing = true;
+    } else {
+      _focusNode.unfocus();
+      _typing = false;
+    }
   }
 
   @override
@@ -247,7 +278,10 @@ class _ConversationState extends State<Conversation>
     listenToMessagesChanges();
     otherUserListener();
     listenIfMessagesSeen();
-    loadUserData(otherUid);
+    loadUserData(widget.otherUid);
+    initRecorder();
+
+    _focusNode.addListener(_onFocusChange);
 
     ///Set up listener here
     _scrollController
@@ -275,226 +309,344 @@ class _ConversationState extends State<Conversation>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        flexibleSpace: gradientAppBar(),
-        leading: IconButton(
-          icon: Icon(
-            Icons.keyboard_backspace,
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _focusNode.unfocus();
+          _typing = false;
+        });
+
+        // if (!_focusNode.hasPrimaryFocus) {
+        //   _focusNode.unfocus();
+        // }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          flexibleSpace: gradientAppBar(),
+          leading: IconButton(
+            icon: Icon(
+              Icons.keyboard_backspace,
+            ),
+            onPressed: () => Navigator.pop(context),
           ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        titleSpacing: 0,
-        title: InkWell(
-          child: Row(
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(left: 0.0, right: 10.0),
-                child: otherUser.profileImageUrl != null
-                    ? CircleAvatar(
-                        backgroundImage: NetworkImage(
-                          otherUser.profileImageUrl,
+          titleSpacing: 0,
+          title: InkWell(
+            child: Row(
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.only(left: 0.0, right: 10.0),
+                  child: otherUser.profileImageUrl != null
+                      ? CircleAvatar(
+                          backgroundImage: NetworkImage(
+                            otherUser.profileImageUrl,
+                          ),
+                        )
+                      : Container(),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(height: 15.0),
+                      Text(
+                        otherUser.username ?? '',
+                        style: TextStyle(
+                          color: switchColor(Colors.black87, Colors.white70),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
                         ),
-                      )
-                    : Container(),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    SizedBox(height: 15.0),
-                    Text(
-                      otherUser.username ?? '',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
                       ),
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      otherUser != null
-                          ? otherUser.online == 'online' ? 'online' : 'offline'
-                          : '',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        fontSize: 11,
+                      SizedBox(height: 5),
+                      Text(
+                        otherUser != null
+                            ? otherUser.online == 'online'
+                                ? 'online'
+                                : 'offline'
+                            : '',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          color: switchColor(Colors.black87, Colors.white70),
+                          fontSize: 11,
+                        ),
                       ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            onTap: () {},
+          ),
+//        actions: <Widget>[
+//          IconButton(
+//            icon: Icon(
+//              Icons.more_horiz,
+//            ),
+//            onPressed: () {},
+//          ),
+//        ],
+        ),
+        body: Container(
+          height: MediaQuery.of(context).size.height,
+          child: Column(
+            children: <Widget>[
+              SizedBox(height: 10),
+              _messages != null
+                  ? Flexible(
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        itemCount: _messages.length,
+                        reverse: true,
+                        itemBuilder: (BuildContext context, int index) {
+                          Message msg = _messages[index];
+                          return ChatBubble(
+                            message: msg.message,
+                            username: otherUser.username,
+                            time: msg.timestamp != null
+                                ? formatTimestamp(msg.timestamp)
+                                : 'now',
+                            type: msg.type,
+                            replyText: null,
+                            isMe: msg.sender == Constants.currentUserID,
+                            isGroup: false,
+                            isReply: false,
+                            replyName: null,
+                          );
+                        },
+                      ),
+                    )
+                  : Container(),
+              Align(
+                  alignment: Alignment.bottomRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8.0, bottom: 8),
+                    child: Text(
+                      seen ? 'seen' : '',
+                      style: TextStyle(
+                          color: switchColor(Colors.black87, Colors.white70)),
                     ),
-                  ],
+                  )),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+//                height: 140,
+                  decoration: BoxDecoration(
+                    color: switchColor(MyColors.lightBG, MyColors.darkBG),
+                    boxShadow: [
+                      BoxShadow(
+                        color: switchColor(Colors.black45, Colors.grey[500]),
+                        offset: Offset(0.0, 1.5),
+                        blurRadius: 4.0,
+                      ),
+                    ],
+                  ),
+                  constraints: BoxConstraints(
+                    maxHeight: 190,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Flexible(
+                        child: ListTile(
+                          leading: IconButton(
+                            icon: Icon(
+                              Icons.add,
+                              color:
+                                  switchColor(Colors.black54, Colors.white70),
+                            ),
+                            onPressed: () async {
+                              ImageEditBottomSheet bottomSheet =
+                                  ImageEditBottomSheet();
+                              bottomSheet.optionIcon(context);
+                              File image = await AppUtil.chooseImage(
+                                  source: bottomSheet.choice);
+                              showDialog(
+                                  barrierDismissible: true,
+                                  child: Container(
+                                    width: Sizes.sm_profile_image_w,
+                                    height: Sizes.sm_profile_image_h,
+                                    child: ImageOverlay(
+                                      imageFile: image,
+                                      btnText: 'Send',
+                                      btnFunction: () async {
+                                        String url = await AppUtil.uploadFile(
+                                            image,
+                                            context,
+                                            'image_messages/' +
+                                                randomAlphaNumeric(20));
+
+                                        messageController.clear();
+                                        await DatabaseService.sendMessage(
+                                            widget.otherUid, 'image', url);
+                                        makeMessagesUnseen();
+
+                                        await NotificationHandler
+                                            .sendNotification(
+                                                widget.otherUid,
+                                                Constants.loggedInUser.username,
+                                                ' sent you an image.',
+                                                Constants.currentUserID,
+                                                'message');
+
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ),
+                                  context: context);
+                            },
+                          ),
+                          contentPadding: EdgeInsets.all(0),
+                          title: _currentStatus != RecordingStatus.Recording
+                              ? TextField(
+                                  focusNode: _focusNode,
+                                  textCapitalization:
+                                      TextCapitalization.sentences,
+                                  controller: messageController,
+                                  onChanged: (value) {
+                                    messageText = value;
+                                  },
+                                  style: TextStyle(
+                                    fontSize: 15.0,
+                                    color: switchColor(
+                                        Colors.black54, Colors.white70),
+                                  ),
+                                  decoration: InputDecoration(
+                                    contentPadding: EdgeInsets.all(10.0),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(5.0),
+                                      borderSide: BorderSide(
+                                        color: MyColors.darkBG,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: MyColors.darkBG,
+                                      ),
+                                      borderRadius: BorderRadius.circular(5.0),
+                                    ),
+                                    hintText: "Write your message...",
+                                    hintStyle: TextStyle(
+                                      fontSize: 15.0,
+                                      color: switchColor(
+                                          Colors.black12, Colors.white70),
+                                    ),
+                                  ),
+                                  maxLines: null,
+                                )
+                              : Text(formatter
+                                      .format((int.parse(recordTime) ~/ 60))
+                                      .toString() +
+                                  ' : ' +
+                                  (formatter.format(int.parse(recordTime) % 60))
+                                      .toString()),
+                          trailing: _typing
+                              ? IconButton(
+                                  icon: Icon(
+                                    Icons.send,
+                                    color: switchColor(
+                                        Colors.black54, Colors.white70),
+                                  ),
+                                  onPressed: () async {
+                                    messageController.clear();
+                                    await DatabaseService.sendMessage(
+                                        widget.otherUid, 'text', messageText);
+                                  },
+                                )
+                              : GestureDetector(
+                                  onLongPress: () async {
+                                    bool isGranted = await PermissionsService()
+                                        .requestMicrophonePermission(
+                                            onPermissionDenied: () {
+                                      print('Permission has been denied');
+                                    });
+
+                                    if (isGranted) {
+                                      setState(() {
+                                        _currentStatus =
+                                            RecordingStatus.Recording;
+                                      });
+                                      await recorder.startRecording(
+                                          conversation: this);
+                                    } else {
+                                      showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return AlertDialog(
+                                              title: Text('Info'),
+                                              content: Text(
+                                                  'You must grant this microphone access to be able to use this feature.'),
+                                              actions: <Widget>[
+                                                MaterialButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Text('OK'),
+                                                )
+                                              ],
+                                            );
+                                          });
+                                    }
+                                  },
+                            onLongPressUp: () async{
+                              setState(() {
+                                _currentStatus = RecordingStatus.Stopped;
+                              });
+                              Recording result =
+                              await recorder.stopRecording();
+
+                              //Storage path is voice_messages/sender_id/receiver_id/file
+                              _url = await AppUtil.uploadFile(
+                                  File(result.path),
+                                  context,
+                                  'voice_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}');
+
+                              await DatabaseService.sendMessage(
+                                  widget.otherUid, 'audio', _url);
+
+                            },
+                                  onLongPressEnd: (longPressDetails) async {
+                                    setState(() {
+                                      _currentStatus = RecordingStatus.Stopped;
+                                    });
+                                    Recording result =
+                                        await recorder.stopRecording();
+
+                                    //Storage path is voice_messages/sender_id/receiver_id/file
+                                    _url = await AppUtil.uploadFile(
+                                        File(result.path),
+                                        context,
+                                        'voice_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}');
+
+                                    await DatabaseService.sendMessage(
+                                        widget.otherUid, 'audio', _url);
+                                  },
+                                  child: IconButton(
+                                    icon: Icon(
+                                      Icons.mic,
+                                      color: switchColor(
+                                          Colors.black54, Colors.white70),
+                                    ),
+                                    onPressed: null,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
-          onTap: () {},
-        ),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(
-              Icons.more_horiz,
-            ),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      body: Container(
-        height: MediaQuery.of(context).size.height,
-        child: Column(
-          children: <Widget>[
-            SizedBox(height: 10),
-            _messages != null
-                ? Flexible(
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      itemCount: _messages.length,
-                      reverse: true,
-                      itemBuilder: (BuildContext context, int index) {
-                        Message msg = _messages[index];
-                        return ChatBubble(
-                          message: msg.message,
-                          username: otherUser.username,
-                          time: msg.timestamp != null
-                              ? formatTimestamp(msg.timestamp)
-                              : 'now',
-                          type: msg.type,
-                          replyText: null,
-                          isMe: msg.sender == Constants.currentUserID,
-                          isGroup: false,
-                          isReply: false,
-                          replyName: null,
-                        );
-                      },
-                    ),
-                  )
-                : Container(),
-            Align(
-                alignment: Alignment.bottomRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 8.0, bottom: 8),
-                  child: Text(
-                    seen ? 'seen' : '',
-                    style: TextStyle(
-                        color: switchColor(Colors.black87, Colors.white70)),
-                  ),
-                )),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-//                height: 140,
-                decoration: BoxDecoration(
-                  color: switchColor(MyColors.lightBG, MyColors.darkBG),
-                  boxShadow: [
-                    BoxShadow(
-                      color: switchColor(Colors.black45, Colors.grey[500]),
-                      offset: Offset(0.0, 1.5),
-                      blurRadius: 4.0,
-                    ),
-                  ],
-                ),
-                constraints: BoxConstraints(
-                  maxHeight: 190,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Flexible(
-                      child: ListTile(
-                        leading: IconButton(
-                          icon: Icon(
-                            Icons.add,
-                            color: switchColor(Colors.black54, Colors.white70),
-                          ),
-                          onPressed: () async {
-                            File image = await AppUtil.chooseImage();
-
-                            showDialog(
-                                barrierDismissible: true,
-                                child: Container(
-                                  width: Sizes.sm_profile_image_w,
-                                  height: Sizes.sm_profile_image_h,
-                                  child: ImageOverlay(
-                                    imageFile: image,
-                                    btnText: 'Send',
-                                    btnFunction: () async {
-                                      String url = await AppUtil.uploadFile(
-                                          image,
-                                          context,
-                                          'image_messages/' +
-                                              randomAlphaNumeric(20));
-
-                                      messageController.clear();
-                                      await DatabaseService.sendMessage(
-                                          otherUid, 'image', url);
-                                      makeMessagesUnseen();
-
-                                      await NotificationHandler.sendNotification(otherUid, Constants.loggedInUser.username, ' sent you an image.', Constants.currentUserID, 'message');
-
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                ),
-                                context: context);
-                          },
-                        ),
-                        contentPadding: EdgeInsets.all(0),
-                        title: TextField(
-                          textCapitalization: TextCapitalization.sentences,
-                          controller: messageController,
-                          onChanged: (value) {
-                            messageText = value;
-                          },
-                          style: TextStyle(
-                            fontSize: 15.0,
-                            color: switchColor(Colors.black54, Colors.white70),
-                          ),
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.all(10.0),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                              borderSide: BorderSide(
-                                color: switchColor(
-                                    MyColors.lightBG, MyColors.darkBG),
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: switchColor(
-                                    MyColors.lightBG, MyColors.darkBG),
-                              ),
-                              borderRadius: BorderRadius.circular(5.0),
-                            ),
-                            hintText: "Write your message...",
-                            hintStyle: TextStyle(
-                              fontSize: 15.0,
-                              color:
-                                  switchColor(Colors.black54, Colors.white70),
-                            ),
-                          ),
-                          maxLines: null,
-                        ),
-                        trailing: IconButton(
-                          icon: Icon(
-                            Icons.send,
-                            color: switchColor(Colors.black54, Colors.white70),
-                          ),
-                          onPressed: () async {
-                            messageController.clear();
-                            await DatabaseService.sendMessage(otherUid, 'text', messageText);
-
-                            await NotificationHandler.sendNotification(otherUid, Constants.loggedInUser.username +  ':', messageText, Constants.currentUserID, 'message');
-
-                            await makeMessagesUnseen();
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );
+  }
+
+  void updateRecordTime(String rt) {
+    if (mounted) {
+      setState(() {
+        recordTime = rt;
+      });
+    }
   }
 }

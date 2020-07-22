@@ -10,6 +10,7 @@ import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/app_util.dart';
+import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:random_string/random_string.dart';
 
@@ -134,6 +135,8 @@ class _NewGroupState extends State<NewGroup>
                           });
 
                           if (isGranted) {
+                            ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
+                            bottomSheet.optionIcon(context);
                             _imageFile = await AppUtil.chooseImage();
                           } else {
                             showDialog(

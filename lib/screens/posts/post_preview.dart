@@ -11,8 +11,8 @@ import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/screens/posts/comment_item.dart';
-import 'package:glitcher/screens/posts/post_item.dart';
+import 'file:///D:/Work/FlutterProjects/glitcher/lib/list_items/comment_item.dart';
+import 'file:///D:/Work/FlutterProjects/glitcher/lib/list_items/post_item.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/Loader.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -277,7 +277,12 @@ class _PostPreviewState extends State<PostPreview>
           child: SingleChildScrollView(
             controller: _scrollController,
             scrollDirection: Axis.vertical,
-            child: _loading ? Center(child: LoaderTwo()) : _buildWidget(),
+            child: _loading ? Center(child: Center(
+                child: Image.asset(
+                  'assets/images/glitcher_loader.gif',
+                  height: 250,
+                  width: 250,
+                ))) : _buildWidget(),
           ),
         ),
       ),

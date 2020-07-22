@@ -22,7 +22,7 @@ import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/custom_url_text.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
-import 'package:glitcher/widgets/post_bottom_sheet.dart';
+import 'file:///D:/Work/FlutterProjects/glitcher/lib/widgets/bottom_sheets/post_bottom_sheet.dart';
 import 'package:share/share.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';

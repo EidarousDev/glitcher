@@ -16,7 +16,7 @@ import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/screens/posts/post_item.dart';
+import 'file:///D:/Work/FlutterProjects/glitcher/lib/list_items/post_item.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
@@ -236,10 +236,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(20)),
                                   border: Border.all(
-                                      color: Constants.currentTheme ==
-                                              AvailableThemes.LIGHT_THEME
-                                          ? MyColors.lightPrimary
-                                          : MyColors.darkPrimary,
+                                      color: switchColor(MyColors.lightPrimary,
+                                          MyColors.darkPrimary),
                                       width: 1),
                                 ),
                                 child: Padding(
@@ -272,10 +270,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       width: double.infinity,
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                            color: Constants.currentTheme ==
-                                    AvailableThemes.LIGHT_THEME
-                                ? MyColors.lightCardBG
-                                : MyColors.darkLineBreak),
+                            color: switchColor(
+                                MyColors.lightCardBG, MyColors.darkLineBreak)),
                       ),
                     ),
 //TODO uncomment after fixing video
@@ -350,10 +346,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       width: double.infinity,
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                            color: Constants.currentTheme ==
-                                    AvailableThemes.LIGHT_THEME
-                                ? MyColors.lightCardBG
-                                : MyColors.darkLineBreak),
+                            color: switchColor(
+                                MyColors.lightCardBG, MyColors.darkLineBreak)),
                       ),
                     ),
                   ],
@@ -496,8 +490,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         //profileImageUrl = loggedInUser.profileImageUrl;
         loggedInProfileImageURL = loggedInUser.profileImageUrl;
         username = loggedInUser.username;
-        print(
-            'profileImageUrl = ${loggedInProfileImageURL} and username = $username');
+//        print(
+//            'profileImageUrl = ${loggedInProfileImageURL} and username = $username');
       });
     }
   }
@@ -572,23 +566,18 @@ void updateGames() async {
       });
 
       List platforms = [];
-      if(results[i]['platforms'] != null){
+      if (results[i]['platforms'] != null) {
         (results[i]['platforms'] as List).forEach((platform) {
           platforms.add(platform['platform']['name']);
         });
-      }
-      else{
-      }
+      } else {}
 
       List stores = [];
-      if(results[i]['stores'] != null){
+      if (results[i]['stores'] != null) {
         (results[i]['stores'] as List).forEach((store) {
           stores.add(store['store']['name']);
         });
-      }
-      else{
-      }
-
+      } else {}
 
       List tags = [];
       (results[i]['tags'] as List).forEach((tag) {
@@ -634,7 +623,9 @@ void updateGames() async {
         'platforms': platforms,
         'stores': stores,
         'metacritic': results[i]['metacritic'],
-        'esrb_rating': gameDetails['esrb_rating'] == null ? null :  gameDetails['esrb_rating']['name'],
+        'esrb_rating': gameDetails['esrb_rating'] == null
+            ? null
+            : gameDetails['esrb_rating']['name'],
         'metacritic_url': gameDetails['metacritic_url'],
         'genres': genres,
         'image': results[i]['background_image'],
@@ -650,11 +641,10 @@ void updateGames() async {
   }
 }
 
-fixString(String s){
-  try{
+fixString(String s) {
+  try {
     return utf8.decode(s.runes.toList());
-  }
-  catch(ex){
+  } catch (ex) {
     return s;
   }
 }

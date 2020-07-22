@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
@@ -19,13 +20,51 @@ class UsersScreen extends StatefulWidget {
 
 class _UsersScreenState extends State<UsersScreen> {
   List<User> users;
+  TextEditingController _searchController = TextEditingController();
+  bool _searching = false;
+  List<User> filteredUsers = [];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(widget.screenType),
+        title: TextField(
+          controller: _searchController,
+          decoration: InputDecoration(
+            fillColor: switchColor(Colors.black54, Colors.black12),
+            prefixIcon: Icon(
+              Icons.search,
+              size: 28.0,
+            ),
+            suffixIcon: _searching ? IconButton(
+                icon: Icon(Icons.close),
+                onPressed: () {
+                  _searchController.clear();
+                }): null,
+            hintText: 'Search',
+          ),
+          onChanged: (text) {
+            filteredUsers = [];
+            if (text.length != 0) {
+              setState(() {
+                _searching = true;
+              });
+            } else {
+              setState(() {
+                _searching = false;
+              });
+            }
+              users.forEach((user) {
+                if (user.username.toLowerCase().contains(text.toLowerCase())) {
+                  setState(() {
+                    filteredUsers.add(user);
+                  });
+                }
+              });
+
+          },
+        ),
         flexibleSpace: gradientAppBar(),
         leading: Builder(
           builder: (context) => Padding(
@@ -53,10 +92,10 @@ class _UsersScreenState extends State<UsersScreen> {
               ),
             );
           },
-          itemCount: users.length,
+          itemCount: !_searching ? users.length : filteredUsers.length,
           padding: EdgeInsets.all(10),
           itemBuilder: (context, index) {
-            return ListTile(
+            return !_searching ? ListTile(
               contentPadding: EdgeInsets.all(10),
               leading: InkWell(
                   child: CacheThisImage(
@@ -75,13 +114,44 @@ class _UsersScreenState extends State<UsersScreen> {
               title: Text(users[index].username),
               trailing: widget.screenType != 'followers'
                   ? MaterialButton(
-                      child: Text('Unfollow'),
+                      child: Text('Unfollow', style: TextStyle(
+                        color: switchColor(Colors.white, Colors.black)
+                      ),),
                       onPressed: () async {
                         await DatabaseService.unfollowUser(users[index].id);
                         Navigator.of(context).pushReplacementNamed('/friends');
                       },
                       color: MyColors.darkPrimary,
                     )
+                  : null,
+            ): ListTile(
+              contentPadding: EdgeInsets.all(10),
+              leading: InkWell(
+                  child: CacheThisImage(
+                    imageUrl: filteredUsers[index].profileImageUrl,
+                    imageShape: BoxShape.circle,
+                    width: Sizes.md_profile_image_w,
+                    height: Sizes.md_profile_image_h,
+                    defaultAssetImage: Strings.default_profile_image,
+                  ),
+                  onTap: () {
+                    Navigator.of(context)
+                        .pushNamed('/user-profile', arguments: {
+                      'userId': filteredUsers[index].id,
+                    });
+                  }),
+              title: Text(filteredUsers[index].username),
+              trailing: widget.screenType != 'followers'
+                  ? MaterialButton(
+                child: Text('Unfollow', style: TextStyle(
+                    color: switchColor(Colors.white, Colors.black)
+                ),),
+                onPressed: () async {
+                  await DatabaseService.unfollowUser(filteredUsers[index].id);
+                  Navigator.of(context).pushReplacementNamed('/friends');
+                },
+                color: MyColors.darkPrimary,
+              )
                   : null,
             );
           }),
