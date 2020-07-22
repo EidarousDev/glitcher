@@ -115,14 +115,9 @@ class _AddCommentPageState extends State<AddComment> {
       );
     }
 
-    /// Checks for username in tweet description
-    /// If foud sends notification to all tagged user
-    /// If no user found or not compost tweet screen is closed and redirect back to home page.
-
-    /// Hide running loader on screen
     glitcherLoader.hideLoader();
 
-    /// Navigate back to home page
+    //Navigator.of(context).pop();
     Navigator.of(context).pushNamed('/post', arguments: {'post': widget.post});
   }
 

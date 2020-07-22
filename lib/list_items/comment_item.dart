@@ -17,7 +17,7 @@ import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
-import 'file:///D:/Work/FlutterProjects/glitcher/lib/widgets/bottom_sheets/comment_bottom_sheet.dart';
+import 'package:glitcher/widgets/bottom_sheets/comment_bottom_sheet.dart';
 
 class CommentItem extends StatefulWidget {
   final Post post;

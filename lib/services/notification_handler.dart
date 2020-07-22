@@ -99,6 +99,8 @@ class NotificationHandler {
 
   static sendNotification(
       String receiverId, String title, String body, String objectId, String type) async {
+    if(receiverId == Constants.currentUserID)
+      return;
     usersRef.document(receiverId).collection('notifications').add({
       'title': title,
       'body': body,

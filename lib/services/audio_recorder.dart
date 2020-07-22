@@ -43,9 +43,9 @@ class AudioRecorder {
 
       _recording = current;
       timer = t;
-     if(conversation != null){
-       conversation.updateRecordTime(timer.tick.toString());
-     }
+//     if(conversation != null){
+//       conversation.updateRecordTime(timer.tick.toString());
+//     }
     });
   }
 

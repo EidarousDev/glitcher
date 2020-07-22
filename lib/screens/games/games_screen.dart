@@ -3,7 +3,7 @@ import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/models/game_model.dart';
-import 'file:///D:/Work/FlutterProjects/glitcher/lib/list_items/game_item.dart';
+import 'package:glitcher/list_items/game_item.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
 

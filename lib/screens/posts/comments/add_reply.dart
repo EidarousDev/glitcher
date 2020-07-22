@@ -132,7 +132,8 @@ class _AddReplyPageState extends State<AddReply> {
     glitcherLoader.hideLoader();
 
     /// Navigate back to home page
-    Navigator.of(context).pushNamed('/post', arguments: {'post': widget.post});
+    //Navigator.of(context).pushNamed('/post', arguments: {'post': widget.post});
+    Navigator.of(context).pop();
   }
 
   @override

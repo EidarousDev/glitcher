@@ -38,7 +38,7 @@ class PostBottomSheet {
       builder: (context) {
         return Container(
             padding: EdgeInsets.only(top: 5, bottom: 0),
-            height: Sizes.fullHeight(context) * (isMyPost ? .25 : .44),
+            height: Sizes.fullHeight(context) * (isMyPost ? .35 : .66),
             width: Sizes.fullWidth(context),
             decoration: BoxDecoration(
               color: switchColor(
@@ -131,11 +131,11 @@ class PostBottomSheet {
 //        isMyPost
 //            ? Container()
 //            :
-        _widgetBottomSheetRow(context, Icon(Icons.report), text: 'Report Post',
+        !isMyPost ? _widgetBottomSheetRow(context, Icon(Icons.report), text: 'Report Post',
             onPressed: () async {
           Navigator.of(context).pushNamed('/report-post',
               arguments: {'post_author': post.authorId, 'post_id': post.id});
-        }),
+        }): Container(),
       ],
     );
   }

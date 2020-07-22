@@ -12,7 +12,7 @@ import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'file:///D:/Work/FlutterProjects/glitcher/lib/list_items/post_item.dart';
+import 'package:glitcher/list_items/post_item.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/Loader.dart';

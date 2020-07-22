@@ -60,7 +60,7 @@ class _ConversationState extends State<Conversation>
 
   ScrollController _scrollController = ScrollController();
 
-  String recordTime;
+  String recordTime = 'recording...';
 
   var _currentStatus;
 
@@ -279,7 +279,7 @@ class _ConversationState extends State<Conversation>
     otherUserListener();
     listenIfMessagesSeen();
     loadUserData(widget.otherUid);
-    initRecorder();
+    //initRecorder();
 
     _focusNode.addListener(_onFocusChange);
 
@@ -533,12 +533,13 @@ class _ConversationState extends State<Conversation>
                                   ),
                                   maxLines: null,
                                 )
-                              : Text(formatter
-                                      .format((int.parse(recordTime) ~/ 60))
-                                      .toString() +
-                                  ' : ' +
-                                  (formatter.format(int.parse(recordTime) % 60))
-                                      .toString()),
+//                              : Text(formatter
+//                                      .format((int.parse(recordTime) ~/ 60))
+//                                      .toString() +
+//                                  ' : ' +
+//                                  (formatter.format(int.parse(recordTime) % 60))
+//                                      .toString()),
+                          : Text(recordTime),
                           trailing: _typing
                               ? IconButton(
                                   icon: Icon(
@@ -553,40 +554,6 @@ class _ConversationState extends State<Conversation>
                                   },
                                 )
                               : GestureDetector(
-                                  onLongPress: () async {
-                                    bool isGranted = await PermissionsService()
-                                        .requestMicrophonePermission(
-                                            onPermissionDenied: () {
-                                      print('Permission has been denied');
-                                    });
-
-                                    if (isGranted) {
-                                      setState(() {
-                                        _currentStatus =
-                                            RecordingStatus.Recording;
-                                      });
-                                      await recorder.startRecording(
-                                          conversation: this);
-                                    } else {
-                                      showDialog(
-                                          context: context,
-                                          builder: (context) {
-                                            return AlertDialog(
-                                              title: Text('Info'),
-                                              content: Text(
-                                                  'You must grant this microphone access to be able to use this feature.'),
-                                              actions: <Widget>[
-                                                MaterialButton(
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                  child: Text('OK'),
-                                                )
-                                              ],
-                                            );
-                                          });
-                                    }
-                                  },
                             onLongPressUp: () async{
                               setState(() {
                                 _currentStatus = RecordingStatus.Stopped;

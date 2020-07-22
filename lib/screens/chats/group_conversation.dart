@@ -64,7 +64,7 @@ class _GroupConversationState extends State<GroupConversation>
 
   bool _typing = false;
 
-  String recordTime;
+  String recordTime = 'recording...';
   final formatter = new NumberFormat("##");
 
   var _currentStatus;
@@ -187,7 +187,7 @@ class _GroupConversationState extends State<GroupConversation>
     getGroupMessages();
     listenToMessagesChanges();
     loadGroupData(widget.groupId);
-    initRecorder();
+    //initRecorder();
     _focusNode.addListener(_onFocusChange);
 
     ///Set up listener here
@@ -429,12 +429,13 @@ class _GroupConversationState extends State<GroupConversation>
                                   ),
                                   maxLines: null,
                                 )
-                              : Text(formatter
-                                      .format((int.parse(recordTime) ~/ 60))
-                                      .toString() +
-                                  ' : ' +
-                                  (formatter.format(int.parse(recordTime) % 60))
-                                      .toString()),
+//                              : Text(formatter
+//                                      .format((int.parse(recordTime) ~/ 60))
+//                                      .toString() +
+//                                  ' : ' +
+//                                  (formatter.format(int.parse(recordTime) % 60))
+//                                      .toString()),
+                          :Text(recordTime),
                           trailing: _typing
                               ? IconButton(
                                   icon: Icon(
@@ -460,6 +461,7 @@ class _GroupConversationState extends State<GroupConversation>
                                         _currentStatus =
                                             RecordingStatus.Recording;
                                       });
+                                      await initRecorder();
                                       await recorder.startRecording(
                                           conversation: this.widget);
                                     } else {
@@ -481,20 +483,6 @@ class _GroupConversationState extends State<GroupConversation>
                                             );
                                           });
                                     }
-                                  },
-                                  onLongPressUp: () async {
-                                    setState(() {
-                                      _currentStatus = RecordingStatus.Stopped;
-                                    });
-                                    Recording result =
-                                    await recorder.stopRecording();
-                                    _url = await AppUtil.uploadFile(
-                                        File(result.path),
-                                        context,
-                                        'group_voice_messages/${widget.groupId}/${randomAlphaNumeric(20)}');
-
-                                    await DatabaseService.sendGroupMessage(
-                                        widget.groupId, 'audio', _url);
                                   },
                                   onLongPressEnd: (longPressDetails) async {
                                     setState(() {

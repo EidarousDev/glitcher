@@ -7,7 +7,7 @@ import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
-import 'file:///D:/Work/FlutterProjects/glitcher/lib/list_items/chat_item.dart';
+import 'package:glitcher/list_items/chat_item.dart';
 
 class Chats extends StatefulWidget {
   @override
