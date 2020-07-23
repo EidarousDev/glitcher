@@ -348,7 +348,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               onPressed: () {
                                 setState(() {
                                   isEditingUsername = true;
-                                  _usernameEditingController.text = _usernameText;
+                                  _usernameEditingController.text =
+                                      _usernameText;
                                 });
                               })
                           : IconButton(
@@ -359,7 +360,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               onPressed: () {
                                 setState(() {
                                   isEditingUsername = false;
-                                  _usernameText = _usernameEditingController.text;
+                                  _usernameText =
+                                      _usernameEditingController.text;
                                 });
 
                                 updateUsername();
@@ -549,11 +551,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         _loading
             ? Center(
-            child: Image.asset(
-              'assets/images/glitcher_loader.gif',
-              height: 250,
-              width: 250,
-            ))
+                child: Image.asset(
+                'assets/images/glitcher_loader.gif',
+                height: 250,
+                width: 250,
+              ))
             : Container(
                 width: 0,
                 height: 0,
@@ -563,11 +565,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   updateUsername() async {
-    await usersRef.document(userId).updateData({'username': _usernameText});
+    List search = searchList(_usernameText);
+    search.addAll(searchList(_nameText));
+    await usersRef
+        .document(userId)
+        .updateData({'username': _usernameText, 'search': search});
+  }
+
+  searchList(String text) {
+    List<String> list = [];
+    for (int i = 1; i <= text.length; i++) {
+      list.add(text.substring(0, i).toLowerCase());
+    }
+    return list;
   }
 
   updateName() async {
-    await usersRef.document(userId).updateData({'name': _nameText});
+    List search = searchList(_usernameText);
+    search.addAll(searchList(_nameText));
+    await usersRef
+        .document(userId)
+        .updateData({'name': _nameText, 'search': search});
   }
 
   updateDesc() async {
@@ -654,7 +672,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             btnFunction: () async {
               ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
               await bottomSheet.openBottomSheet(context);
-              File image = await AppUtil.chooseImage(source: bottomSheet.choice);
+              File image =
+                  await AppUtil.chooseImage(source: bottomSheet.choice);
               setState(() {
                 _coverImageFile = image;
                 _coverImageUrl = null;
@@ -708,7 +727,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             btnFunction: () async {
               ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
               await bottomSheet.openBottomSheet(context);
-              File image = await AppUtil.chooseImage(source: bottomSheet.choice);
+              File image =
+                  await AppUtil.chooseImage(source: bottomSheet.choice);
               setState(() {
                 _profileImageFile = image;
                 _profileImageUrl = null;
@@ -746,7 +766,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               imageFile: _coverImageFile,
               btnText: 'Download',
               btnFunction: () async {
-                downloadImage(_coverImageUrl, randomAlphaNumeric(20) + '_cover');
+                downloadImage(
+                    _coverImageUrl, randomAlphaNumeric(20) + '_cover');
                 Navigator.of(context).pop();
               },
             ),
@@ -769,7 +790,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               imageFile: _profileImageFile,
               btnText: 'Download',
               btnFunction: () async {
-                await downloadImage(_profileImageUrl, randomAlphaNumeric(20) + '_profile');
+                await downloadImage(
+                    _profileImageUrl, randomAlphaNumeric(20) + '_profile');
                 Navigator.of(context).pop();
               },
             ),

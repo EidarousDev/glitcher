@@ -69,21 +69,6 @@ class _BuildDrawerState extends State<BuildDrawer> {
           ),
           ListTile(
             onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          ProfileScreen(Constants.currentUserID)));
-            },
-            title: Text(
-              'Profile',
-            ),
-            leading: Icon(
-              Icons.person,
-            ),
-          ),
-          ListTile(
-            onTap: () {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => GamesScreen()));
             },
@@ -131,18 +116,6 @@ class _BuildDrawerState extends State<BuildDrawer> {
             onTap: () {
               Navigator.of(context).pushNamed('/about-us');
             },
-          ),
-          ListTile(
-            onTap: () {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => Chats()));
-            },
-            title: Text(
-              'Chats',
-            ),
-            leading: Icon(
-              Icons.chat_bubble,
-            ),
           ),
           ListTile(
             onTap: () {

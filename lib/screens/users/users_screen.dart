@@ -37,11 +37,13 @@ class _UsersScreenState extends State<UsersScreen> {
               Icons.search,
               size: 28.0,
             ),
-            suffixIcon: _searching ? IconButton(
-                icon: Icon(Icons.close),
-                onPressed: () {
-                  _searchController.clear();
-                }): null,
+            suffixIcon: _searching
+                ? IconButton(
+                    icon: Icon(Icons.close),
+                    onPressed: () {
+                      _searchController.clear();
+                    })
+                : null,
             hintText: 'Search',
           ),
           onChanged: (text) {
@@ -55,14 +57,13 @@ class _UsersScreenState extends State<UsersScreen> {
                 _searching = false;
               });
             }
-              users.forEach((user) {
-                if (user.username.toLowerCase().contains(text.toLowerCase())) {
-                  setState(() {
-                    filteredUsers.add(user);
-                  });
-                }
-              });
-
+            users.forEach((user) {
+              if (user.username.toLowerCase().contains(text.toLowerCase())) {
+                setState(() {
+                  filteredUsers.add(user);
+                });
+              }
+            });
           },
         ),
         flexibleSpace: gradientAppBar(),
@@ -95,65 +96,89 @@ class _UsersScreenState extends State<UsersScreen> {
           itemCount: !_searching ? users.length : filteredUsers.length,
           padding: EdgeInsets.all(10),
           itemBuilder: (context, index) {
-            return !_searching ? ListTile(
-              contentPadding: EdgeInsets.all(10),
-              leading: InkWell(
-                  child: CacheThisImage(
-                    imageUrl: users[index].profileImageUrl,
-                    imageShape: BoxShape.circle,
-                    width: Sizes.md_profile_image_w,
-                    height: Sizes.md_profile_image_h,
-                    defaultAssetImage: Strings.default_profile_image,
-                  ),
-                  onTap: () {
-                    Navigator.of(context)
-                        .pushNamed('/user-profile', arguments: {
-                      'userId': users[index].id,
-                    });
-                  }),
-              title: Text(users[index].username),
-              trailing: widget.screenType != 'followers'
-                  ? MaterialButton(
-                      child: Text('Unfollow', style: TextStyle(
-                        color: switchColor(Colors.white, Colors.black)
-                      ),),
-                      onPressed: () async {
-                        await DatabaseService.unfollowUser(users[index].id);
-                        Navigator.of(context).pushReplacementNamed('/friends');
-                      },
-                      color: MyColors.darkPrimary,
-                    )
-                  : null,
-            ): ListTile(
-              contentPadding: EdgeInsets.all(10),
-              leading: InkWell(
-                  child: CacheThisImage(
-                    imageUrl: filteredUsers[index].profileImageUrl,
-                    imageShape: BoxShape.circle,
-                    width: Sizes.md_profile_image_w,
-                    height: Sizes.md_profile_image_h,
-                    defaultAssetImage: Strings.default_profile_image,
-                  ),
-                  onTap: () {
-                    Navigator.of(context)
-                        .pushNamed('/user-profile', arguments: {
-                      'userId': filteredUsers[index].id,
-                    });
-                  }),
-              title: Text(filteredUsers[index].username),
-              trailing: widget.screenType != 'followers'
-                  ? MaterialButton(
-                child: Text('Unfollow', style: TextStyle(
-                    color: switchColor(Colors.white, Colors.black)
-                ),),
-                onPressed: () async {
-                  await DatabaseService.unfollowUser(filteredUsers[index].id);
-                  Navigator.of(context).pushReplacementNamed('/friends');
-                },
-                color: MyColors.darkPrimary,
-              )
-                  : null,
-            );
+            return !_searching
+                ? ListTile(
+                    onTap: () {
+                      Navigator.of(context)
+                          .pushNamed('/user-profile', arguments: {
+                        'userId': users[index].id,
+                      });
+                    },
+                    contentPadding: EdgeInsets.all(10),
+                    leading: InkWell(
+                        child: CacheThisImage(
+                          imageUrl: users[index].profileImageUrl,
+                          imageShape: BoxShape.circle,
+                          width: Sizes.md_profile_image_w,
+                          height: Sizes.md_profile_image_h,
+                          defaultAssetImage: Strings.default_profile_image,
+                        ),
+                        onTap: () {
+                          Navigator.of(context)
+                              .pushNamed('/user-profile', arguments: {
+                            'userId': users[index].id,
+                          });
+                        }),
+                    title: Text(users[index].username),
+                    trailing: widget.screenType != 'followers'
+                        ? MaterialButton(
+                            child: Text(
+                              'Unfollow',
+                              style: TextStyle(
+                                  color:
+                                      switchColor(Colors.white, Colors.black)),
+                            ),
+                            onPressed: () async {
+                              await DatabaseService.unfollowUser(
+                                  users[index].id);
+                              Navigator.of(context)
+                                  .pushReplacementNamed('/friends');
+                            },
+                            color: MyColors.darkPrimary,
+                          )
+                        : null,
+                  )
+                : ListTile(
+                    onTap: () {
+                      Navigator.of(context)
+                          .pushNamed('/user-profile', arguments: {
+                        'userId': filteredUsers[index].id,
+                      });
+                    },
+                    contentPadding: EdgeInsets.all(10),
+                    leading: InkWell(
+                        child: CacheThisImage(
+                          imageUrl: filteredUsers[index].profileImageUrl,
+                          imageShape: BoxShape.circle,
+                          width: Sizes.md_profile_image_w,
+                          height: Sizes.md_profile_image_h,
+                          defaultAssetImage: Strings.default_profile_image,
+                        ),
+                        onTap: () {
+                          Navigator.of(context)
+                              .pushNamed('/user-profile', arguments: {
+                            'userId': filteredUsers[index].id,
+                          });
+                        }),
+                    title: Text(filteredUsers[index].username),
+                    trailing: widget.screenType != 'followers'
+                        ? MaterialButton(
+                            child: Text(
+                              'Unfollow',
+                              style: TextStyle(
+                                  color:
+                                      switchColor(Colors.white, Colors.black)),
+                            ),
+                            onPressed: () async {
+                              await DatabaseService.unfollowUser(
+                                  filteredUsers[index].id);
+                              Navigator.of(context)
+                                  .pushReplacementNamed('/friends');
+                            },
+                            color: MyColors.darkPrimary,
+                          )
+                        : null,
+                  );
           }),
     );
   }

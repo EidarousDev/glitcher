@@ -46,6 +46,7 @@ class _ChatBubbleState extends State<ChatBubble> {
     super.initState();
     //print('Message: ${widget.message}');
     audioPlayerWidget = AudioMessagePlayer(url: widget.message);
+    print('type: ${widget.type}, message: ${widget.message}');
   }
 
   @override

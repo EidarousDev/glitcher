@@ -122,7 +122,7 @@ class _ConversationState extends State<Conversation>
         }
 
         if (Message.fromDoc(change.document).sender == widget.otherUid) {
-          print('made seen');
+          //print('made seen');
           makeMessagesSeen();
         }
       });
@@ -214,21 +214,12 @@ class _ConversationState extends State<Conversation>
   }
 
   makeMessagesSeen() async {
-//    await _firestore
-//        .collection('chats')
-//        .document(Constants.currentUserID)
-//        .collection('conversations')
-//        .document(otherUid)
-//        .collection('messages')
-//        .document('seen')
-//        .setData({'isSeen': true});
-
     await _firestore
         .collection('chats')
         .document(widget.otherUid)
         .collection('conversations')
         .document(Constants.currentUserID)
-        .setData({'isSeen': true});
+        .updateData({'isSeen': true});
   }
 
   makeMessagesUnseen() async {
@@ -539,7 +530,7 @@ class _ConversationState extends State<Conversation>
 //                                  ' : ' +
 //                                  (formatter.format(int.parse(recordTime) % 60))
 //                                      .toString()),
-                          : Text(recordTime),
+                              : Text(recordTime),
                           trailing: _typing
                               ? IconButton(
                                   icon: Icon(
@@ -554,23 +545,42 @@ class _ConversationState extends State<Conversation>
                                   },
                                 )
                               : GestureDetector(
-                            onLongPressUp: () async{
-                              setState(() {
-                                _currentStatus = RecordingStatus.Stopped;
-                              });
-                              Recording result =
-                              await recorder.stopRecording();
+                                  onLongPress: () async {
+                                    bool isGranted = await PermissionsService()
+                                        .requestMicrophonePermission(
+                                            onPermissionDenied: () {
+                                      print('Permission has been denied');
+                                      return;
+                                    });
 
-                              //Storage path is voice_messages/sender_id/receiver_id/file
-                              _url = await AppUtil.uploadFile(
-                                  File(result.path),
-                                  context,
-                                  'voice_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}');
-
-                              await DatabaseService.sendMessage(
-                                  widget.otherUid, 'audio', _url);
-
-                            },
+                                    if (isGranted) {
+                                      setState(() {
+                                        _currentStatus =
+                                            RecordingStatus.Recording;
+                                      });
+                                      await initRecorder();
+                                      await recorder.startRecording(
+                                          conversation: this.widget);
+                                    } else {
+                                      showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return AlertDialog(
+                                              title: Text('Info'),
+                                              content: Text(
+                                                  'You must grant this microphone access to be able to use this feature.'),
+                                              actions: <Widget>[
+                                                MaterialButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Text('OK'),
+                                                )
+                                              ],
+                                            );
+                                          });
+                                    }
+                                  },
                                   onLongPressEnd: (longPressDetails) async {
                                     setState(() {
                                       _currentStatus = RecordingStatus.Stopped;

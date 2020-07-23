@@ -16,6 +16,7 @@ import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/home/home_screen.dart';
 import 'package:glitcher/screens/notifications/notifications_screen.dart';
 import 'package:glitcher/screens/profile/profile_screen.dart';
+import 'package:glitcher/screens/users/search_screen.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/functions.dart';
@@ -59,6 +60,7 @@ class _AppPageState extends State<AppPage> {
         children: <Widget>[
           HomeScreen(),
           Chats(),
+          SearchScreen(),
           NotificationsScreen(),
           ProfileScreen(Constants.currentUserID),
         ],
@@ -85,6 +87,12 @@ class _AppPageState extends State<AppPage> {
             BottomNavigationBarItem(
               icon: Icon(
                 Icons.message,
+              ),
+              title: Container(height: 0.0),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.search,
               ),
               title: Container(height: 0.0),
             ),

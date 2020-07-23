@@ -62,8 +62,8 @@ class _CommentItemState extends State<CommentItem> {
 
   @override
   Widget build(BuildContext context) {
-    print(
-        'user: ${widget.commenter.username} and comment: ${widget.comment.text}');
+//    print(
+//        'user: ${widget.commenter.username} and comment: ${widget.comment.text}');
     return SafeArea(
       child: Column(
         children: <Widget>[
@@ -871,9 +871,11 @@ class _CommentItemState extends State<CommentItem> {
   loadReplies(String postId, String commentId) async {
     List<Comment> replies =
         await DatabaseService.getCommentReplies(postId, commentId);
-    setState(() {
-      this.replies = replies;
-    });
+      if(mounted){
+        setState(() {
+          this.replies = replies;
+        });
+      }
 
     this.replies.forEach((element) async {
       User user = await DatabaseService.getUserWithId(element.commenterID);

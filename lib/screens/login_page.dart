@@ -223,14 +223,25 @@ class _LoginPageState extends State<LoginPage>
   }
 
   void addUserToDatabase(String id) {
+    List search = searchList(_username);
     Map<String, dynamic> userMap = {
+      'name': 'Your name here',
       'username': _username,
       'description': 'Write something about yourself',
       'notificationsNumber': 0,
       'violations': 0,
+      'search': search
     };
 
     usersRef.document(id).setData(userMap);
+  }
+
+  searchList(String text) {
+    List<String> list = [];
+    for (int i = 1; i <= text.length; i++) {
+      list.add(text.substring(0, i).toLowerCase());
+    }
+    return list;
   }
 
   Future<bool> isUsernameTaken(String name) async {

@@ -560,10 +560,33 @@ class DatabaseService {
     QuerySnapshot gameSnapshot = await gamesRef
         .where('search', arrayContains: text)
         .orderBy('fullName', descending: false)
+        .limit(10)
         .getDocuments();
     List<Game> games =
         gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
     return games;
+  }
+
+  static Future<List> nextSearchGames(String lastVisiblePostSnapShot, String text) async {
+    QuerySnapshot gameSnapshot = await gamesRef
+        .where('search', arrayContains: text)
+        .orderBy('fullName', descending: false)
+        .startAfter([lastVisiblePostSnapShot])
+        .limit(10)
+        .getDocuments();
+    List<Game> games =
+        gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
+    return games;
+  }
+
+  static Future<List> searchUsers(text) async {
+    QuerySnapshot usersSnapshot = await usersRef
+        .where('search', arrayContains: text)
+        .orderBy('username', descending: false)
+        .getDocuments();
+    List<User> users =
+        usersSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
+    return users;
   }
 
   // This function is used to submit/add a comment

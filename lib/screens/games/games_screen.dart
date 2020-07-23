@@ -14,6 +14,9 @@ class GamesScreen extends StatefulWidget {
 
 class _GamesScreenState extends State<GamesScreen> {
   List<Game> _games = [];
+  List<Game> _filteredGames = [];
+
+  bool _searching = false;
   ScrollController _scrollController = ScrollController();
 
   TextEditingController _typeAheadController = TextEditingController();
@@ -31,18 +34,11 @@ class _GamesScreenState extends State<GamesScreen> {
           Icons.email,
         ),
         onPressed: () async {
-          //Navigator.of(context).pushNamed('/new-game');
-//
-//          final Email email = Email(
-//            body: 'ARK Survival evolved.',
-//            subject: 'Game suggestion',
-//            recipients: ['ahmednab93@gmail.com'],
-//            isHTML: false,
-//          );
-
-//          await FlutterEmailSender.send(email);
-
-        Navigator.of(context).pushNamed('/suggestion', arguments: {'initial_title': 'New game suggestion', 'initial_details': 'I (${Constants.loggedInUser.username}) suggest adding the following game: '});
+          Navigator.of(context).pushNamed('/suggestion', arguments: {
+            'initial_title': 'New game suggestion',
+            'initial_details':
+                'I (${Constants.loggedInUser.username}) suggest adding the following game: '
+          });
           Functions.showInSnackBar(context, _scaffoldKey, "Suggestion sent ");
         },
       ),
@@ -71,25 +67,36 @@ class _GamesScreenState extends State<GamesScreen> {
                   Icons.search,
                   size: 28.0,
                 ),
-                suffixIcon: IconButton(
-                    icon: Icon(Icons.close),
+                suffixIcon: _searching ? IconButton(
+                    icon:  Icon(Icons.close),
                     onPressed: () {
                       _typeAheadController.clear();
-                      _setupFeed();
-                    }),
+                      setState(() {
+                        _searching = false;
+                      });
+
+                    }): null,
               ),
               controller: _typeAheadController,
               onChanged: (text) {
+                _filteredGames = [];
                 if (text.isEmpty) {
                   _setupFeed();
+                  setState(() {
+                    _filteredGames = [];
+                    _searching = false;
+                  });
                 } else {
+                  setState(() {
+                    _searching = true;
+                  });
                   _searchGames(text);
                 }
               },
             ),
           ),
           Expanded(
-            child: ListView.builder(
+            child: !_searching ? ListView.builder(
               controller: _scrollController,
               scrollDirection: Axis.vertical,
               shrinkWrap: true,
@@ -106,6 +113,24 @@ class _GamesScreenState extends State<GamesScreen> {
                     ],
                   );
                 });
+              },
+            ):ListView.builder(
+              controller: _scrollController,
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              itemCount: _filteredGames.length,
+              itemBuilder: (BuildContext context, int index) {
+                Game game = _filteredGames[index];
+
+                return StreamBuilder(
+                    builder: (BuildContext context, AsyncSnapshot snapshot) {
+                      return Column(
+                        children: <Widget>[
+                          GameItem(key: ValueKey(game.id), game: game),
+                          Divider(height: .5, color: Colors.grey)
+                        ],
+                      );
+                    });
               },
             ),
           ),
@@ -126,7 +151,8 @@ class _GamesScreenState extends State<GamesScreen> {
   _searchGames(String text) async {
     List<Game> games = await DatabaseService.searchGames(text.toLowerCase());
     setState(() {
-      _games = games;
+      _filteredGames = games;
+      this.lastVisibleGameSnapShot = games.last.fullName;
     });
   }
 
@@ -140,7 +166,7 @@ class _GamesScreenState extends State<GamesScreen> {
               _scrollController.position.maxScrollExtent &&
           !_scrollController.position.outOfRange) {
         print('reached the bottom');
-        nextGames();
+        !_searching ? nextGames() : nextSearchGames(_typeAheadController.text);
       } else if (_scrollController.offset <=
               _scrollController.position.minScrollExtent &&
           !_scrollController.position.outOfRange) {
@@ -158,5 +184,16 @@ class _GamesScreenState extends State<GamesScreen> {
         this.lastVisibleGameSnapShot = games.last.fullName;
       });
     }
+  }
+
+  nextSearchGames(String text) async{
+    var games = await DatabaseService.nextSearchGames(lastVisibleGameSnapShot, text);
+    if (games.length > 0) {
+      setState(() {
+        games.forEach((element) => _filteredGames.add(element));
+        this.lastVisibleGameSnapShot = games.last.fullName;
+      });
+    }
+
   }
 }

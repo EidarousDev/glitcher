@@ -67,7 +67,7 @@ class _PostPreviewState extends State<PostPreview>
   /// @param youtubeId for posts with an Embedded YouTube Video
   String _youtubeId;
 
-  AnimationController _animationController;
+  //AnimationController _animationController = AnimationController();
   Animation _animation;
   FocusNode _focusNode = FocusNode();
 
@@ -103,7 +103,7 @@ class _PostPreviewState extends State<PostPreview>
   void dispose() {
     //videoPlayerController.dispose();
     //chewieController.dispose();
-    _animationController.dispose();
+    //_animationController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -201,7 +201,7 @@ class _PostPreviewState extends State<PostPreview>
                           return SizedBox.shrink();
                         }
                         User commenter = snapshot.data;
-                        print('commenter: $commenter and comment: $comment');
+                        //print('commenter: $commenter and comment: $comment');
                         return CommentItem(
                           post: widget.post,
                           comment: comment,

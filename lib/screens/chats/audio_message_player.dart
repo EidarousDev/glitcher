@@ -110,7 +110,7 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
   }
 
   Future play() async {
-    //print('audio url: ${widget.url}');
+    print('audio url: ${widget.url}');
     await advancedPlayer.play(widget.url);
     setState(() {
       playerState = AudioPlayerState.PLAYING;

@@ -10,17 +10,19 @@ class User {
   final dynamic online;
   final int violations;
   final int notificationsNumber;
+  final List search;
 
   User(
       {this.id,
-        this.name,
-        this.username,
-        this.profileImageUrl,
-        this.email,
-        this.description,
-        this.online,
-        this.violations,
-        this.notificationsNumber});
+      this.name,
+      this.username,
+      this.profileImageUrl,
+      this.email,
+      this.description,
+      this.online,
+      this.violations,
+      this.notificationsNumber,
+      this.search});
 
   factory User.fromDoc(DocumentSnapshot doc) {
     return User(
@@ -32,6 +34,7 @@ class User {
         description: doc['description'] ?? '',
         online: doc['online'],
         violations: doc['violations'],
-        notificationsNumber: doc['notificationsNumber']);
+        notificationsNumber: doc['notificationsNumber'],
+        search: doc['search']);
   }
 }
