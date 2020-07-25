@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_email_sender/flutter_email_sender.dart';
-import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
-import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/list_items/game_item.dart';
+import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
 
 class GamesScreen extends StatefulWidget {
   @override
@@ -67,15 +66,16 @@ class _GamesScreenState extends State<GamesScreen> {
                   Icons.search,
                   size: 28.0,
                 ),
-                suffixIcon: _searching ? IconButton(
-                    icon:  Icon(Icons.close),
-                    onPressed: () {
-                      _typeAheadController.clear();
-                      setState(() {
-                        _searching = false;
-                      });
-
-                    }): null,
+                suffixIcon: _searching
+                    ? IconButton(
+                        icon: Icon(Icons.close),
+                        onPressed: () {
+                          _typeAheadController.clear();
+                          setState(() {
+                            _searching = false;
+                          });
+                        })
+                    : null,
               ),
               controller: _typeAheadController,
               onChanged: (text) {
@@ -96,43 +96,45 @@ class _GamesScreenState extends State<GamesScreen> {
             ),
           ),
           Expanded(
-            child: !_searching ? ListView.builder(
-              controller: _scrollController,
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              itemCount: _games.length,
-              itemBuilder: (BuildContext context, int index) {
-                Game game = _games[index];
+            child: !_searching
+                ? ListView.builder(
+                    controller: _scrollController,
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: _games.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      Game game = _games[index];
 
-                return StreamBuilder(
-                    builder: (BuildContext context, AsyncSnapshot snapshot) {
-                  return Column(
-                    children: <Widget>[
-                      GameItem(key: ValueKey(game.id), game: game),
-                      Divider(height: .5, color: Colors.grey)
-                    ],
-                  );
-                });
-              },
-            ):ListView.builder(
-              controller: _scrollController,
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              itemCount: _filteredGames.length,
-              itemBuilder: (BuildContext context, int index) {
-                Game game = _filteredGames[index];
+                      return StreamBuilder(builder:
+                          (BuildContext context, AsyncSnapshot snapshot) {
+                        return Column(
+                          children: <Widget>[
+                            GameItem(key: ValueKey(game.id), game: game),
+                            Divider(height: .5, color: Colors.grey)
+                          ],
+                        );
+                      });
+                    },
+                  )
+                : ListView.builder(
+                    controller: _scrollController,
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: _filteredGames.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      Game game = _filteredGames[index];
 
-                return StreamBuilder(
-                    builder: (BuildContext context, AsyncSnapshot snapshot) {
-                      return Column(
-                        children: <Widget>[
-                          GameItem(key: ValueKey(game.id), game: game),
-                          Divider(height: .5, color: Colors.grey)
-                        ],
-                      );
-                    });
-              },
-            ),
+                      return StreamBuilder(builder:
+                          (BuildContext context, AsyncSnapshot snapshot) {
+                        return Column(
+                          children: <Widget>[
+                            GameItem(key: ValueKey(game.id), game: game),
+                            Divider(height: .5, color: Colors.grey)
+                          ],
+                        );
+                      });
+                    },
+                  ),
           ),
         ],
       ),
@@ -183,17 +185,18 @@ class _GamesScreenState extends State<GamesScreen> {
         games.forEach((element) => _games.add(element));
         this.lastVisibleGameSnapShot = games.last.fullName;
       });
+      print('lastVisibleGameSnapShot: $lastVisibleGameSnapShot');
     }
   }
 
-  nextSearchGames(String text) async{
-    var games = await DatabaseService.nextSearchGames(lastVisibleGameSnapShot, text);
+  nextSearchGames(String text) async {
+    var games =
+        await DatabaseService.nextSearchGames(lastVisibleGameSnapShot, text);
     if (games.length > 0) {
       setState(() {
         games.forEach((element) => _filteredGames.add(element));
         this.lastVisibleGameSnapShot = games.last.fullName;
       });
     }
-
   }
 }

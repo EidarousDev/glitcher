@@ -4,8 +4,6 @@ import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/widgets/scrolling_text.dart';
-import 'package:marquee/marquee.dart';
 
 class GameItem extends StatefulWidget {
   final Game game;
@@ -141,9 +139,11 @@ class _GameItemState extends State<GameItem> {
         followBtnText = 'Unfollow';
       });
     } else {
-      setState(() {
-        followBtnText = 'Follow';
-      });
+      if (mounted) {
+        setState(() {
+          followBtnText = 'Follow';
+        });
+      }
     }
   }
 

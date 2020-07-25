@@ -5,10 +5,10 @@ import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/message_model.dart';
-import 'package:glitcher/models/notification_model.dart'as notification;
+import 'package:glitcher/models/notification_model.dart' as notification;
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/services/notification_handler.dart' ;
+import 'package:glitcher/services/notification_handler.dart';
 
 class DatabaseService {
   // This function is used to get the recent posts (unfiltered)
@@ -278,7 +278,8 @@ class DatabaseService {
         .orderBy('timestamp', descending: true)
         .limit(10)
         .getDocuments();
-    List<notification.Notification> notifications = notificationSnapshot.documents
+    List<notification.Notification> notifications = notificationSnapshot
+        .documents
         .map((doc) => notification.Notification.fromDoc(doc))
         .toList();
     return notifications;
@@ -567,7 +568,8 @@ class DatabaseService {
     return games;
   }
 
-  static Future<List> nextSearchGames(String lastVisiblePostSnapShot, String text) async {
+  static Future<List> nextSearchGames(
+      String lastVisiblePostSnapShot, String text) async {
     QuerySnapshot gameSnapshot = await gamesRef
         .where('search', arrayContains: text)
         .orderBy('fullName', descending: false)
@@ -583,6 +585,20 @@ class DatabaseService {
     QuerySnapshot usersSnapshot = await usersRef
         .where('search', arrayContains: text)
         .orderBy('username', descending: false)
+        .limit(10)
+        .getDocuments();
+    List<User> users =
+        usersSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
+    return users;
+  }
+
+  static Future<List> nextSearchUsers(
+      String lastVisiblePostSnapShot, String text) async {
+    QuerySnapshot usersSnapshot = await usersRef
+        .where('search', arrayContains: text)
+        .orderBy('username', descending: false)
+        .startAfter([lastVisiblePostSnapShot])
+        .limit(10)
         .getDocuments();
     List<User> users =
         usersSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
@@ -601,11 +617,14 @@ class DatabaseService {
         .updateData({'comments': FieldValue.increment(1)});
   }
 
-  static void editComment(String postId, String commentId, String commentText) async {
-    await postsRef.document(postId).collection('comments').document(commentId).updateData({
-      'text': commentText,
-      'timestamp': FieldValue.serverTimestamp()
-    });
+  static void editComment(
+      String postId, String commentId, String commentText) async {
+    await postsRef
+        .document(postId)
+        .collection('comments')
+        .document(commentId)
+        .updateData(
+            {'text': commentText, 'timestamp': FieldValue.serverTimestamp()});
   }
 
   static void addReply(
@@ -635,10 +654,8 @@ class DatabaseService {
         .document(commentId)
         .collection('replies')
         .document(replyId)
-        .updateData({
-      'text': replyText,
-      'timestamp': FieldValue.serverTimestamp()
-    });
+        .updateData(
+            {'text': replyText, 'timestamp': FieldValue.serverTimestamp()});
   }
 
   static followGame(String gameId) async {
@@ -715,9 +732,8 @@ class DatabaseService {
 
     List<Post> posts = [];
 
-    for(DocumentSnapshot doc in postSnapshot.documents){
-      DocumentSnapshot postDoc =
-      await postsRef.document(doc.documentID).get();
+    for (DocumentSnapshot doc in postSnapshot.documents) {
+      DocumentSnapshot postDoc = await postsRef.document(doc.documentID).get();
 
       if (postDoc.exists) {
         posts.add(await getPostWithId(doc.documentID));
@@ -746,9 +762,8 @@ class DatabaseService {
 
     List<Post> posts = [];
 
-    for(DocumentSnapshot doc in postSnapshot.documents){
-      DocumentSnapshot postDoc =
-      await postsRef.document(doc.documentID).get();
+    for (DocumentSnapshot doc in postSnapshot.documents) {
+      DocumentSnapshot postDoc = await postsRef.document(doc.documentID).get();
 
       if (postDoc.exists) {
         posts.add(await getPostWithId(doc.documentID));
@@ -774,9 +789,8 @@ class DatabaseService {
 
     List<Post> posts = [];
 
-    for(DocumentSnapshot doc in postSnapshot.documents){
-      DocumentSnapshot postDoc =
-      await postsRef.document(doc.documentID).get();
+    for (DocumentSnapshot doc in postSnapshot.documents) {
+      DocumentSnapshot postDoc = await postsRef.document(doc.documentID).get();
 
       if (postDoc.exists) {
         Post post = await getPostWithId(doc.documentID);
@@ -806,9 +820,8 @@ class DatabaseService {
 
     List<Post> posts = [];
 
-    for(DocumentSnapshot doc in postsSnapshot.documents){
-      DocumentSnapshot postDoc =
-      await postsRef.document(doc.documentID).get();
+    for (DocumentSnapshot doc in postsSnapshot.documents) {
+      DocumentSnapshot postDoc = await postsRef.document(doc.documentID).get();
 
       if (postDoc.exists) {
         posts.add(await getPostWithId(doc.documentID));
@@ -820,7 +833,6 @@ class DatabaseService {
             .delete();
       }
     }
-
 
     return posts;
   }

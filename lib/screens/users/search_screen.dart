@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:glitcher/utils/functions.dart';
-import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({Key key}) : super(key: key);
@@ -21,11 +21,27 @@ class _SearchScreenState extends State<SearchScreen> {
   bool _searching = false;
   List<User> filteredUsers = [];
 
+  String lastVisibleGameSnapShot;
+
+  ScrollController _scrollController = ScrollController();
+
   _searchUsers(String text) async {
     List<User> users = await DatabaseService.searchUsers(text.toLowerCase());
     setState(() {
       filteredUsers = users;
+      this.lastVisibleGameSnapShot = users.last.username;
     });
+  }
+
+  nextSearchUsers(String text) async {
+    var users =
+        await DatabaseService.nextSearchUsers(lastVisibleGameSnapShot, text);
+    if (users.length > 0) {
+      setState(() {
+        users.forEach((element) => filteredUsers.add(element));
+        this.lastVisibleGameSnapShot = users.last.username;
+      });
+    }
   }
 
   @override
@@ -165,6 +181,18 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   void initState() {
+    _scrollController.addListener(() {
+      if (_scrollController.offset >=
+              _scrollController.position.maxScrollExtent &&
+          !_scrollController.position.outOfRange) {
+        print('reached the bottom');
+        nextSearchUsers(_searchController.text);
+      } else if (_scrollController.offset <=
+              _scrollController.position.minScrollExtent &&
+          !_scrollController.position.outOfRange) {
+        print("reached the top");
+      } else {}
+    });
     super.initState();
   }
 }

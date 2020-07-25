@@ -49,20 +49,15 @@ class _LoginPageState extends State<LoginPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            title,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          TextField(
+          TextFormField(
               onChanged: (value) {
                 isPassword ? _password = value : _email = value;
               },
               style: TextStyle(color: MyColors.darkCardBG),
               obscureText: isPassword,
               decoration: InputDecoration(
+                  hintText: isPassword ? 'Password' : 'E-mail',
+                  hintStyle: TextStyle(color: Colors.grey),
                   border: InputBorder.none,
                   fillColor: Color(0xfff3f3f4),
                   filled: true))
@@ -290,12 +285,17 @@ class _LoginPageState extends State<LoginPage> {
                       _emailPasswordWidget(),
                       SizedBox(height: 20),
                       _submitButton(),
-                      Container(
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        alignment: Alignment.centerRight,
-                        child: Text('Forgot Password ?',
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.w500)),
+                      GestureDetector(
+                        onTap: () async {
+                          await auth.sendPasswordResetEmail(email: _email);
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 10),
+                          alignment: Alignment.centerRight,
+                          child: Text('Forgot Password ?',
+                              style: TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w500)),
+                        ),
                       ),
                       _divider(),
                       _facebookButton(),
