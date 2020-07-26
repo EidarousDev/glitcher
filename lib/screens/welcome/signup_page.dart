@@ -27,13 +27,13 @@ class _SignUpPageState extends State<SignUpPage> {
 
   String _errorMsgEmail = '';
 
-  String _username;
+  String _username = '';
 
-  String _password;
+  String _password = '';
 
-  String _email;
+  String _email = '';
 
-  String _confirmPassword;
+  String _confirmPassword = '';
 
   String userId = "";
 
@@ -159,7 +159,14 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget _submitButton() {
     return InkWell(
       onTap: () async {
-        await _signUp();
+        if (_email.isNotEmpty &&
+            _username.isNotEmpty &&
+            _password.isNotEmpty &&
+            _confirmPassword.isNotEmpty) {
+          await _signUp();
+        } else {
+          AppUtil.showSnackBar(context, _scaffoldKey, 'Please fill fields above');
+        }
       },
       child: Container(
         width: MediaQuery.of(context).size.width,
@@ -182,8 +189,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget _loginAccountLabel() {
     return InkWell(
       onTap: () {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => LoginPage()));
+        Navigator.pushReplacementNamed(context, 'login');
       },
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 20),
@@ -214,8 +220,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
   Widget _title() {
     return Image.asset(
-      'assets/images/glitcher_rounded.png',
-      height: 120.0,
+      'assets/images/icon-480.png',
+      height: 200.0,
     );
   }
 
@@ -252,7 +258,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    SizedBox(height: 110),
+                    SizedBox(height: 30),
                     _title(),
                     SizedBox(
                       height: 50,
@@ -402,7 +408,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
     if (!valid) {
       // username exists
-      Functions.showInSnackBar(context, _scaffoldKey,
+      AppUtil.showSnackBar(context, _scaffoldKey,
           '$_username is already in use. Please choose a different username.');
       myFocusNodeName.requestFocus();
     } else {
@@ -412,6 +418,10 @@ class _SignUpPageState extends State<SignUpPage> {
         // Validation Passed
         try {
           userId = await auth.signUp(_username, _email, _password);
+          if(userId == 'Email already in use'){
+            AppUtil.showSnackBar(context, _scaffoldKey, userId);
+            return;
+          }
           addUserToDatabase(userId);
           //widget.auth.sendEmailVerification();
           //showVerifyEmailSentDialog(context);
@@ -422,18 +432,18 @@ class _SignUpPageState extends State<SignUpPage> {
         } catch (signUpError) {
           if (signUpError is PlatformException) {
             if (signUpError.code == 'ERROR_EMAIL_ALREADY_IN_USE') {
-              Functions.showInSnackBar(
+              AppUtil.showSnackBar(
                   context, _scaffoldKey, '$_email is already in use.');
               myFocusNodeEmail.requestFocus();
             } else if (signUpError.code == 'ERROR_WEAK_PASSWORD') {
-              Functions.showInSnackBar(context, _scaffoldKey,
+              AppUtil.showSnackBar(context, _scaffoldKey,
                   'Password is too weak. Please, type in a more complex password.');
               myFocusNodePassword.requestFocus();
             } else if (signUpError.code == 'ERROR_INVALID_EMAIL') {
-              Functions.showInSnackBar(context, _scaffoldKey, 'Invalid Email.');
+              AppUtil.showSnackBar(context, _scaffoldKey, 'Invalid Email.');
               myFocusNodeEmail.requestFocus();
             } else {
-              Functions.showInSnackBar(
+              AppUtil.showSnackBar(
                   context, _scaffoldKey, 'Unknown Error.. $signUpError');
             }
           }
@@ -442,18 +452,16 @@ class _SignUpPageState extends State<SignUpPage> {
         }
       } else {
         if (_password != _confirmPassword) {
-          Functions.showInSnackBar(
-              context, _scaffoldKey, "Passwords don't match");
+          AppUtil.showSnackBar(context, _scaffoldKey, "Passwords don't match");
           myFocusNodePassword.requestFocus();
         } else {
           if (_errorMsgUsername != null) {
-            Functions.showInSnackBar(context, _scaffoldKey, _errorMsgUsername);
+            AppUtil.showSnackBar(context, _scaffoldKey, _errorMsgUsername);
           } else if (_errorMsgEmail != null) {
-            Functions.showInSnackBar(context, _scaffoldKey, _errorMsgEmail);
+            AppUtil.showSnackBar(context, _scaffoldKey, _errorMsgEmail);
           } else {
             print('$_errorMsgUsername\n$_errorMsgEmail');
-            Functions.showInSnackBar(
-                context, _scaffoldKey, "An Error Occurred");
+            AppUtil.showSnackBar(context, _scaffoldKey, "An Error Occurred");
           }
         }
       }

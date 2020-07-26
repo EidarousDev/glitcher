@@ -3,6 +3,7 @@ import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/list_items/game_item.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 
@@ -38,7 +39,7 @@ class _GamesScreenState extends State<GamesScreen> {
             'initial_details':
                 'I (${Constants.loggedInUser.username}) suggest adding the following game: '
           });
-          Functions.showInSnackBar(context, _scaffoldKey, "Suggestion sent ");
+          AppUtil.showSnackBar(context, _scaffoldKey, "Suggestion sent ");
         },
       ),
       appBar: AppBar(

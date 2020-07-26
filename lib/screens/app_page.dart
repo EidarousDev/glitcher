@@ -17,6 +17,7 @@ import 'package:glitcher/screens/profile/profile_screen.dart';
 import 'package:glitcher/screens/users/search_screen.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:package_info/package_info.dart';
 
@@ -154,7 +155,7 @@ class _AppPageState extends State<AppPage> {
       // Got a new connectivity status!
       if (result == ConnectivityResult.none) {
         print('No internet');
-        Functions.showInFixedSnackBar(
+        AppUtil.showFixedSnackBar(
             context, _scaffoldKey, 'No internet connection.');
       } else {
         _scaffoldKey.currentState.hideCurrentSnackBar();

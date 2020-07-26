@@ -15,6 +15,7 @@ import 'package:glitcher/screens/chats/group_conversation.dart';
 import 'package:glitcher/screens/chats/group_details.dart';
 import 'package:glitcher/screens/chats/group_members.dart';
 import 'package:glitcher/screens/chats/new_group.dart';
+import 'package:glitcher/screens/welcome/login_page.dart';
 import 'package:glitcher/screens/users/users_screen.dart';
 import 'package:glitcher/screens/games/game_screen.dart';
 import 'package:glitcher/screens/games/new_game.dart';
@@ -31,6 +32,8 @@ import 'package:glitcher/screens/report_post_screen.dart';
 import 'package:glitcher/screens/settings.dart';
 import 'package:glitcher/screens/suggestion_screen.dart';
 import 'package:glitcher/screens/web_browser/in_app_browser.dart';
+import 'package:glitcher/screens/welcome/password_reset.dart';
+import 'package:glitcher/screens/welcome/signup_page.dart';
 import 'package:page_transition/page_transition.dart';
 
 class RouteGenerator {
@@ -188,6 +191,16 @@ class RouteGenerator {
 
       case '/suggestion':
         return MaterialPageRoute(builder: (_) => SuggestionScreen(initialTitle: args['initial_title'], initialDetails: args['initial_details'], gameId: args['game_id'],));
+
+      case 'sign-up':
+        return MaterialPageRoute(builder: (_) => SignUpPage());
+
+      case 'login':
+        return MaterialPageRoute(builder: (_) => LoginPage());
+
+      case 'password-reset':
+        return MaterialPageRoute(builder: (_) => PasswordResetScreen());
+
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

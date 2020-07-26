@@ -92,7 +92,7 @@ class _WelcomePageState extends State<WelcomePage> {
         ));
   }
 
-  Widget _title() {
+  Widget _icon() {
     return Image.asset(
       'assets/images/icon-480.png',
       height: 260.0,
@@ -123,7 +123,7 @@ class _WelcomePageState extends State<WelcomePage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              _title(),
+              _icon(),
               SizedBox(
                 height: 80,
               ),

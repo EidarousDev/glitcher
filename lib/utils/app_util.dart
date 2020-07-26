@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/widgets/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -35,6 +36,42 @@ class AppUtil {
         gravity: ToastGravity.CENTER,
         timeInSecForIos: 1,
         textcolor: '#ffffff');
+  }
+
+  static void showSnackBar(BuildContext context,
+      GlobalKey<ScaffoldState> _scaffoldKey, String value) {
+    FocusScope.of(context).requestFocus(new FocusNode());
+    _scaffoldKey.currentState?.removeCurrentSnackBar();
+    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+      content: new Text(
+        value,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+            color: Colors.white,
+            fontSize: 16.0,
+            fontFamily: "WorkSansSemiBold"),
+      ),
+      backgroundColor: MyColors.darkPrimary,
+      duration: Duration(seconds: 3),
+    ));
+  }
+
+  static void showFixedSnackBar(BuildContext context,
+      GlobalKey<ScaffoldState> _scaffoldKey, String value) {
+    FocusScope.of(context).requestFocus(new FocusNode());
+    _scaffoldKey.currentState?.removeCurrentSnackBar();
+    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+      content: new Text(
+        value,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+            color: Colors.white,
+            fontSize: 16.0,
+            fontFamily: "WorkSansSemiBold"),
+      ),
+      backgroundColor: MyColors.darkPrimary,
+      duration: Duration(hours: 1),
+    ));
   }
 
   static Future chooseImage({ImageSource source = ImageSource.gallery}) async {

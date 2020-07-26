@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/utils/app_util.dart';
 
 Future<FirebaseUser> getCurrentUser() async {
   FirebaseUser currentUser = await Auth().getCurrentUser();
@@ -40,10 +42,10 @@ class Auth implements BaseAuth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   @override
-  Future<String> signInWithEmailAndPassword(
-      String email, String password) async {
+  Future<String> signInWithEmailAndPassword(String email,
+      String password) async {
     final FirebaseUser user = (await _firebaseAuth.signInWithEmailAndPassword(
-            email: email, password: password))
+        email: email, password: password))
         .user;
     return user?.uid;
   }
@@ -51,7 +53,7 @@ class Auth implements BaseAuth {
   @override
   Future<String> signIn(String email, String password) async {
     FirebaseUser user = (await _firebaseAuth.signInWithEmailAndPassword(
-            email: email, password: password))
+        email: email, password: password))
         .user;
     if (user.isEmailVerified) return user.uid;
     return null;
@@ -59,16 +61,28 @@ class Auth implements BaseAuth {
 
   // ignore: missing_return
   Future<String> signUp(String username, String email, String password) async {
-    FirebaseUser user = (await _firebaseAuth.createUserWithEmailAndPassword(
-            email: email, password: password))
-        .user;
+    FirebaseUser user;
+    try {
+      user = (await _firebaseAuth.createUserWithEmailAndPassword(
+          email: email, password: password))
+          .user;
+    } catch (signUpError) {
+      if (signUpError is PlatformException) {
+        if (signUpError.code == 'ERROR_EMAIL_ALREADY_IN_USE') {
+          return 'Email already in use';
+        }
+      }
+    }
+
+
     try {
       await user.sendEmailVerification();
       return user.uid;
     } catch (e) {
-      print("An error occured while trying to send email        verification");
+      print("An error occurred while trying to send verification email");
       print(e.message);
     }
+
   }
 
   @override
@@ -144,4 +158,5 @@ class Auth implements BaseAuth {
     User loggedInUser = await DatabaseService.getUserWithId(uid);
     return loggedInUser;
   }
+
 }

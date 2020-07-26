@@ -278,7 +278,7 @@ class _LoginPageState extends State<LoginPage>
 
     if (!valid) {
       // username exists
-      Functions.showInSnackBar(context, _scaffoldKey,
+      AppUtil.showSnackBar(context, _scaffoldKey,
           '$_username is already in use. Please choose a different username.');
       myFocusNodeName.requestFocus();
     } else {
@@ -298,18 +298,18 @@ class _LoginPageState extends State<LoginPage>
         } catch (signUpError) {
           if (signUpError is PlatformException) {
             if (signUpError.code == 'ERROR_EMAIL_ALREADY_IN_USE') {
-              Functions.showInSnackBar(
+              AppUtil.showSnackBar(
                   context, _scaffoldKey, '$_email is already in use.');
               myFocusNodeEmail.requestFocus();
             } else if (signUpError.code == 'ERROR_WEAK_PASSWORD') {
-              Functions.showInSnackBar(context, _scaffoldKey,
+              AppUtil.showSnackBar(context, _scaffoldKey,
                   'Password is too weak. Please, type in a more complex password.');
               myFocusNodePassword.requestFocus();
             } else if (signUpError.code == 'ERROR_INVALID_EMAIL') {
-              Functions.showInSnackBar(context, _scaffoldKey, 'Invalid Email.');
+              AppUtil.showSnackBar(context, _scaffoldKey, 'Invalid Email.');
               myFocusNodeEmail.requestFocus();
             } else {
-              Functions.showInSnackBar(
+              AppUtil.showSnackBar(
                   context, _scaffoldKey, 'Unknown Error.. $signUpError');
             }
           }
@@ -318,17 +318,17 @@ class _LoginPageState extends State<LoginPage>
         }
       } else {
         if (_password != _confirmPassword) {
-          Functions.showInSnackBar(
+          AppUtil.showSnackBar(
               context, _scaffoldKey, "Passwords don't match");
           myFocusNodePassword.requestFocus();
         } else {
           if (_errorMsgUsername != null) {
-            Functions.showInSnackBar(context, _scaffoldKey, _errorMsgUsername);
+            AppUtil.showSnackBar(context, _scaffoldKey, _errorMsgUsername);
           } else if (_errorMsgEmail != null) {
-            Functions.showInSnackBar(context, _scaffoldKey, _errorMsgEmail);
+            AppUtil.showSnackBar(context, _scaffoldKey, _errorMsgEmail);
           } else {
             print('$_errorMsgUsername\n$_errorMsgEmail');
-            Functions.showInSnackBar(
+            AppUtil.showSnackBar(
                 context, _scaffoldKey, "An Error Occurred");
           }
         }
@@ -355,7 +355,7 @@ class _LoginPageState extends State<LoginPage>
       Navigator.of(context).pushReplacementNamed('/');
     } catch (e) {
       // Email or Password Incorrect
-      Functions.showInSnackBar(
+      AppUtil.showSnackBar(
           context, _scaffoldKey, 'Email or Password incorrect!$e');
     }
     setState(() {
@@ -619,7 +619,7 @@ class _LoginPageState extends State<LoginPage>
               Padding(
                 padding: EdgeInsets.only(top: 10.0, right: 40.0),
                 child: GestureDetector(
-                  onTap: () => Functions.showInSnackBar(
+                  onTap: () => AppUtil.showSnackBar(
                       context, _scaffoldKey, "Facebook button pressed"),
                   child: Container(
                     padding: const EdgeInsets.all(15.0),
@@ -637,7 +637,7 @@ class _LoginPageState extends State<LoginPage>
               Padding(
                 padding: EdgeInsets.only(top: 10.0),
                 child: GestureDetector(
-                  onTap: () => Functions.showInSnackBar(
+                  onTap: () => AppUtil.showSnackBar(
                       context, _scaffoldKey, "Google button pressed"),
                   child: Container(
                     padding: const EdgeInsets.all(15.0),

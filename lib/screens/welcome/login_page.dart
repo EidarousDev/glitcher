@@ -4,6 +4,7 @@ import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
 
 import 'signup_page.dart';
@@ -242,8 +243,8 @@ class _LoginPageState extends State<LoginPage> {
   Widget _createAccountLabel() {
     return InkWell(
       onTap: () {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => SignUpPage()));
+        Navigator.pushReplacementNamed(
+            context, 'sign-up');
       },
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 5),
@@ -272,10 +273,10 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _title() {
+  Widget _icon() {
     return Image.asset(
-      'assets/images/glitcher_rounded.png',
-      height: 120.0,
+      'assets/images/icon-480.png',
+      height: 200.0,
     );
   }
 
@@ -300,7 +301,7 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.of(context).pushReplacementNamed('/');
     } catch (e) {
       // Email or Password Incorrect
-      customSnackBar(_scaffoldKey, 'ToZ');
+      AppUtil.showSnackBar(context, _scaffoldKey, 'Authentication failed');
     }
     glitcherLoader.hideLoader();
     //print('Should be true: $_loading');
@@ -326,15 +327,15 @@ class _LoginPageState extends State<LoginPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      SizedBox(height: 110.0),
-                      _title(),
+                      SizedBox(height: 30.0),
+                      _icon(),
                       SizedBox(height: 50),
                       _emailPasswordWidget(),
                       SizedBox(height: 20),
                       _submitButton(),
                       GestureDetector(
                         onTap: () async {
-                          await auth.sendPasswordResetEmail(email: _email);
+                          Navigator.of(context).pushNamed('password-reset');
                         },
                         child: Container(
                           padding: EdgeInsets.symmetric(vertical: 10),
