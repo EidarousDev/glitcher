@@ -1,5 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/services/auth.dart';
+import 'package:glitcher/services/auth_provider.dart';
+import 'package:glitcher/utils/app_util.dart';
+import 'package:glitcher/utils/functions.dart';
 
 import 'login_page.dart';
 import 'widgets/bezier_container.dart';
@@ -14,6 +21,26 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  bool _isObscure = true;
+
+  String _errorMsgUsername = '';
+
+  String _errorMsgEmail = '';
+
+  String _username;
+
+  String _password;
+
+  String _email;
+
+  String _confirmPassword;
+
+  String userId = "";
+
+  final FocusNode myFocusNodePassword = FocusNode();
+  final FocusNode myFocusNodeEmail = FocusNode();
+  final FocusNode myFocusNodeName = FocusNode();
+
   Widget _backButton() {
     return InkWell(
       onTap: () {
@@ -25,55 +52,129 @@ class _SignUpPageState extends State<SignUpPage> {
           children: <Widget>[
             Container(
               padding: EdgeInsets.only(left: 0, top: 10, bottom: 10),
-              child: Icon(Icons.keyboard_arrow_left, color: Colors.black),
+              child: Icon(Icons.arrow_back, color: Colors.white),
             ),
-            Text('Back',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500))
           ],
         ),
       ),
     );
   }
 
-  Widget _entryField(String title, {bool isPassword = false}) {
+  Widget _entryField(String title,
+      {FocusNode focusNode,
+      bool isPassword = false,
+      bool isUsername = false,
+      bool isEmail = false,
+      bool isConfirmPassword = false}) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text(
-            title,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          TextField(
-              style: TextStyle(color: MyColors.darkCardBG),
-              obscureText: isPassword,
-              decoration: InputDecoration(
-                  border: InputBorder.none,
-                  fillColor: Color(0xfff3f3f4),
-                  filled: true))
+          Expanded(
+            child: TextFormField(
+                focusNode: focusNode,
+                onChanged: (value) {
+                  if (isEmail) {
+                    setState(() {
+                      _email = value;
+                    });
+                  } else if (isUsername) {
+                    setState(() {
+                      _username = value;
+                    });
+                  } else if (isPassword) {
+                    setState(() {
+                      _password = value;
+                    });
+                  } else if (isConfirmPassword) {
+                    _confirmPassword = value;
+                  }
+                },
+                style: TextStyle(color: MyColors.darkCardBG),
+                obscureText: _isObscure && (isPassword || isConfirmPassword),
+                decoration: InputDecoration(
+                    hintText: title,
+                    hintStyle: TextStyle(color: Colors.grey),
+                    prefixIcon: Container(
+                      width: 48,
+                      child: isEmail
+                          ? Icon(
+                              Icons.email,
+                              size: 18,
+                              color: Colors.grey.shade400,
+                            )
+                          : isPassword || isConfirmPassword
+                              ? Icon(
+                                  Icons.lock,
+                                  size: 18,
+                                  color: Colors.grey.shade400,
+                                )
+                              : Icon(
+                                  Icons.person,
+                                  size: 18,
+                                  color: Colors.grey.shade400,
+                                ),
+                    ),
+                    suffixIcon: Container(
+                      width: 48,
+                      child: _isObscure && (isPassword || isConfirmPassword)
+                          ? IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _isObscure = !_isObscure;
+                                });
+                              },
+                              icon: Icon(
+                                Icons.remove_red_eye,
+                                size: 18,
+                              ),
+                              color: Colors.grey.shade400,
+                            )
+                          : isPassword || isConfirmPassword
+                              ? IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _isObscure = !_isObscure;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    Icons.visibility_off,
+                                    size: 18,
+                                  ),
+                                  color: Colors.grey.shade400,
+                                )
+                              : Container(),
+                    ),
+                    border: InputBorder.none,
+                    fillColor: Color(0xfff3f3f4),
+                    filled: true)),
+          )
         ],
       ),
     );
   }
 
   Widget _submitButton() {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.symmetric(vertical: 15),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(5)),
-          gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [MyColors.darkCardBG, MyColors.darkPrimary])),
-      child: Text(
-        'Register Now',
-        style: TextStyle(fontSize: 20, color: Colors.white),
+    return InkWell(
+      onTap: () async {
+        await _signUp();
+      },
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        padding: EdgeInsets.symmetric(vertical: 15),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(5)),
+            gradient: LinearGradient(
+                begin: Alignment.centerRight,
+                end: Alignment.centerRight,
+                colors: [MyColors.darkCardBG, MyColors.darkPrimary])),
+        child: Text(
+          'Register now',
+          style: TextStyle(fontSize: 20, color: Colors.white),
+        ),
       ),
     );
   }
@@ -101,7 +202,7 @@ class _SignUpPageState extends State<SignUpPage> {
             Text(
               'Login',
               style: TextStyle(
-                  color: Color(0xfff79c4f),
+                  color: MyColors.darkPrimary,
                   fontSize: 13,
                   fontWeight: FontWeight.w600),
             ),
@@ -121,9 +222,11 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget _emailPasswordWidget() {
     return Column(
       children: <Widget>[
-        _entryField("Username"),
-        _entryField("Email"),
-        _entryField("Password", isPassword: true),
+        _entryField("Username", focusNode: myFocusNodeName, isUsername: true),
+        _entryField("Email", focusNode: myFocusNodeEmail, isEmail: true),
+        _entryField("Password",
+            focusNode: myFocusNodePassword, isPassword: true),
+        _entryField("Confirm Password", isConfirmPassword: true)
       ],
     );
   }
@@ -132,6 +235,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     return Scaffold(
+      key: _scaffoldKey,
       body: Container(
         height: height,
         child: Stack(
@@ -164,10 +268,200 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               ),
             ),
-            Positioned(top: 40, left: 0, child: _backButton()),
           ],
         ),
       ),
     );
+  }
+
+  bool _loading = false;
+  String validateEmail(String value) {
+    String pattern =
+        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+    RegExp regExp = new RegExp(pattern);
+    if (value.length == 0) {
+      AppUtil().showToast("Email is Required");
+      setState(() {
+        _errorMsgEmail = "Email is Required";
+      });
+    } else if (!regExp.hasMatch(value)) {
+      AppUtil().showToast("Invalid Email");
+      setState(() {
+        _errorMsgEmail = "Invalid Email";
+      });
+    } else {
+      setState(() {
+        _errorMsgEmail = null;
+      });
+    }
+    return _errorMsgEmail;
+  }
+
+  String validateUsername(String value) {
+    String pattern =
+        r'^(?=.{8,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$';
+    RegExp regExp = new RegExp(pattern);
+    if (value.length == 0) {
+      AppUtil().showToast("Username is Required");
+      setState(() {
+        _errorMsgUsername = "Username is Required";
+      });
+    } else if (!regExp.hasMatch(value)) {
+      AppUtil().showToast("Invalid Username");
+      setState(() {
+        _errorMsgUsername = "Invalid Username";
+      });
+      return _errorMsgUsername;
+    } else {
+      setState(() {
+        _errorMsgUsername = null;
+      });
+    }
+    return _errorMsgUsername;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    myFocusNodePassword.dispose();
+    myFocusNodeEmail.dispose();
+    myFocusNodeName.dispose();
+  }
+
+  Future<bool> isUsernameTaken(String name) async {
+    final QuerySnapshot result = await Firestore.instance
+        .collection('users')
+        .where('username', isEqualTo: name)
+        .limit(1)
+        .getDocuments();
+    return result.documents.isEmpty;
+  }
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  searchList(String text) {
+    List<String> list = [];
+    for (int i = 1; i <= text.length; i++) {
+      list.add(text.substring(0, i).toLowerCase());
+    }
+    return list;
+  }
+
+  void addUserToDatabase(String id) {
+    List search = searchList(_username);
+    Map<String, dynamic> userMap = {
+      'name': 'Your name here',
+      'username': _username,
+      'description': 'Write something about yourself',
+      'notificationsNumber': 0,
+      'violations': 0,
+      'search': search
+    };
+
+    usersRef.document(id).setData(userMap);
+  }
+
+  void showVerifyEmailSentDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text("Verify your account"),
+          content:
+              new Text("Link to verify account has been sent to your email"),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text("Dismiss"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future _signUp() async {
+    final BaseAuth auth = AuthProvider.of(context).auth;
+
+    //print(_email + ' : ' + _password);
+    setState(() {
+      _loading = true;
+    });
+    //print('Should be true: $_loading');
+    String validEmail = validateEmail(_email);
+    String validUsername = validateUsername(_username);
+
+    print('validEmail: $validEmail ');
+    print('validEmail: $validUsername ');
+
+    final valid = await isUsernameTaken(_username);
+
+    if (!valid) {
+      // username exists
+      Functions.showInSnackBar(context, _scaffoldKey,
+          '$_username is already in use. Please choose a different username.');
+      myFocusNodeName.requestFocus();
+    } else {
+      if (validEmail == null &&
+          validUsername == null &&
+          _password == _confirmPassword) {
+        // Validation Passed
+        try {
+          userId = await auth.signUp(_username, _email, _password);
+          addUserToDatabase(userId);
+          //widget.auth.sendEmailVerification();
+          //showVerifyEmailSentDialog(context);
+          print('Signed up user: $userId');
+//        moveUserTo(
+//            context: context, widget: HomePage(), routeId: HomePage.id);
+          showVerifyEmailSentDialog(context);
+        } catch (signUpError) {
+          if (signUpError is PlatformException) {
+            if (signUpError.code == 'ERROR_EMAIL_ALREADY_IN_USE') {
+              Functions.showInSnackBar(
+                  context, _scaffoldKey, '$_email is already in use.');
+              myFocusNodeEmail.requestFocus();
+            } else if (signUpError.code == 'ERROR_WEAK_PASSWORD') {
+              Functions.showInSnackBar(context, _scaffoldKey,
+                  'Password is too weak. Please, type in a more complex password.');
+              myFocusNodePassword.requestFocus();
+            } else if (signUpError.code == 'ERROR_INVALID_EMAIL') {
+              Functions.showInSnackBar(context, _scaffoldKey, 'Invalid Email.');
+              myFocusNodeEmail.requestFocus();
+            } else {
+              Functions.showInSnackBar(
+                  context, _scaffoldKey, 'Unknown Error.. $signUpError');
+            }
+          }
+          //print(e);
+
+        }
+      } else {
+        if (_password != _confirmPassword) {
+          Functions.showInSnackBar(
+              context, _scaffoldKey, "Passwords don't match");
+          myFocusNodePassword.requestFocus();
+        } else {
+          if (_errorMsgUsername != null) {
+            Functions.showInSnackBar(context, _scaffoldKey, _errorMsgUsername);
+          } else if (_errorMsgEmail != null) {
+            Functions.showInSnackBar(context, _scaffoldKey, _errorMsgEmail);
+          } else {
+            print('$_errorMsgUsername\n$_errorMsgEmail');
+            Functions.showInSnackBar(
+                context, _scaffoldKey, "An Error Occurred");
+          }
+        }
+      }
+    }
+
+    setState(() {
+      _loading = false;
+    });
+    print('Should be false: $_loading');
   }
 }

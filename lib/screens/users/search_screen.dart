@@ -7,6 +7,7 @@ import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
+import 'package:glitcher/widgets/drawer.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -83,19 +84,13 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
         flexibleSpace: gradientAppBar(),
         leading: Builder(
-          builder: (context) => Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: InkWell(
-              onTap: () => Scaffold.of(context).openDrawer(),
-              child: new IconButton(
-                icon: new Icon(Icons.arrow_back),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ),
-          ),
-        ),
+            builder: (context) => Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: InkWell(
+                    onTap: () => Scaffold.of(context).openDrawer(),
+                    child: Icon(IconData(58311, fontFamily: 'MaterialIcons')),
+                  ),
+                )),
       ),
       body: filteredUsers.length > 0
           ? ListView.separated(
@@ -176,6 +171,7 @@ class _SearchScreenState extends State<SearchScreen> {
               'Search for users',
               style: TextStyle(fontSize: 20, color: Colors.grey),
             )),
+      drawer: BuildDrawer(),
     );
   }
 

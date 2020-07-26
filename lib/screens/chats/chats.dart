@@ -1,13 +1,13 @@
-import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/list_items/chat_item.dart';
 import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
-import 'package:glitcher/list_items/chat_item.dart';
+import 'package:glitcher/widgets/drawer.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
 
 class Chats extends StatefulWidget {
   @override
@@ -95,11 +95,13 @@ class _ChatsState extends State<Chats>
               Icons.search,
               size: 28.0,
             ),
-            suffixIcon: _searching ? IconButton(
-                icon: Icon(Icons.close),
-                onPressed: () {
-                  _searchController.clear();
-                }): null,
+            suffixIcon: _searching
+                ? IconButton(
+                    icon: Icon(Icons.close),
+                    onPressed: () {
+                      _searchController.clear();
+                    })
+                : null,
             hintText: 'Search',
           ),
           onChanged: (text) {
@@ -133,6 +135,14 @@ class _ChatsState extends State<Chats>
             }
           },
         ),
+        leading: Builder(
+            builder: (context) => Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: InkWell(
+                    onTap: () => Scaffold.of(context).openDrawer(),
+                    child: Icon(IconData(58311, fontFamily: 'MaterialIcons')),
+                  ),
+                )),
         actions: <Widget>[],
         bottom: TabBar(
           onTap: (index) {
@@ -170,66 +180,79 @@ class _ChatsState extends State<Chats>
       body: TabBarView(
         controller: _tabController,
         children: <Widget>[
-          ListView.separated(
-            padding: EdgeInsets.all(10),
-            separatorBuilder: (BuildContext context, int index) {
-              return Align(
-                alignment: Alignment.centerRight,
-                child: Container(
-                  height: 0.5,
-                  width: MediaQuery.of(context).size.width / 1.3,
-                  child: Divider(),
-                ),
-              );
-            },
-            itemCount: !_searching ? chats.length : filteredChats.length,
-            itemBuilder: !_searching
-                ? (BuildContext context, int index) {
-                    ChatItem chat = chats[index];
-                    return chat;
-                  }
-                : (BuildContext context, int index) {
-                    ChatItem chat = filteredChats[index];
-                    return chat;
+          chats.length > 0
+              ? ListView.separated(
+                  padding: EdgeInsets.all(10),
+                  separatorBuilder: (BuildContext context, int index) {
+                    return Align(
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                        height: 0.5,
+                        width: MediaQuery.of(context).size.width / 1.3,
+                        child: Divider(),
+                      ),
+                    );
                   },
-          ),
-          ListView.separated(
-            padding: EdgeInsets.symmetric(
-              vertical: 7,
-            ),
-            separatorBuilder: (BuildContext context, int index) {
-              return Align(
-                alignment: Alignment.centerRight,
-                child: Container(
-                  height: 0.5,
-                  width: MediaQuery.of(context).size.width / 1.3,
-                  child: Divider(),
-                ),
-              );
-            },
-            itemCount: !_searching && _tabController.index == 1
-                ? this.groups.length
-                : this.filteredGroups.length,
-            itemBuilder: (BuildContext context, int index) {
-              Group group = !_searching && _tabController.index == 1
-                  ? this.groups[index]
-                  : this.filteredGroups[index];
+                  itemCount: !_searching ? chats.length : filteredChats.length,
+                  itemBuilder: !_searching
+                      ? (BuildContext context, int index) {
+                          ChatItem chat = chats[index];
+                          return chat;
+                        }
+                      : (BuildContext context, int index) {
+                          ChatItem chat = filteredChats[index];
+                          return chat;
+                        },
+                )
+              : Center(
+                  child: Text(
+                  'No chats yet',
+                  style: TextStyle(fontSize: 20, color: Colors.grey),
+                )),
+          groups.length > 0
+              ? ListView.separated(
+                  padding: EdgeInsets.symmetric(
+                    vertical: 7,
+                  ),
+                  separatorBuilder: (BuildContext context, int index) {
+                    return Align(
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                        height: 0.5,
+                        width: MediaQuery.of(context).size.width / 1.3,
+                        child: Divider(),
+                      ),
+                    );
+                  },
+                  itemCount: !_searching && _tabController.index == 1
+                      ? this.groups.length
+                      : this.filteredGroups.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    Group group = !_searching && _tabController.index == 1
+                        ? this.groups[index]
+                        : this.filteredGroups[index];
 
-              return ListTile(
-                onTap: () {
-                  Navigator.of(context).pushNamed('/group-conversation',
-                      arguments: {'groupId': group.id});
-                },
-                leading: CircleAvatar(
-                  radius: 25,
-                  backgroundImage: NetworkImage(group.image),
-                ),
-                title: Text(group.name),
-              );
-            },
-          ),
+                    return ListTile(
+                      onTap: () {
+                        Navigator.of(context).pushNamed('/group-conversation',
+                            arguments: {'groupId': group.id});
+                      },
+                      leading: CircleAvatar(
+                        radius: 25,
+                        backgroundImage: NetworkImage(group.image),
+                      ),
+                      title: Text(group.name),
+                    );
+                  },
+                )
+              : Center(
+                  child: Text(
+                  'No groups yet',
+                  style: TextStyle(fontSize: 20, color: Colors.grey),
+                )),
         ],
       ),
+      drawer: BuildDrawer(),
     );
   }
 

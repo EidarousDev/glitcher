@@ -1,9 +1,11 @@
+import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/app_page.dart';
-import 'package:glitcher/screens/welcome/welcome_page.dart';
+import 'package:glitcher/screens/welcome/login_page.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
@@ -32,11 +34,13 @@ class _RootPageState extends State<RootPage> {
   @override
   void initState() {
     super.initState();
+    this.getCurrentTheme();
   }
 
   Widget buildWaitingScreen() {
     return Scaffold(
       body: Container(
+        color: switchColor(Colors.white, MyColors.darkAccent),
         alignment: Alignment.center,
         child: Center(
             child: Image.asset(
@@ -48,13 +52,28 @@ class _RootPageState extends State<RootPage> {
     );
   }
 
+  getCurrentTheme() async {
+    String theme = await getTheme();
+    if (theme == "AvailableThemes.LIGHT_THEME") {
+      setState(() {
+        DynamicTheme.of(context).setThemeData(MyColors.lightTheme);
+        Constants.currentTheme = AvailableThemes.LIGHT_THEME;
+      });
+    } else {
+      setState(() {
+        DynamicTheme.of(context).setThemeData(MyColors.darkTheme);
+        Constants.currentTheme = AvailableThemes.DARK_THEME;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     switch (authStatus) {
       case AuthStatus.NOT_DETERMINED:
         return buildWaitingScreen();
       case AuthStatus.NOT_LOGGED_IN:
-        return WelcomePage();
+        return LoginPage();
       //LoginPage(onSignedIn: _signedIn,);
       case AuthStatus.LOGGED_IN:
         return AppPage();

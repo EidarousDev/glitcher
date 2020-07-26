@@ -33,10 +33,8 @@ class _LoginPageState extends State<LoginPage> {
           children: <Widget>[
             Container(
               padding: EdgeInsets.only(left: 0, top: 10, bottom: 10),
-              child: Icon(Icons.keyboard_arrow_left, color: Colors.black),
+              child: Icon(Icons.arrow_back, color: Colors.white),
             ),
-            Text('Back',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500))
           ],
         ),
       ),
@@ -46,25 +44,74 @@ class _LoginPageState extends State<LoginPage> {
   Widget _entryField(String title, {bool isPassword = false}) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          TextFormField(
-              onChanged: (value) {
-                isPassword ? _password = value : _email = value;
-              },
-              style: TextStyle(color: MyColors.darkCardBG),
-              obscureText: isPassword,
-              decoration: InputDecoration(
-                  hintText: isPassword ? 'Password' : 'E-mail',
-                  hintStyle: TextStyle(color: Colors.grey),
-                  border: InputBorder.none,
-                  fillColor: Color(0xfff3f3f4),
-                  filled: true))
+          Expanded(
+            child: TextFormField(
+                onChanged: (value) {
+                  isPassword ? _password = value : _email = value;
+                },
+                style: TextStyle(color: MyColors.darkCardBG),
+                obscureText: _isObscure && (isPassword),
+                decoration: InputDecoration(
+                    prefixIcon: Container(
+                      width: 48,
+                      child: !isPassword
+                          ? Icon(
+                              Icons.email,
+                              size: 18,
+                              color: Colors.grey.shade400,
+                            )
+                          : Icon(
+                              Icons.lock,
+                              size: 18,
+                              color: Colors.grey.shade400,
+                            ),
+                    ),
+                    suffixIcon: Container(
+                      width: 48,
+                      child: _isObscure && isPassword
+                          ? IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _isObscure = !_isObscure;
+                                });
+                              },
+                              icon: Icon(
+                                Icons.remove_red_eye,
+                                size: 18,
+                              ),
+                              color: Colors.grey.shade400,
+                            )
+                          : isPassword
+                              ? IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _isObscure = !_isObscure;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    Icons.visibility_off,
+                                    size: 18,
+                                  ),
+                                  color: Colors.grey.shade400,
+                                )
+                              : Container(),
+                    ),
+                    hintText: isPassword ? 'Password' : 'E-mail',
+                    hintStyle: TextStyle(color: Colors.grey),
+                    border: InputBorder.none,
+                    fillColor: Color(0xfff3f3f4),
+                    filled: true)),
+          )
         ],
       ),
     );
   }
+
+  bool _isObscure = true;
 
   Widget _submitButton() {
     return InkWell(
@@ -215,7 +262,7 @@ class _LoginPageState extends State<LoginPage> {
             Text(
               'Register',
               style: TextStyle(
-                  color: Color(0xfff79c4f),
+                  color: MyColors.darkPrimary,
                   fontSize: 13,
                   fontWeight: FontWeight.w600),
             ),
@@ -297,15 +344,14 @@ class _LoginPageState extends State<LoginPage> {
                                   fontSize: 14, fontWeight: FontWeight.w500)),
                         ),
                       ),
-                      _divider(),
-                      _facebookButton(),
+//                      _divider(),
+//                      _facebookButton(),
                       SizedBox(height: 10.0),
                       _createAccountLabel(),
                     ],
                   ),
                 ),
               ),
-              Positioned(top: 40, left: 0, child: _backButton()),
             ],
           ),
         ));

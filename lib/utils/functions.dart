@@ -14,7 +14,6 @@ import 'package:http/http.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/constants.dart';
@@ -195,7 +194,7 @@ class Functions {
             fontSize: 16.0,
             fontFamily: "WorkSansSemiBold"),
       ),
-      backgroundColor: Colors.blue,
+      backgroundColor: MyColors.darkPrimary,
       duration: Duration(seconds: 3),
     ));
   }
@@ -213,7 +212,7 @@ class Functions {
             fontSize: 16.0,
             fontFamily: "WorkSansSemiBold"),
       ),
-      backgroundColor: Colors.blue,
+      backgroundColor: MyColors.darkPrimary,
       duration: Duration(hours: 1),
     ));
   }

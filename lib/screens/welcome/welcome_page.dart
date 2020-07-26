@@ -132,10 +132,6 @@ class _WelcomePageState extends State<WelcomePage> {
                 height: 20,
               ),
               _signUpButton(),
-              SizedBox(
-                height: 20,
-              ),
-              _label()
             ],
           ),
         ),

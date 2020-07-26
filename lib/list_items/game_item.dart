@@ -45,23 +45,33 @@ class _GameItemState extends State<GameItem> {
             "${widget.game.image}",
           ),
         ),
-        title: Row(
-          children: <Widget>[
-            Text(
-              widget.game.fullName,
-              maxLines: 2,
-              overflow: TextOverflow.fade,
-              style: TextStyle(fontWeight: FontWeight.bold),
+        title: Expanded(
+          child: Text(
+            widget.game.fullName,
+            maxLines: 2,
+            overflow: TextOverflow.fade,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
             ),
-          ],
-        ),
-        subtitle: Text(
-          "${widget.game.genres}",
-          style: TextStyle(
-            fontWeight: FontWeight.w300,
-            fontSize: 11,
           ),
         ),
+        subtitle: widget.game.genres.length > 0
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                    SizedBox(
+                      height: 3,
+                    ),
+                    Text(
+                      "${widget.game.genres}",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w300,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ])
+            : null,
         trailing: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[

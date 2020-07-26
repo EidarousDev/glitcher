@@ -72,8 +72,11 @@ class _GamesScreenState extends State<GamesScreen> {
                         onPressed: () {
                           _typeAheadController.clear();
                           setState(() {
+                            _games = [];
+                            _filteredGames = [];
                             _searching = false;
                           });
+                          _setupFeed();
                         })
                     : null,
               ),

@@ -2,13 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/list_items/post_item.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/list_items/post_item.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
 
 class BookmarksScreen extends StatefulWidget {
   @override
@@ -39,61 +39,70 @@ class _BookmarksScreenState extends State<BookmarksScreen>
         title: Text('Bookmarks'),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        child: ListView.separated(
-          separatorBuilder: (BuildContext context, int index) {
-            return Container(
-              height: 1,
-              color: MyColors.darkAccent,
-              width: MediaQuery.of(context).size.width / 1.3,
-              child: Divider(),
-            );
-          },
-          physics: NeverScrollableScrollPhysics(),
-          scrollDirection: Axis.vertical,
-          itemCount: _posts.length,
-          shrinkWrap: true,
-          itemBuilder: (BuildContext context, int index) {
-            Post post = _posts[index];
-            //print('post author: ${post.authorId}');
-            return post.authorId != 'deleted'
-                ? FutureBuilder(
-                    future: DatabaseService.getUserWithId(post.authorId),
-                    builder: (BuildContext context, AsyncSnapshot snapshot) {
-                      if (!snapshot.hasData) {
-                        return SizedBox.shrink();
-                      }
-                      User author = snapshot.data;
-                      return PostItem(
-                        post: post,
-                        author: author,
-                        route: '/bookmarks',
-                      );
-                    })
-                : SizedBox(
-                    child: Center(
-                        child:
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                Text('This post has been deleted by the author.'),
-                                IconButton(icon: Icon(Icons.close), onPressed: () async{
-                                  await usersRef
-                                  .document(Constants.currentUserID)
-                                  .collection('bookmarks')
-                                  .document(post.id)
-                                  .delete();
-                                  _setupFeed();
-                                },)
-                              ],
-                            )),
-                    height: 100,
+      body: _posts.length > 0
+          ? SingleChildScrollView(
+              controller: _scrollController,
+              child: ListView.separated(
+                separatorBuilder: (BuildContext context, int index) {
+                  return Container(
+                    height: 1,
+                    color: MyColors.darkAccent,
+                    width: MediaQuery.of(context).size.width / 1.3,
+                    child: Divider(),
                   );
-          },
-        ),
-      ),
+                },
+                physics: NeverScrollableScrollPhysics(),
+                scrollDirection: Axis.vertical,
+                itemCount: _posts.length,
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int index) {
+                  Post post = _posts[index];
+                  //print('post author: ${post.authorId}');
+                  return post.authorId != 'deleted'
+                      ? FutureBuilder(
+                          future: DatabaseService.getUserWithId(post.authorId),
+                          builder:
+                              (BuildContext context, AsyncSnapshot snapshot) {
+                            if (!snapshot.hasData) {
+                              return SizedBox.shrink();
+                            }
+                            User author = snapshot.data;
+                            return PostItem(
+                              post: post,
+                              author: author,
+                              route: '/bookmarks',
+                            );
+                          })
+                      : SizedBox(
+                          child: Center(
+                              child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              Text('This post has been deleted by the author.'),
+                              IconButton(
+                                icon: Icon(Icons.close),
+                                onPressed: () async {
+                                  await usersRef
+                                      .document(Constants.currentUserID)
+                                      .collection('bookmarks')
+                                      .document(post.id)
+                                      .delete();
+                                  _setupFeed();
+                                },
+                              )
+                            ],
+                          )),
+                          height: 100,
+                        );
+                },
+              ),
+            )
+          : Center(
+              child: Text(
+              'No posts bookmarked',
+              style: TextStyle(fontSize: 20, color: Colors.grey),
+            )),
     );
   }
 

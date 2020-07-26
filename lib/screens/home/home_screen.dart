@@ -5,21 +5,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_icons/font_awesome.dart';
-import 'package:glitcher/widgets/card_icon_text.dart';
-import 'package:glitcher/widgets/drawer.dart';
-import 'package:glitcher/widgets/gradient_appbar.dart';
-import 'package:glitcher/widgets/rate_app.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
+import 'package:glitcher/list_items/post_item.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/list_items/post_item.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
+import 'package:glitcher/widgets/drawer.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
+import 'package:glitcher/widgets/rate_app.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -127,6 +125,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           controller: _scrollController,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Container(
                 height: 70,
@@ -353,24 +352,35 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ],
                 ),
               ),
-              ListView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                scrollDirection: Axis.vertical,
-                itemCount: _posts.length,
-                shrinkWrap: true,
-                itemBuilder: (BuildContext context, int index) {
-                  Post post = _posts[index];
-                  return FutureBuilder(
-                      future: DatabaseService.getUserWithId(post.authorId),
-                      builder: (BuildContext context, AsyncSnapshot snapshot) {
-                        if (!snapshot.hasData) {
-                          return SizedBox.shrink();
-                        }
-                        User author = snapshot.data;
-                        return PostItem(post: post, author: author);
-                      });
-                },
-              ),
+              _posts.length > 0
+                  ? ListView.builder(
+                      physics: NeverScrollableScrollPhysics(),
+                      scrollDirection: Axis.vertical,
+                      itemCount: _posts.length,
+                      shrinkWrap: true,
+                      itemBuilder: (BuildContext context, int index) {
+                        Post post = _posts[index];
+                        return FutureBuilder(
+                            future:
+                                DatabaseService.getUserWithId(post.authorId),
+                            builder:
+                                (BuildContext context, AsyncSnapshot snapshot) {
+                              if (!snapshot.hasData) {
+                                return SizedBox.shrink();
+                              }
+                              User author = snapshot.data;
+                              return PostItem(post: post, author: author);
+                            });
+                      },
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.only(top: 160.0),
+                      child: Center(
+                          child: Text(
+                        'No posts to show',
+                        style: TextStyle(fontSize: 20, color: Colors.grey),
+                      )),
+                    ),
             ],
           ),
         ),
