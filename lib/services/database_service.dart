@@ -389,6 +389,21 @@ class DatabaseService {
     return messages;
   }
 
+  static getLastMessage(String otherUserId) async{
+    QuerySnapshot msgSnapshot = await chatsRef
+        .document(Constants.currentUserID)
+        .collection('conversations')
+        .document(otherUserId)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .limit(1)
+        .getDocuments();
+    List<Message> messages =
+    msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
+    return messages[0];
+
+  }
+
   static Future<List<Message>> getGroupMessages(String groupId) async {
     QuerySnapshot msgSnapshot = await chatGroupsRef
         .document(groupId)
@@ -400,6 +415,7 @@ class DatabaseService {
         msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
     return messages;
   }
+
 
   static Future<List<Message>> getPrevMessages(
       Timestamp firstVisibleGameSnapShot, String otherUserId) async {
@@ -934,14 +950,14 @@ class DatabaseService {
 
       NotificationHandler.sendNotification(
           userId,
-          '${Constants.loggedInUser.username} followed you',
+          '${Constants.currentUser.username} followed you',
           'You are now friends',
           Constants.currentUserID,
           'follow');
     } else {
       NotificationHandler.sendNotification(
           userId,
-          '${Constants.loggedInUser.username} followed you',
+          '${Constants.currentUser.username} followed you',
           'Follow him back to be friends',
           Constants.currentUserID,
           'follow');
@@ -954,4 +970,10 @@ class DatabaseService {
     List<User> followers = await getFollowers(Constants.currentUserID);
     Constants.userFollowers = followers;
   }
+
+  static addUserEmailToNewsletter(String userId, String email, String username) async{
+    await newsletterEmailsRef.document(userId).setData({'email': email, 'username': username, 'timestamp': FieldValue.serverTimestamp()});
+  }
+
+
 }

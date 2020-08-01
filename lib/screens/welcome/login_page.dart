@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:glitcher/constants/constants.dart';
@@ -297,7 +298,6 @@ class _LoginPageState extends State<LoginPage> {
     //print('Should be true: $_loading');
     try {
       userId = await auth.signInWithEmailAndPassword(_email, _password);
-      //print('Signed in: $userId');
       Navigator.of(context).pushReplacementNamed('/');
     } catch (e) {
       // Email or Password Incorrect
@@ -306,6 +306,7 @@ class _LoginPageState extends State<LoginPage> {
     glitcherLoader.hideLoader();
     //print('Should be true: $_loading');
   }
+
 
   @override
   Widget build(BuildContext context) {

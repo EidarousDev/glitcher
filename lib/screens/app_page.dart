@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/hashtag_model.dart';
+import 'package:glitcher/models/notification_model.dart' as notification;
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/home/home_screen.dart';
@@ -20,6 +21,7 @@ import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:package_info/package_info.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'chats/chats.dart';
 
@@ -47,6 +49,8 @@ class _AppPageState extends State<AppPage> {
   );
 
   StreamSubscription<ConnectivityResult> connectivitySubscription;
+
+  int _unseenNotifications = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -97,10 +101,10 @@ class _AppPageState extends State<AppPage> {
             ),
             BottomNavigationBarItem(
               // ignore: null_aware_before_operator
-              icon: Constants.loggedInUser?.notificationsNumber > 0
+              icon: Constants.currentUser?.notificationsNumber > 0
                   ? Badge(
                       badgeContent: Text(Constants
-                          .loggedInUser?.notificationsNumber
+                          .currentUser?.notificationsNumber
                           .toString()),
                       child: Icon(Icons.notifications),
                       toAnimate: true,
@@ -131,7 +135,7 @@ class _AppPageState extends State<AppPage> {
   void initState() {
     super.initState();
     setPackageInfo();
-    print('Constants.loggedInUser: ${Constants.loggedInUser}');
+    print('Constants.loggedInUser: ${Constants.currentUser}');
     _pageController = PageController(initialPage: 0);
     _retrieveDynamicLink();
     userListener();
@@ -199,7 +203,7 @@ class _AppPageState extends State<AppPage> {
       querySnapshot.documentChanges.forEach((change) {
         setState(() {
           if (change.document.documentID == Constants.currentUserID) {
-            Constants.loggedInUser = User.fromDoc(change.document);
+            Constants.currentUser = User.fromDoc(change.document);
           }
         });
       });

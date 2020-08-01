@@ -586,7 +586,7 @@ class _PostItemState extends State<PostItem> {
       await NotificationHandler.sendNotification(
           post.authorId,
           'New Post Like',
-          Constants.loggedInUser.username + ' likes your post',
+          Constants.currentUser.username + ' likes your post',
           post.id,
           'like');
     } else if (isLiked == false && isDisliked == false) {
@@ -606,7 +606,7 @@ class _PostItemState extends State<PostItem> {
       await NotificationHandler.sendNotification(
           post.authorId,
           'New Post Like',
-          Constants.loggedInUser.username + ' likes your post',
+          Constants.currentUser.username + ' likes your post',
           post.id,
           'like');
     } else {

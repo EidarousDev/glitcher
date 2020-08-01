@@ -81,6 +81,7 @@ class Strings {
   static const String default_profile_image =
       'assets/images/default_profile.png';
   static const String default_post_image = 'assets/images/default_profile.png';
+  static const String default_group_image = 'assets/images/group_default.png';
   static const String like_sound = 'assets/sounds/like_sound.mp3';
   static const String dislike_sound = 'assets/sounds/dislikesfx.mp3';
   static const String swipe_up_to_reload =

@@ -86,7 +86,7 @@ class _AddCommentPageState extends State<AddComment> {
 
       await NotificationHandler.sendNotification(
           widget.user.id,
-          Constants.loggedInUser.username + ' commented on your post',
+          Constants.currentUser.username + ' commented on your post',
           _textEditingController.text,
           widget.post.id,
           'comment');
@@ -219,7 +219,7 @@ class _AddCommentPageState extends State<AddComment> {
         await NotificationHandler.sendNotification(
             user.id,
             'New post mention',
-            Constants.loggedInUser.username + ' mentioned you in a comment',
+            Constants.currentUser.username + ' mentioned you in a comment',
             widget.post.id,
             'mention');
       }

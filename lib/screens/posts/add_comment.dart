@@ -58,7 +58,7 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
 
                 await NotificationHandler.sendNotification(
                     post.authorId,
-                    Constants.loggedInUser.username + ' commented on your post',
+                    Constants.currentUser.username + ' commented on your post',
                     _commentTextController.text,
                     postId,'comment');
 
@@ -221,7 +221,7 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
         await NotificationHandler.sendNotification(
             user.id,
             'New post mention',
-            Constants.loggedInUser.username + ' mentioned you in a comment',
+            Constants.currentUser.username + ' mentioned you in a comment',
             postId,
         'mention');
       }

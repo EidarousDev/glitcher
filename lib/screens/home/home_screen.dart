@@ -147,6 +147,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                   Row(
                                     children: <Widget>[
                                       Radio(
+                                          activeColor: MyColors.darkPrimary,
                                           value: 0,
                                           groupValue: feedFilter,
                                           onChanged: (value) {
@@ -163,6 +164,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                   Row(
                                     children: <Widget>[
                                       Radio(
+                                          activeColor: MyColors.darkPrimary,
                                           value: 1,
                                           groupValue: feedFilter,
                                           onChanged: (value) {
@@ -175,6 +177,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                         'Followed Gamers',
                                       ),
                                       Radio(
+                                          activeColor: MyColors.darkPrimary,
                                           value: 2,
                                           groupValue: feedFilter,
                                           onChanged: (value) {

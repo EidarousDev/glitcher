@@ -37,7 +37,7 @@ class _GamesScreenState extends State<GamesScreen> {
           Navigator.of(context).pushNamed('/suggestion', arguments: {
             'initial_title': 'New game suggestion',
             'initial_details':
-                'I (${Constants.loggedInUser.username}) suggest adding the following game: '
+                'I (${Constants.currentUser.username}) suggest adding the following game: '
           });
           AppUtil.showSnackBar(context, _scaffoldKey, "Suggestion sent ");
         },

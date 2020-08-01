@@ -12,6 +12,7 @@ class MyColors {
   static Color lightBG = Color(0xffeeeeee);
   static Color badgeColor = Colors.red;
   static Color lightButtonsBackground = Colors.grey[300];
+  static Color lightPrimaryTappedBtn = Color(0xff4b9fe3);
   static Color lightLineBreak = Color(0xffd5d5d5);
   static Color lightInLineBreak = Color(0xffe1e3e3);
 

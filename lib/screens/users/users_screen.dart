@@ -123,6 +123,7 @@ class _UsersScreenState extends State<UsersScreen> {
                         title: Text(users[index].username),
                         trailing: widget.screenType != 'followers'
                             ? MaterialButton(
+                                textColor: Colors.white,
                                 child: Text(
                                   'Unfollow',
                                   style: TextStyle(

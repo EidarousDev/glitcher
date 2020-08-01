@@ -228,7 +228,6 @@ class _LoginPageState extends State<LoginPage>
       'name': 'Your name here',
       'username': _username,
       'description': 'Write something about yourself',
-      'notificationsNumber': 0,
       'violations': 0,
       'search': search
     };

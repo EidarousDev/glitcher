@@ -1,10 +1,12 @@
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
+import 'package:glitcher/utils/functions.dart';
 
 import 'services/route_generator.dart';
 
@@ -25,15 +27,26 @@ Future<void> retrieveDynamicLink(BuildContext context) async {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     retrieveDynamicLink(context);
     return AuthProvider(
       auth: Auth(),
       child: DynamicTheme(
-          defaultBrightness: Brightness.dark,
-          data: (brightness) => MyColors.darkTheme,
+          defaultBrightness:
+              Constants.currentTheme == AvailableThemes.DARK_THEME
+                  ? Brightness.dark
+                  : Brightness.light,
+          data: (brightness) =>
+              Constants.currentTheme == AvailableThemes.DARK_THEME
+                  ? MyColors.darkTheme
+                  : MyColors.lightTheme,
           themedWidgetBuilder: (context, theme) {
             return MaterialApp(
               title: Strings.appName,
@@ -44,5 +57,27 @@ class MyApp extends StatelessWidget {
             );
           }),
     );
+  }
+
+  @override
+  void initState() {
+    getCurrentTheme();
+    super.initState();
+  }
+
+  getCurrentTheme() async {
+    String theme = await getTheme();
+    print("Fucking theme :  $theme ");
+    if (theme == "AvailableThemes.LIGHT_THEME") {
+      //DynamicTheme.of(context).setThemeData(MyColors.lightTheme);
+      setState(() {
+        Constants.currentTheme = AvailableThemes.LIGHT_THEME;
+      });
+    } else {
+      //DynamicTheme.of(context).setThemeData(MyColors.darkTheme);
+      setState(() {
+        Constants.currentTheme = AvailableThemes.DARK_THEME;
+      });
+    }
   }
 }

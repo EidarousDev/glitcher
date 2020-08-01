@@ -96,7 +96,7 @@ class _AddReplyPageState extends State<AddReply> {
 
       await NotificationHandler.sendNotification(
           widget.user.id,
-          Constants.loggedInUser.username + ' commented on your post',
+          Constants.currentUser.username + ' commented on your post',
           _textEditingController.text,
           widget.comment.id,
           'comment');
@@ -232,7 +232,7 @@ class _AddReplyPageState extends State<AddReply> {
         await NotificationHandler.sendNotification(
             user.id,
             'New post mention',
-            Constants.loggedInUser.username + ' mentioned you in a comment',
+            Constants.currentUser.username + ' mentioned you in a comment',
             widget.comment.id,
             'mention');
       }

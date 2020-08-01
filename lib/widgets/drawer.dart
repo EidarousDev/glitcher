@@ -41,9 +41,9 @@ class _BuildDrawerState extends State<BuildDrawer> {
                     radius: 35.0,
                     backgroundColor: Theme.of(context).primaryColor,
                     backgroundImage:
-                        Constants.loggedInUser.profileImageUrl != null
+                        Constants.currentUser.profileImageUrl != null
                             ? CachedNetworkImageProvider(
-                                Constants.loggedInUser.profileImageUrl)
+                                Constants.currentUser.profileImageUrl)
                             : AssetImage('assets/images/default_profile.png'),
                   ),
                 ),
@@ -51,8 +51,8 @@ class _BuildDrawerState extends State<BuildDrawer> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text(
-                      Constants.loggedInUser.username != null
-                          ? Constants.loggedInUser.username
+                      Constants.currentUser.username != null
+                          ? Constants.currentUser.username
                           : '',
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 20),

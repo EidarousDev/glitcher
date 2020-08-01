@@ -451,7 +451,7 @@ class _CommentItemState extends State<CommentItem> {
       await NotificationHandler.sendNotification(
           post.authorId,
           'New Comment Like',
-          Constants.loggedInUser.username + ' likes your comment',
+          Constants.currentUser.username + ' likes your comment',
           post.id,
           'like');
     } else if (isLiked == false && isDisliked == false) {
@@ -475,7 +475,7 @@ class _CommentItemState extends State<CommentItem> {
       await NotificationHandler.sendNotification(
           post.authorId,
           'New Comment Like',
-          Constants.loggedInUser.username + ' likes your comment',
+          Constants.currentUser.username + ' likes your comment',
           post.id,
           'like');
     } else {
@@ -680,7 +680,7 @@ class _CommentItemState extends State<CommentItem> {
       await NotificationHandler.sendNotification(
           post.authorId,
           'New Comment Like',
-          Constants.loggedInUser.username + ' likes your comment',
+          Constants.currentUser.username + ' likes your comment',
           post.id,
           'like');
     } else if (isLiked == false && isDisliked == false) {
@@ -708,7 +708,7 @@ class _CommentItemState extends State<CommentItem> {
       await NotificationHandler.sendNotification(
           post.authorId,
           'New Comment Like',
-          Constants.loggedInUser.username + ' likes your comment',
+          Constants.currentUser.username + ' likes your comment',
           post.id,
           'like');
     } else {

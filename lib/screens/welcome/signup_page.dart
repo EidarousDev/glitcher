@@ -1,10 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
+import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 
@@ -353,18 +358,19 @@ class _SignUpPageState extends State<SignUpPage> {
     return list;
   }
 
-  void addUserToDatabase(String id) {
+  addUserToDatabase(String id, String email) async{
     List search = searchList(_username);
     Map<String, dynamic> userMap = {
       'name': 'Your name here',
       'username': _username,
+      'email': email,
       'description': 'Write something about yourself',
       'notificationsNumber': 0,
       'violations': 0,
       'search': search
     };
 
-    usersRef.document(id).setData(userMap);
+    await usersRef.document(id).setData(userMap);
   }
 
   void showVerifyEmailSentDialog(BuildContext context) {
@@ -422,13 +428,18 @@ class _SignUpPageState extends State<SignUpPage> {
             AppUtil.showSnackBar(context, _scaffoldKey, userId);
             return;
           }
-          addUserToDatabase(userId);
-          //widget.auth.sendEmailVerification();
-          //showVerifyEmailSentDialog(context);
-          print('Signed up user: $userId');
-//        moveUserTo(
-//            context: context, widget: HomePage(), routeId: HomePage.id);
+
+          ////TODO test
+          await FirebaseAuth.instance.signInWithEmailAndPassword(email: _email, password: _password);
+          FirebaseUser user = await FirebaseAuth.instance.currentUser();
+          await addUserToDatabase(userId, user.email);
+          await DatabaseService.addUserEmailToNewsletter(userId, user.email, _username);
+          await FirebaseAuth.instance.signOut();
+          ////
+
+          auth.sendEmailVerification();
           showVerifyEmailSentDialog(context);
+          Navigator.of(context).pushReplacementNamed('/login');
         } catch (signUpError) {
           if (signUpError is PlatformException) {
             if (signUpError.code == 'ERROR_EMAIL_ALREADY_IN_USE') {
@@ -448,7 +459,6 @@ class _SignUpPageState extends State<SignUpPage> {
             }
           }
           //print(e);
-
         }
       } else {
         if (_password != _confirmPassword) {
@@ -472,4 +482,5 @@ class _SignUpPageState extends State<SignUpPage> {
     });
     print('Should be false: $_loading');
   }
+
 }

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/screens/chats/conversation.dart';
 
 class ChatItem extends StatefulWidget {
   final String dp;
   final String name;
   final String time;
-  final String msg;
+  final Message msg;
   final bool isOnline;
   final int counter;
 
@@ -68,7 +69,12 @@ class _ChatItemState extends State<ChatItem> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        subtitle: Text("${widget.msg}"),
+        subtitle: widget.msg.type == 'text' ? Text("${widget.msg.message}"):Row(
+          children: [
+            widget.msg.type == 'audio' ? Icon(Icons.audiotrack): Icon(Icons.image),
+            widget.msg.type == 'audio' ? Text("Voice massage"): Text("image")
+          ],
+        ),
         trailing: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[

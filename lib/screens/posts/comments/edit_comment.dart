@@ -230,7 +230,7 @@ class _AddCommentPageState extends State<EditComment> {
         await NotificationHandler.sendNotification(
             user.id,
             'New post mention',
-            Constants.loggedInUser.username + ' mentioned you in a comment',
+            Constants.currentUser.username + ' mentioned you in a comment',
             widget.post.id,
             'mention');
       }

@@ -334,7 +334,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: <Widget>[
                         !isEditingName
                             ? Text(
-                                _nameText + ' ',
+                                '${_nameText ?? ''} ',
                                 style: TextStyle(
                                     fontSize: 20, fontWeight: FontWeight.bold),
                               )
@@ -375,7 +375,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 '@' + _usernameText,
                                 style: TextStyle(
                                     color: switchColor(
-                                        MyColors.lightButtonsBackground,
+                                        MyColors.lightPrimaryTappedBtn,
                                         MyColors.darkPrimaryTappedBtn),
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,

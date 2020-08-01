@@ -32,7 +32,7 @@ class _RootPageState extends State<RootPage> {
 
   @override
   void initState() {
-    this.getCurrentTheme();
+    //this.getCurrentTheme();
     super.initState();
   }
 
@@ -49,18 +49,6 @@ class _RootPageState extends State<RootPage> {
         )),
       ),
     );
-  }
-
-  getCurrentTheme() async {
-    String theme = await getTheme();
-    print("Fucking theme :  $theme ");
-    if (theme == "AvailableThemes.LIGHT_THEME") {
-      //DynamicTheme.of(context).setThemeData(MyColors.lightTheme);
-      Constants.currentTheme = AvailableThemes.LIGHT_THEME;
-    } else {
-      //DynamicTheme.of(context).setThemeData(MyColors.darkTheme);
-      Constants.currentTheme = AvailableThemes.DARK_THEME;
-    }
   }
 
   @override
@@ -82,8 +70,8 @@ class _RootPageState extends State<RootPage> {
     if (user?.uid != null && user.isEmailVerified) {
       User loggedInUser = await DatabaseService.getUserWithId(user?.uid);
       setState(() {
-        Constants.loggedInUser = loggedInUser;
-        Constants.currentUser = user;
+        Constants.currentUser = loggedInUser;
+        Constants.currentFirebaseUser = user;
         Constants.currentUserID = user?.uid;
         authStatus = AuthStatus.LOGGED_IN;
       });

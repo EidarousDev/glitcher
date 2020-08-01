@@ -213,7 +213,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
         ),
         onPressed: () {
           Navigator.of(context).pushNamed('/suggestion', arguments: {'initial_title': '${game.fullName} edit suggestion',
-            'initial_details': 'I (${Constants.loggedInUser.username}) suggest the following edit:', 'game_id': game.id});
+            'initial_details': 'I (${Constants.currentUser.username}) suggest the following edit:', 'game_id': game.id});
         },
       ),
       drawer: BuildDrawer(),

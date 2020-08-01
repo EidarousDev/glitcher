@@ -474,7 +474,7 @@ class _ConversationState extends State<Conversation>
                                         await NotificationHandler
                                             .sendNotification(
                                                 widget.otherUid,
-                                                Constants.loggedInUser.username,
+                                                Constants.currentUser.username,
                                                 ' sent you an image.',
                                                 Constants.currentUserID,
                                                 'message');
@@ -536,7 +536,7 @@ class _ConversationState extends State<Conversation>
                                   icon: Icon(
                                     Icons.send,
                                     color: switchColor(
-                                        Colors.black54, Colors.white70),
+                                        MyColors.lightPrimary, Colors.white70),
                                   ),
                                   onPressed: () async {
                                     messageController.clear();
@@ -546,12 +546,18 @@ class _ConversationState extends State<Conversation>
                                 )
                               : GestureDetector(
                                   onLongPress: () async {
-                                    bool isGranted = await PermissionsService()
-                                        .requestMicrophonePermission(
-                                            onPermissionDenied: () {
-                                      print('Permission has been denied');
+                                    bool isGranted;
+                                    if (await PermissionsService()
+                                        .hasMicrophonePermission()) {
+                                      isGranted = true;
+                                    } else {
+                                      isGranted = await PermissionsService()
+                                          .requestMicrophonePermission(
+                                              onPermissionDenied: () {
+                                        print('Permission has been denied');
+                                      });
                                       return;
-                                    });
+                                    }
 
                                     if (isGranted) {
                                       setState(() {
@@ -600,8 +606,8 @@ class _ConversationState extends State<Conversation>
                                   child: IconButton(
                                     icon: Icon(
                                       Icons.mic,
-                                      color: switchColor(
-                                          Colors.black54, Colors.white70),
+                                      color: switchColor(MyColors.lightPrimary,
+                                          Colors.white70),
                                     ),
                                     onPressed: null,
                                   ),

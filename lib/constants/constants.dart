@@ -3,6 +3,7 @@ import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:glitcher/models/hashtag_model.dart';
+import 'package:glitcher/models/notification_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/widgets/custom_loader.dart';
 
@@ -18,6 +19,7 @@ final chatsRef = firestore.collection('chats');
 final gamesRef = firestore.collection('games');
 final hashtagsRef = firestore.collection('hashtags');
 final chatGroupsRef = firestore.collection('chat_groups');
+final newsletterEmailsRef = firestore.collection('newsletter_emails');
 final glitcherLoader = CustomLoader();
 
 /// User Authentication Constants
@@ -38,9 +40,9 @@ enum AvailableThemes {
 }
 
 class Constants {
-  static FirebaseUser currentUser;
+  static FirebaseUser currentFirebaseUser;
   static String currentUserID;
-  static User loggedInUser;
+  static User currentUser;
   static List<String> games = [];
   static const genres = ['Action', 'Sports', 'Racing', 'Fighting'];
   static var currentTheme = AvailableThemes.DARK_THEME;
@@ -52,6 +54,7 @@ class Constants {
   static List<User> userFollowing = [];
   static List<User> userFollowers = [];
   static List<Hashtag> hashtags = [];
+  static List<Notification> unseenNotifications = [];
 
   static ConnectivityResult connectionState;
   static String country;

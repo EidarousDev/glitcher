@@ -11,6 +11,7 @@ import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:random_string/random_string.dart';
 
@@ -62,6 +63,7 @@ class _NewGroupState extends State<NewGroup>
     super.build(context);
     return Scaffold(
       floatingActionButton: FloatingActionButton(
+        backgroundColor: MyColors.darkPrimary,
         child: Icon(
           Icons.done,
         ),
@@ -87,25 +89,23 @@ class _NewGroupState extends State<NewGroup>
         },
       ),
       appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: <Color>[MyColors.darkCardBG, MyColors.darkBG])),
-        ),
+        flexibleSpace: gradientAppBar(),
 //        elevation: 4,
         leading: IconButton(
           icon: Icon(
             Icons.keyboard_backspace,
           ),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
-        title: TextField(
-          decoration: InputDecoration.collapsed(
-            hintText: 'Search',
-          ),
-        ),
+        title: Text('New Group')
+
+//        TextField(
+//          decoration: InputDecoration.collapsed(
+//            hintText: 'Search',
+//          ),
+//        ),
       ),
       body: CustomScrollView(
         controller: _scrollController,
@@ -254,6 +254,8 @@ class _NewGroupState extends State<NewGroup>
                     ),
                     subtitle: Text(friendsData.elementAt(index).description),
                     trailing: Checkbox(
+                      checkColor: Colors.white,
+                        activeColor: MyColors.darkPrimary,
                         value: chosens[index],
                         onChanged: (value) {
                           setState(() {

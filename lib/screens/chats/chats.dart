@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/list_items/chat_item.dart';
 import 'package:glitcher/models/group_model.dart';
+import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
@@ -44,13 +46,14 @@ class _ChatsState extends State<Chats>
   Future<ChatItem> loadUserData(String uid) async {
     ChatItem chatItem;
     User user = await DatabaseService.getUserWithId(uid);
+    Message message = await DatabaseService.getLastMessage(user.id);
     setState(() {
       chatItem = ChatItem(
         key: ValueKey(uid),
         dp: user.profileImageUrl,
         name: user.username,
         isOnline: user.online == 'online',
-        msg: 'Last Message',
+        msg: message??'No messages yet',
         time: user.online == 'online'
             ? 'online'
             : Functions.formatTimestamp(user.online),
@@ -246,7 +249,7 @@ class _ChatsState extends State<Chats>
                         },
                         leading: CircleAvatar(
                           radius: 25,
-                          backgroundImage: NetworkImage(group.image),
+                          backgroundImage: group.image != null ? NetworkImage(group.image):AssetImage(Strings.default_group_image),
                         ),
                         title: Text(group.name),
                       );

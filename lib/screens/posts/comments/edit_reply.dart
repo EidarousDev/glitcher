@@ -230,7 +230,7 @@ class _AddReplyPageState extends State<EditReply> {
         await NotificationHandler.sendNotification(
             user.id,
             'New post mention',
-            Constants.loggedInUser.username + ' mentioned you in a comment',
+            Constants.currentUser.username + ' mentioned you in a comment',
             widget.comment.id,
             'mention');
       }

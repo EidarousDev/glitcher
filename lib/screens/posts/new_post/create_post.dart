@@ -298,7 +298,7 @@ class _CreatePostReplyPageState extends State<CreatePost> {
         await NotificationHandler.sendNotification(
             user.id,
             'New post mention',
-            Constants.loggedInUser.username + ' mentioned you in a post',
+            Constants.currentUser.username + ' mentioned you in a post',
             postId,
             'mention');
       }

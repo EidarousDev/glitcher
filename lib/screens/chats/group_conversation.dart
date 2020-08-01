@@ -450,11 +450,18 @@ class _GroupConversationState extends State<GroupConversation>
                                 )
                               : GestureDetector(
                                   onLongPress: () async {
-                                    bool isGranted = await PermissionsService()
-                                        .requestMicrophonePermission(
-                                            onPermissionDenied: () {
-                                      print('Permission has been denied');
-                                    });
+                                    bool isGranted;
+                                    if(await PermissionsService().hasMicrophonePermission()){
+                                      isGranted = true;
+                                    }
+                                    else{
+                                      isGranted = await PermissionsService()
+                                          .requestMicrophonePermission(
+                                          onPermissionDenied: () {
+                                            print('Permission has been denied');
+                                          });
+                                      return;
+                                    }
 
                                     if (isGranted) {
                                       setState(() {
@@ -464,6 +471,7 @@ class _GroupConversationState extends State<GroupConversation>
                                       await initRecorder();
                                       await recorder.startRecording(
                                           conversation: this.widget);
+                                    return;
                                     } else {
                                       showDialog(
                                           context: context,
