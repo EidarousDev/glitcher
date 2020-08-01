@@ -1,4 +1,3 @@
-import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
@@ -33,8 +32,8 @@ class _RootPageState extends State<RootPage> {
 
   @override
   void initState() {
-    super.initState();
     this.getCurrentTheme();
+    super.initState();
   }
 
   Widget buildWaitingScreen() {
@@ -54,16 +53,13 @@ class _RootPageState extends State<RootPage> {
 
   getCurrentTheme() async {
     String theme = await getTheme();
+    print("Fucking theme :  $theme ");
     if (theme == "AvailableThemes.LIGHT_THEME") {
-      setState(() {
-        DynamicTheme.of(context).setThemeData(MyColors.lightTheme);
-        Constants.currentTheme = AvailableThemes.LIGHT_THEME;
-      });
+      //DynamicTheme.of(context).setThemeData(MyColors.lightTheme);
+      Constants.currentTheme = AvailableThemes.LIGHT_THEME;
     } else {
-      setState(() {
-        DynamicTheme.of(context).setThemeData(MyColors.darkTheme);
-        Constants.currentTheme = AvailableThemes.DARK_THEME;
-      });
+      //DynamicTheme.of(context).setThemeData(MyColors.darkTheme);
+      Constants.currentTheme = AvailableThemes.DARK_THEME;
     }
   }
 
@@ -83,7 +79,6 @@ class _RootPageState extends State<RootPage> {
 
   Future authAssignment() async {
     FirebaseUser user = await Auth().getCurrentUser();
-
     if (user?.uid != null && user.isEmailVerified) {
       User loggedInUser = await DatabaseService.getUserWithId(user?.uid);
       setState(() {

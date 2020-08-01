@@ -84,178 +84,191 @@ class _ChatsState extends State<Chats>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Scaffold(
-      appBar: AppBar(
-        flexibleSpace: gradientAppBar(),
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: Scaffold(
+        appBar: AppBar(
+          flexibleSpace: gradientAppBar(),
 //        elevation: 4,
-        title: TextField(
-          controller: _searchController,
-          decoration: InputDecoration(
-            prefixIcon: Icon(
-              Icons.search,
-              size: 28.0,
+          title: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              prefixIcon: Icon(
+                Icons.search,
+                size: 28.0,
+              ),
+              suffixIcon: _searching
+                  ? IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () {
+                        _searchController.clear();
+                      })
+                  : null,
+              hintText: 'Search',
             ),
-            suffixIcon: _searching
-                ? IconButton(
-                    icon: Icon(Icons.close),
-                    onPressed: () {
-                      _searchController.clear();
-                    })
-                : null,
-            hintText: 'Search',
+            onChanged: (text) {
+              filteredChats = [];
+              filteredGroups = [];
+              if (text.length != 0) {
+                setState(() {
+                  _searching = true;
+                });
+              } else {
+                setState(() {
+                  _searching = false;
+                });
+              }
+              if (_tabController.index == 0) {
+                chats.forEach((chatItem) {
+                  if (chatItem.name
+                      .toLowerCase()
+                      .contains(text.toLowerCase())) {
+                    setState(() {
+                      filteredChats.add(chatItem);
+                    });
+                  }
+                });
+              } else {
+                groups.forEach((groupItem) {
+                  if (groupItem.name
+                      .toLowerCase()
+                      .contains(text.toLowerCase())) {
+                    setState(() {
+                      filteredGroups.add(groupItem);
+                    });
+                  }
+                });
+              }
+            },
           ),
-          onChanged: (text) {
-            filteredChats = [];
-            filteredGroups = [];
-            if (text.length != 0) {
+          leading: Builder(
+              builder: (context) => Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: InkWell(
+                      onTap: () => Scaffold.of(context).openDrawer(),
+                      child: Icon(IconData(58311, fontFamily: 'MaterialIcons')),
+                    ),
+                  )),
+          actions: <Widget>[],
+          bottom: TabBar(
+            onTap: (index) {
               setState(() {
-                _searching = true;
-              });
-            } else {
-              setState(() {
+                filteredGroups = [];
+                filteredChats = [];
                 _searching = false;
               });
-            }
-            if (_tabController.index == 0) {
-              chats.forEach((chatItem) {
-                if (chatItem.name.toLowerCase().contains(text.toLowerCase())) {
-                  setState(() {
-                    filteredChats.add(chatItem);
-                  });
-                }
-              });
-            } else {
-              groups.forEach((groupItem) {
-                if (groupItem.name.toLowerCase().contains(text.toLowerCase())) {
-                  setState(() {
-                    filteredGroups.add(groupItem);
-                  });
-                }
-              });
-            }
-          },
+              _searchController.clear();
+            },
+            controller: _tabController,
+            indicatorColor: Theme.of(context).accentColor,
+            labelColor: MyColors.darkGrey,
+            unselectedLabelColor: Theme.of(context).textTheme.caption.color,
+            isScrollable: false,
+            tabs: <Widget>[
+              Tab(
+                text: "Friends",
+              ),
+              Tab(
+                text: "Groups",
+              ),
+            ],
+          ),
         ),
-        leading: Builder(
-            builder: (context) => Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: InkWell(
-                    onTap: () => Scaffold.of(context).openDrawer(),
-                    child: Icon(IconData(58311, fontFamily: 'MaterialIcons')),
-                  ),
-                )),
-        actions: <Widget>[],
-        bottom: TabBar(
-          onTap: (index) {
-            setState(() {
-              filteredGroups = [];
-              filteredChats = [];
-              _searching = false;
-            });
-            _searchController.clear();
-          },
+        floatingActionButton: _tabController.index == 1
+            ? FloatingActionButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/new-group');
+                },
+                child: Icon(
+                  Icons.add,
+                ))
+            : null,
+        body: TabBarView(
           controller: _tabController,
-          indicatorColor: Theme.of(context).accentColor,
-          labelColor: MyColors.darkGrey,
-          unselectedLabelColor: Theme.of(context).textTheme.caption.color,
-          isScrollable: false,
-          tabs: <Widget>[
-            Tab(
-              text: "Friends",
-            ),
-            Tab(
-              text: "Groups",
-            ),
+          children: <Widget>[
+            chats.length > 0
+                ? ListView.separated(
+                    padding: EdgeInsets.all(10),
+                    separatorBuilder: (BuildContext context, int index) {
+                      return Align(
+                        alignment: Alignment.centerRight,
+                        child: Container(
+                          height: 0.5,
+                          width: MediaQuery.of(context).size.width / 1.3,
+                          child: Divider(),
+                        ),
+                      );
+                    },
+                    itemCount:
+                        !_searching ? chats.length : filteredChats.length,
+                    itemBuilder: !_searching
+                        ? (BuildContext context, int index) {
+                            ChatItem chat = chats[index];
+                            return chat;
+                          }
+                        : (BuildContext context, int index) {
+                            ChatItem chat = filteredChats[index];
+                            return chat;
+                          },
+                  )
+                : Center(
+                    child: Text(
+                    'No chats yet',
+                    style: TextStyle(fontSize: 20, color: Colors.grey),
+                  )),
+            groups.length > 0
+                ? ListView.separated(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 7,
+                    ),
+                    separatorBuilder: (BuildContext context, int index) {
+                      return Align(
+                        alignment: Alignment.centerRight,
+                        child: Container(
+                          height: 0.5,
+                          width: MediaQuery.of(context).size.width / 1.3,
+                          child: Divider(),
+                        ),
+                      );
+                    },
+                    itemCount: !_searching && _tabController.index == 1
+                        ? this.groups.length
+                        : this.filteredGroups.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      Group group = !_searching && _tabController.index == 1
+                          ? this.groups[index]
+                          : this.filteredGroups[index];
+
+                      return ListTile(
+                        onTap: () {
+                          Navigator.of(context).pushNamed('/group-conversation',
+                              arguments: {'groupId': group.id});
+                        },
+                        leading: CircleAvatar(
+                          radius: 25,
+                          backgroundImage: NetworkImage(group.image),
+                        ),
+                        title: Text(group.name),
+                      );
+                    },
+                  )
+                : Center(
+                    child: Text(
+                    'No groups yet',
+                    style: TextStyle(fontSize: 20, color: Colors.grey),
+                  )),
           ],
         ),
+        drawer: BuildDrawer(),
       ),
-      floatingActionButton: _tabController.index == 1
-          ? FloatingActionButton(
-              onPressed: () {
-                Navigator.of(context).pushNamed('/new-group');
-              },
-              child: Icon(
-                Icons.add,
-              ))
-          : null,
-      body: TabBarView(
-        controller: _tabController,
-        children: <Widget>[
-          chats.length > 0
-              ? ListView.separated(
-                  padding: EdgeInsets.all(10),
-                  separatorBuilder: (BuildContext context, int index) {
-                    return Align(
-                      alignment: Alignment.centerRight,
-                      child: Container(
-                        height: 0.5,
-                        width: MediaQuery.of(context).size.width / 1.3,
-                        child: Divider(),
-                      ),
-                    );
-                  },
-                  itemCount: !_searching ? chats.length : filteredChats.length,
-                  itemBuilder: !_searching
-                      ? (BuildContext context, int index) {
-                          ChatItem chat = chats[index];
-                          return chat;
-                        }
-                      : (BuildContext context, int index) {
-                          ChatItem chat = filteredChats[index];
-                          return chat;
-                        },
-                )
-              : Center(
-                  child: Text(
-                  'No chats yet',
-                  style: TextStyle(fontSize: 20, color: Colors.grey),
-                )),
-          groups.length > 0
-              ? ListView.separated(
-                  padding: EdgeInsets.symmetric(
-                    vertical: 7,
-                  ),
-                  separatorBuilder: (BuildContext context, int index) {
-                    return Align(
-                      alignment: Alignment.centerRight,
-                      child: Container(
-                        height: 0.5,
-                        width: MediaQuery.of(context).size.width / 1.3,
-                        child: Divider(),
-                      ),
-                    );
-                  },
-                  itemCount: !_searching && _tabController.index == 1
-                      ? this.groups.length
-                      : this.filteredGroups.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    Group group = !_searching && _tabController.index == 1
-                        ? this.groups[index]
-                        : this.filteredGroups[index];
-
-                    return ListTile(
-                      onTap: () {
-                        Navigator.of(context).pushNamed('/group-conversation',
-                            arguments: {'groupId': group.id});
-                      },
-                      leading: CircleAvatar(
-                        radius: 25,
-                        backgroundImage: NetworkImage(group.image),
-                      ),
-                      title: Text(group.name),
-                    );
-                  },
-                )
-              : Center(
-                  child: Text(
-                  'No groups yet',
-                  style: TextStyle(fontSize: 20, color: Colors.grey),
-                )),
-        ],
-      ),
-      drawer: BuildDrawer(),
     );
   }
 
   @override
   bool get wantKeepAlive => true;
+
+  Future<bool> _onBackPressed() {
+    /// Navigate back to home page
+    Navigator.of(context).pushReplacementNamed('/home');
+  }
 }

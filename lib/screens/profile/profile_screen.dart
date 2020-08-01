@@ -4,21 +4,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
-import 'package:glitcher/widgets/circular_clipper.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
+import 'package:glitcher/list_items/post_item.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/list_items/post_item.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/utils/Loader.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
+import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
 import 'package:glitcher/widgets/caching_image.dart';
+import 'package:glitcher/widgets/circular_clipper.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
 import 'package:random_string/random_string.dart';
 
@@ -311,256 +310,283 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _build() {
-    return Stack(
-      alignment: Alignment(0, 0),
-      children: <Widget>[
-        SingleChildScrollView(
-          controller: _scrollController,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              _profileAndCover(),
-              SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  !isEditingUsername
-                      ? Text(
-                          _usernameText,
-                          style: TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold),
-                        )
-                      : Container(
-                          width: 200,
-                          child: TextField(
-                            controller: _usernameEditingController,
-                          )),
-                  userId == Constants.currentUserID
-                      ? !isEditingUsername
-                          ? IconButton(
-                              icon: Icon(
-                                Icons.edit,
-                                size: 18,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  isEditingUsername = true;
-                                  _usernameEditingController.text =
-                                      _usernameText;
-                                });
-                              })
-                          : IconButton(
-                              icon: Icon(
-                                Icons.done,
-                                size: 18,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  isEditingUsername = false;
-                                  _usernameText =
-                                      _usernameEditingController.text;
-                                });
-
-                                updateUsername();
-                              })
-                      : Container(),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  !isEditingName
-                      ? Text(
-                          _nameText,
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold),
-                        )
-                      : Container(
-                          width: 200,
-                          child: TextField(
-                            controller: _nameEditingController,
-                          )),
-                  userId == Constants.currentUserID
-                      ? !isEditingName
-                          ? IconButton(
-                              icon: Icon(
-                                Icons.edit,
-                                size: 18,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  isEditingName = true;
-                                  _nameEditingController.text = _nameText;
-                                });
-                              })
-                          : IconButton(
-                              icon: Icon(
-                                Icons.done,
-                                size: 18,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  isEditingName = false;
-                                  _nameText = _nameEditingController.text;
-                                });
-
-                                updateName();
-                              })
-                      : Container(),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  !isEditingDesc
-                      ? Text(
-                          _descText,
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
-                        )
-                      : Container(
-                          width: 200,
-                          child: TextField(
-                            controller: _descEditingController,
-                          )),
-                  userId == Constants.currentUserID
-                      ? !isEditingDesc
-                          ? IconButton(
-                              icon: Icon(
-                                Icons.edit,
-                                size: 18,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  isEditingDesc = true;
-                                  _descEditingController.text = _descText;
-                                });
-                              })
-                          : IconButton(
-                              icon: Icon(
-                                Icons.done,
-                                size: 18,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  isEditingDesc = false;
-                                  _descText = _descEditingController.text;
-                                });
-                                updateDesc();
-                              })
-                      : Container(),
-                ],
-              ),
-              SizedBox(
-                height: 8,
-              ),
-              userId == Constants.currentUserID
-                  ? Row(
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: Stack(
+        alignment: Alignment(0, 0),
+        children: <Widget>[
+          SingleChildScrollView(
+            controller: _scrollController,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                _profileAndCover(),
+                SizedBox(
+                  height: 1.0,
+                ),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        InkWell(
-                          onTap: () => Navigator.of(context).pushNamed('/users',
-                              arguments: {'screen_type': 'Followers'}),
-                          child: Column(
-                            children: <Widget>[
-                              Text(
-                                'Followers',
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                              Text(Constants.userFollowers.length.toString())
-                            ],
-                          ),
-                        ),
-                        InkWell(
-                          onTap: () => Navigator.of(context).pushNamed('/users',
-                              arguments: {'screen_type': 'Following'}),
-                          child: Column(
-                            children: <Widget>[
-                              Text(
-                                'Following',
-                                style:
-                                    TextStyle(color: Colors.grey, fontSize: 14),
-                              ),
-                              Text(Constants.userFollowing.length.toString())
-                            ],
-                          ),
-                        ),
-                        InkWell(
-                          onTap: () {
-                            Navigator.of(context).pushNamed('/users',
-                                arguments: {'screen_type': 'Friends'});
-                          },
-                          child: Column(
-                            children: <Widget>[
-                              Text(
-                                'Friends',
-                                style:
-                                    TextStyle(color: Colors.grey, fontSize: 14),
-                              ),
-                              Text(Constants.userFriends.length.toString())
-                            ],
-                          ),
-                        ),
+                        !isEditingName
+                            ? Text(
+                                _nameText + ' ',
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.bold),
+                              )
+                            : Container(
+                                width: 200,
+                                child: TextField(
+                                  controller: _nameEditingController,
+                                )),
+                        userId == Constants.currentUserID
+                            ? !isEditingName
+                                ? IconButton(
+                                    icon: Icon(
+                                      Icons.edit,
+                                      size: 18,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        isEditingName = true;
+                                        _nameEditingController.text = _nameText;
+                                      });
+                                    })
+                                : IconButton(
+                                    icon: Icon(
+                                      Icons.done,
+                                      size: 18,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        isEditingName = false;
+                                        _nameText = _nameEditingController.text;
+                                      });
+
+                                      updateName();
+                                    })
+                            : Container(),
+                        !isEditingUsername
+                            ? Text(
+                                '@' + _usernameText,
+                                style: TextStyle(
+                                    color: switchColor(
+                                        MyColors.lightButtonsBackground,
+                                        MyColors.darkPrimaryTappedBtn),
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'WorkSansMedium'),
+                              )
+                            : Container(
+                                width: 150,
+                                child: TextField(
+                                  controller: _usernameEditingController,
+                                )),
+                        userId == Constants.currentUserID
+                            ? !isEditingUsername
+                                ? IconButton(
+                                    icon: Icon(
+                                      Icons.edit,
+                                      size: 16,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        isEditingUsername = true;
+                                        _usernameEditingController.text =
+                                            _usernameText;
+                                      });
+                                    })
+                                : IconButton(
+                                    icon: Icon(
+                                      Icons.done,
+                                      size: 16,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        isEditingUsername = false;
+                                        _usernameText =
+                                            _usernameEditingController.text;
+                                      });
+
+                                      updateUsername();
+                                    })
+                            : Container(),
                       ],
-                    )
-                  : Container(),
-              SizedBox(
-                height: 8,
-              ),
-              Divider(
-                color: switchColor(
-                    MyColors.lightLineBreak, MyColors.darkLineBreak),
-              ),
-              _postsReady == true
-                  ? ListView.builder(
-                      physics: NeverScrollableScrollPhysics(),
-                      scrollDirection: Axis.vertical,
-                      itemCount: _posts.length,
-                      shrinkWrap: true,
-                      itemBuilder: (BuildContext context, int index) {
-                        Post post = _posts[index];
-                        return FutureBuilder(
-                            future:
-                                DatabaseService.getUserWithId(post.authorId),
-                            builder:
-                                (BuildContext context, AsyncSnapshot snapshot) {
-                              if (!snapshot.hasData) {
-                                return SizedBox.shrink();
-                              }
-                              User author = snapshot.data;
-                              return PostItem(post: post, author: author);
-                            });
-                      },
-                    )
-                  : Container(),
-            ],
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    !isEditingDesc
+                        ? Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Container(
+                              constraints: new BoxConstraints(
+                                  maxWidth:
+                                      MediaQuery.of(context).size.width - 70),
+                              child: Text(
+                                _descText,
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.grey,
+                                    fontFamily: 'WorkSansMedium'),
+                              ),
+                            ),
+                          )
+                        : Container(
+                            width: 200,
+                            child: TextField(
+                              controller: _descEditingController,
+                            )),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    userId == Constants.currentUserID
+                        ? !isEditingDesc
+                            ? IconButton(
+                                icon: Icon(
+                                  Icons.edit,
+                                  size: 18,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    isEditingDesc = true;
+                                    _descEditingController.text = _descText;
+                                  });
+                                })
+                            : IconButton(
+                                icon: Icon(
+                                  Icons.done,
+                                  size: 18,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    isEditingDesc = false;
+                                    _descText = _descEditingController.text;
+                                  });
+                                  updateDesc();
+                                })
+                        : Container(),
+                  ],
+                ),
+                SizedBox(
+                  height: 8,
+                ),
+                userId == Constants.currentUserID
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          InkWell(
+                            onTap: () => Navigator.of(context).pushNamed(
+                                '/users',
+                                arguments: {'screen_type': 'Followers'}),
+                            child: Column(
+                              children: <Widget>[
+                                Text(
+                                  'Followers',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                                Text(Constants.userFollowers.length.toString())
+                              ],
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () => Navigator.of(context).pushNamed(
+                                '/users',
+                                arguments: {'screen_type': 'Following'}),
+                            child: Column(
+                              children: <Widget>[
+                                Text(
+                                  'Following',
+                                  style: TextStyle(
+                                      color: Colors.grey, fontSize: 14),
+                                ),
+                                Text(Constants.userFollowing.length.toString())
+                              ],
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              Navigator.of(context).pushNamed('/users',
+                                  arguments: {'screen_type': 'Friends'});
+                            },
+                            child: Column(
+                              children: <Widget>[
+                                Text(
+                                  'Friends',
+                                  style: TextStyle(
+                                      color: Colors.grey, fontSize: 14),
+                                ),
+                                Text(Constants.userFriends.length.toString())
+                              ],
+                            ),
+                          ),
+                        ],
+                      )
+                    : Container(),
+                SizedBox(
+                  height: 8,
+                ),
+                Divider(
+                  color: switchColor(
+                      MyColors.lightLineBreak, MyColors.darkLineBreak),
+                ),
+                _postsReady == true
+                    ? ListView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        scrollDirection: Axis.vertical,
+                        itemCount: _posts.length,
+                        shrinkWrap: true,
+                        itemBuilder: (BuildContext context, int index) {
+                          Post post = _posts[index];
+                          return FutureBuilder(
+                              future:
+                                  DatabaseService.getUserWithId(post.authorId),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot snapshot) {
+                                if (!snapshot.hasData) {
+                                  return SizedBox.shrink();
+                                }
+                                User author = snapshot.data;
+                                return PostItem(post: post, author: author);
+                              });
+                        },
+                      )
+                    : Container(),
+              ],
+            ),
           ),
-        ),
-        Positioned(
-          top: 0.0,
-          left: 0.0,
-          right: 0.0,
-          child: AppBar(
-            backgroundColor: Colors.transparent,
+          Positioned(
+            top: 0.0,
+            left: 0.0,
+            right: 0.0,
+            child: AppBar(
+              backgroundColor: Colors.transparent,
+            ),
           ),
-        ),
-        _loading
-            ? Center(
-                child: Image.asset(
-                'assets/images/glitcher_loader.gif',
-                height: 250,
-                width: 250,
-              ))
-            : Container(
-                width: 0,
-                height: 0,
-              ),
-      ],
+          _loading
+              ? Center(
+                  child: Image.asset(
+                  'assets/images/glitcher_loader.gif',
+                  height: 250,
+                  width: 250,
+                ))
+              : Container(
+                  width: 0,
+                  height: 0,
+                ),
+        ],
+      ),
     );
   }
 
@@ -798,5 +824,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           context: context);
     }
+  }
+
+  Future<bool> _onBackPressed() {
+    /// Navigate back to home page
+    Navigator.of(context).pushReplacementNamed('/home');
   }
 }

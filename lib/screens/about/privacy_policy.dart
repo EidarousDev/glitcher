@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:glitcher/widgets/gradient_appbar.dart';
-import 'package:glitcher/constants/strings.dart';
 import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:glitcher/constants/strings.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:webview_media/webview_flutter.dart';
 
 class PrivacyPolicy extends StatelessWidget {
@@ -19,7 +20,7 @@ class PrivacyPolicy extends StatelessWidget {
       // to allow calling Scaffold.of(context) so we can show a snackbar.
       body: Builder(builder: (BuildContext context) {
         return WebView(
-          initialUrl: 'https://flutter.dev',
+          initialUrl: 'http://www.gl1tch3r.com/privacy-policy/',
           javascriptMode: JavascriptMode.unrestricted,
           onWebViewCreated: (WebViewController webViewController) {
             _controller.complete(webViewController);

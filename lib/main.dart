@@ -5,7 +5,8 @@ import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
-import 'package:glitcher/services/route_generator.dart';
+
+import 'services/route_generator.dart';
 
 void main() {
   /*RenderErrorBox.backgroundColor = Colors.transparent;
@@ -15,7 +16,7 @@ void main() {
 
 Future<void> retrieveDynamicLink(BuildContext context) async {
   final PendingDynamicLinkData data =
-  await FirebaseDynamicLinks.instance.getInitialLink();
+      await FirebaseDynamicLinks.instance.getInitialLink();
   final Uri deepLink = data?.link;
 
   if (deepLink != null) {

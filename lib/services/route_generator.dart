@@ -15,8 +15,6 @@ import 'package:glitcher/screens/chats/group_conversation.dart';
 import 'package:glitcher/screens/chats/group_details.dart';
 import 'package:glitcher/screens/chats/group_members.dart';
 import 'package:glitcher/screens/chats/new_group.dart';
-import 'package:glitcher/screens/welcome/login_page.dart';
-import 'package:glitcher/screens/users/users_screen.dart';
 import 'package:glitcher/screens/games/game_screen.dart';
 import 'package:glitcher/screens/games/new_game.dart';
 import 'package:glitcher/screens/hashtag_posts_screen.dart';
@@ -31,7 +29,9 @@ import 'package:glitcher/screens/profile/profile_screen.dart';
 import 'package:glitcher/screens/report_post_screen.dart';
 import 'package:glitcher/screens/settings.dart';
 import 'package:glitcher/screens/suggestion_screen.dart';
+import 'package:glitcher/screens/users/users_screen.dart';
 import 'package:glitcher/screens/web_browser/in_app_browser.dart';
+import 'package:glitcher/screens/welcome/login_page.dart';
 import 'package:glitcher/screens/welcome/password_reset.dart';
 import 'package:glitcher/screens/welcome/signup_page.dart';
 import 'package:page_transition/page_transition.dart';
@@ -46,7 +46,8 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => RootPage());
 
       case '/home':
-        return MaterialPageRoute(builder: (_) => AppPage());
+        return PageTransition(
+            child: AppPage(), type: PageTransitionType.leftToRightWithFade);
 
       case '/new-post':
         return MaterialPageRoute(builder: (_) => CreatePost());
@@ -165,7 +166,7 @@ class RouteGenerator {
           ),
         );
 
-        case '/edit-reply':
+      case '/edit-reply':
         // Validation of correct data type
         return MaterialPageRoute(
           builder: (_) => EditReply(
@@ -175,7 +176,6 @@ class RouteGenerator {
             user: args['user'],
           ),
         );
-
 
       case '/bookmarks':
         return MaterialPageRoute(builder: (_) => BookmarksScreen());
@@ -187,10 +187,19 @@ class RouteGenerator {
                 ));
 
       case '/report-post':
-        return MaterialPageRoute(builder: (_) => ReportPostScreen(postAuthor: args['post_author'], postId: args['post_id'],));
+        return MaterialPageRoute(
+            builder: (_) => ReportPostScreen(
+                  postAuthor: args['post_author'],
+                  postId: args['post_id'],
+                ));
 
       case '/suggestion':
-        return MaterialPageRoute(builder: (_) => SuggestionScreen(initialTitle: args['initial_title'], initialDetails: args['initial_details'], gameId: args['game_id'],));
+        return MaterialPageRoute(
+            builder: (_) => SuggestionScreen(
+                  initialTitle: args['initial_title'],
+                  initialDetails: args['initial_details'],
+                  gameId: args['game_id'],
+                ));
 
       case 'sign-up':
         return MaterialPageRoute(builder: (_) => SignUpPage());
@@ -200,7 +209,6 @@ class RouteGenerator {
 
       case 'password-reset':
         return MaterialPageRoute(builder: (_) => PasswordResetScreen());
-
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

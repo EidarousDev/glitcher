@@ -89,6 +89,7 @@ Future<List> getHashtags() async {
 }
 
 Color switchColor(Color lightColor, Color darkColor) {
+  //print('current theme: ${Constants.currentTheme}');
   return Constants.currentTheme == AvailableThemes.LIGHT_THEME
       ? lightColor
       : darkColor;
@@ -181,7 +182,6 @@ class Functions {
   }
 
   /* Alert Error - SnackBar */
-
 
   /// Format Time
   static String formatTimestamp(Timestamp timestamp) {
