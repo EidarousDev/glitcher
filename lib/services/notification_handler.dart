@@ -10,11 +10,7 @@ import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/constants/constants.dart';
 
-
-
-
 class NotificationHandler {
-
   static receiveNotification(BuildContext context) {
     StreamSubscription iosSubscription;
     FirebaseMessaging _fcm = FirebaseMessaging();
@@ -53,12 +49,14 @@ class NotificationHandler {
         print("onLaunch: $message");
         makeNotificationSeen(message['data']['id']);
 
-        navigateToScreen(context, message['data']['type'], message['data']['object_id']);
+        navigateToScreen(
+            context, message['data']['type'], message['data']['object_id']);
       },
       onResume: (Map<String, dynamic> message) async {
         print("onResume: $message");
         makeNotificationSeen(message['data']['id']);
-        navigateToScreen(context, message['data']['type'], message['data']['object_id']);
+        navigateToScreen(
+            context, message['data']['type'], message['data']['object_id']);
       },
     );
   }
@@ -73,34 +71,33 @@ class NotificationHandler {
     });
   }
 
-  static navigateToScreen(BuildContext context, String type, String objectId){
-    switch(type){
+  static navigateToScreen(BuildContext context, String type, String objectId) {
+    switch (type) {
       case 'message':
-        Navigator.of(context).pushNamed('/conversation',
-            arguments: {'otherUid': objectId});
+        Navigator.of(context)
+            .pushNamed('/conversation', arguments: {'otherUid': objectId});
         break;
 
       case 'follow':
-        Navigator.of(context).pushNamed('/user-profile',
-            arguments: {'userId': objectId});
+        Navigator.of(context)
+            .pushNamed('/user-profile', arguments: {'userId': objectId});
         break;
 
       case 'new_group':
-        Navigator.of(context).pushNamed('/group-conversation', arguments: {'groupId': objectId});
+        Navigator.of(context)
+            .pushNamed('/group-conversation', arguments: {'groupId': objectId});
         break;
 
-      default :
-        Navigator.of(context).pushNamed('/post',
-            arguments: {'postId': objectId});
+      default:
+        Navigator.of(context)
+            .pushNamed('/post', arguments: {'postId': objectId});
         break;
-
     }
   }
 
-  static sendNotification(
-      String receiverId, String title, String body, String objectId, String type) async {
-    if(receiverId == Constants.currentUserID)
-      return;
+  static sendNotification(String receiverId, String title, String body,
+      String objectId, String type) async {
+    if (receiverId == Constants.currentUserID) return;
     usersRef.document(receiverId).collection('notifications').add({
       'title': title,
       'body': body,

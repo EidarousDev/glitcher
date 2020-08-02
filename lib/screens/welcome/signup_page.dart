@@ -45,6 +45,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final FocusNode myFocusNodePassword = FocusNode();
   final FocusNode myFocusNodeEmail = FocusNode();
   final FocusNode myFocusNodeName = FocusNode();
+  final FocusNode myFocusNodeConfirmPassword = FocusNode();
 
   Widget _backButton() {
     return InkWell(
@@ -97,6 +98,23 @@ class _SignUpPageState extends State<SignUpPage> {
                     _confirmPassword = value;
                   }
                 },
+                keyboardType:
+                    isEmail ? TextInputType.emailAddress : TextInputType.text,
+                onFieldSubmitted: (v) {
+                  if (isUsername) {
+                    FocusScope.of(context).requestFocus(myFocusNodeEmail);
+                  } else if (isEmail) {
+                    FocusScope.of(context).requestFocus(myFocusNodePassword);
+                  } else if (isPassword) {
+                    FocusScope.of(context)
+                        .requestFocus(myFocusNodeConfirmPassword);
+                  } else if (isConfirmPassword) {
+                    _signUp();
+                  }
+                },
+                textInputAction: isConfirmPassword
+                    ? TextInputAction.done
+                    : TextInputAction.next,
                 style: TextStyle(color: MyColors.darkCardBG),
                 obscureText: _isObscure && (isPassword || isConfirmPassword),
                 decoration: InputDecoration(
@@ -170,7 +188,8 @@ class _SignUpPageState extends State<SignUpPage> {
             _confirmPassword.isNotEmpty) {
           await _signUp();
         } else {
-          AppUtil.showSnackBar(context, _scaffoldKey, 'Please fill fields above');
+          AppUtil.showSnackBar(
+              context, _scaffoldKey, 'Please fill fields above');
         }
       },
       child: Container(
@@ -223,21 +242,22 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  Widget _title() {
+  Widget _icon() {
     return Image.asset(
       'assets/images/icon-480.png',
       height: 200.0,
     );
   }
 
-  Widget _emailPasswordWidget() {
+  Widget _textFieldWidgets() {
     return Column(
       children: <Widget>[
         _entryField("Username", focusNode: myFocusNodeName, isUsername: true),
         _entryField("Email", focusNode: myFocusNodeEmail, isEmail: true),
         _entryField("Password",
             focusNode: myFocusNodePassword, isPassword: true),
-        _entryField("Confirm Password", isConfirmPassword: true)
+        _entryField("Confirm Password",
+            focusNode: myFocusNodeConfirmPassword, isConfirmPassword: true)
       ],
     );
   }
@@ -264,11 +284,11 @@ class _SignUpPageState extends State<SignUpPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     SizedBox(height: 30),
-                    _title(),
+                    _icon(),
                     SizedBox(
                       height: 50,
                     ),
-                    _emailPasswordWidget(),
+                    _textFieldWidgets(),
                     SizedBox(
                       height: 20,
                     ),
@@ -331,14 +351,6 @@ class _SignUpPageState extends State<SignUpPage> {
     return _errorMsgUsername;
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    myFocusNodePassword.dispose();
-    myFocusNodeEmail.dispose();
-    myFocusNodeName.dispose();
-  }
-
   Future<bool> isUsernameTaken(String name) async {
     final QuerySnapshot result = await Firestore.instance
         .collection('users')
@@ -346,6 +358,15 @@ class _SignUpPageState extends State<SignUpPage> {
         .limit(1)
         .getDocuments();
     return result.documents.isEmpty;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    myFocusNodeConfirmPassword.dispose();
+    myFocusNodePassword.dispose();
+    myFocusNodeEmail.dispose();
+    myFocusNodeName.dispose();
   }
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -358,7 +379,7 @@ class _SignUpPageState extends State<SignUpPage> {
     return list;
   }
 
-  addUserToDatabase(String id, String email) async{
+  addUserToDatabase(String id, String email) async {
     List search = searchList(_username);
     Map<String, dynamic> userMap = {
       'name': 'Your name here',
@@ -424,16 +445,18 @@ class _SignUpPageState extends State<SignUpPage> {
         // Validation Passed
         try {
           userId = await auth.signUp(_username, _email, _password);
-          if(userId == 'Email already in use'){
+          if (userId == 'Email already in use') {
             AppUtil.showSnackBar(context, _scaffoldKey, userId);
             return;
           }
 
           ////TODO test
-          await FirebaseAuth.instance.signInWithEmailAndPassword(email: _email, password: _password);
+          await FirebaseAuth.instance
+              .signInWithEmailAndPassword(email: _email, password: _password);
           FirebaseUser user = await FirebaseAuth.instance.currentUser();
           await addUserToDatabase(userId, user.email);
-          await DatabaseService.addUserEmailToNewsletter(userId, user.email, _username);
+          await DatabaseService.addUserEmailToNewsletter(
+              userId, user.email, _username);
           await FirebaseAuth.instance.signOut();
           ////
 
@@ -482,5 +505,4 @@ class _SignUpPageState extends State<SignUpPage> {
     });
     print('Should be false: $_loading');
   }
-
 }

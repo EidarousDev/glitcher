@@ -18,9 +18,9 @@ class _RootPageState extends State<RootPage> {
   bool emailVerified;
 
   @override
-  void didChangeDependencies() {
+  void didChangeDependencies() async {
     super.didChangeDependencies();
-    authAssignment();
+    await authAssignment();
     Functions.getUserCountryInfo();
   }
 
@@ -32,7 +32,6 @@ class _RootPageState extends State<RootPage> {
 
   @override
   void initState() {
-    //this.getCurrentTheme();
     super.initState();
   }
 

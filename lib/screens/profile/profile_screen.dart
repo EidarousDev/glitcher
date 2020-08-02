@@ -18,6 +18,7 @@ import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/circular_clipper.dart';
+import 'package:glitcher/widgets/drawer.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
 import 'package:random_string/random_string.dart';
 
@@ -71,7 +72,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool isEditingName = false;
   bool isEditingDesc = false;
 
+  String _errorMsgUsername = '';
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   _ProfileScreenState(this.userId);
+
+  String validateUsername(String value) {
+    String pattern =
+        r'^(?=.{8,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$';
+    RegExp regExp = new RegExp(pattern);
+    if (value.length == 0) {
+      AppUtil().showToast("Username is Required");
+      setState(() {
+        _errorMsgUsername = "Username is Required";
+      });
+    } else if (!regExp.hasMatch(value)) {
+      AppUtil().showToast("Invalid Username");
+      setState(() {
+        _errorMsgUsername = "Invalid Username";
+      });
+      return _errorMsgUsername;
+    } else {
+      setState(() {
+        _errorMsgUsername = null;
+      });
+    }
+    return _errorMsgUsername;
+  }
+
+  Future<bool> isUsernameTaken(String name) async {
+    final QuerySnapshot result = await Firestore.instance
+        .collection('users')
+        .where('username', isEqualTo: name)
+        .limit(1)
+        .getDocuments();
+    return result.documents.isEmpty;
+  }
 
   @override
   void initState() {
@@ -408,8 +445,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     onPressed: () {
                                       setState(() {
                                         isEditingUsername = false;
-                                        _usernameText =
-                                            _usernameEditingController.text;
                                       });
 
                                       updateUsername();
@@ -572,6 +607,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
             right: 0.0,
             child: AppBar(
               backgroundColor: Colors.transparent,
+              leading: Builder(
+                builder: (context) => Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: InkWell(
+                    onTap: () => Scaffold.of(context).openDrawer(),
+                    child: Icon(IconData(58311, fontFamily: 'MaterialIcons')),
+                  ),
+                ),
+              ),
             ),
           ),
           _loading
@@ -591,11 +635,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   updateUsername() async {
-    List search = searchList(_usernameText);
-    search.addAll(searchList(_nameText));
-    await usersRef
-        .document(userId)
-        .updateData({'username': _usernameText, 'search': search});
+    String validUsername = validateUsername(_usernameText);
+    final valid = await isUsernameTaken(_usernameText);
+
+    if (!valid) {
+      // username exists
+      AppUtil.showSnackBar(context, _scaffoldKey,
+          '$_usernameText is already in use. Please choose a different username.');
+    } else {
+      if (validUsername == null) {
+        List search = searchList(_usernameText);
+        search.addAll(searchList(_nameText));
+        await usersRef
+            .document(userId)
+            .updateData({'username': _usernameText, 'search': search});
+        setState(() {
+          _usernameText = _usernameEditingController.text;
+        });
+      }
+    }
   }
 
   searchList(String text) {
@@ -664,7 +722,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       body: _build(),
+      drawer: BuildDrawer(),
     );
   }
 

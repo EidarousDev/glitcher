@@ -53,7 +53,7 @@ class _ChatsState extends State<Chats>
         dp: user.profileImageUrl,
         name: user.username,
         isOnline: user.online == 'online',
-        msg: message??'No messages yet',
+        msg: message ?? 'No messages yet',
         time: user.online == 'online'
             ? 'online'
             : Functions.formatTimestamp(user.online),
@@ -249,7 +249,10 @@ class _ChatsState extends State<Chats>
                         },
                         leading: CircleAvatar(
                           radius: 25,
-                          backgroundImage: group.image != null ? NetworkImage(group.image):AssetImage(Strings.default_group_image),
+                          backgroundColor: Colors.grey,
+                          backgroundImage: group.image != null
+                              ? NetworkImage(group.image)
+                              : AssetImage(Strings.default_group_image),
                         ),
                         title: Text(group.name),
                       );

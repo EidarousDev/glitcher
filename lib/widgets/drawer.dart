@@ -50,14 +50,17 @@ class _BuildDrawerState extends State<BuildDrawer> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text(
-                      Constants.currentUser.username != null
-                          ? Constants.currentUser.username
-                          : '',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        Constants.currentUser.username != null
+                            ? Constants.currentUser.username
+                            : '',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20),
+                      ),
                     ),
-                    Icon(Icons.arrow_drop_down)
+                    //Icon(Icons.arrow_drop_down)
                   ],
                 ),
               ],
@@ -137,7 +140,10 @@ class _BuildDrawerState extends State<BuildDrawer> {
                     .document(Constants.currentUserID)
                     .collection('tokens')
                     .document(token)
-                    .setData({'modifiedAt': FieldValue.serverTimestamp(), 'signed': false});
+                    .setData({
+                  'modifiedAt': FieldValue.serverTimestamp(),
+                  'signed': false
+                });
 
                 setState(() {
                   authStatus = AuthStatus.NOT_LOGGED_IN;

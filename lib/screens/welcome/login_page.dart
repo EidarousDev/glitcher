@@ -24,6 +24,8 @@ class _LoginPageState extends State<LoginPage> {
   String _email = '', _password = '', _confirmPassword = '', _username = '';
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String userId = "";
+
+  final focus = FocusNode();
   Widget _backButton() {
     return InkWell(
       onTap: () {
@@ -55,6 +57,19 @@ class _LoginPageState extends State<LoginPage> {
                 onChanged: (value) {
                   isPassword ? _password = value : _email = value;
                 },
+                keyboardType: !isPassword
+                    ? TextInputType.emailAddress
+                    : TextInputType.text,
+                textInputAction:
+                    isPassword ? TextInputAction.done : TextInputAction.next,
+                onFieldSubmitted: (v) {
+                  if (!isPassword) {
+                    FocusScope.of(context).requestFocus(focus);
+                  } else {
+                    _login();
+                  }
+                },
+                focusNode: isPassword ? focus : null,
                 style: TextStyle(color: MyColors.darkCardBG),
                 obscureText: _isObscure && (isPassword),
                 decoration: InputDecoration(
@@ -244,8 +259,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget _createAccountLabel() {
     return InkWell(
       onTap: () {
-        Navigator.pushReplacementNamed(
-            context, 'sign-up');
+        Navigator.pushReplacementNamed(context, 'sign-up');
       },
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 5),
@@ -306,7 +320,6 @@ class _LoginPageState extends State<LoginPage> {
     glitcherLoader.hideLoader();
     //print('Should be true: $_loading');
   }
-
 
   @override
   Widget build(BuildContext context) {
