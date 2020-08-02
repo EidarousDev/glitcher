@@ -240,7 +240,8 @@ class _GroupConversationState extends State<GroupConversation>
             icon: Icon(
               Icons.keyboard_backspace,
             ),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () =>
+                Navigator.of(context).pushReplacementNamed('/chats'),
           ),
           titleSpacing: 0,
           title: InkWell(
@@ -435,7 +436,7 @@ class _GroupConversationState extends State<GroupConversation>
 //                                  ' : ' +
 //                                  (formatter.format(int.parse(recordTime) % 60))
 //                                      .toString()),
-                          :Text(recordTime),
+                              : Text(recordTime),
                           trailing: _typing
                               ? IconButton(
                                   icon: Icon(
@@ -451,15 +452,15 @@ class _GroupConversationState extends State<GroupConversation>
                               : GestureDetector(
                                   onLongPress: () async {
                                     bool isGranted;
-                                    if(await PermissionsService().hasMicrophonePermission()){
+                                    if (await PermissionsService()
+                                        .hasMicrophonePermission()) {
                                       isGranted = true;
-                                    }
-                                    else{
+                                    } else {
                                       isGranted = await PermissionsService()
                                           .requestMicrophonePermission(
-                                          onPermissionDenied: () {
-                                            print('Permission has been denied');
-                                          });
+                                              onPermissionDenied: () {
+                                        print('Permission has been denied');
+                                      });
                                       return;
                                     }
 
@@ -471,7 +472,7 @@ class _GroupConversationState extends State<GroupConversation>
                                       await initRecorder();
                                       await recorder.startRecording(
                                           conversation: this.widget);
-                                    return;
+                                      return;
                                     } else {
                                       showDialog(
                                           context: context,

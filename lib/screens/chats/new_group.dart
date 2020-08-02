@@ -89,24 +89,24 @@ class _NewGroupState extends State<NewGroup>
         },
       ),
       appBar: AppBar(
-        flexibleSpace: gradientAppBar(),
+          flexibleSpace: gradientAppBar(),
 //        elevation: 4,
-        leading: IconButton(
-          icon: Icon(
-            Icons.keyboard_backspace,
+          leading: IconButton(
+            icon: Icon(
+              Icons.keyboard_backspace,
+            ),
+            onPressed: () {
+              Navigator.of(context).pushReplacementNamed('/chats');
+            },
           ),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-        title: Text('New Group')
+          title: Text('New Group')
 
 //        TextField(
 //          decoration: InputDecoration.collapsed(
 //            hintText: 'Search',
 //          ),
 //        ),
-      ),
+          ),
       body: CustomScrollView(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
@@ -135,7 +135,8 @@ class _NewGroupState extends State<NewGroup>
                           });
 
                           if (isGranted) {
-                            ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
+                            ImageEditBottomSheet bottomSheet =
+                                ImageEditBottomSheet();
                             bottomSheet.optionIcon(context);
                             _imageFile = await AppUtil.chooseImage();
                           } else {
@@ -254,7 +255,7 @@ class _NewGroupState extends State<NewGroup>
                     ),
                     subtitle: Text(friendsData.elementAt(index).description),
                     trailing: Checkbox(
-                      checkColor: Colors.white,
+                        checkColor: Colors.white,
                         activeColor: MyColors.darkPrimary,
                         value: chosens[index],
                         onChanged: (value) {
@@ -300,7 +301,12 @@ class _NewGroupState extends State<NewGroup>
           .document(_groupId)
           .setData({'timestamp': FieldValue.serverTimestamp()});
 
-      await NotificationHandler.sendNotification(user['user_id'], 'New chat group', 'You\'ve been added to a new chat group "${textEditingController.text}"', _groupId, 'new_group');
+      await NotificationHandler.sendNotification(
+          user['user_id'],
+          'New chat group',
+          'You\'ve been added to a new chat group "${textEditingController.text}"',
+          _groupId,
+          'new_group');
     }
   }
 

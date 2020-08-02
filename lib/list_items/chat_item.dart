@@ -69,12 +69,18 @@ class _ChatItemState extends State<ChatItem> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        subtitle: widget.msg.type == 'text' ? Text("${widget.msg.message}"):Row(
-          children: [
-            widget.msg.type == 'audio' ? Icon(Icons.audiotrack): Icon(Icons.image),
-            widget.msg.type == 'audio' ? Text("Voice massage"): Text("image")
-          ],
-        ),
+        subtitle: widget.msg.type == 'text'
+            ? Text("${widget.msg.message}")
+            : Row(
+                children: [
+                  widget.msg.type == 'audio'
+                      ? Icon(Icons.audiotrack)
+                      : Icon(Icons.image),
+                  widget.msg.type == 'audio'
+                      ? Text("Voice massage")
+                      : Text("image")
+                ],
+              ),
         trailing: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
@@ -116,8 +122,8 @@ class _ChatItemState extends State<ChatItem> {
         onTap: () {
           ValueKey key = this.widget.key;
           String uid = key.value;
-          Navigator.of(context)
-              .pushNamed('/conversation', arguments: {'otherUid': uid});
+          Navigator.of(context).pushReplacementNamed('/conversation',
+              arguments: {'otherUid': uid});
         },
       ),
     );

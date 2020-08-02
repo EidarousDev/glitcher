@@ -180,7 +180,7 @@ class _ChatsState extends State<Chats>
         floatingActionButton: _tabController.index == 1
             ? FloatingActionButton(
                 onPressed: () {
-                  Navigator.of(context).pushNamed('/new-group');
+                  Navigator.of(context).pushReplacementNamed('/new-group');
                 },
                 child: Icon(
                   Icons.add,
@@ -244,7 +244,8 @@ class _ChatsState extends State<Chats>
 
                       return ListTile(
                         onTap: () {
-                          Navigator.of(context).pushNamed('/group-conversation',
+                          Navigator.of(context).pushReplacementNamed(
+                              '/group-conversation',
                               arguments: {'groupId': group.id});
                         },
                         leading: CircleAvatar(
