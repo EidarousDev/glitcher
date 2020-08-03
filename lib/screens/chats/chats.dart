@@ -1,8 +1,12 @@
+import 'dart:convert';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/list_items/chat_item.dart';
+import 'package:glitcher/main.dart';
 import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/user_model.dart';
@@ -36,6 +40,7 @@ class _ChatsState extends State<Chats>
 
     friends.forEach((f) async {
       await loadUserData(f.id);
+      await sortChatItems();
     });
 
     setState(() {
@@ -54,9 +59,6 @@ class _ChatsState extends State<Chats>
         name: user.username,
         isOnline: user.online == 'online',
         msg: message ?? 'No messages yet',
-        time: user.online == 'online'
-            ? 'online'
-            : Functions.formatTimestamp(user.online),
         counter: 0,
       );
       chats.add(chatItem);
@@ -67,11 +69,10 @@ class _ChatsState extends State<Chats>
 
   @override
   void initState() {
-    super.initState();
-    _tabController = TabController(vsync: this, initialIndex: 0, length: 2);
-
     getCurrentUserFriends();
     getChatGroups();
+    super.initState();
+    _tabController = TabController(vsync: this, initialIndex: 0, length: 2);
   }
 
   getChatGroups() async {
@@ -82,6 +83,29 @@ class _ChatsState extends State<Chats>
         this.groups.add(group);
       });
     }
+  }
+
+  sortChatItems() {
+    int n = chats.length;
+    for (int i = 0; i < n - 1; i++) {
+      for (int j = 0; j < n - i - 1; j++) {
+        var current = chats[j].msg.timestamp;
+        var next = chats[j + 1].msg.timestamp;
+        if (current.seconds <= next.seconds) {
+          setState(() {
+            ChatItem temp = chats[j];
+            chats[j] = chats[j + 1];
+            chats[j + 1] = temp;
+          });
+        }
+      }
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    sortChatItems();
+    super.didChangeDependencies();
   }
 
   @override
@@ -180,7 +204,7 @@ class _ChatsState extends State<Chats>
         floatingActionButton: _tabController.index == 1
             ? FloatingActionButton(
                 onPressed: () {
-                  Navigator.of(context).pushReplacementNamed('/new-group');
+                  Navigator.of(context).pushNamed('/new-group');
                 },
                 child: Icon(
                   Icons.add,
@@ -244,13 +268,12 @@ class _ChatsState extends State<Chats>
 
                       return ListTile(
                         onTap: () {
-                          Navigator.of(context).pushReplacementNamed(
-                              '/group-conversation',
+                          Navigator.of(context).pushNamed('/group-conversation',
                               arguments: {'groupId': group.id});
                         },
                         leading: CircleAvatar(
                           radius: 25,
-                          backgroundColor: Colors.grey,
+                          backgroundColor: Colors.grey.shade400,
                           backgroundImage: group.image != null
                               ? NetworkImage(group.image)
                               : AssetImage(Strings.default_group_image),

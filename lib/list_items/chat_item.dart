@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/screens/chats/conversation.dart';
+import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/utils/functions.dart';
 
 class ChatItem extends StatefulWidget {
   final String dp;
   final String name;
-  final String time;
-  final Message msg;
+  //final String time;
+  Message msg;
   final bool isOnline;
   final int counter;
 
@@ -14,7 +16,7 @@ class ChatItem extends StatefulWidget {
     Key key,
     @required this.dp,
     @required this.name,
-    @required this.time,
+    //this.time,
     @required this.msg,
     @required this.isOnline,
     @required this.counter,
@@ -86,7 +88,7 @@ class _ChatItemState extends State<ChatItem> {
           children: <Widget>[
             SizedBox(height: 10),
             Text(
-              "${widget.time}",
+              "${Functions.formatTimestamp(widget.msg.timestamp)}",
               style: TextStyle(
                 fontWeight: FontWeight.w300,
                 fontSize: 11,
@@ -119,11 +121,14 @@ class _ChatItemState extends State<ChatItem> {
                   ),
           ],
         ),
-        onTap: () {
+        onTap: () async {
           ValueKey key = this.widget.key;
           String uid = key.value;
-          Navigator.of(context).pushReplacementNamed('/conversation',
-              arguments: {'otherUid': uid});
+          var message = await Navigator.of(context)
+              .pushNamed('/conversation', arguments: {'otherUid': uid});
+          setState(() {
+            widget.msg = message;
+          });
         },
       ),
     );

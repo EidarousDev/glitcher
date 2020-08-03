@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:flutter_recaptcha_v2/flutter_recaptcha_v2.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/services/auth.dart';
@@ -21,11 +22,12 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  String _email = '', _password = '', _confirmPassword = '', _username = '';
+  String _email = '', _password = '';
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String userId = "";
 
   final focus = FocusNode();
+
   Widget _backButton() {
     return InkWell(
       onTap: () {
@@ -151,6 +153,11 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  @override
+  void initState() {
+    super.initState();
+  }
+
   Widget _divider() {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 10),
@@ -259,7 +266,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget _createAccountLabel() {
     return InkWell(
       onTap: () {
-        Navigator.pushReplacementNamed(context, 'sign-up');
+        Navigator.pushReplacementNamed(context, '/sign-up');
       },
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 5),
@@ -349,7 +356,7 @@ class _LoginPageState extends State<LoginPage> {
                       _submitButton(),
                       GestureDetector(
                         onTap: () async {
-                          Navigator.of(context).pushNamed('password-reset');
+                          Navigator.of(context).pushNamed('/password-reset');
                         },
                         child: Container(
                           padding: EdgeInsets.symmetric(vertical: 10),

@@ -213,7 +213,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget _loginAccountLabel() {
     return InkWell(
       onTap: () {
-        Navigator.pushReplacementNamed(context, 'login');
+        Navigator.pushReplacementNamed(context, '/login');
       },
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 20),

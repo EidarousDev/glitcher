@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/user_model.dart';
@@ -16,6 +17,7 @@ import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
 import 'package:glitcher/widgets/chat_bubble.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
@@ -229,13 +231,7 @@ class _GroupConversationState extends State<GroupConversation>
       },
       child: Scaffold(
         appBar: AppBar(
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-                gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: <Color>[MyColors.darkCardBG, MyColors.darkBG])),
-          ),
+          flexibleSpace: gradientAppBar(),
           leading: IconButton(
             icon: Icon(
               Icons.keyboard_backspace,
@@ -248,15 +244,15 @@ class _GroupConversationState extends State<GroupConversation>
             child: Row(
               children: <Widget>[
                 Padding(
-                  padding: EdgeInsets.only(left: 0.0, right: 10.0),
-                  child: group?.image != null
-                      ? CircleAvatar(
-                          backgroundImage: NetworkImage(
-                            group.image,
-                          ),
-                        )
-                      : Container(),
-                ),
+                    padding: EdgeInsets.only(left: 0.0, right: 10.0),
+                    child: CircleAvatar(
+                      backgroundColor: Colors.grey.shade400,
+                      backgroundImage: group.image != null
+                          ? NetworkImage(
+                              group.image,
+                            )
+                          : AssetImage(Strings.default_group_image),
+                    )),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,7 +276,7 @@ class _GroupConversationState extends State<GroupConversation>
               elevation: 0,
               initialValue: choices[0],
               onCanceled: () {
-                print('You have not chossed anything');
+                print('You have not chosen anything');
               },
               tooltip: 'This is tooltip',
               onSelected: _select,
@@ -332,7 +328,8 @@ class _GroupConversationState extends State<GroupConversation>
                     padding: const EdgeInsets.only(right: 8.0, bottom: 8),
                     child: Text(
                       seen ? 'seen' : '',
-                      style: TextStyle(color: Colors.white70),
+                      style: TextStyle(
+                          color: switchColor(Colors.black87, Colors.white70)),
                     ),
                   )),
               Align(
@@ -340,10 +337,10 @@ class _GroupConversationState extends State<GroupConversation>
                 child: Container(
                   //                height: 140,
                   decoration: BoxDecoration(
-                    color: MyColors.darkBG,
+                    color: switchColor(MyColors.lightBG, MyColors.darkBG),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey[500],
+                        color: switchColor(Colors.grey[500], Colors.grey[500]),
                         offset: Offset(0.0, 1.5),
                         blurRadius: 4.0,
                       ),
@@ -360,7 +357,8 @@ class _GroupConversationState extends State<GroupConversation>
                           leading: IconButton(
                             icon: Icon(
                               Icons.add,
-                              color: Colors.white70,
+                              color: switchColor(
+                                  MyColors.lightPrimary, Colors.white70),
                             ),
                             onPressed: () async {
                               ImageEditBottomSheet bottomSheet =
@@ -406,7 +404,8 @@ class _GroupConversationState extends State<GroupConversation>
                                   },
                                   style: TextStyle(
                                     fontSize: 15.0,
-                                    color: Colors.white70,
+                                    color: switchColor(
+                                        Colors.black54, Colors.white70),
                                   ),
                                   decoration: InputDecoration(
                                     contentPadding: EdgeInsets.all(10.0),
@@ -425,7 +424,8 @@ class _GroupConversationState extends State<GroupConversation>
                                     hintText: "Write your message...",
                                     hintStyle: TextStyle(
                                       fontSize: 15.0,
-                                      color: Colors.white70,
+                                      color: switchColor(
+                                          Colors.black12, Colors.white70),
                                     ),
                                   ),
                                   maxLines: null,
@@ -441,7 +441,8 @@ class _GroupConversationState extends State<GroupConversation>
                               ? IconButton(
                                   icon: Icon(
                                     Icons.send,
-                                    color: Colors.white70,
+                                    color: switchColor(
+                                        MyColors.lightPrimary, Colors.white70),
                                   ),
                                   onPressed: () async {
                                     messageController.clear();
@@ -510,7 +511,8 @@ class _GroupConversationState extends State<GroupConversation>
                                   child: IconButton(
                                     icon: Icon(
                                       Icons.mic,
-                                      color: Colors.white70,
+                                      color: switchColor(MyColors.lightPrimary,
+                                          Colors.white70),
                                     ),
                                     onPressed: null,
                                   ),

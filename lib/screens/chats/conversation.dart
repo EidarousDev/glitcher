@@ -315,12 +315,15 @@ class _ConversationState extends State<Conversation>
         appBar: AppBar(
           flexibleSpace: gradientAppBar(),
           leading: IconButton(
-            icon: Icon(
-              Icons.keyboard_backspace,
-            ),
-            onPressed: () =>
-                Navigator.of(context).pushReplacementNamed('/chats'),
-          ),
+              icon: Icon(
+                Icons.keyboard_backspace,
+              ),
+              onPressed: () async {
+                var message =
+                    await DatabaseService.getLastMessage(widget.otherUid);
+
+                Navigator.of(context).pop(message);
+              }),
           titleSpacing: 0,
           title: InkWell(
             child: Row(
@@ -426,7 +429,7 @@ class _ConversationState extends State<Conversation>
                     color: switchColor(MyColors.lightBG, MyColors.darkBG),
                     boxShadow: [
                       BoxShadow(
-                        color: switchColor(Colors.black45, Colors.grey[500]),
+                        color: switchColor(Colors.grey[500], Colors.grey[500]),
                         offset: Offset(0.0, 1.5),
                         blurRadius: 4.0,
                       ),
@@ -443,8 +446,8 @@ class _ConversationState extends State<Conversation>
                           leading: IconButton(
                             icon: Icon(
                               Icons.add,
-                              color:
-                                  switchColor(Colors.black54, Colors.white70),
+                              color: switchColor(
+                                  MyColors.lightPrimary, Colors.white70),
                             ),
                             onPressed: () async {
                               ImageEditBottomSheet bottomSheet =

@@ -4,6 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/sizes.dart';
+import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
@@ -58,17 +59,19 @@ class _GroupDetailsState extends State<GroupDetails>
           children: <Widget>[
             Stack(
               children: <Widget>[
-                Image.network(
-                  _group?.image,
-                  fit: BoxFit.fill,
-                  width: MediaQuery.of(context).size.width,
-                  height: 300,
-                ),
+                _group?.image != null
+                    ? Image.network(
+                        _group?.image,
+                        fit: BoxFit.fill,
+                        width: MediaQuery.of(context).size.width,
+                        height: 300,
+                      )
+                    : Image.asset(Strings.default_group_image),
                 Align(
-                  alignment: Alignment.topRight,
+                  alignment: Alignment.bottomRight,
                   child: IconButton(
-                    icon: Icon(Icons.edit),
-                    onPressed: () async{
+                    icon: Icon(Icons.camera_enhance),
+                    onPressed: () async {
                       ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
                       bottomSheet.optionIcon(context);
                       File image = await AppUtil.chooseImage();
@@ -81,7 +84,8 @@ class _GroupDetailsState extends State<GroupDetails>
                               imageFile: image,
                               btnText: 'Upload',
                               btnFunction: () async {
-                                String url = await AppUtil.uploadFile(image, context, 'group_chats_images/$groupId');
+                                String url = await AppUtil.uploadFile(image,
+                                    context, 'group_chats_images/$groupId');
 
                                 await chatGroupsRef
                                     .document(groupId)

@@ -75,12 +75,6 @@ class _AppPageState extends State<AppPage> {
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           items: <BottomNavigationBarItem>[
-//            BottomNavigationBarItem(
-//              icon: Icon(
-//                Icons.group,
-//              ),
-//              title: Container(height: 0.0),
-//            ),
             BottomNavigationBarItem(
               icon: Icon(
                 Icons.home,

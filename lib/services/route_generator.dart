@@ -32,6 +32,7 @@ import 'package:glitcher/screens/suggestion_screen.dart';
 import 'package:glitcher/screens/users/users_screen.dart';
 import 'package:glitcher/screens/web_browser/in_app_browser.dart';
 import 'package:glitcher/screens/welcome/login_page.dart';
+import 'package:glitcher/screens/welcome/password_change.dart';
 import 'package:glitcher/screens/welcome/password_reset.dart';
 import 'package:glitcher/screens/welcome/signup_page.dart';
 import 'package:page_transition/page_transition.dart';
@@ -201,14 +202,17 @@ class RouteGenerator {
                   gameId: args['game_id'],
                 ));
 
-      case 'sign-up':
+      case '/sign-up':
         return MaterialPageRoute(builder: (_) => SignUpPage());
 
-      case 'login':
+      case '/login':
         return MaterialPageRoute(builder: (_) => LoginPage());
 
-      case 'password-reset':
+      case '/password-reset':
         return MaterialPageRoute(builder: (_) => PasswordResetScreen());
+
+      case '/password-change':
+        return MaterialPageRoute(builder: (_) => PasswordChangeScreen());
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

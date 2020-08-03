@@ -56,7 +56,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     style: textStyle(),
                   ),
                   Radio(
-                    activeColor: MyColors.darkPrimary,
+                      activeColor: MyColors.darkPrimary,
                       value: 0,
                       groupValue: darkOrLight,
                       onChanged: (value) {
@@ -173,6 +173,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
             ),
+            Divider(
+              height: 2,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8, left: 16),
+              child: MaterialButton(
+                color: switchColor(MyColors.lightPrimary, MyColors.darkPrimary),
+                child: Text('Change Password'),
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/password-change');
+                },
+              ),
+            )
           ],
         ),
       ),
@@ -193,7 +206,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       AppUtil.showSnackBar(
           context, _scaffoldKey, 'Unsubscribed from newsletter');
     } else {
-      await  DatabaseService.addUserEmailToNewsletter(Constants.currentUserID,
+      await DatabaseService.addUserEmailToNewsletter(Constants.currentUserID,
           Constants.currentUser.email, Constants.currentUser.username);
       setState(() {
         _isSubscribedToNewsletter = true;
