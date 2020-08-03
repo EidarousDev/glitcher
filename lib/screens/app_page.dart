@@ -141,7 +141,7 @@ class _AppPageState extends State<AppPage> {
     print('User Friends = ${Constants.userFriends}');
 
     this._getFavouriteFilter();
-    NotificationHandler.receiveNotification(context);
+    NotificationHandler.receiveNotification(context, _scaffoldKey);
 
     connectivitySubscription = Connectivity()
         .onConnectivityChanged
@@ -195,11 +195,13 @@ class _AppPageState extends State<AppPage> {
   userListener() {
     usersRef.snapshots().listen((querySnapshot) {
       querySnapshot.documentChanges.forEach((change) {
-        setState(() {
-          if (change.document.documentID == Constants.currentUserID) {
-            Constants.currentUser = User.fromDoc(change.document);
-          }
-        });
+        if (mounted) {
+          setState(() {
+            if (change.document.documentID == Constants.currentUserID) {
+              Constants.currentUser = User.fromDoc(change.document);
+            }
+          });
+        }
       });
     });
   }

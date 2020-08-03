@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/widgets/rate_app.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/screens/chats/chats.dart';
@@ -129,6 +131,25 @@ class _BuildDrawerState extends State<BuildDrawer> {
             ),
             leading: Icon(
               Icons.tag_faces,
+            ),
+          ),
+          ListTile(
+            onTap: () async {
+              final Email email = Email(
+                body:
+                    '\nPlease don\'t remove this line (${Constants.currentUserID})',
+                subject: 'State subject here',
+                recipients: ['eidarousdev@gmail.com'],
+                isHTML: false,
+              );
+
+              await FlutterEmailSender.send(email);
+            },
+            title: Text(
+              'Contact us',
+            ),
+            leading: Icon(
+              Icons.email,
             ),
           ),
           ListTile(

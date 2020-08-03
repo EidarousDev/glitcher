@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
@@ -124,7 +125,9 @@ class _CreatePostReplyPageState extends State<CreatePost> {
           autoPlay: false,
           looping: false,
         );
-        Chewie playerWidget = Chewie(controller: chewieController,);
+        Chewie playerWidget = Chewie(
+          controller: chewieController,
+        );
         createPostVideo = CreatePostVideo(
           video: _video,
           playerWidget: playerWidget,
@@ -185,6 +188,18 @@ class _CreatePostReplyPageState extends State<CreatePost> {
       'timestamp': FieldValue.serverTimestamp(),
       'game': selectedGame
     };
+
+    int coolDownMinutes = 10;
+    Post lastPost =
+        await DatabaseService.getUserLastPost(Constants.currentUserID);
+    if (DateTime.now().millisecondsSinceEpoch -
+            lastPost.timestamp.millisecondsSinceEpoch <
+        coolDownMinutes * 60000) {
+      AppUtil.showSnackBar(context, _scaffoldKey,
+          'Must wait $coolDownMinutes minutes to upload another post');
+      glitcherLoader.hideLoader();
+      return;
+    }
 
     await postsRef.document(postId).setData(postData);
 
@@ -312,10 +327,8 @@ class _CreatePostReplyPageState extends State<CreatePost> {
 
         if (newHashtag) {
           String hashtagId = randomAlphaNumeric(20);
-          await hashtagsRef.document(hashtagId).setData({
-            'text': word,
-            'timestamp': FieldValue.serverTimestamp()
-          });
+          await hashtagsRef.document(hashtagId).setData(
+              {'text': word, 'timestamp': FieldValue.serverTimestamp()});
 
           await hashtagsRef
               .document(hashtagId)
@@ -495,7 +508,6 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                         color: MyColors.darkGrey,
                       ),
                       hintText: 'Enter Game name')),
-
               suggestionsCallback: (pattern) {
                 return DatabaseService.searchGames(pattern);
               },

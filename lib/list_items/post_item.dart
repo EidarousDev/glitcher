@@ -18,6 +18,7 @@ import 'package:glitcher/screens/home/home_screen.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/services/share_link.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/custom_url_text.dart';
@@ -32,11 +33,7 @@ class PostItem extends StatefulWidget {
   final User author;
   final String route;
 
-  PostItem(
-      {Key key,
-      @required this.post,
-      @required this.author,
-      this.route})
+  PostItem({Key key, @required this.post, @required this.author, this.route})
       : super(key: key);
   @override
   _PostItemState createState() => _PostItemState();
@@ -67,7 +64,6 @@ class _PostItemState extends State<PostItem> {
   Game currentGame;
   final number = ValueNotifier(0);
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -583,12 +579,8 @@ class _PostItemState extends State<PostItem> {
         //post.likesCount = likesNo;
       });
 
-      await NotificationHandler.sendNotification(
-          post.authorId,
-          'New Post Like',
-          Constants.currentUser.username + ' likes your post',
-          post.id,
-          'like');
+      await NotificationHandler.sendNotification(post.authorId, 'New Post Like',
+          Constants.currentUser.username + ' likes your post', post.id, 'like');
     } else if (isLiked == false && isDisliked == false) {
       await postsRef
           .document(post.id)
@@ -603,12 +595,8 @@ class _PostItemState extends State<PostItem> {
         //post.likesCount = likesNo;
       });
 
-      await NotificationHandler.sendNotification(
-          post.authorId,
-          'New Post Like',
-          Constants.currentUser.username + ' likes your post',
-          post.id,
-          'like');
+      await NotificationHandler.sendNotification(post.authorId, 'New Post Like',
+          Constants.currentUser.username + ' likes your post', post.id, 'like');
     } else {
       throw Exception('Unconditional Event Occurred!');
     }
@@ -825,18 +813,11 @@ class _PostItemState extends State<PostItem> {
     });
   }
 
-  void onLongPressedPost(BuildContext context, String postText) {
+  void onLongPressedPost(BuildContext context, String postText,
+      GlobalKey<ScaffoldState> scaffoldKey) {
     var text = ClipboardData(text: postText);
     Clipboard.setData(text);
-    Scaffold.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Colors.black,
-        content: Text(
-          'Post copied to clipboard',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
-    );
+    AppUtil.showSnackBar(context, scaffoldKey, 'Post copied to clipboard');
   }
 
   void setCurrentGame() async {

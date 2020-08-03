@@ -34,6 +34,17 @@ class DatabaseService {
     return posts;
   }
 
+  static Future<Post> getUserLastPost(String authorId) async {
+    QuerySnapshot postSnapshot = await postsRef
+        .where('author', isEqualTo: authorId)
+        .orderBy('timestamp', descending: true)
+        .limit(1)
+        .getDocuments();
+    List<Post> posts =
+        postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+    return posts[0];
+  }
+
   // Get Post info of a specific post
   static Future<Post> getPostWithId(String postId) async {
     DocumentSnapshot postDocSnapshot = await postsRef.document(postId).get();
@@ -389,7 +400,7 @@ class DatabaseService {
     return messages;
   }
 
-  static getLastMessage(String otherUserId) async{
+  static getLastMessage(String otherUserId) async {
     QuerySnapshot msgSnapshot = await chatsRef
         .document(Constants.currentUserID)
         .collection('conversations')
@@ -399,9 +410,8 @@ class DatabaseService {
         .limit(1)
         .getDocuments();
     List<Message> messages =
-    msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
+        msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
     return messages[0];
-
   }
 
   static Future<List<Message>> getGroupMessages(String groupId) async {
@@ -415,7 +425,6 @@ class DatabaseService {
         msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
     return messages;
   }
-
 
   static Future<List<Message>> getPrevMessages(
       Timestamp firstVisibleGameSnapShot, String otherUserId) async {
@@ -971,9 +980,12 @@ class DatabaseService {
     Constants.userFollowers = followers;
   }
 
-  static addUserEmailToNewsletter(String userId, String email, String username) async{
-    await newsletterEmailsRef.document(userId).setData({'email': email, 'username': username, 'timestamp': FieldValue.serverTimestamp()});
+  static addUserEmailToNewsletter(
+      String userId, String email, String username) async {
+    await newsletterEmailsRef.document(userId).setData({
+      'email': email,
+      'username': username,
+      'timestamp': FieldValue.serverTimestamp()
+    });
   }
-
-
 }

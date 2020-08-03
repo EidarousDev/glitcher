@@ -9,9 +9,11 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/utils/app_util.dart';
 
 class NotificationHandler {
-  static receiveNotification(BuildContext context) {
+  static receiveNotification(
+      BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
     StreamSubscription iosSubscription;
     FirebaseMessaging _fcm = FirebaseMessaging();
 
@@ -28,20 +30,11 @@ class NotificationHandler {
         print("onMessage: $message");
         makeNotificationSeen(message['data']['id']);
 
-        final SnackBar snackBar = SnackBar(
-          content: Text(
-            message['notification']['title'],
-            style: TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.blue,
-          action: SnackBarAction(
-            label: 'GO',
-            textColor: Colors.white,
-            onPressed: () {},
-          ),
+        AppUtil.showSnackBar(
+          context,
+          scaffoldKey,
+          message['notification']['title'],
         );
-
-        Scaffold.of(context).showSnackBar(snackBar);
 
         //showNotification(message);
       },

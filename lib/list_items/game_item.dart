@@ -4,6 +4,7 @@ import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/utils/app_util.dart';
 
 class GameItem extends StatefulWidget {
   final Game game;
@@ -21,6 +22,8 @@ class _GameItemState extends State<GameItem> {
   String followBtnText;
 
   String snackbarText;
+
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -110,30 +113,14 @@ class _GameItemState extends State<GameItem> {
       DatabaseService.unFollowGame(widget.game.id);
       setState(() {
         followBtnText = 'Follow';
-        final SnackBar snackBar = SnackBar(
-          duration: Duration(seconds: 1),
-          content: Text(
-            'Game unfollowed',
-            style: TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.blue,
-        );
-        Scaffold.of(context).showSnackBar(snackBar);
       });
+      AppUtil.showSnackBar(context, _scaffoldKey, 'Game unfollowed');
     } else {
       DatabaseService.followGame(widget.game.id);
       setState(() {
         followBtnText = 'Unfollow';
-        final SnackBar snackBar = SnackBar(
-          duration: Duration(seconds: 1),
-          content: Text(
-            'Game followed',
-            style: TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.blue,
-        );
-        Scaffold.of(context).showSnackBar(snackBar);
       });
+      AppUtil.showSnackBar(context, _scaffoldKey, 'Game followed');
     }
     DatabaseService.getFollowedGames();
   }

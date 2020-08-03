@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:webview_media/webview_flutter.dart';
+import 'package:glitcher/utils/app_util.dart';
 
 class InAppBrowser extends StatefulWidget {
   String url = 'https://flutter.dev';
@@ -14,9 +15,12 @@ class _InAppBrowserState extends State<InAppBrowser> {
   final Completer<WebViewController> _controller =
       Completer<WebViewController>();
 
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
       ),
@@ -58,9 +62,7 @@ class _InAppBrowserState extends State<InAppBrowser> {
     return JavascriptChannel(
         name: 'Toaster',
         onMessageReceived: (JavascriptMessage message) {
-          Scaffold.of(context).showSnackBar(
-            SnackBar(content: Text(message.message)),
-          );
+          AppUtil.showSnackBar(context, _scaffoldKey, message.message);
         });
   }
 }

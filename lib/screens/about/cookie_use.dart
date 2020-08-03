@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'dart:async';
@@ -7,9 +8,12 @@ import 'package:webview_media/webview_flutter.dart';
 class CookieUse extends StatelessWidget {
   final Completer<WebViewController> _controller =
       Completer<WebViewController>();
+
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text(Strings.cookie_use),
         flexibleSpace: gradientAppBar(),
@@ -53,9 +57,7 @@ class CookieUse extends StatelessWidget {
     return JavascriptChannel(
         name: 'Toaster',
         onMessageReceived: (JavascriptMessage message) {
-          Scaffold.of(context).showSnackBar(
-            SnackBar(content: Text(message.message)),
-          );
+          AppUtil.showSnackBar(context, _scaffoldKey, message.message);
         });
   }
 }
