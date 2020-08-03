@@ -218,7 +218,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       url = await AppUtil.uploadFile(
         _profileImageFile,
         context,
-        'profile_img/$userId',
+        'profile_images/$userId',
       );
 
       setState(() {
@@ -229,7 +229,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
     if (_coverImageFile != null) {
       url = await AppUtil.uploadFile(
-          _coverImageFile, context, 'cover_img/$userId');
+          _coverImageFile, context, 'cover_images/$userId');
 
       setState(() {
         _coverImageUrl = url;
@@ -739,7 +739,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
 
       String url = await AppUtil.uploadFile(
-          _coverImageFile, context, 'cover_img/$userId');
+          _coverImageFile, context, 'cover_images/$userId');
       setState(() {
         _coverImageUrl = url;
         _coverImageFile = null;
@@ -766,7 +766,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               });
 
               String url = await AppUtil.uploadFile(
-                  _coverImageFile, context, 'cover_img/$userId');
+                  _coverImageFile, context, 'cover_images/$userId');
               setState(() {
                 _coverImageUrl = url;
                 _coverImageFile = null;
@@ -794,7 +794,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
 
       String url = await AppUtil.uploadFile(
-          _profileImageFile, context, 'cover_img/$userId');
+          _profileImageFile, context, 'cover_images/$userId');
       setState(() {
         _profileImageUrl = url;
         _profileImageFile = null;
@@ -821,7 +821,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               });
 
               String url = await AppUtil.uploadFile(
-                  _profileImageFile, context, 'profile_img/$userId');
+                  _profileImageFile, context, 'profile_images/$userId');
               setState(() {
                 _profileImageUrl = url;
                 _profileImageFile = null;

@@ -85,8 +85,7 @@ class _FullscreenOverlayState extends State<FullScreenOverlay> {
               "Edit",
               style: TextStyle(color: Colors.blue),
             ),
-            onPressed: () async{
-
+            onPressed: () async {
               File image = await AppUtil.chooseImage();
 
               setState(() {
@@ -95,11 +94,13 @@ class _FullscreenOverlayState extends State<FullScreenOverlay> {
 
               String url;
               if (whichImage == 1) {
-                url = await AppUtil.uploadFile(image, context, 'cover_img/$userId');
+                url = await AppUtil.uploadFile(
+                    image, context, 'cover_images/$userId');
 
                 updateCoverImage(url);
               } else {
-                url = await AppUtil.uploadFile(image, context, 'profile_img/$userId');
+                url = await AppUtil.uploadFile(
+                    image, context, 'profile_images/$userId');
 
                 updateProfileImage(url);
               }
@@ -109,7 +110,6 @@ class _FullscreenOverlayState extends State<FullScreenOverlay> {
                 _loading = false;
                 Navigator.pop(context, url);
               });
-
             },
             borderSide: BorderSide(
               color: Colors.blue, //Color of the border
@@ -130,16 +130,11 @@ class _FullscreenOverlayState extends State<FullScreenOverlay> {
     );
   }
 
-  updateProfileImage(String url) async{
-    await usersRef
-        .document(userId)
-        .updateData({'profile_url': url});
+  updateProfileImage(String url) async {
+    await usersRef.document(userId).updateData({'profile_url': url});
   }
 
-  updateCoverImage(String url) async{
-    await usersRef
-        .document(userId)
-        .updateData({'cover_url': url});
+  updateCoverImage(String url) async {
+    await usersRef.document(userId).updateData({'cover_url': url});
   }
-
 }
