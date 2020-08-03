@@ -737,7 +737,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _coverImageFile = image;
         _coverImageUrl = null;
       });
-
+      glitcherLoader.showLoader(context);
       String url = await AppUtil.uploadFile(
           _coverImageFile, context, 'cover_images/$userId');
       setState(() {
@@ -745,7 +745,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _coverImageFile = null;
       });
     }
-
+    glitcherLoader.hideLoader();
     await showDialog(
         barrierDismissible: true,
         child: Container(
@@ -764,7 +764,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _coverImageFile = image;
                 _coverImageUrl = null;
               });
-
+              glitcherLoader.showLoader(context);
               String url = await AppUtil.uploadFile(
                   _coverImageFile, context, 'cover_images/$userId');
               setState(() {
@@ -775,6 +775,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               await usersRef
                   .document(userId)
                   .updateData({'cover_url': _coverImageUrl});
+              glitcherLoader.hideLoader();
 
               Navigator.of(context).pop();
             },
@@ -792,13 +793,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _profileImageFile = image;
         _profileImageUrl = null;
       });
-
+      glitcherLoader.showLoader(context);
       String url = await AppUtil.uploadFile(
           _profileImageFile, context, 'cover_images/$userId');
       setState(() {
         _profileImageUrl = url;
         _profileImageFile = null;
       });
+      glitcherLoader.hideLoader();
     }
 
     showDialog(
@@ -819,7 +821,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _profileImageFile = image;
                 _profileImageUrl = null;
               });
-
+              glitcherLoader.showLoader(context);
               String url = await AppUtil.uploadFile(
                   _profileImageFile, context, 'profile_images/$userId');
               setState(() {
@@ -830,6 +832,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               await usersRef
                   .document(userId)
                   .updateData({'profile_url': _profileImageUrl});
+              glitcherLoader.hideLoader();
 
               Navigator.of(context).pop();
             },
