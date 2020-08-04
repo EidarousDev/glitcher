@@ -166,12 +166,12 @@ class _CreatePostReplyPageState extends State<CreatePost> {
     await checkIfContainsMention(_textEditingController.text, postId);
 
     if (_video != null) {
-      _uploadedFileURL =
-          await AppUtil.uploadFile(_video, context, 'posts_videos/' + postId);
+      _uploadedFileURL = await AppUtil.uploadFile(
+          _video, context, 'posts_videos/${Constants.currentUserID}/' + postId);
     } else if (_image != null) {
       //await compressAndUploadFile(_image, 'glitchertemp.jpg');
-      _uploadedFileURL =
-          await AppUtil.uploadFile(_image, context, 'posts_images/' + postId);
+      _uploadedFileURL = await AppUtil.uploadFile(
+          _image, context, 'posts_images/${Constants.currentUserID}/' + postId);
     } else {}
 
     print(_youtubeId);

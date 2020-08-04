@@ -378,7 +378,7 @@ class _GroupConversationState extends State<GroupConversation>
                                         _url = await AppUtil.uploadFile(
                                             image,
                                             context,
-                                            'image_messages/${widget.groupId}/' +
+                                            'group_chat_image_messages/${widget.groupId}/' +
                                                 randomAlphaNumeric(20));
 
                                         messageController.clear();
@@ -503,7 +503,7 @@ class _GroupConversationState extends State<GroupConversation>
                                     _url = await AppUtil.uploadFile(
                                         File(result.path),
                                         context,
-                                        'group_voice_messages/${widget.groupId}/${randomAlphaNumeric(20)}');
+                                        'group_chat_voice_messages/${widget.groupId}/${randomAlphaNumeric(20)}');
 
                                     await DatabaseService.sendGroupMessage(
                                         widget.groupId, 'audio', _url);

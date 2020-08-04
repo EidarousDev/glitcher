@@ -82,7 +82,7 @@ class _NewGroupState extends State<NewGroup>
           _groupId = randomAlphaNumeric(20);
 
           _imageUrl = await AppUtil.uploadFile(
-              _imageFile, context, 'group_chats_images/$_groupId');
+              _imageFile, context, 'group_chat_images/$_groupId');
           await addGroup();
           await addGroupToUsers();
           Navigator.of(context).pushNamed('/chats');

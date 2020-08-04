@@ -467,7 +467,7 @@ class _ConversationState extends State<Conversation>
                                         String url = await AppUtil.uploadFile(
                                             image,
                                             context,
-                                            'image_messages/' +
+                                            'image_messages/${Constants.currentUserID}/${widget.otherUid}/' +
                                                 randomAlphaNumeric(20));
 
                                         messageController.clear();

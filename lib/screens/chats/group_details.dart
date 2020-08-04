@@ -85,7 +85,7 @@ class _GroupDetailsState extends State<GroupDetails>
                               btnText: 'Upload',
                               btnFunction: () async {
                                 String url = await AppUtil.uploadFile(image,
-                                    context, 'group_chats_images/$groupId');
+                                    context, 'group_chat_images/$groupId');
 
                                 await chatGroupsRef
                                     .document(groupId)
