@@ -73,6 +73,8 @@ class _GroupConversationState extends State<GroupConversation>
 
   AudioRecorder recorder;
 
+  List<String> groupMembersIds = [];
+
   _GroupConversationState();
 
   Future<String> _localPath() async {
@@ -154,6 +156,11 @@ class _GroupConversationState extends State<GroupConversation>
     usersSnapshot.documents.forEach((doc) {
       users.add(doc.data);
       usersIds.add(doc.documentID);
+    });
+
+    print('member: ${usersIds[0]}');
+    setState(() {
+      groupMembersIds = usersIds;
     });
 
     for (String userId in usersIds) {
@@ -366,6 +373,7 @@ class _GroupConversationState extends State<GroupConversation>
                               bottomSheet.optionIcon(context);
                               File image = await AppUtil.chooseImage(
                                   source: bottomSheet.choice);
+
                               showDialog(
                                   barrierDismissible: true,
                                   child: Container(
@@ -379,7 +387,8 @@ class _GroupConversationState extends State<GroupConversation>
                                             image,
                                             context,
                                             'group_chat_image_messages/${widget.groupId}/' +
-                                                randomAlphaNumeric(20));
+                                                randomAlphaNumeric(20),
+                                            groupMembersIds: groupMembersIds);
 
                                         messageController.clear();
                                         await DatabaseService.sendGroupMessage(
@@ -503,7 +512,8 @@ class _GroupConversationState extends State<GroupConversation>
                                     _url = await AppUtil.uploadFile(
                                         File(result.path),
                                         context,
-                                        'group_chat_voice_messages/${widget.groupId}/${randomAlphaNumeric(20)}');
+                                        'group_chat_voice_messages/${widget.groupId}/${randomAlphaNumeric(20)}',
+                                        groupMembersIds: groupMembersIds);
 
                                     await DatabaseService.sendGroupMessage(
                                         widget.groupId, 'audio', _url);

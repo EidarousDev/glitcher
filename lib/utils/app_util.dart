@@ -75,8 +75,7 @@ class AppUtil {
   }
 
   static Future chooseImage({ImageSource source = ImageSource.gallery}) async {
-    File image = await ImagePicker.pickImage(
-        source: source, imageQuality: 80);
+    File image = await ImagePicker.pickImage(source: source, imageQuality: 80);
     print('File size: ${image.lengthSync()}');
     return image;
   }
@@ -85,13 +84,31 @@ class AppUtil {
     await ImagePicker.pickVideo(source: ImageSource.gallery);
   }
 
-  static Future uploadFile(File file, BuildContext context, String path) async {
+  static Future uploadFile(File file, BuildContext context, String path,
+      {List<String> groupMembersIds}) async {
     if (file == null) return;
 
     StorageReference storageReference =
         FirebaseStorage.instance.ref().child(path);
+    print('storage path: $path');
+    StorageUploadTask uploadTask;
 
-    StorageUploadTask uploadTask = storageReference.putFile(file);
+    if (path.contains('group')) {
+      Map<String, String> members = {};
+      for (String id in groupMembersIds) {
+        print('Member: $id');
+        members.putIfAbsent(id, () => id);
+      }
+      uploadTask = storageReference.putFile(
+        file,
+        StorageMetadata(
+          contentLanguage: 'en',
+          customMetadata: members,
+        ),
+      );
+    } else {
+      uploadTask = storageReference.putFile(file);
+    }
 
     await uploadTask.onComplete;
     print('File Uploaded');

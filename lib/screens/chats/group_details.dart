@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
@@ -35,18 +36,37 @@ class _GroupDetailsState extends State<GroupDetails>
 
   TextEditingController _textEditingController = TextEditingController();
 
+  List<String> groupMembersIds = [];
+
   _GroupDetailsState(this.groupId);
 
   @override
   void initState() {
     super.initState();
     getGroup();
+    getGroupMembersIds();
   }
 
   getGroup() async {
     Group group = await DatabaseService.getGroupWithId(groupId);
     setState(() {
       _group = group;
+    });
+  }
+
+  getGroupMembersIds() async {
+    List<String> usersIds = [];
+    QuerySnapshot usersSnapshot = await chatGroupsRef
+        .document(widget.groupId)
+        .collection('users')
+        .getDocuments();
+    usersSnapshot.documents.forEach((doc) {
+      usersIds.add(doc.documentID);
+    });
+
+    print('member: ${usersIds[0]}');
+    setState(() {
+      groupMembersIds = usersIds;
     });
   }
 
@@ -85,7 +105,8 @@ class _GroupDetailsState extends State<GroupDetails>
                               btnText: 'Upload',
                               btnFunction: () async {
                                 String url = await AppUtil.uploadFile(image,
-                                    context, 'group_chat_images/$groupId');
+                                    context, 'group_chat_images/$groupId',
+                                    groupMembersIds: groupMembersIds);
 
                                 await chatGroupsRef
                                     .document(groupId)
