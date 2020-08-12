@@ -281,7 +281,6 @@ class _GroupConversationState extends State<GroupConversation>
           actions: <Widget>[
             PopupMenuButton<String>(
               elevation: 0,
-              initialValue: choices[0],
               onCanceled: () {
                 print('You have not chosen anything');
               },

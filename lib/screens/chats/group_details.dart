@@ -11,6 +11,7 @@ import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:math' show Random;
@@ -74,113 +75,153 @@ class _GroupDetailsState extends State<GroupDetails>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(
+          flexibleSpace: gradientAppBar(),
+          title: Text(_group.name),
+        ),
         body: Column(
           children: <Widget>[
             Stack(
               children: <Widget>[
                 _group?.image != null
-                    ? Image.network(
-                        _group?.image,
-                        fit: BoxFit.fill,
-                        width: MediaQuery.of(context).size.width,
-                        height: 300,
+                    ? GestureDetector(
+                        onTap: () async {
+                          ImageEditBottomSheet bottomSheet =
+                              ImageEditBottomSheet();
+                          bottomSheet.optionIcon(context);
+                          File image = await AppUtil.chooseImage();
+                          showDialog(
+                              barrierDismissible: true,
+                              child: Container(
+                                width: Sizes.sm_profile_image_w,
+                                height: Sizes.sm_profile_image_h,
+                                child: ImageOverlay(
+                                  imageFile: image,
+                                  btnText: 'Upload',
+                                  btnFunction: () async {
+                                    String url = await AppUtil.uploadFile(image,
+                                        context, 'group_chat_images/$groupId',
+                                        groupMembersIds: groupMembersIds);
+
+                                    await chatGroupsRef
+                                        .document(groupId)
+                                        .updateData({'image': url});
+
+                                    getGroup();
+
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ),
+                              context: context);
+                        },
+                        child: Image.network(
+                          _group?.image,
+                          fit: BoxFit.fill,
+                          width: MediaQuery.of(context).size.width,
+                          height: 300,
+                        ),
                       )
                     : Image.asset(Strings.default_group_image),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: IconButton(
-                    icon: Icon(Icons.camera_enhance),
-                    onPressed: () async {
-                      ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
-                      bottomSheet.optionIcon(context);
-                      File image = await AppUtil.chooseImage();
-                      showDialog(
-                          barrierDismissible: true,
-                          child: Container(
-                            width: Sizes.sm_profile_image_w,
-                            height: Sizes.sm_profile_image_h,
-                            child: ImageOverlay(
-                              imageFile: image,
-                              btnText: 'Upload',
-                              btnFunction: () async {
-                                String url = await AppUtil.uploadFile(image,
-                                    context, 'group_chat_images/$groupId',
-                                    groupMembersIds: groupMembersIds);
-
-                                await chatGroupsRef
-                                    .document(groupId)
-                                    .updateData({'image': url});
-
-                                getGroup();
-
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ),
-                          context: context);
-                    },
+                Positioned.fill(
+                  child: Align(
+                    alignment: Alignment.topRight,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.person_add,
+                        color: Colors.white,
+                      ),
+                      onPressed: () async {},
+                    ),
                   ),
-                )
+                ),
+                gameName(),
+                gameEditButton(),
               ],
             ),
             SizedBox(
               height: 20,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                _editing
-                    ? Container(
-                        width: 200,
-                        child: TextField(
-                          textAlign: TextAlign.center,
-                          controller: _textEditingController,
-                        ),
-                      )
-                    : Text(
-                        _group.name,
-                        style: TextStyle(fontSize: 24),
-                      ),
-                SizedBox(
-                  width: 10,
-                ),
-                !_editing
-                    ? IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () {
-                          setState(() {
-                            _editing = !_editing;
-                            _textEditingController.text = _group.name;
-                          });
-                        },
-                      )
-                    : RawMaterialButton(
-                        elevation: 2.0,
-                        fillColor: Colors.white30,
-                        shape: CircleBorder(),
-                        child: Icon(
-                          Icons.done,
-                        ),
-                        onPressed: () async {
-                          await chatGroupsRef.document(groupId).updateData(
-                              {'name': _textEditingController.text});
-
-                          getGroup();
-
-                          setState(() {
-                            print('To save group name');
-                            setState(() {
-                              _editing = false;
-                            });
-                          });
-                        },
-                      ),
-              ],
-            )
           ],
         ));
+  }
+
+  gameName() {
+    return _editing
+        ? Positioned.fill(
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8, right: 80, bottom: 8),
+                child: TextField(
+                  style: TextStyle(fontSize: 30),
+                  textAlign: TextAlign.left,
+                  controller: _textEditingController,
+                ),
+              ),
+            ),
+          )
+        : Positioned.fill(
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  _group.name,
+                  style: TextStyle(fontSize: 30),
+                ),
+              ),
+            ),
+          );
+  }
+
+  gameEditButton() {
+    return !_editing
+        ? Positioned.fill(
+            child: Align(
+              alignment: Alignment.bottomRight,
+              child: IconButton(
+                icon: Icon(
+                  Icons.edit,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _editing = !_editing;
+                    _textEditingController.text = _group.name;
+                  });
+                },
+              ),
+            ),
+          )
+        : Positioned.fill(
+            child: Align(
+              alignment: Alignment.bottomRight,
+              child: RawMaterialButton(
+                elevation: 2.0,
+                fillColor: Colors.white,
+                shape: CircleBorder(),
+                child: Icon(
+                  Icons.done,
+                  color: Colors.black,
+                ),
+                onPressed: () async {
+                  await chatGroupsRef
+                      .document(groupId)
+                      .updateData({'name': _textEditingController.text});
+
+                  getGroup();
+
+                  setState(() {
+                    print('To save group name');
+                    setState(() {
+                      _editing = false;
+                    });
+                  });
+                },
+              ),
+            ),
+          );
   }
 
   @override

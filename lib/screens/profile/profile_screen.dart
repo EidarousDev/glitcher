@@ -101,10 +101,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return _errorMsgUsername;
   }
 
-  Future<bool> isUsernameTaken(String name) async {
+  Future<bool> isUsernameTaken(String username) async {
     final QuerySnapshot result = await Firestore.instance
         .collection('users')
-        .where('username', isEqualTo: name)
+        .where('username', isEqualTo: username)
         .limit(1)
         .getDocuments();
     return result.documents.isEmpty;
@@ -635,20 +635,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   updateUsername() async {
-    String validUsername = validateUsername(_usernameText);
-    final valid = await isUsernameTaken(_usernameText);
+    String validUsername = validateUsername(_usernameEditingController.text);
+    final valid = await isUsernameTaken(_usernameEditingController.text);
 
     if (!valid) {
       // username exists
       AppUtil.showSnackBar(context, _scaffoldKey,
-          '$_usernameText is already in use. Please choose a different username.');
+          '${_usernameEditingController.text} is already in use. Please choose a different username.');
     } else {
       if (validUsername == null) {
-        List search = searchList(_usernameText);
+        List search = searchList(_usernameEditingController.text);
         search.addAll(searchList(_nameText));
-        await usersRef
-            .document(userId)
-            .updateData({'username': _usernameText, 'search': search});
+        await usersRef.document(userId).updateData(
+            {'username': _usernameEditingController.text, 'search': search});
         setState(() {
           _usernameText = _usernameEditingController.text;
         });
