@@ -67,7 +67,12 @@ class _AddMembersToGroupState extends State<AddMembersToGroup>
                     groupId, friendsData[i].id);
               }
 
-              await NotificationHandler.sendNotification(friendsData[i].id, 'New chat group', 'You\'ve been added to a new chat group "${textEditingController.text}"', groupId, 'new_group');
+              await NotificationHandler.sendNotification(
+                  friendsData[i].id,
+                  'New chat group',
+                  'You\'ve been added to a new chat group "${textEditingController.text}"',
+                  groupId,
+                  'new_group');
             }
 
             Navigator.of(context).pushReplacementNamed('/group-members',
@@ -87,7 +92,10 @@ class _AddMembersToGroupState extends State<AddMembersToGroup>
             icon: Icon(
               Icons.keyboard_backspace,
             ),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context)
+                  .pushNamed('/group-members', arguments: {'groupId': groupId});
+            },
           ),
           title: TextField(
             decoration: InputDecoration.collapsed(
@@ -156,9 +164,14 @@ class _AddMembersToGroupState extends State<AddMembersToGroup>
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              subtitle: Text(friendsData.elementAt(index).description),
+              subtitle: Text(
+                friendsData.elementAt(index).description,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
               trailing: Checkbox(
                   value: chosens[index],
+                  activeColor: MyColors.darkPrimary,
                   onChanged: (value) {
                     setState(() {
                       chosens[index] = value;

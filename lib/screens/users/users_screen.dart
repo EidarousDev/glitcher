@@ -123,12 +123,9 @@ class _UsersScreenState extends State<UsersScreen> {
                         title: Text(users[index].username),
                         trailing: widget.screenType != 'followers'
                             ? MaterialButton(
-                                textColor: Colors.white,
                                 child: Text(
                                   'Unfollow',
-                                  style: TextStyle(
-                                      color: switchColor(
-                                          Colors.white, Colors.black)),
+                                  style: TextStyle(color: Colors.white),
                                 ),
                                 onPressed: () async {
                                   await DatabaseService.unfollowUser(
@@ -168,8 +165,8 @@ class _UsersScreenState extends State<UsersScreen> {
                                 child: Text(
                                   'Unfollow',
                                   style: TextStyle(
-                                      color: switchColor(
-                                          Colors.white, Colors.black)),
+                                    color: Colors.white,
+                                  ),
                                 ),
                                 onPressed: () async {
                                   await DatabaseService.unfollowUser(

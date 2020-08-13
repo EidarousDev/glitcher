@@ -177,7 +177,7 @@ class _NewGroupState extends State<NewGroup>
                       flex: 10,
                       child: TextField(
                         autofocus: true,
-                        cursorColor: Colors.white,
+                        cursorColor: MyColors.darkPrimary,
                         controller: textEditingController,
                         decoration: InputDecoration.collapsed(
                           hintStyle: TextStyle(color: Colors.grey.shade400),

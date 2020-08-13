@@ -128,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Container(
-                height: 70,
+                height: isFiltering ? 252 : 70,
                 //height: 120,//TODO use this if video fixed
                 color: switchColor(MyColors.lightBG, MyColors.darkBG),
                 child: Column(

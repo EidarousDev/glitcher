@@ -53,6 +53,7 @@ class _SearchScreenState extends State<SearchScreen> {
         appBar: AppBar(
           centerTitle: true,
           title: TextField(
+            cursorColor: MyColors.darkPrimary,
             controller: _searchController,
             decoration: InputDecoration(
               fillColor: switchColor(Colors.black54, Colors.black12),
@@ -144,8 +145,8 @@ class _SearchScreenState extends State<SearchScreen> {
                                       child: Text(
                                         'Unfollow',
                                         style: TextStyle(
-                                            color: switchColor(
-                                                Colors.white, Colors.black)),
+                                          color: Colors.white,
+                                        ),
                                       ),
                                       onPressed: () async {
                                         await DatabaseService.unfollowUser(
@@ -158,8 +159,8 @@ class _SearchScreenState extends State<SearchScreen> {
                                       child: Text(
                                         'Follow',
                                         style: TextStyle(
-                                            color: switchColor(
-                                                Colors.white, Colors.black)),
+                                          color: Colors.white,
+                                        ),
                                       ),
                                       onPressed: () async {
                                         await DatabaseService.followUser(

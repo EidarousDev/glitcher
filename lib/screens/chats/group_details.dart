@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/group_model.dart';
@@ -65,10 +66,78 @@ class _GroupDetailsState extends State<GroupDetails>
       usersIds.add(doc.documentID);
     });
 
-    print('member: ${usersIds[0]}');
+    //print('member: ${usersIds[0]}');
     setState(() {
       groupMembersIds = usersIds;
     });
+  }
+
+  editImage() async {
+    ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
+    bottomSheet.optionIcon(context);
+    File image = await AppUtil.chooseImage();
+    showDialog(
+        barrierDismissible: true,
+        child: Container(
+          width: Sizes.sm_profile_image_w,
+          height: Sizes.sm_profile_image_h,
+          child: ImageOverlay(
+            imageFile: image,
+            btnText: 'Upload',
+            btnFunction: () async {
+              String url = await AppUtil.uploadFile(
+                  image, context, 'group_chat_images/$groupId',
+                  groupMembersIds: groupMembersIds);
+
+              await chatGroupsRef.document(groupId).updateData({'image': url});
+
+              getGroup();
+
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+        context: context);
+  }
+
+  exitGroup() {
+    showDialog(
+      context: context,
+      builder: (context) => Container(
+        height: 100,
+        width: 100,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: AlertDialog(
+            title: Text('Are you sure?'),
+            content: Text('Do you want to exit this group?'),
+            actions: <Widget>[
+              GestureDetector(
+                onTap: () async {
+                  glitcherLoader.showLoader(context);
+
+                  await DatabaseService.removeGroupMember(
+                      groupId, Constants.currentUserID);
+
+                  glitcherLoader.hideLoader();
+
+                  Navigator.pushNamedAndRemoveUntil(context, '/', (r) => false);
+                },
+                child: Text("Yes"),
+              ),
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(false),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text("NO"),
+                ),
+              ),
+              SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -79,70 +148,76 @@ class _GroupDetailsState extends State<GroupDetails>
           flexibleSpace: gradientAppBar(),
           title: Text(_group.name),
         ),
-        body: Column(
-          children: <Widget>[
-            Stack(
-              children: <Widget>[
-                _group?.image != null
-                    ? GestureDetector(
-                        onTap: () async {
-                          ImageEditBottomSheet bottomSheet =
-                              ImageEditBottomSheet();
-                          bottomSheet.optionIcon(context);
-                          File image = await AppUtil.chooseImage();
-                          showDialog(
-                              barrierDismissible: true,
-                              child: Container(
-                                width: Sizes.sm_profile_image_w,
-                                height: Sizes.sm_profile_image_h,
-                                child: ImageOverlay(
-                                  imageFile: image,
-                                  btnText: 'Upload',
-                                  btnFunction: () async {
-                                    String url = await AppUtil.uploadFile(image,
-                                        context, 'group_chat_images/$groupId',
-                                        groupMembersIds: groupMembersIds);
-
-                                    await chatGroupsRef
-                                        .document(groupId)
-                                        .updateData({'image': url});
-
-                                    getGroup();
-
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                              ),
-                              context: context);
-                        },
-                        child: Image.network(
-                          _group?.image,
-                          fit: BoxFit.fill,
-                          width: MediaQuery.of(context).size.width,
-                          height: 300,
+        body: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              Stack(
+                children: <Widget>[
+                  _group?.image != null
+                      ? GestureDetector(
+                          onTap: () async {
+                            editImage();
+                          },
+                          child: Image.network(
+                            _group?.image,
+                            fit: BoxFit.fill,
+                            width: MediaQuery.of(context).size.width,
+                            height: 300,
+                          ),
+                        )
+                      : GestureDetector(
+                          onTap: () {
+                            editImage();
+                          },
+                          child: Image.asset(Strings.default_group_image)),
+                  Positioned.fill(
+                    child: Align(
+                      alignment: Alignment.topRight,
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.person_add,
+                          color: Colors.white,
                         ),
-                      )
-                    : Image.asset(Strings.default_group_image),
-                Positioned.fill(
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.person_add,
-                        color: Colors.white,
+                        onPressed: () async {
+                          Navigator.pushNamed(context, '/group-members',
+                              arguments: {'groupId': groupId});
+                        },
                       ),
-                      onPressed: () async {},
                     ),
                   ),
+                  gameName(),
+                  gameEditButton(),
+                ],
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: MyColors.darkPrimary,
+                  border: Border.all(color: MyColors.darkAccent, width: 3),
+                  boxShadow: <BoxShadow>[],
                 ),
-                gameName(),
-                gameEditButton(),
-              ],
-            ),
-            SizedBox(
-              height: 20,
-            ),
-          ],
+                child: ListTile(
+                  onTap: () async {
+                    exitGroup();
+                  },
+                  title: Row(
+                    children: [
+                      Icon(Icons.exit_to_app, color: Colors.white),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Text(
+                        'Exit group',
+                        style: TextStyle(fontSize: 18),
+                      )
+                    ],
+                  ),
+                ),
+              )
+            ],
+          ),
         ));
   }
 
@@ -154,6 +229,7 @@ class _GroupDetailsState extends State<GroupDetails>
               child: Padding(
                 padding: const EdgeInsets.only(left: 8, right: 80, bottom: 8),
                 child: TextField(
+                  cursorColor: MyColors.darkPrimary,
                   style: TextStyle(fontSize: 30),
                   textAlign: TextAlign.left,
                   controller: _textEditingController,

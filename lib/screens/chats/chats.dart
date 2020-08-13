@@ -118,6 +118,7 @@ class _ChatsState extends State<Chats>
           flexibleSpace: gradientAppBar(),
 //        elevation: 4,
           title: TextField(
+            cursorColor: MyColors.darkPrimary,
             controller: _searchController,
             decoration: InputDecoration(
               prefixIcon: Icon(

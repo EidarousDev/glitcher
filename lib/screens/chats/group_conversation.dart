@@ -403,6 +403,7 @@ class _GroupConversationState extends State<GroupConversation>
                           contentPadding: EdgeInsets.all(0),
                           title: _currentStatus != RecordingStatus.Recording
                               ? TextField(
+                                  cursorColor: MyColors.darkPrimary,
                                   focusNode: _focusNode,
                                   textCapitalization:
                                       TextCapitalization.sentences,

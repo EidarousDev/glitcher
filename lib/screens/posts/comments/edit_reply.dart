@@ -27,7 +27,8 @@ class EditReply extends StatefulWidget {
   final Comment reply;
   final User user;
 
-  EditReply({Key key, this.post, this.comment, this.user, this.reply}) : super(key: key);
+  EditReply({Key key, this.post, this.comment, this.user, this.reply})
+      : super(key: key);
   _AddReplyPageState createState() => _AddReplyPageState();
 }
 
@@ -90,8 +91,8 @@ class _AddReplyPageState extends State<EditReply> {
   void _submitButton() async {
     glitcherLoader.showLoader(context);
     if (_textEditingController.text.isNotEmpty) {
-      DatabaseService.editReply(
-          widget.post.id, widget.comment.id, widget.reply.id, _textEditingController.text);
+      DatabaseService.editReply(widget.post.id, widget.comment.id,
+          widget.reply.id, _textEditingController.text);
 
 //      await NotificationHandler.sendNotification(
 //          widget.user.id,
@@ -191,33 +192,33 @@ class _AddReplyPageState extends State<EditReply> {
 
   Future<bool> _onBackPressed() {
     return showDialog(
-      context: context,
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: new AlertDialog(
-          title: new Text('Are you sure?'),
-          content: new Text('Do you want to discard this comment?'),
-          actions: <Widget>[
-            new GestureDetector(
-              onTap: () => Navigator.of(context).pop(false),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text("NO"),
-              ),
+          context: context,
+          builder: (context) => Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: new AlertDialog(
+              title: new Text('Are you sure?'),
+              content: new Text('Do you want to discard this comment?'),
+              actions: <Widget>[
+                new GestureDetector(
+                  onTap: () => Navigator.of(context).pop(false),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text("NO"),
+                  ),
+                ),
+                SizedBox(height: 16),
+                new GestureDetector(
+                  onTap: () => Navigator.of(context)
+                      .pushNamed('/post', arguments: {'post': widget.post}),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text("YES"),
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 16),
-            new GestureDetector(
-              onTap: () => Navigator.of(context)
-                  .pushNamed('/post', arguments: {'post': widget.post}),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text("YES"),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ) ??
+          ),
+        ) ??
         false;
   }
 
@@ -225,7 +226,7 @@ class _AddReplyPageState extends State<EditReply> {
     comment.split(' ').forEach((word) async {
       if (word.startsWith('@')) {
         User user =
-        await DatabaseService.getUserWithUsername(word.substring(1));
+            await DatabaseService.getUserWithUsername(word.substring(1));
 
         await NotificationHandler.sendNotification(
             user.id,
@@ -381,6 +382,7 @@ class _ComposeTweet extends WidgetView<EditReply, _AddReplyPageState> {
               ),
               Expanded(
                 child: TextField(
+                  cursorColor: MyColors.darkPrimary,
                   onChanged: (text) {
                     if (text.length > Sizes.maxPostChars) {
                       viewState.setState(() {

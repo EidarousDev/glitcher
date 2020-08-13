@@ -68,11 +68,11 @@ class _GroupMembersState extends State<GroupMembers>
             Navigator.of(context).pop();
           },
         ),
-        title: TextField(
-          decoration: InputDecoration.collapsed(
-            hintText: 'Search',
-          ),
-        ),
+//        title: TextField(
+//          decoration: InputDecoration.collapsed(
+//            hintText: 'Search',
+//          ),
+//        ),
         actions: <Widget>[
           IconButton(
             icon: Icon(
@@ -106,7 +106,11 @@ class _GroupMembersState extends State<GroupMembers>
               backgroundImage: NetworkImage(members[index]['image']),
             ),
             title: Text(members[index]['name'] ?? ''),
-            subtitle: Text(members[index]['description'] ?? ''),
+            subtitle: Text(
+              members[index]['description'] ?? '',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
             trailing: members
                     .where((member) => member['id'] == Constants.currentUserID)
                     .toList()[0]['is_admin']
