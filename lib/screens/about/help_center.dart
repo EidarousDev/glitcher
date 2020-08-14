@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
-import 'package:glitcher/constants/strings.dart';
 import 'package:webview_media/webview_flutter.dart';
 
 class HelpCenter extends StatefulWidget {
@@ -29,7 +29,7 @@ class _HelpCenterState extends State<HelpCenter> {
       // to allow calling Scaffold.of(context) so we can show a snackbar.
       body: Builder(builder: (BuildContext context) {
         return WebView(
-          initialUrl: 'https://flutter.dev',
+          initialUrl: 'http://www.gl1tch3r.com/category/help-center',
           javascriptMode: JavascriptMode.unrestricted,
           onWebViewCreated: (WebViewController webViewController) {
             _controller.complete(webViewController);
