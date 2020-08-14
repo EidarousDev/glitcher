@@ -388,15 +388,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(
-          Icons.add,
-        ),
-        onPressed: () {
-          //Navigator.of(context).pushNamed('/new-post');
-          updateGames();
-        },
-      ),
       drawer: BuildDrawer(),
     );
   }

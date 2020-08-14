@@ -15,7 +15,7 @@ class DatabaseService {
   static Future<List<Post>> getPosts() async {
     QuerySnapshot postSnapshot = await postsRef
         .orderBy('timestamp', descending: true)
-        .limit(10)
+        .limit(20)
         .getDocuments();
     List<Post> posts =
         postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
@@ -27,7 +27,7 @@ class DatabaseService {
     QuerySnapshot postSnapshot = await postsRef
         .where('author', isEqualTo: authorId)
         .orderBy('timestamp', descending: true)
-        .limit(10)
+        .limit(20)
         .getDocuments();
     List<Post> posts =
         postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
@@ -107,7 +107,7 @@ class DatabaseService {
     QuerySnapshot postSnapshot = await postsRef
         .orderBy('timestamp', descending: true)
         .startAfter([lastVisiblePostSnapShot])
-        .limit(10)
+        .limit(20)
         .getDocuments();
     List<Post> posts =
         postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
@@ -121,7 +121,7 @@ class DatabaseService {
         .where('author', isEqualTo: authorId)
         .orderBy('timestamp', descending: true)
         .startAfter([lastVisiblePostSnapShot])
-        .limit(10)
+        .limit(20)
         .getDocuments();
     List<Post> posts =
         postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
@@ -168,7 +168,7 @@ class DatabaseService {
         .where('game', whereIn: Constants.followedGamesNames)
         .orderBy('timestamp', descending: true)
         .startAfter([lastVisiblePostSnapShot])
-        .limit(10)
+        .limit(20)
         .getDocuments();
     List<Post> posts =
         postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
@@ -182,7 +182,7 @@ class DatabaseService {
         .where('author', whereIn: Constants.followingIds)
         .orderBy('timestamp', descending: true)
         .startAfter([lastVisiblePostSnapShot])
-        .limit(10)
+        .limit(20)
         .getDocuments();
     List<Post> posts =
         postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
@@ -239,7 +239,7 @@ class DatabaseService {
     QuerySnapshot postSnapshot = await postsRef
         .where('game', isEqualTo: gameName)
         .orderBy('timestamp', descending: true)
-        .limit(10)
+        .limit(20)
         .getDocuments();
     List<Post> posts =
         postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
@@ -253,7 +253,7 @@ class DatabaseService {
         .where('game', isEqualTo: gameName)
         .orderBy('timestamp', descending: true)
         .startAfter([lastVisiblePostSnapShot])
-        .limit(10)
+        .limit(20)
         .getDocuments();
     List<Post> posts =
         postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
@@ -264,7 +264,7 @@ class DatabaseService {
     QuerySnapshot postSnapshot = await postsRef
         .where('game', whereIn: Constants.followedGamesNames)
         .orderBy('timestamp', descending: true)
-        .limit(10)
+        .limit(20)
         .getDocuments();
     List<Post> posts =
         postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
@@ -275,7 +275,7 @@ class DatabaseService {
     QuerySnapshot postSnapshot = await postsRef
         .where('author', whereIn: Constants.followingIds)
         .orderBy('timestamp', descending: true)
-        .limit(10)
+        .limit(20)
         .getDocuments();
     List<Post> posts =
         postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
@@ -287,7 +287,7 @@ class DatabaseService {
         .document(Constants.currentUserID)
         .collection('notifications')
         .orderBy('timestamp', descending: true)
-        .limit(10)
+        .limit(20)
         .getDocuments();
     List<notification.Notification> notifications = notificationSnapshot
         .documents
@@ -518,7 +518,7 @@ class DatabaseService {
         .document(postId)
         .collection('comments')
         ?.orderBy('timestamp', descending: true)
-        ?.limit(10)
+        ?.limit(20)
         ?.getDocuments();
     List<Comment> comments =
         commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
@@ -533,7 +533,7 @@ class DatabaseService {
         .document(commentId)
         .collection('replies')
         ?.orderBy('timestamp', descending: true)
-        ?.limit(10)
+        ?.limit(20)
         ?.getDocuments();
     List<Comment> comments =
         commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
@@ -552,7 +552,7 @@ class DatabaseService {
   static getGames() async {
     QuerySnapshot gameSnapshot = await gamesRef
         .orderBy('fullName', descending: false)
-        .limit(6)
+        .limit(20)
         .getDocuments();
     List<Game> games =
         gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
@@ -575,7 +575,7 @@ class DatabaseService {
     QuerySnapshot gameSnapshot = await gamesRef
         .orderBy('fullName', descending: false)
         .startAfter([lastVisibleGameSnapShot])
-        .limit(10)
+        .limit(20)
         .getDocuments();
     List<Game> games =
         gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
@@ -586,7 +586,7 @@ class DatabaseService {
     QuerySnapshot gameSnapshot = await gamesRef
         .where('search', arrayContains: text)
         .orderBy('fullName', descending: false)
-        .limit(10)
+        .limit(20)
         .getDocuments();
     List<Game> games =
         gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
@@ -599,7 +599,7 @@ class DatabaseService {
         .where('search', arrayContains: text)
         .orderBy('fullName', descending: false)
         .startAfter([lastVisiblePostSnapShot])
-        .limit(10)
+        .limit(20)
         .getDocuments();
     List<Game> games =
         gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
@@ -610,7 +610,7 @@ class DatabaseService {
     QuerySnapshot usersSnapshot = await usersRef
         .where('search', arrayContains: text)
         .orderBy('username', descending: false)
-        .limit(10)
+        .limit(20)
         .getDocuments();
     List<User> users =
         usersSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
@@ -623,7 +623,7 @@ class DatabaseService {
         .where('search', arrayContains: text)
         .orderBy('username', descending: false)
         .startAfter([lastVisiblePostSnapShot])
-        .limit(10)
+        .limit(20)
         .getDocuments();
     List<User> users =
         usersSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
@@ -752,7 +752,7 @@ class DatabaseService {
         .document(hashtagId)
         .collection('posts')
         .orderBy('timestamp', descending: true)
-        .limit(10)
+        .limit(20)
         .getDocuments();
 
     List<Post> posts = [];
@@ -782,7 +782,7 @@ class DatabaseService {
         .collection('posts')
         .orderBy('timestamp', descending: true)
         .startAfter([lastVisiblePostSnapShot])
-        .limit(10)
+        .limit(20)
         .getDocuments();
 
     List<Post> posts = [];
@@ -809,7 +809,7 @@ class DatabaseService {
         .document(Constants.currentUserID)
         .collection('bookmarks')
         .orderBy('timestamp', descending: true)
-        .limit(10)
+        .limit(20)
         .getDocuments();
 
     List<Post> posts = [];
@@ -840,7 +840,7 @@ class DatabaseService {
         .collection('bookmarks')
         .orderBy('timestamp', descending: true)
         .startAfter([lastVisiblePostSnapShot])
-        .limit(10)
+        .limit(20)
         .getDocuments();
 
     List<Post> posts = [];
