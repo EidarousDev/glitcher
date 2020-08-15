@@ -42,7 +42,12 @@ class DatabaseService {
         .getDocuments();
     List<Post> posts =
         postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
-    return posts[0];
+
+    if (posts == null || posts.isEmpty) {
+      return null;
+    } else {
+      return posts[0];
+    }
   }
 
   // Get Post info of a specific post

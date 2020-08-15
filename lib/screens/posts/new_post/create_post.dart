@@ -6,14 +6,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
-import 'package:glitcher/models/post_model.dart';
-import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/hashtag_model.dart';
+import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/posts/new_post/widget/create_bottom_icon.dart';
 import 'package:glitcher/screens/posts/new_post/widget/create_post_image.dart';
@@ -25,6 +24,7 @@ import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:random_string/random_string.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -192,9 +192,13 @@ class _CreatePostReplyPageState extends State<CreatePost> {
     int coolDownMinutes = 10;
     Post lastPost =
         await DatabaseService.getUserLastPost(Constants.currentUserID);
-    if (DateTime.now().millisecondsSinceEpoch -
-            lastPost.timestamp.millisecondsSinceEpoch <
-        coolDownMinutes * 60000) {
+
+    if (lastPost == null) {
+      print('First time to post');
+    } else if (lastPost != null &&
+        DateTime.now().millisecondsSinceEpoch -
+                lastPost.timestamp.millisecondsSinceEpoch <
+            coolDownMinutes * 60000) {
       AppUtil.showSnackBar(context, _scaffoldKey,
           'Must wait $coolDownMinutes minutes to upload another post');
       glitcherLoader.hideLoader();
