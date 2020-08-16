@@ -300,6 +300,6 @@ class _ChatsState extends State<Chats>
 
   Future<bool> _onBackPressed() {
     /// Navigate back to home page
-    Navigator.of(context).pushReplacementNamed('/home');
+    Navigator.of(context).pushReplacementNamed('/');
   }
 }

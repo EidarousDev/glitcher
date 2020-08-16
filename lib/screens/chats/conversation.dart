@@ -471,6 +471,9 @@ class _ConversationState extends State<Conversation>
                                             context,
                                             'image_messages/${Constants.currentUserID}/${widget.otherUid}/' +
                                                 randomAlphaNumeric(20));
+                                        print(
+                                            'image_messages/${Constants.currentUserID}/${widget.otherUid}/' +
+                                                randomAlphaNumeric(20));
 
                                         messageController.clear();
                                         await DatabaseService.sendMessage(

@@ -33,7 +33,7 @@ class CustomLoader {
     );
   }
 
-  showLoader(context) {
+  showLoader(context, {height = 100.0, width = 100.0}) {
     _overlayState = Overlay.of(context);
     _buildLoader();
     _overlayState.insert(_overlayEntry);
@@ -51,31 +51,27 @@ class CustomLoader {
   buildLoader(BuildContext context, {height = 100.0, width = 100.0}) {
     return Center(
         child: Image.asset(
-          'assets/images/glitcher_loader.gif',
-          height: height,
-          width: width,
-        ));
+      'assets/images/glitcher_loader.gif',
+      height: height,
+      width: width,
+    ));
   }
 }
 
 class CustomScreenLoader extends StatelessWidget {
   final Color backgroundColor;
-  final double height;
-  final double width;
-  const CustomScreenLoader(
-      {Key key,
-      this.backgroundColor = const Color(0xfff8f8f8),
-      this.height = 200,
-      this.width = 200})
-      : super(key: key);
+  const CustomScreenLoader({
+    Key key,
+    this.backgroundColor = const Color(0xfff8f8f8),
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: backgroundColor,
       child: Container(
-        height: height,
-        width: height,
+        height: Sizes.fullHeight(context),
+        width: Sizes.fullWidth(context),
         alignment: Alignment.center,
         child: Container(
           padding: EdgeInsets.all(10),

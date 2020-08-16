@@ -243,8 +243,7 @@ class _GroupConversationState extends State<GroupConversation>
             icon: Icon(
               Icons.keyboard_backspace,
             ),
-            onPressed: () =>
-                Navigator.of(context).pushReplacementNamed('/chats'),
+            onPressed: () => Navigator.of(context).pop(),
           ),
           titleSpacing: 0,
           title: InkWell(

@@ -9,7 +9,8 @@ class ReportPostScreen extends StatefulWidget {
   final String postAuthor;
   final String postId;
 
-  const ReportPostScreen({Key key, this.postAuthor, this.postId}) : super(key: key);
+  const ReportPostScreen({Key key, this.postAuthor, this.postId})
+      : super(key: key);
 
   @override
   _ReportPostScreenState createState() => _ReportPostScreenState();
@@ -47,9 +48,16 @@ class _ReportPostScreenState extends State<ReportPostScreen> {
                       padding: const EdgeInsets.all(8.0),
                       child: DropdownButton(
                         items: <String>[
-                          'Sexual content',
+                          'Nudity',
                           'Bad language',
                           'Violence',
+                          'Harassment',
+                          'Suicide or Self-Injury',
+                          'False News',
+                          'Spam',
+                          'Unauthorized Sales',
+                          'Hate Speech',
+                          'Terrorism',
                           'Other'
                         ].map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(

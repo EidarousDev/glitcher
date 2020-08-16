@@ -513,7 +513,7 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                       ),
                       hintText: 'Enter Game name')),
               suggestionsCallback: (pattern) {
-                return DatabaseService.searchGames(pattern);
+                return DatabaseService.searchGames(pattern.toLowerCase());
               },
               itemBuilder: (context, suggestion) {
                 Game game = suggestion as Game;
