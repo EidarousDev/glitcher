@@ -1,17 +1,12 @@
-import 'dart:convert';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/list_items/chat_item.dart';
-import 'package:glitcher/main.dart';
 import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/drawer.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 
@@ -279,7 +274,7 @@ class _ChatsState extends State<Chats>
                               ? NetworkImage(group.image)
                               : AssetImage(Strings.default_group_image),
                         ),
-                        title: Text(group.name),
+                        title: Text(group.name ?? 'Unnamed group'),
                       );
                     },
                   )
