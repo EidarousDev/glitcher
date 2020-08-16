@@ -5,16 +5,15 @@ import 'package:chewie/chewie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/strings.dart';
+import 'package:glitcher/list_items/comment_item.dart';
+import 'package:glitcher/list_items/post_item.dart';
 import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/list_items/comment_item.dart';
-import 'package:glitcher/list_items/post_item.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/utils/Loader.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:video_player/video_player.dart';
 
@@ -249,7 +248,14 @@ class _PostPreviewState extends State<PostPreview>
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         PostItem(post: _currentPost, author: _author),
-        getList(),
+        _comments.length > 0
+            ? getList()
+            : Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 32.0),
+                  child: Text('Be the first to comment...'),
+                ),
+              ),
       ],
     );
   }
@@ -277,12 +283,15 @@ class _PostPreviewState extends State<PostPreview>
           child: SingleChildScrollView(
             controller: _scrollController,
             scrollDirection: Axis.vertical,
-            child: _loading ? Center(child: Center(
-                child: Image.asset(
-                  'assets/images/glitcher_loader.gif',
-                  height: 250,
-                  width: 250,
-                ))) : _buildWidget(),
+            child: _loading
+                ? Center(
+                    child: Center(
+                        child: Image.asset(
+                    'assets/images/glitcher_loader.gif',
+                    height: 250,
+                    width: 250,
+                  )))
+                : _buildWidget(),
           ),
         ),
       ),

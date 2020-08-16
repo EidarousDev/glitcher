@@ -1,23 +1,24 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
-import 'package:glitcher/services/audio_recorder.dart';
-import 'package:glitcher/services/permissions_service.dart';
-import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
-import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/services/audio_recorder.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
+import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
+import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
 import 'package:glitcher/widgets/chat_bubble.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
-import 'package:glitcher/constants/sizes.dart';
 import 'package:intl/intl.dart';
 import 'package:random_string/random_string.dart';
 
@@ -112,6 +113,7 @@ class _ConversationState extends State<Conversation>
         .listen((querySnapshot) {
       querySnapshot.documentChanges.forEach((change) {
         if (change.type == DocumentChangeType.added) {
+          print('type is her');
           if (_messages != null) {
             if (this.mounted) {
               setState(() {
