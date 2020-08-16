@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
@@ -9,12 +10,12 @@ class AddMembersToGroup extends StatefulWidget {
   final String groupId;
   AddMembersToGroup(this.groupId);
   @override
-  _AddMembersToGroupState createState() => _AddMembersToGroupState(groupId);
+  _AddMembersToGroupState createState() => _AddMembersToGroupState();
 }
 
 class _AddMembersToGroupState extends State<AddMembersToGroup>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-  final String groupId;
+  Group group;
   List<User> friendsData = [];
   List<bool> chosens = [];
   List<String> existingMembersIds = [];
@@ -23,10 +24,9 @@ class _AddMembersToGroupState extends State<AddMembersToGroup>
 
   ScrollController _scrollController;
 
-  _AddMembersToGroupState(this.groupId);
-
   getNonMembersFriends() async {
-    existingMembersIds = await DatabaseService.getGroupMembersIds(groupId);
+    existingMembersIds =
+        await DatabaseService.getGroupMembersIds(widget.groupId);
 
     List<User> friends =
         await DatabaseService.getFriends(Constants.currentUserID);
@@ -48,8 +48,12 @@ class _AddMembersToGroupState extends State<AddMembersToGroup>
   @override
   void initState() {
     super.initState();
-
     getNonMembersFriends();
+    getGroupData();
+  }
+
+  getGroupData() async {
+    group = await DatabaseService.getGroupWithId(widget.groupId);
   }
 
   @override
@@ -64,19 +68,19 @@ class _AddMembersToGroupState extends State<AddMembersToGroup>
             for (int i = 0; i < chosens.length; i++) {
               if (chosens[i]) {
                 await DatabaseService.addMemberToGroup(
-                    groupId, friendsData[i].id);
+                    widget.groupId, friendsData[i].id);
               }
 
               await NotificationHandler.sendNotification(
                   friendsData[i].id,
                   'New chat group',
-                  'You\'ve been added to a new chat group "${textEditingController.text}"',
-                  groupId,
+                  'You\'ve been added to a new chat group: ${group.name}',
+                  widget.groupId,
                   'new_group');
             }
 
             Navigator.of(context).pushReplacementNamed('/group-members',
-                arguments: {'groupId': groupId});
+                arguments: {'groupId': widget.groupId});
           },
         ),
         appBar: AppBar(
@@ -93,8 +97,8 @@ class _AddMembersToGroupState extends State<AddMembersToGroup>
               Icons.keyboard_backspace,
             ),
             onPressed: () {
-              Navigator.of(context)
-                  .pushNamed('/group-members', arguments: {'groupId': groupId});
+              Navigator.of(context).pushNamed('/group-members',
+                  arguments: {'groupId': widget.groupId});
             },
           ),
           title: TextField(
