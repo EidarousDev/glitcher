@@ -58,4 +58,6 @@ class Constants {
 
   static ConnectivityResult connectionState;
   static String country;
+
+  static String currentRoute;
 }

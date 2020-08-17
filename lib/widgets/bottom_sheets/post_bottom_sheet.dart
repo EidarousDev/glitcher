@@ -38,7 +38,7 @@ class PostBottomSheet {
       builder: (context) {
         return Container(
             padding: EdgeInsets.only(top: 5, bottom: 0),
-            height: Sizes.fullHeight(context) * (isMyPost ? .35 : .66),
+            height: Sizes.fullHeight(context) * (isMyPost ? .35 : .5),
             width: Sizes.fullWidth(context),
             decoration: BoxDecoration(
               color: switchColor(
@@ -67,36 +67,45 @@ class PostBottomSheet {
             ),
           ),
         ),
+        Constants.currentRoute != '/post'
+            ? _widgetBottomSheetRow(context, Icon(Icons.remove_red_eye),
+                text: 'Preview Post', onPressed: () async {
+                if (Constants.currentRoute == '/post') return;
+                Navigator.of(context).pushNamed('/post', arguments: {
+                  'post': post,
+                });
+              })
+            : Container(),
         _widgetBottomSheetRow(
           context,
           Icon(Icons.link),
           text: 'Copy link to post',
         ),
         route == '/bookmarks'
-          ?
+            ?
 //          _widgetBottomSheetRow(
 //          context,
 //          Icon(FontAwesome.getIconData('bookmark-remove')),
 //          text: 'Unbookmark this post',
 //          onPressed: () {
 //          },
-    Container()
-         :
-        _widgetBottomSheetRow(
-          context,
-          Icon(Icons.bookmark),
-          text: 'Bookmark this post',
-          onPressed: () {
-            _bookmarkPost(post.id, context);
-          },
-        ),
+            Container()
+            : _widgetBottomSheetRow(
+                context,
+                Icon(Icons.bookmark),
+                text: 'Bookmark this post',
+                onPressed: () {
+                  _bookmarkPost(post.id, context);
+                },
+              ),
         isMyPost
             ? _widgetBottomSheetRow(
                 context,
                 Icon(Icons.edit),
                 text: 'Edit this post',
                 onPressed: () {
-                  Navigator.of(context).pushNamed('/edit-post', arguments: {'post': post});
+                  Navigator.of(context)
+                      .pushNamed('/edit-post', arguments: {'post': post});
                 },
               )
             : Container(),
@@ -121,21 +130,26 @@ class PostBottomSheet {
                 text: 'Unfollow ${user.username}', onPressed: () async {
                 unfollowUser(context, user);
               }),
-        isMyPost
-            ? Container()
-            : _widgetBottomSheetRow(
-                context,
-                Icon(Icons.block),
-                text: 'Block ${user.username}',
-              ),
+
+//        isMyPost
+//            ? Container()
+//            : _widgetBottomSheetRow(
+//                context,
+//                Icon(Icons.block),
+//                text: 'Block ${user.username}',
+//              ),
 //        isMyPost
 //            ? Container()
 //            :
-        !isMyPost ? _widgetBottomSheetRow(context, Icon(Icons.report), text: 'Report Post',
-            onPressed: () async {
-          Navigator.of(context).pushNamed('/report-post',
-              arguments: {'post_author': post.authorId, 'post_id': post.id});
-        }): Container(),
+        !isMyPost
+            ? _widgetBottomSheetRow(context, Icon(Icons.report),
+                text: 'Report Post', onPressed: () async {
+                Navigator.of(context).pushNamed('/report-post', arguments: {
+                  'post_author': post.authorId,
+                  'post_id': post.id
+                });
+              })
+            : Container(),
       ],
     );
   }

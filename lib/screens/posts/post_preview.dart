@@ -80,7 +80,7 @@ class _PostPreviewState extends State<PostPreview>
   void initState() {
     loadPostData();
     super.initState();
-
+    Constants.currentRoute = '/post';
     _loadAudioByteData();
 
     ///Set up listener here

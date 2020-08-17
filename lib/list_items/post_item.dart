@@ -78,6 +78,7 @@ class _PostItemState extends State<PostItem> {
       children: <Widget>[
         GestureDetector(
           onTap: () {
+            if (Constants.currentRoute == '/post') return;
             Navigator.of(context).pushNamed('/post', arguments: {
               'post': post,
             });

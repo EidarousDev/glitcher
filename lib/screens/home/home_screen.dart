@@ -423,6 +423,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    Constants.currentRoute = '/home';
 
     ///Set up listener here
     _scrollController
