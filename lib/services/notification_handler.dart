@@ -3,12 +3,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
 
 class NotificationHandler {
@@ -102,7 +101,7 @@ class NotificationHandler {
     });
 
     //To increment notificationsNumber
-    User user = await DatabaseService.getUserWithId(receiverId);
+    //User user = await DatabaseService.getUserWithId(receiverId);
     usersRef
         .document(receiverId)
         .updateData({'notificationsNumber': FieldValue.increment(1)});
@@ -124,9 +123,7 @@ class NotificationHandler {
     configLocalNotification();
 
     var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
-        Platform.isAndroid
-            ? 'com.eidarousdev.glitcher'
-            : 'com.eidarousdev.glitcher',
+        Platform.isAndroid ? 'com.devyat.glitcher' : 'com.devyat.glitcher',
         'glitcher',
         'your channel description',
         enableVibration: true,
