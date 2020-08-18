@@ -8,20 +8,41 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:844244619365:android:14074c5cf7662e75f2768c",
+        "mobilesdk_app_id": "1:844244619365:android:5d891ad406100ac3f2768c",
         "android_client_info": {
           "package_name": "com.devyat.glitcher"
         }
       },
       "oauth_client": [
         {
-          "client_id": "844244619365-7vd187inj3be9ln22ta0524259mmshqa.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.devyat.glitcher",
-            "certificate_hash": "e8917f352c482ad06597f4b37b972b40ffaef989"
-          }
-        },
+          "client_id": "844244619365-m1h5hqveov4jor2f6v3pv7b9bnrvekjb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPAOREZ9auR3WajPViQP-9iD1f3G5ImZo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "844244619365-m1h5hqveov4jor2f6v3pv7b9bnrvekjb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:844244619365:android:f5a977657bc5e7a8f2768c",
+        "android_client_info": {
+          "package_name": "com.eidarousdev.glitcher_admin"
+        }
+      },
+      "oauth_client": [
         {
           "client_id": "844244619365-m1h5hqveov4jor2f6v3pv7b9bnrvekjb.apps.googleusercontent.com",
           "client_type": 3
