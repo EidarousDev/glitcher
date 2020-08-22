@@ -1,10 +1,15 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/screens/welcome/widgets/verify_email.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
+import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'widgets/bezier_container.dart';
 
@@ -41,6 +46,29 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  searchList(String text) {
+    List<String> list = [];
+    for (int i = 1; i <= text.length; i++) {
+      list.add(text.substring(0, i).toLowerCase());
+    }
+    return list;
+  }
+
+  addUserToDatabase(String id, String email, String username) async {
+    List search = searchList(username);
+    Map<String, dynamic> userMap = {
+      'name': 'Your name here',
+      'username': username,
+      'email': email,
+      'description': 'Write something about yourself',
+      'notificationsNumber': 0,
+      'violations': 0,
+      'search': search
+    };
+
+    await usersRef.document(id).setData(userMap);
   }
 
   Widget _entryField(String title, {bool isPassword = false}) {
@@ -326,7 +354,23 @@ class _LoginPageState extends State<LoginPage> {
     //print('Should be true: $_loading');
     try {
       userId = await auth.signInWithEmailAndPassword(_email, _password);
-      Navigator.of(context).pushReplacementNamed('/');
+      User temp = await DatabaseService.getUserWithId(userId);
+      FirebaseUser user = await auth.getCurrentUser();
+
+      if (user.isEmailVerified && temp.id == null) {
+        print('signed up');
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String username = prefs.getString('username');
+
+        await addUserToDatabase(userId, user.email, username);
+        await DatabaseService.addUserEmailToNewsletter(
+            userId, user.email, username);
+      } else if (!user.isEmailVerified) {
+        await auth.signOut();
+        await showVerifyEmailSentDialog(context);
+      } else {
+        Navigator.of(context).pushReplacementNamed('/');
+      }
     } catch (e) {
       // Email or Password Incorrect
       AppUtil.showSnackBar(context, _scaffoldKey, 'Authentication failed');

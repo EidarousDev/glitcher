@@ -7,6 +7,7 @@ import 'package:glitcher/screens/welcome/widgets/verify_email.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/utils/app_util.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'widgets/bezier_container.dart';
 
@@ -369,29 +370,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  searchList(String text) {
-    List<String> list = [];
-    for (int i = 1; i <= text.length; i++) {
-      list.add(text.substring(0, i).toLowerCase());
-    }
-    return list;
-  }
-
-  addUserToDatabase(String id, String email) async {
-    List search = searchList(_username);
-    Map<String, dynamic> userMap = {
-      'name': 'Your name here',
-      'username': _username,
-      'email': email,
-      'description': 'Write something about yourself',
-      'notificationsNumber': 0,
-      'violations': 0,
-      'search': search
-    };
-
-    await usersRef.document(id).setData(userMap);
-  }
-
   Future _signUp() async {
     final BaseAuth auth = AuthProvider.of(context).auth;
 
@@ -435,9 +413,11 @@ class _SignUpPageState extends State<SignUpPage> {
 //          await FirebaseAuth.instance.signOut();
 //          ////
 
-          //auth.sendEmailVerification();
+          await auth.sendEmailVerification();
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setString('username', _username);
+
           Navigator.of(context).pushReplacementNamed('/login');
-          await showVerifyEmailSentDialog(context);
         } catch (signUpError) {
           if (signUpError is PlatformException) {
             if (signUpError.code == 'ERROR_EMAIL_ALREADY_IN_USE') {
