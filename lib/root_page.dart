@@ -5,6 +5,7 @@ import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/app_page.dart';
 import 'package:glitcher/screens/welcome/login_page.dart';
+import 'package:glitcher/screens/welcome/widgets/verify_email.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
@@ -73,6 +74,11 @@ class _RootPageState extends State<RootPage> {
         Constants.currentFirebaseUser = user;
         Constants.currentUserID = user?.uid;
         authStatus = AuthStatus.LOGGED_IN;
+      });
+    } else if (user?.uid != null && !(user.isEmailVerified)) {
+      await showVerifyEmailSentDialog(context);
+      setState(() {
+        authStatus = AuthStatus.NOT_LOGGED_IN;
       });
     } else {
       setState(() {
