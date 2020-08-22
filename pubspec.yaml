@@ -73,6 +73,7 @@ dependencies:
   provider:
 
 dev_dependencies:
+  stack: ^0.0.1
   flutter_test:
     sdk: flutter
 

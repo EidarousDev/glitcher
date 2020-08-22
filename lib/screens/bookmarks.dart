@@ -70,7 +70,6 @@ class _BookmarksScreenState extends State<BookmarksScreen>
                             return PostItem(
                               post: post,
                               author: author,
-                              route: '/bookmarks',
                             );
                           })
                       : SizedBox(
@@ -107,6 +106,7 @@ class _BookmarksScreenState extends State<BookmarksScreen>
   }
 
   _onBackPressed() {
+    Constants.currentRoute = Constants.routesStack.pop();
     Navigator.of(context).pop();
   }
 

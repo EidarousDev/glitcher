@@ -31,9 +31,8 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 class PostItem extends StatefulWidget {
   final Post post;
   final User author;
-  final String route;
 
-  PostItem({Key key, @required this.post, @required this.author, this.route})
+  PostItem({Key key, @required this.post, @required this.author})
       : super(key: key);
   @override
   _PostItemState createState() => _PostItemState();
@@ -68,11 +67,11 @@ class _PostItemState extends State<PostItem> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 5),
-      child: _buildPost(widget.post, widget.author, widget.route),
+      child: _buildPost(widget.post, widget.author),
     );
   }
 
-  _buildPost(Post post, User author, String route) {
+  _buildPost(Post post, User author) {
     initLikes(post);
     return Column(
       children: <Widget>[
@@ -134,8 +133,7 @@ class _PostItemState extends State<PostItem> {
                 trailing: ValueListenableBuilder<int>(
                   valueListenable: number,
                   builder: (context, value, child) {
-                    return PostBottomSheet()
-                        .postOptionIcon(context, post, route);
+                    return PostBottomSheet().postOptionIcon(context, post);
                   },
                 ),
               ),

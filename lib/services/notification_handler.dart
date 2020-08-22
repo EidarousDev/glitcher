@@ -83,6 +83,8 @@ class NotificationHandler {
       default:
         Navigator.of(context)
             .pushNamed('/post', arguments: {'postId': objectId});
+        Constants.routesStack.push('/home');
+        Constants.currentRoute = '/post';
         break;
     }
   }
@@ -142,8 +144,7 @@ class NotificationHandler {
   }
 
   clearNotificationsNumber() async {
-    await DatabaseService.getUserWithId(Constants.currentUserID);
-    usersRef
+    await usersRef
         .document(Constants.currentUserID)
         .updateData({'notificationsNumber': 0});
   }

@@ -211,7 +211,8 @@ class _AppPageState extends State<AppPage> {
     if (mounted) {
       setState(() {
         this._page = page;
-        if (page == 2) {
+        if (page == 3) {
+          //TODO change if bottom navbar changed
           //notification screen
           NotificationHandler().clearNotificationsNumber();
         }

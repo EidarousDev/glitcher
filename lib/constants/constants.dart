@@ -6,6 +6,7 @@ import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/notification_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/widgets/custom_loader.dart';
+import 'package:stack/stack.dart';
 
 /// Firebase Constants
 final auth = FirebaseAuth.instance;
@@ -60,4 +61,5 @@ class Constants {
   static String country;
 
   static String currentRoute;
+  static Stack<String> routesStack = Stack();
 }

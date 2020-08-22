@@ -80,7 +80,6 @@ class _PostPreviewState extends State<PostPreview>
   void initState() {
     loadPostData();
     super.initState();
-    Constants.currentRoute = '/post';
     _loadAudioByteData();
 
     ///Set up listener here
@@ -265,8 +264,15 @@ class _PostPreviewState extends State<PostPreview>
     return Scaffold(
       resizeToAvoidBottomPadding: true,
       appBar: AppBar(
+        leading: new IconButton(
+          icon: new Icon(Icons.arrow_back),
+          onPressed: () {
+            _onBackPressed();
+          },
+        ),
         title: Text('Post Preview'),
         flexibleSpace: gradientAppBar(),
+
       ),
       body: SmartRefresher(
         controller: _refreshController,
@@ -319,5 +325,10 @@ class _PostPreviewState extends State<PostPreview>
     setState(() {
       _loading = false;
     });
+  }
+
+  void _onBackPressed() {
+    Constants.currentRoute = Constants.routesStack.pop();
+    Navigator.of(context).pop();
   }
 }

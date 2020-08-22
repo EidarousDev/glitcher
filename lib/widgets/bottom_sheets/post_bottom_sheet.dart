@@ -11,12 +11,12 @@ import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
 
 class PostBottomSheet {
-  Widget postOptionIcon(BuildContext context, Post post, String route) {
+  Widget postOptionIcon(BuildContext context, Post post) {
     return customInkWell(
         radius: BorderRadius.circular(20),
         context: context,
         onPressed: () {
-          _openBottomSheet(context, post, route);
+          _openBottomSheet(context, post);
         },
         child: Container(
           width: 25,
@@ -28,8 +28,8 @@ class PostBottomSheet {
         ));
   }
 
-  void _openBottomSheet(BuildContext context, Post post, String route) async {
-    print('route: $route');
+  void _openBottomSheet(BuildContext context, Post post) async {
+    print('route: ${Constants.currentRoute}');
     User user = await DatabaseService.getUserWithId(post.authorId);
     bool isMyPost = Constants.currentUserID == post.authorId;
     await showModalBottomSheet(
@@ -48,13 +48,13 @@ class PostBottomSheet {
                 topRight: Radius.circular(20),
               ),
             ),
-            child: _postOptions(context, isMyPost, post, user, route));
+            child: _postOptions(context, isMyPost, post, user));
       },
     );
   }
 
   Widget _postOptions(
-      BuildContext context, bool isMyPost, Post post, User user, String route) {
+      BuildContext context, bool isMyPost, Post post, User user) {
     return Column(
       children: <Widget>[
         Container(
@@ -81,7 +81,7 @@ class PostBottomSheet {
           Icon(Icons.link),
           text: 'Copy link to post',
         ),
-        route == '/bookmarks'
+        Constants.currentRoute == '/bookmarks'
             ?
 //          _widgetBottomSheetRow(
 //          context,
