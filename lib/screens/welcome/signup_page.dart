@@ -1,19 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:glitcher/constants/constants.dart';
-import 'package:glitcher/constants/constants.dart';
-import 'package:glitcher/constants/constants.dart';
-import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/screens/welcome/widgets/verify_email.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
-import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
-import 'package:glitcher/utils/functions.dart';
 
-import 'login_page.dart';
 import 'widgets/bezier_container.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -180,31 +174,35 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Widget _submitButton() {
-    return InkWell(
-      onTap: () async {
-        if (_email.isNotEmpty &&
-            _username.isNotEmpty &&
-            _password.isNotEmpty &&
-            _confirmPassword.isNotEmpty) {
-          await _signUp();
-        } else {
-          AppUtil.showSnackBar(
-              context, _scaffoldKey, 'Please fill fields above');
-        }
-      },
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.symmetric(vertical: 15),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(5)),
-            gradient: LinearGradient(
-                begin: Alignment.centerRight,
-                end: Alignment.centerRight,
-                colors: [MyColors.darkCardBG, MyColors.darkPrimary])),
-        child: Text(
-          'Register now',
-          style: TextStyle(fontSize: 20, color: Colors.white),
+    return Ink(
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(5)),
+          gradient: LinearGradient(
+              begin: Alignment.centerRight,
+              end: Alignment.centerRight,
+              colors: [MyColors.darkCardBG, MyColors.darkPrimary])),
+      child: InkWell(
+        splashColor: Colors.yellow,
+        onTap: () async {
+          if (_email.isNotEmpty &&
+              _username.isNotEmpty &&
+              _password.isNotEmpty &&
+              _confirmPassword.isNotEmpty) {
+            await _signUp();
+          } else {
+            AppUtil.showSnackBar(
+                context, _scaffoldKey, 'Please fill fields above');
+          }
+        },
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          padding: EdgeInsets.symmetric(vertical: 15),
+          alignment: Alignment.center,
+          child: Text(
+            'Register now',
+            style: TextStyle(
+                fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+          ),
         ),
       ),
     );
@@ -330,7 +328,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   String validateUsername(String value) {
     String pattern =
-        r'^(?=.{8,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$';
+        r'^(?=.{4,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$';
     RegExp regExp = new RegExp(pattern);
     if (value.length == 0) {
       AppUtil().showToast("Username is Required");
@@ -394,29 +392,6 @@ class _SignUpPageState extends State<SignUpPage> {
     await usersRef.document(id).setData(userMap);
   }
 
-  void showVerifyEmailSentDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        // return object of type Dialog
-        return AlertDialog(
-          title: new Text("Verify your account"),
-          content:
-              new Text("Link to verify account has been sent to your email"),
-          actions: <Widget>[
-            new FlatButton(
-              child: new Text("Dismiss"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   Future _signUp() async {
     final BaseAuth auth = AuthProvider.of(context).auth;
 
@@ -450,19 +425,19 @@ class _SignUpPageState extends State<SignUpPage> {
             return;
           }
 
-          ////TODO test
-          await FirebaseAuth.instance
-              .signInWithEmailAndPassword(email: _email, password: _password);
-          FirebaseUser user = await FirebaseAuth.instance.currentUser();
-          await addUserToDatabase(userId, user.email);
-          await DatabaseService.addUserEmailToNewsletter(
-              userId, user.email, _username);
-          await FirebaseAuth.instance.signOut();
-          ////
+//          ////TODO test
+//          await FirebaseAuth.instance
+//              .signInWithEmailAndPassword(email: _email, password: _password);
+//          FirebaseUser user = await FirebaseAuth.instance.currentUser();
+//          await addUserToDatabase(userId, user.email);
+//          await DatabaseService.addUserEmailToNewsletter(
+//              userId, user.email, _username);
+//          await FirebaseAuth.instance.signOut();
+//          ////
 
-          auth.sendEmailVerification();
-          showVerifyEmailSentDialog(context);
+          //auth.sendEmailVerification();
           Navigator.of(context).pushReplacementNamed('/login');
+          await showVerifyEmailSentDialog(context);
         } catch (signUpError) {
           if (signUpError is PlatformException) {
             if (signUpError.code == 'ERROR_EMAIL_ALREADY_IN_USE') {

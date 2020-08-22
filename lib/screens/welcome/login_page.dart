@@ -1,15 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
-import 'package:flutter_recaptcha_v2/flutter_recaptcha_v2.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/utils/app_util.dart';
-import 'package:glitcher/widgets/custom_widgets.dart';
 
-import 'signup_page.dart';
 import 'widgets/bezier_container.dart';
 
 class LoginPage extends StatefulWidget {
@@ -133,21 +129,32 @@ class _LoginPageState extends State<LoginPage> {
   bool _isObscure = true;
 
   Widget _submitButton() {
-    return InkWell(
-      onTap: _login,
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.symmetric(vertical: 15),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(5)),
-            gradient: LinearGradient(
-                begin: Alignment.centerRight,
-                end: Alignment.centerRight,
-                colors: [MyColors.darkCardBG, MyColors.darkPrimary])),
-        child: Text(
-          'Login',
-          style: TextStyle(fontSize: 20, color: Colors.white),
+    return Ink(
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(5)),
+          gradient: LinearGradient(
+              begin: Alignment.centerRight,
+              end: Alignment.centerRight,
+              colors: [MyColors.darkCardBG, MyColors.darkPrimary])),
+      child: InkWell(
+        splashColor: Colors.yellow,
+        onTap: () async {
+          if (_email.isNotEmpty && _password.isNotEmpty) {
+            await _login();
+          } else {
+            AppUtil.showSnackBar(
+                context, _scaffoldKey, 'Please enter your login details');
+          }
+        },
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          padding: EdgeInsets.symmetric(vertical: 15),
+          alignment: Alignment.center,
+          child: Text(
+            'LOGIN',
+            style: TextStyle(
+                fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+          ),
         ),
       ),
     );
@@ -266,7 +273,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget _createAccountLabel() {
     return InkWell(
       onTap: () {
-        Navigator.pushReplacementNamed(context, '/sign-up');
+        Navigator.pushNamed(context, '/sign-up');
       },
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 5),
