@@ -612,7 +612,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   padding: const EdgeInsets.all(8.0),
                   child: InkWell(
                     onTap: () => Scaffold.of(context).openDrawer(),
-                    child: Icon(IconData(58311, fontFamily: 'MaterialIcons')),
+                    child: Icon(
+                        const IconData(58311, fontFamily: 'MaterialIcons')),
                   ),
                 ),
               ),

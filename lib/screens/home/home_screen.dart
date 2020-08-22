@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             padding: const EdgeInsets.all(8.0),
             child: InkWell(
               onTap: () => Scaffold.of(context).openDrawer(),
-              child: Icon(IconData(58311, fontFamily: 'MaterialIcons')),
+              child: Icon(const IconData(58311, fontFamily: 'MaterialIcons')),
 //                    CachedNetworkImage(
 //                      imageUrl: profileImageUrl,
 //                      imageBuilder: (context, imageProvider) => CircleAvatar(
