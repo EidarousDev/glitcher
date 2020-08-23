@@ -34,6 +34,20 @@ class DatabaseService {
     return posts;
   }
 
+  // This function is used to get the recent posts of a certain user
+  static Future<List<Post>> getNextUserPosts(
+      String authorId, Timestamp lastVisiblePostSnapShot) async {
+    QuerySnapshot postSnapshot = await postsRef
+        .where('author', isEqualTo: authorId)
+        .orderBy('timestamp', descending: true)
+        .startAfter([lastVisiblePostSnapShot])
+        .limit(20)
+        .getDocuments();
+    List<Post> posts =
+        postSnapshot.documents.map((doc) => Post.fromDoc(doc)).toList();
+    return posts;
+  }
+
   static Future<Post> getUserLastPost(String authorId) async {
     QuerySnapshot postSnapshot = await postsRef
         .where('author', isEqualTo: authorId)
@@ -134,6 +148,7 @@ class DatabaseService {
   }
 
   static deletePost(String postId) async {
+    print('deleting post...');
     await postsRef.document(postId).delete();
   }
 
@@ -303,7 +318,7 @@ class DatabaseService {
 
   // This function is used to get the author info of each post
   static Future<User> getUserWithId(String userId) async {
-    DocumentSnapshot userDocSnapshot = await usersRef.document(userId).get();
+    DocumentSnapshot userDocSnapshot = await usersRef?.document(userId)?.get();
     if (userDocSnapshot.exists) {
       return User.fromDoc(userDocSnapshot);
     }
@@ -416,6 +431,12 @@ class DatabaseService {
         .getDocuments();
     List<Message> messages =
         msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
+    if (messages.length == 0)
+      return Message(
+          message: 'No previous messages.',
+          type: 'text',
+          sender: otherUserId,
+          timestamp: Timestamp.fromDate(DateTime.now()));
     return messages[0];
   }
 

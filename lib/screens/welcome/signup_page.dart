@@ -1,9 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
-import 'package:glitcher/screens/welcome/widgets/verify_email.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/utils/app_util.dart';
@@ -400,6 +398,9 @@ class _SignUpPageState extends State<SignUpPage> {
           userId = await auth.signUp(_username, _email, _password);
           if (userId == 'Email already in use') {
             AppUtil.showSnackBar(context, _scaffoldKey, userId);
+            return;
+          } else if (userId == 'sign_up_error') {
+            AppUtil.showSnackBar(context, _scaffoldKey, 'Sign up error!');
             return;
           }
 

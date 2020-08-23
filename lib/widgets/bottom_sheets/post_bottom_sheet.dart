@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -210,8 +209,8 @@ class PostBottomSheet {
             ),
             SizedBox(height: 16),
             new GestureDetector(
-              onTap: () {
-                DatabaseService.deletePost(postId);
+              onTap: () async {
+                await DatabaseService.deletePost(postId);
                 Navigator.of(context).pop();
               },
               child: Padding(

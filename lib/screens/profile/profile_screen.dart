@@ -80,7 +80,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   String validateUsername(String value) {
     String pattern =
-        r'^(?=.{8,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$';
+        r'^(?=.{4,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$';
     RegExp regExp = new RegExp(pattern);
     if (value.length == 0) {
       AppUtil().showToast("Username is Required");
@@ -88,7 +88,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _errorMsgUsername = "Username is Required";
       });
     } else if (!regExp.hasMatch(value)) {
-      AppUtil().showToast("Invalid Username");
+      //AppUtil().showToast("Invalid Username");
       setState(() {
         _errorMsgUsername = "Invalid Username";
       });
@@ -167,7 +167,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void nextPosts() async {
     var posts;
-    posts = await DatabaseService.getNextPosts(lastVisiblePostSnapShot);
+    posts =
+        await DatabaseService.getNextUserPosts(userId, lastVisiblePostSnapShot);
 
     if (posts.length > 0) {
       setState(() {
@@ -420,8 +421,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               )
                             : Container(
                                 width: 150,
-                                child: TextField(
+                                child: TextFormField(
                                   controller: _usernameEditingController,
+                                  onFieldSubmitted: (v) {
+                                    setState(() {
+                                      isEditingUsername = false;
+                                    });
+
+                                    updateUsername();
+                                  },
                                 )),
                         userId == Constants.currentUserID
                             ? !isEditingUsername
@@ -636,6 +644,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   updateUsername() async {
+    glitcherLoader.showLoader(context);
     String validUsername = validateUsername(_usernameEditingController.text);
     final valid = await isUsernameTaken(_usernameEditingController.text);
 
@@ -652,8 +661,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() {
           _usernameText = _usernameEditingController.text;
         });
+      } else {
+        AppUtil.showSnackBar(context, _scaffoldKey, 'Invalid Username!');
       }
     }
+    glitcherLoader.hideLoader();
   }
 
   searchList(String text) {
@@ -744,50 +756,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _coverImageUrl = url;
         _coverImageFile = null;
       });
-    }
-    glitcherLoader.hideLoader();
-    await showDialog(
-        barrierDismissible: true,
-        child: Container(
-          width: Sizes.sm_profile_image_w,
-          height: Sizes.sm_profile_image_h,
-          child: ImageOverlay(
-            imageUrl: _coverImageUrl,
-            imageFile: _coverImageFile,
-            btnText: 'Edit',
-            btnFunction: () async {
-              ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
-              await bottomSheet.openBottomSheet(context);
-              File image =
-                  await AppUtil.chooseImage(source: bottomSheet.choice);
-              setState(() {
-                _coverImageFile = image;
-                _coverImageUrl = null;
-              });
-              glitcherLoader.showLoader(context);
-              String url = await AppUtil.uploadFile(
-                  _coverImageFile, context, 'cover_images/$userId');
-              setState(() {
-                _coverImageUrl = url;
-                _coverImageFile = null;
-              });
+      await usersRef.document(userId).updateData({'cover_url': _coverImageUrl});
+      glitcherLoader.hideLoader();
+    } else {
+      await showDialog(
+          barrierDismissible: true,
+          child: Container(
+            width: Sizes.sm_profile_image_w,
+            height: Sizes.sm_profile_image_h,
+            child: ImageOverlay(
+              imageUrl: _coverImageUrl,
+              imageFile: _coverImageFile,
+              btnText: 'Edit',
+              btnFunction: () async {
+                ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
+                await bottomSheet.openBottomSheet(context);
+                File image =
+                    await AppUtil.chooseImage(source: bottomSheet.choice);
+                setState(() {
+                  _coverImageFile = image;
+                  _coverImageUrl = null;
+                });
+                glitcherLoader.showLoader(context);
+                String url = await AppUtil.uploadFile(
+                    _coverImageFile, context, 'cover_images/$userId');
+                setState(() {
+                  _coverImageUrl = url;
+                  _coverImageFile = null;
+                });
 
-              await usersRef
-                  .document(userId)
-                  .updateData({'cover_url': _coverImageUrl});
-              glitcherLoader.hideLoader();
+                await usersRef
+                    .document(userId)
+                    .updateData({'cover_url': _coverImageUrl});
+                glitcherLoader.hideLoader();
 
-              Navigator.of(context).pop();
-            },
+                Navigator.of(context).pop();
+              },
+            ),
           ),
-        ),
-        context: context);
+          context: context);
+    }
   }
 
   profileEdit() async {
     if (_profileImageUrl == null && _profileImageFile == null) {
       ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
-      bottomSheet.openBottomSheet(context);
+      await bottomSheet.openBottomSheet(context);
       File image = await AppUtil.chooseImage(source: bottomSheet.choice);
       setState(() {
         _profileImageFile = image;
@@ -800,45 +814,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _profileImageUrl = url;
         _profileImageFile = null;
       });
+      await usersRef
+          .document(userId)
+          .updateData({'profile_url': _profileImageUrl});
       glitcherLoader.hideLoader();
-    }
-
-    showDialog(
-        barrierDismissible: true,
-        child: Container(
-          width: Sizes.sm_profile_image_w,
-          height: Sizes.sm_profile_image_h,
-          child: ImageOverlay(
-            imageUrl: _profileImageUrl,
-            imageFile: _profileImageFile,
-            btnText: 'Edit',
-            btnFunction: () async {
-              ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
-              await bottomSheet.openBottomSheet(context);
-              File image =
-                  await AppUtil.chooseImage(source: bottomSheet.choice);
-              setState(() {
-                _profileImageFile = image;
-                _profileImageUrl = null;
-              });
-              glitcherLoader.showLoader(context);
-              String url = await AppUtil.uploadFile(
-                  _profileImageFile, context, 'profile_images/$userId');
-              setState(() {
-                _profileImageUrl = url;
-                _profileImageFile = null;
-              });
-
-              await usersRef
-                  .document(userId)
-                  .updateData({'profile_url': _profileImageUrl});
-              glitcherLoader.hideLoader();
-
-              Navigator.of(context).pop();
-            },
+    } else {
+      showDialog(
+          barrierDismissible: true,
+          child: Container(
+            width: Sizes.sm_profile_image_w,
+            height: Sizes.sm_profile_image_h,
+            child: ImageOverlay(
+              imageUrl: _profileImageUrl,
+              imageFile: _profileImageFile,
+              btnText: 'Edit',
+              btnFunction: () async {
+                ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
+                await bottomSheet.openBottomSheet(context);
+                File image =
+                    await AppUtil.chooseImage(source: bottomSheet.choice);
+                setState(() {
+                  _profileImageFile = image;
+                  _profileImageUrl = null;
+                });
+                glitcherLoader.showLoader(context);
+                String url = await AppUtil.uploadFile(
+                    _profileImageFile, context, 'profile_images/$userId');
+                setState(() {
+                  _profileImageUrl = url;
+                  _profileImageFile = null;
+                });
+                await usersRef
+                    .document(userId)
+                    .updateData({'profile_url': _profileImageUrl});
+                glitcherLoader.hideLoader();
+                Navigator.of(context).pop();
+              },
+            ),
           ),
-        ),
-        context: context);
+          context: context);
+    }
   }
 
   coverDownload() async {

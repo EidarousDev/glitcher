@@ -67,7 +67,9 @@ class _RootPageState extends State<RootPage> {
 
   Future authAssignment() async {
     FirebaseUser user = await Auth().getCurrentUser();
-    if (user?.uid != null && user.isEmailVerified) {
+    if (user?.uid != null &&
+        user.isEmailVerified &&
+        ((await DatabaseService.getUserWithId(user?.uid)).id != null)) {
       User loggedInUser = await DatabaseService.getUserWithId(user?.uid);
       setState(() {
         Constants.currentUser = loggedInUser;
@@ -76,6 +78,7 @@ class _RootPageState extends State<RootPage> {
         authStatus = AuthStatus.LOGGED_IN;
       });
     } else if (user?.uid != null && !(user.isEmailVerified)) {
+      print('!(user.isEmailVerified) = ${!(user.isEmailVerified)}');
       await showVerifyEmailSentDialog(context);
       setState(() {
         authStatus = AuthStatus.NOT_LOGGED_IN;

@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/hashtag_model.dart';
-import 'package:glitcher/models/notification_model.dart' as notification;
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/home/home_screen.dart';
@@ -21,7 +20,6 @@ import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:package_info/package_info.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'chats/chats.dart';
 
@@ -54,6 +52,7 @@ class _AppPageState extends State<AppPage> {
 
   @override
   Widget build(BuildContext context) {
+    print('currentUser = ${Constants.currentUser}');
     return Scaffold(
       key: _scaffoldKey,
       body: PageView(

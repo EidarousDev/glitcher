@@ -92,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
                   if (!isPassword) {
                     FocusScope.of(context).requestFocus(focus);
                   } else {
-                    _login();
+                    _checkFields();
                   }
                 },
                 focusNode: isPassword ? focus : null,
@@ -167,12 +167,7 @@ class _LoginPageState extends State<LoginPage> {
       child: InkWell(
         splashColor: Colors.yellow,
         onTap: () async {
-          if (_email.isNotEmpty && _password.isNotEmpty) {
-            await _login();
-          } else {
-            AppUtil.showSnackBar(
-                context, _scaffoldKey, 'Please enter your login details');
-          }
+          _checkFields();
         },
         child: Container(
           width: MediaQuery.of(context).size.width,
@@ -353,9 +348,10 @@ class _LoginPageState extends State<LoginPage> {
     glitcherLoader.showLoader(context);
     //print('Should be true: $_loading');
     try {
-      userId = await auth.signInWithEmailAndPassword(_email, _password);
+      FirebaseUser user =
+          await auth.signInWithEmailAndPassword(_email, _password);
+      userId = user.uid;
       User temp = await DatabaseService.getUserWithId(userId);
-      FirebaseUser user = await auth.getCurrentUser();
 
       if (user.isEmailVerified && temp.id == null) {
         print('signed up');
@@ -428,5 +424,14 @@ class _LoginPageState extends State<LoginPage> {
             ],
           ),
         ));
+  }
+
+  Future<void> _checkFields() async {
+    if (_email.isNotEmpty && _password.isNotEmpty) {
+      await _login();
+    } else {
+      AppUtil.showSnackBar(
+          context, _scaffoldKey, 'Please enter your login details');
+    }
   }
 }

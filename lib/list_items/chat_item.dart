@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:glitcher/models/message_model.dart';
-import 'package:glitcher/screens/chats/conversation.dart';
-import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
 
 class ChatItem extends StatefulWidget {
@@ -72,7 +70,11 @@ class _ChatItemState extends State<ChatItem> {
           ),
         ),
         subtitle: widget.msg.type == 'text'
-            ? Text("${widget.msg.message}")
+            ? Text(
+                "${widget.msg.message}",
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              )
             : Row(
                 children: [
                   widget.msg.type == 'audio'

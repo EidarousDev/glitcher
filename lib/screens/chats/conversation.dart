@@ -323,10 +323,7 @@ class _ConversationState extends State<Conversation>
                   Icons.keyboard_backspace,
                 ),
                 onPressed: () async {
-                  var message =
-                      await DatabaseService.getLastMessage(widget.otherUid);
-
-                  Navigator.of(context).pop(message);
+                  _onBackBtnPressed();
                 }),
             titleSpacing: 0,
             title: InkWell(
@@ -653,7 +650,6 @@ class _ConversationState extends State<Conversation>
   Future<bool> _onBackBtnPressed() async {
     print('Back Button Pressed');
     var message = await DatabaseService.getLastMessage(widget.otherUid);
-
     Navigator.of(context).pop(message);
   }
 }
