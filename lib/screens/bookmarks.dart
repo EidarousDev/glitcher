@@ -106,7 +106,7 @@ class _BookmarksScreenState extends State<BookmarksScreen>
   }
 
   _onBackPressed() {
-    Constants.currentRoute = Constants.routesStack.pop();
+    Constants.routesStack.pop();
     Navigator.of(context).pop();
   }
 

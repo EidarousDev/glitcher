@@ -28,7 +28,7 @@ class PostBottomSheet {
   }
 
   void _openBottomSheet(BuildContext context, Post post) async {
-    print('route: ${Constants.currentRoute}');
+    print('route: ${Constants.routesStack.top()}');
     User user = await DatabaseService.getUserWithId(post.authorId);
     bool isMyPost = Constants.currentUserID == post.authorId;
     await showModalBottomSheet(
@@ -66,13 +66,16 @@ class PostBottomSheet {
             ),
           ),
         ),
-        Constants.currentRoute != '/post'
+        Constants.routesStack.top() != '/post'
             ? _widgetBottomSheetRow(context, Icon(Icons.remove_red_eye),
                 text: 'Preview Post', onPressed: () async {
-                if (Constants.currentRoute == '/post') return;
-                Navigator.of(context).pushNamed('/post', arguments: {
-                  'post': post,
-                });
+                if (Constants.routesStack.top() == '/post')
+                  return;
+                else {
+                  Navigator.of(context).pushNamed('/post', arguments: {
+                    'post': post,
+                  });
+                }
               })
             : Container(),
         _widgetBottomSheetRow(
@@ -80,7 +83,7 @@ class PostBottomSheet {
           Icon(Icons.link),
           text: 'Copy link to post',
         ),
-        Constants.currentRoute == '/bookmarks'
+        Constants.routesStack.top() == '/bookmarks'
             ?
 //          _widgetBottomSheetRow(
 //          context,

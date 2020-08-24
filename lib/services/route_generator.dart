@@ -48,7 +48,6 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => RootPage());
 
       case '/home':
-        Constants.currentRoute = '/home';
         Constants.routesStack.push('/home');
         return PageTransition(
             child: AppPage(), type: PageTransitionType.leftToRightWithFade);
@@ -60,7 +59,6 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => EditPost(post: args['post']));
 
       case '/user-profile':
-        Constants.currentRoute = '/user-profile';
         Constants.routesStack.push('/user-profile');
         return MaterialPageRoute(
           builder: (_) => ProfileScreen(
@@ -69,7 +67,6 @@ class RouteGenerator {
         );
 
       case '/post':
-        Constants.currentRoute = '/post';
         Constants.routesStack.push('/post');
         // Validation of correct data type
         return PageTransition(
@@ -101,7 +98,6 @@ class RouteGenerator {
         );
 
       case '/game-screen':
-        Constants.currentRoute = '/game-screen';
         Constants.routesStack.push('/game-screen');
         return MaterialPageRoute(
           builder: (_) => GameScreen(
@@ -188,7 +184,6 @@ class RouteGenerator {
         );
 
       case '/bookmarks':
-        Constants.currentRoute = '/bookmarks';
         Constants.routesStack.push('/bookmarks');
         return MaterialPageRoute(builder: (_) => BookmarksScreen());
 

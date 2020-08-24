@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -19,6 +18,7 @@ import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/custom_url_text.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
 
 class AddComment extends StatefulWidget {
   final Post post;
@@ -31,7 +31,7 @@ class AddComment extends StatefulWidget {
 class _AddCommentPageState extends State<AddComment> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isScrollingDown = false;
-  ScrollController scrollcontroller;
+  ScrollController scrollController;
 
   File _image;
   var _video;
@@ -47,22 +47,22 @@ class _AddCommentPageState extends State<AddComment> {
 
   @override
   void dispose() {
-    scrollcontroller.dispose();
+    scrollController.dispose();
     _textEditingController.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
-    scrollcontroller = ScrollController();
+    scrollController = ScrollController();
     _textEditingController = TextEditingController();
-    scrollcontroller..addListener(_scrollListener);
+    scrollController..addListener(_scrollListener);
     DatabaseService.getGameNames();
     super.initState();
   }
 
   _scrollListener() {
-    if (scrollcontroller.position.userScrollDirection ==
+    if (scrollController.position.userScrollDirection ==
         ScrollDirection.reverse) {}
   }
 
@@ -72,7 +72,7 @@ class _AddCommentPageState extends State<AddComment> {
     });
   }
 
-  void _onImageIconSelcted(File file) {
+  void _onImageIconSelected(File file) {
     setState(() {
       _image = file;
     });
@@ -118,7 +118,8 @@ class _AddCommentPageState extends State<AddComment> {
     glitcherLoader.hideLoader();
 
     //Navigator.of(context).pop();
-    Navigator.of(context).pushNamed('/post', arguments: {'post': widget.post});
+    Navigator.of(context)
+        .pushReplacementNamed('/post', arguments: {'post': widget.post});
   }
 
   @override
@@ -159,14 +160,15 @@ class _AddCommentPageState extends State<AddComment> {
           child: Stack(
             children: <Widget>[
               SingleChildScrollView(
-                controller: scrollcontroller,
-                child: _ComposeTweet(this),
+                controller: scrollController,
+                child: _ComposeComment(this),
               ),
               Align(
                 alignment: Alignment.bottomCenter,
-                child: CreatePostBottomIconWidget(
+                child: CreateBottomIcon(
                   textEditingController: _textEditingController,
-                  onImageIconSelected: _onImageIconSelcted,
+                  isComment: true,
+                  onImageIconSelected: _onImageIconSelected,
                 ),
               ),
             ],
@@ -227,12 +229,12 @@ class _AddCommentPageState extends State<AddComment> {
   }
 }
 
-class _ComposeTweet extends WidgetView<AddComment, _AddCommentPageState> {
-  _ComposeTweet(this.viewState) : super(viewState);
+class _ComposeComment extends WidgetView<AddComment, _AddCommentPageState> {
+  _ComposeComment(this.viewState) : super(viewState);
 
   final _AddCommentPageState viewState;
 
-  Widget _tweerCard(BuildContext context) {
+  Widget _postCard(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -354,7 +356,7 @@ class _ComposeTweet extends WidgetView<AddComment, _AddCommentPageState> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          _tweerCard(context),
+          _postCard(context),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[

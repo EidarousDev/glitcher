@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -20,6 +19,7 @@ import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/custom_url_text.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
 
 class EditReply extends StatefulWidget {
   final Post post;
@@ -178,7 +178,8 @@ class _AddReplyPageState extends State<EditReply> {
               ),
               Align(
                 alignment: Alignment.bottomCenter,
-                child: CreatePostBottomIconWidget(
+                child: CreateBottomIcon(
+                  isComment: true,
                   textEditingController: _textEditingController,
                   onImageIconSelected: _onImageIconSelected,
                 ),

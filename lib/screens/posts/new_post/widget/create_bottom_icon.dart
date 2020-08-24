@@ -6,24 +6,24 @@ import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
 import 'package:image_picker/image_picker.dart';
 
-class CreatePostBottomIconWidget extends StatefulWidget {
+class CreateBottomIcon extends StatefulWidget {
   final TextEditingController textEditingController;
   final Function(File) onImageIconSelected;
   final Function(File) onVideoIconSelected;
-  CreatePostBottomIconWidget(
+  final bool isComment;
+  CreateBottomIcon(
       {Key key,
       this.textEditingController,
       this.onImageIconSelected,
-      this.onVideoIconSelected})
+      this.onVideoIconSelected,
+      this.isComment})
       : super(key: key);
 
   @override
-  _CreatePostBottomIconWidgetState createState() =>
-      _CreatePostBottomIconWidgetState();
+  _CreateBottomIconState createState() => _CreateBottomIconState();
 }
 
-class _CreatePostBottomIconWidgetState
-    extends State<CreatePostBottomIconWidget> {
+class _CreateBottomIconState extends State<CreateBottomIcon> {
   bool reachToWarning = false;
   bool reachToOver = false;
   Color wordCountColor;
@@ -64,21 +64,25 @@ class _CreatePostBottomIconWidgetState
           color: Theme.of(context).backgroundColor),
       child: Row(
         children: <Widget>[
-          IconButton(
-            onPressed: () {
-              setImage(ImageSource.gallery);
-            },
-            icon: Icon(Icons.image),
-            color: MyColors.darkPrimary,
-          ),
-          IconButton(
-              onPressed: () {
-                setImage(ImageSource.camera);
-              },
-              icon: Icon(
-                Icons.camera_alt,
-                color: MyColors.darkPrimary,
-              )),
+          !widget.isComment
+              ? IconButton(
+                  onPressed: () {
+                    setImage(ImageSource.gallery);
+                  },
+                  icon: Icon(Icons.image),
+                  color: MyColors.darkPrimary,
+                )
+              : Container(),
+          !widget.isComment
+              ? IconButton(
+                  onPressed: () {
+                    setImage(ImageSource.camera);
+                  },
+                  icon: Icon(
+                    Icons.camera_alt,
+                    color: MyColors.darkPrimary,
+                  ))
+              : Container(),
 //          IconButton(
 //              onPressed: () {
 //                setVideo();

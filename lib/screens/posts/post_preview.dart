@@ -57,7 +57,7 @@ class _PostPreviewState extends State<PostPreview>
   //YoutubePlayerController _youtubeController = YoutubePlayerController();
 
   /// Value Checkers
-  bool _loading = true;
+  bool _loading = false;
   bool _isPlaying = false;
 
   /// Instantiating required Widgets
@@ -272,7 +272,6 @@ class _PostPreviewState extends State<PostPreview>
         ),
         title: Text('Post Preview'),
         flexibleSpace: gradientAppBar(),
-
       ),
       body: SmartRefresher(
         controller: _refreshController,
@@ -317,6 +316,9 @@ class _PostPreviewState extends State<PostPreview>
   }
 
   void loadPostData() async {
+    setState(() {
+      _loading = true;
+    });
     _currentPost = await DatabaseService.getPostWithId(widget.post.id);
     _author = await DatabaseService.getUserWithId(_currentPost.authorId);
     print('currentPost = $_currentPost and author= $_author');
@@ -328,7 +330,7 @@ class _PostPreviewState extends State<PostPreview>
   }
 
   void _onBackPressed() {
-    Constants.currentRoute = Constants.routesStack.pop();
+    Constants.routesStack.pop();
     Navigator.of(context).pop();
   }
 }

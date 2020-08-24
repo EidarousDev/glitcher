@@ -7,7 +7,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:glitcher/constants/constants.dart';
-import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
 
 class NotificationHandler {
@@ -83,8 +82,6 @@ class NotificationHandler {
       default:
         Navigator.of(context)
             .pushNamed('/post', arguments: {'postId': objectId});
-        Constants.routesStack.push('/home');
-        Constants.currentRoute = '/post';
         break;
     }
   }

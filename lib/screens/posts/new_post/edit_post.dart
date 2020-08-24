@@ -6,7 +6,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
-import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -25,11 +24,12 @@ import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
+import 'package:http/http.dart' show get;
 import 'package:path_provider/path_provider.dart';
 import 'package:random_string/random_string.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-import 'package:http/http.dart' show get;
 
 class EditPost extends StatefulWidget {
   final Post post;
@@ -86,18 +86,17 @@ class _CreatePostReplyPageState extends State<EditPost> {
     scrollcontroller..addListener(_scrollListener);
     DatabaseService.getGameNames();
 
-    if(widget.post.imageUrl != null) {
+    if (widget.post.imageUrl != null) {
       downloadImage(widget.post.imageUrl);
     }
 
-        setState(() {
-          _textEditingController.text = widget.post.text;
-          _typeAheadController.text = widget.post.game;
-          selectedGame = widget.post.game;
-        });
+    setState(() {
+      _textEditingController.text = widget.post.text;
+      _typeAheadController.text = widget.post.game;
+      selectedGame = widget.post.game;
+    });
 
-        super.initState();
-
+    super.initState();
   }
 
   _scrollListener() {
@@ -133,13 +132,15 @@ class _CreatePostReplyPageState extends State<EditPost> {
 
         _video = file;
         VideoPlayerController controller =
-        VideoPlayerController.file(File(_video.path));
+            VideoPlayerController.file(File(_video.path));
         ChewieController chewieController = ChewieController(
           videoPlayerController: controller,
           autoPlay: false,
           looping: false,
         );
-        Chewie playerWidget = Chewie(controller: chewieController,);
+        Chewie playerWidget = Chewie(
+          controller: chewieController,
+        );
         createPostVideo = CreatePostVideo(
           video: _video,
           playerWidget: playerWidget,
@@ -259,7 +260,8 @@ class _CreatePostReplyPageState extends State<EditPost> {
               ),
               Align(
                 alignment: Alignment.bottomCenter,
-                child: CreatePostBottomIconWidget(
+                child: CreateBottomIcon(
+                  isComment: false,
                   textEditingController: _textEditingController,
                   onImageIconSelected: _onImageIconSelected,
                   onVideoIconSelected: _onVideoIconSelected,
@@ -327,10 +329,8 @@ class _CreatePostReplyPageState extends State<EditPost> {
 
         if (newHashtag) {
           String hashtagId = randomAlphaNumeric(20);
-          await hashtagsRef.document(hashtagId).setData({
-            'text': word,
-            'timestamp': FieldValue.serverTimestamp()
-          });
+          await hashtagsRef.document(hashtagId).setData(
+              {'text': word, 'timestamp': FieldValue.serverTimestamp()});
 
           await hashtagsRef
               .document(hashtagId)
@@ -573,6 +573,4 @@ class _ComposeTweet extends WidgetView<EditPost, _CreatePostReplyPageState> {
       ),
     );
   }
-
-
 }

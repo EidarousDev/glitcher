@@ -20,10 +20,10 @@ import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/services/share_link.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
+import 'package:glitcher/widgets/bottom_sheets/post_bottom_sheet.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/custom_url_text.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
-import 'package:glitcher/widgets/bottom_sheets/post_bottom_sheet.dart';
 import 'package:share/share.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -77,7 +77,7 @@ class _PostItemState extends State<PostItem> {
       children: <Widget>[
         GestureDetector(
           onTap: () {
-            if (Constants.currentRoute == '/post') return;
+            if (Constants.routesStack.top() == '/post') return;
             Navigator.of(context).pushNamed('/post', arguments: {
               'post': post,
             });

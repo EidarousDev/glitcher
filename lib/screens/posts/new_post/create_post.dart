@@ -263,7 +263,8 @@ class _CreatePostReplyPageState extends State<CreatePost> {
               ),
               Align(
                 alignment: Alignment.bottomCenter,
-                child: CreatePostBottomIconWidget(
+                child: CreateBottomIcon(
+                  isComment: false,
                   textEditingController: _textEditingController,
                   onImageIconSelected: _onImageIconSelected,
                   onVideoIconSelected: _onVideoIconSelected,

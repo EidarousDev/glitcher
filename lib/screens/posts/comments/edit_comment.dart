@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -20,6 +19,7 @@ import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/custom_url_text.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
 
 class EditComment extends StatefulWidget {
   final Post post;
@@ -63,7 +63,6 @@ class _AddCommentPageState extends State<EditComment> {
 
     setState(() {
       _textEditingController.text = widget.comment.text;
-
     });
 
     super.initState();
@@ -90,7 +89,8 @@ class _AddCommentPageState extends State<EditComment> {
   void _submitButton() async {
     glitcherLoader.showLoader(context);
     if (_textEditingController.text.isNotEmpty) {
-      DatabaseService.editComment(widget.post.id, widget.comment.id, _textEditingController.text);
+      DatabaseService.editComment(
+          widget.post.id, widget.comment.id, _textEditingController.text);
 
 //      await NotificationHandler.sendNotification(
 //          widget.user.id,
@@ -177,7 +177,8 @@ class _AddCommentPageState extends State<EditComment> {
               ),
               Align(
                 alignment: Alignment.bottomCenter,
-                child: CreatePostBottomIconWidget(
+                child: CreateBottomIcon(
+                  isComment: true,
                   textEditingController: _textEditingController,
                   onImageIconSelected: _onImageIconSelcted,
                 ),

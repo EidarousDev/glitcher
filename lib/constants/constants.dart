@@ -60,6 +60,5 @@ class Constants {
   static ConnectivityResult connectionState;
   static String country;
 
-  static String currentRoute;
   static Stack<String> routesStack = Stack();
 }

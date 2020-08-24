@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -20,6 +19,7 @@ import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/custom_url_text.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
 
 class AddReply extends StatefulWidget {
   final Post post;
@@ -27,7 +27,8 @@ class AddReply extends StatefulWidget {
   final User user;
   final String mention;
 
-  AddReply({Key key, this.post, this.comment, this.user, this.mention}) : super(key: key);
+  AddReply({Key key, this.post, this.comment, this.user, this.mention})
+      : super(key: key);
   _AddReplyPageState createState() => _AddReplyPageState();
 }
 
@@ -179,7 +180,8 @@ class _AddReplyPageState extends State<AddReply> {
               ),
               Align(
                 alignment: Alignment.bottomCenter,
-                child: CreatePostBottomIconWidget(
+                child: CreateBottomIcon(
+                  isComment: true,
                   textEditingController: _textEditingController,
                   onImageIconSelected: _onImageIconSelected,
                 ),
@@ -193,33 +195,33 @@ class _AddReplyPageState extends State<AddReply> {
 
   Future<bool> _onBackPressed() {
     return showDialog(
-      context: context,
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: new AlertDialog(
-          title: new Text('Are you sure?'),
-          content: new Text('Do you want to discard this comment?'),
-          actions: <Widget>[
-            new GestureDetector(
-              onTap: () => Navigator.of(context).pop(false),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text("NO"),
-              ),
+          context: context,
+          builder: (context) => Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: new AlertDialog(
+              title: new Text('Are you sure?'),
+              content: new Text('Do you want to discard this comment?'),
+              actions: <Widget>[
+                new GestureDetector(
+                  onTap: () => Navigator.of(context).pop(false),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text("NO"),
+                  ),
+                ),
+                SizedBox(height: 16),
+                new GestureDetector(
+                  onTap: () => Navigator.of(context)
+                      .pushNamed('/post', arguments: {'post': widget.post}),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text("YES"),
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 16),
-            new GestureDetector(
-              onTap: () => Navigator.of(context)
-                  .pushNamed('/post', arguments: {'post': widget.post}),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text("YES"),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ) ??
+          ),
+        ) ??
         false;
   }
 
@@ -227,7 +229,7 @@ class _AddReplyPageState extends State<AddReply> {
     comment.split(' ').forEach((word) async {
       if (word.startsWith('@')) {
         User user =
-        await DatabaseService.getUserWithUsername(word.substring(1));
+            await DatabaseService.getUserWithUsername(word.substring(1));
 
         await NotificationHandler.sendNotification(
             user.id,
