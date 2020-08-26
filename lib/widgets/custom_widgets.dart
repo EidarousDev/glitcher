@@ -4,6 +4,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:image_picker/image_picker.dart';
@@ -521,4 +523,17 @@ getImage(BuildContext context, ImageSource source, Function onImageSelected) {
     onImageSelected(file);
     Navigator.pop(context);
   });
+}
+
+Widget customDivider(double height, {double width = double.infinity}) {
+  return SizedBox(
+    height: height,
+    width: width,
+    child: DecoratedBox(
+      decoration: BoxDecoration(
+          color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
+              ? MyColors.lightLineBreak
+              : MyColors.darkLineBreak),
+    ),
+  );
 }

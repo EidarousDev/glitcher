@@ -18,6 +18,7 @@ import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/circular_clipper.dart';
+import 'package:glitcher/widgets/custom_widgets.dart';
 import 'package:glitcher/widgets/drawer.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
 import 'package:random_string/random_string.dart';
@@ -580,10 +581,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(
                   height: 8,
                 ),
-                Divider(
-                  color: switchColor(
-                      MyColors.lightLineBreak, MyColors.darkLineBreak),
-                ),
+                customDivider(3.0, width: Sizes.fullWidth(context) - 100.0),
                 _postsReady == true
                     ? ListView.builder(
                         physics: NeverScrollableScrollPhysics(),
