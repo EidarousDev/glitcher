@@ -61,7 +61,7 @@ class _AppPageState extends State<AppPage> {
         onPageChanged: onPageChanged,
         children: <Widget>[
           HomeScreen(),
-          Chats(),
+          Constants.chats,
           SearchScreen(),
           NotificationsScreen(),
           ProfileScreen(Constants.currentUserID),
@@ -96,9 +96,11 @@ class _AppPageState extends State<AppPage> {
               // ignore: null_aware_before_operator
               icon: Constants.currentUser?.notificationsNumber > 0
                   ? Badge(
-                      badgeContent: Text(Constants
-                          .currentUser?.notificationsNumber
-                          .toString()),
+                      badgeContent: Text(
+                          Constants.currentUser.notificationsNumber < 9
+                              ? Constants.currentUser?.notificationsNumber
+                                  .toString()
+                              : '+9'),
                       child: Icon(Icons.notifications),
                       toAnimate: true,
                       animationType: BadgeAnimationType.scale,
@@ -137,6 +139,7 @@ class _AppPageState extends State<AppPage> {
     setFollowing();
     setFollowers();
     setHashtags();
+    Constants.chats = Chats();
     print('User Friends = ${Constants.userFriends}');
 
     this._getFavouriteFilter();

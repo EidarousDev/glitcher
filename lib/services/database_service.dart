@@ -316,6 +316,22 @@ class DatabaseService {
     return notifications;
   }
 
+  static Future<List<notification.Notification>> getNextNotifications(
+      Timestamp lastVisibleNotificationSnapShot) async {
+    QuerySnapshot notificationSnapshot = await usersRef
+        .document(Constants.currentUserID)
+        .collection('notifications')
+        .orderBy('timestamp', descending: true)
+        .startAfter([lastVisibleNotificationSnapShot])
+        .limit(20)
+        .getDocuments();
+    List<notification.Notification> notifications = notificationSnapshot
+        .documents
+        .map((doc) => notification.Notification.fromDoc(doc))
+        .toList();
+    return notifications;
+  }
+
   // This function is used to get the author info of each post
   static Future<User> getUserWithId(String userId) async {
     DocumentSnapshot userDocSnapshot = await usersRef?.document(userId)?.get();
@@ -1013,5 +1029,38 @@ class DatabaseService {
       'username': username,
       'timestamp': FieldValue.serverTimestamp()
     });
+  }
+
+  static makeUserOnline() async {
+    await usersRef
+        .document(Constants.currentUserID)
+        .updateData({'online': 'online'});
+  }
+
+  static makeUserOffline() async {
+    await usersRef
+        .document(Constants.currentUserID)
+        .updateData({'online': FieldValue.serverTimestamp()});
+  }
+
+  static removeNotification(
+      String receiverId, String objectId, String type) async {
+    QuerySnapshot snapshot = await usersRef
+        .document(receiverId)
+        .collection('notifications')
+        .where('sender', isEqualTo: Constants.currentUserID)
+        .where('type', isEqualTo: type)
+        .where('object_id', isEqualTo: objectId)
+        .getDocuments();
+
+    await usersRef
+        .document(receiverId)
+        .collection('notifications')
+        .document(snapshot.documents[0].documentID)
+        .delete();
+
+    await usersRef
+        .document(receiverId)
+        .updateData({'notificationsNumber': FieldValue.increment(-1)});
   }
 }

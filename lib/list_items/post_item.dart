@@ -546,6 +546,9 @@ class _PostItemState extends State<PostItem> {
       await postsRef
           .document(post.id)
           .updateData({'likes': FieldValue.increment(-1)});
+
+      await NotificationHandler.removeNotification(
+          post.authorId, post.id, 'like');
       setState(() {
         isLiked = false;
         //post.likesCount = likesNo;

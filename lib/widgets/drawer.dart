@@ -159,7 +159,7 @@ class _BuildDrawerState extends State<BuildDrawer> {
                     .document(Constants.currentUserID)
                     .collection('tokens')
                     .document(token)
-                    .setData({
+                    .updateData({
                   'modifiedAt': FieldValue.serverTimestamp(),
                   'signed': false
                 });

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/list_items/notification_item.dart';
@@ -15,6 +16,8 @@ class NotificationsScreen extends StatefulWidget {
 class _NotificationsScreenState extends State<NotificationsScreen> {
   List<notification_model.Notification> _notifications = [];
   ScrollController _scrollController = ScrollController();
+
+  Timestamp lastVisibleNotificationSnapShot;
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +40,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ),
         body: _notifications.length > 0
             ? SingleChildScrollView(
+                controller: _scrollController,
                 child: ListView.builder(
-                  controller: _scrollController,
+                  physics: NeverScrollableScrollPhysics(),
                   scrollDirection: Axis.vertical,
                   shrinkWrap: true,
                   itemCount: _notifications.length,
@@ -86,7 +90,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         await DatabaseService.getNotifications();
     setState(() {
       _notifications = notifications;
+      this.lastVisibleNotificationSnapShot = notifications.last.timestamp;
     });
+  }
+
+  void nextNotifications() async {
+    var notifications = await DatabaseService.getNextNotifications(
+        lastVisibleNotificationSnapShot);
+    if (notifications.length > 0) {
+      setState(() {
+        notifications.forEach((element) => _notifications.add(element));
+        this.lastVisibleNotificationSnapShot = _notifications.last.timestamp;
+      });
+    }
   }
 
   loadUserData(String senderUserId) async {
@@ -98,6 +114,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   @override
   void initState() {
     super.initState();
+    _scrollController
+      ..addListener(() {
+        if (_scrollController.offset >=
+                _scrollController.position.maxScrollExtent &&
+            !_scrollController.position.outOfRange) {
+          print('reached the bottom');
+          nextNotifications();
+        } else if (_scrollController.offset <=
+                _scrollController.position.minScrollExtent &&
+            !_scrollController.position.outOfRange) {
+          print("reached the top");
+        } else {}
+      });
     _setupFeed();
   }
 

@@ -7,6 +7,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
 
 class NotificationHandler {
@@ -101,9 +102,16 @@ class NotificationHandler {
 
     //To increment notificationsNumber
     //User user = await DatabaseService.getUserWithId(receiverId);
-    usersRef
+    await usersRef
         .document(receiverId)
         .updateData({'notificationsNumber': FieldValue.increment(1)});
+  }
+
+  static removeNotification(
+      String receiverId, String objectId, String type) async {
+    await DatabaseService.removeNotification(receiverId, objectId, type);
+
+    print('noti removed');
   }
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =

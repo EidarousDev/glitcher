@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
@@ -16,7 +17,10 @@ class Chats extends StatefulWidget {
 }
 
 class _ChatsState extends State<Chats>
-    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+    with
+        SingleTickerProviderStateMixin,
+        AutomaticKeepAliveClientMixin,
+        WidgetsBindingObserver {
   TabController _tabController;
   List<ChatItem> chats = [];
   List<Group> groups = [];
@@ -101,6 +105,36 @@ class _ChatsState extends State<Chats>
   void didChangeDependencies() {
     sortChatItems();
     super.didChangeDependencies();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    updateOnlineUserState(state);
+    if (state == AppLifecycleState.resumed) {
+      // user returned to our app
+      getCurrentUserFriends();
+      getChatGroups();
+      print('resumed');
+    } else if (state == AppLifecycleState.inactive) {
+      // app is inactive
+      //_setupFeed();
+      print('inactive');
+    } else if (state == AppLifecycleState.paused) {
+      // user is about quit our app temporally
+      //_setupFeed();
+      print('paused');
+    } else if (state == AppLifecycleState.detached) {
+      // app suspended (not used in iOS)
+    }
+  }
+
+  void updateOnlineUserState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused) {
+      DatabaseService.makeUserOffline();
+    } else if (state == AppLifecycleState.resumed) {
+      DatabaseService.makeUserOnline();
+    }
   }
 
   @override

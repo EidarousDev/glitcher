@@ -6,6 +6,7 @@ import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
 
@@ -74,11 +75,20 @@ class CommentBottomSheet {
                 Icon(Icons.edit),
                 text: 'Edit Comment',
                 onPressed: () {
-                  if(parentComment == null){
-                    Navigator.of(context).pushNamed('/edit-comment', arguments: {'post': post, 'user': user, 'comment': comment});
-                  }
-                  else{
-                    Navigator.of(context).pushNamed('/edit-reply', arguments: {'post': post, 'comment': parentComment, 'reply': comment, 'user': user});
+                  if (parentComment == null) {
+                    Navigator.of(context).pushNamed('/edit-comment',
+                        arguments: {
+                          'post': post,
+                          'user': user,
+                          'comment': comment
+                        });
+                  } else {
+                    Navigator.of(context).pushNamed('/edit-reply', arguments: {
+                      'post': post,
+                      'comment': parentComment,
+                      'reply': comment,
+                      'user': user
+                    });
                   }
                 },
                 isEnable: true,
@@ -188,6 +198,12 @@ class CommentBottomSheet {
               onTap: () async {
                 await DatabaseService.deleteComment(
                     postId, commentId, parentCommentId);
+
+                await NotificationHandler.removeNotification(
+                    (await DatabaseService.getPostWithId(postId)).authorId,
+                    postId,
+                    'comment');
+
                 Navigator.of(context).pop();
                 Navigator.of(context)
                     .pushReplacementNamed('/post', arguments: {'post': postId});

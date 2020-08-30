@@ -651,5 +651,6 @@ class _ConversationState extends State<Conversation>
     print('Back Button Pressed');
     var message = await DatabaseService.getLastMessage(widget.otherUid);
     Navigator.of(context).pop(message);
+    //Constants.chats.ChatsState
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/notification_model.dart' as notification_model;
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/functions.dart';
@@ -46,9 +47,11 @@ class _NotificationItemState extends State<NotificationItem> {
         child: ListTile(
           contentPadding: EdgeInsets.all(0),
           leading: CircleAvatar(
-            backgroundImage: NetworkImage(
-              "${widget.image}",
-            ),
+            backgroundImage: widget.image != null
+                ? NetworkImage(
+                    "${widget.image}",
+                  )
+                : AssetImage(Strings.default_profile_image),
             radius: 25,
           ),
           title: Text(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/utils/functions.dart';
 
@@ -34,9 +35,11 @@ class _ChatItemState extends State<ChatItem> {
         leading: Stack(
           children: <Widget>[
             CircleAvatar(
-              backgroundImage: NetworkImage(
-                "${widget.dp}",
-              ),
+              backgroundImage: widget.dp != null
+                  ? NetworkImage(
+                      "${widget.dp}",
+                    )
+                  : AssetImage(Strings.default_profile_image),
               radius: 25,
             ),
             Positioned(

@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/notification_model.dart';
 import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/screens/chats/chats.dart';
 import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:stack/stack.dart';
 
@@ -61,4 +62,7 @@ class Constants {
   static String country;
 
   static Stack<String> routesStack = Stack();
+
+  //screens
+  static Chats chats = Chats();
 }

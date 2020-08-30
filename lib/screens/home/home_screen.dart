@@ -460,12 +460,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       // user returned to our app
       _setupFeed();
+      print('resumed');
     } else if (state == AppLifecycleState.inactive) {
       // app is inactive
-      _setupFeed();
+      //_setupFeed();
+      print('inactive');
     } else if (state == AppLifecycleState.paused) {
       // user is about quit our app temporally
-      _setupFeed();
+      //_setupFeed();
+      print('paused');
     } else if (state == AppLifecycleState.detached) {
       // app suspended (not used in iOS)
     }
@@ -474,13 +477,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void updateOnlineUserState(AppLifecycleState state) async {
     if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused) {
-      await usersRef
-          .document(Constants.currentUserID)
-          .updateData({'online': FieldValue.serverTimestamp()});
+      DatabaseService.makeUserOffline();
     } else if (state == AppLifecycleState.resumed) {
-      await usersRef
-          .document(Constants.currentUserID)
-          .updateData({'online': 'online'});
+      DatabaseService.makeUserOnline();
     }
   }
 
@@ -550,99 +549,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _loadAudioByteData() async {
     _swipeUpSFX = await rootBundle.load(Strings.swipe_up_to_reload);
-  }
-}
-
-void updateGames() async {
-  String url =
-      'https://api.rawg.io/api/games?dates=2000-01-01%2C2020-12-31&ordering=-added&page=382';
-  var response = await http.get(url);
-  String body = response.body;
-  while (jsonDecode(body)['next'] != null) {
-    var response = await http.get(url);
-    //print(url);
-    String body = response.body;
-    List results = jsonDecode(body)['results'];
-
-    for (int i = 0; i < results.length; i++) {
-      List genres = [];
-      (results[i]['genres'] as List).forEach((genre) {
-        genres.add(genre['name']);
-      });
-
-      List platforms = [];
-      if (results[i]['platforms'] != null) {
-        (results[i]['platforms'] as List).forEach((platform) {
-          platforms.add(platform['platform']['name']);
-        });
-      } else {}
-
-      List stores = [];
-      if (results[i]['stores'] != null) {
-        (results[i]['stores'] as List).forEach((store) {
-          stores.add(store['store']['name']);
-        });
-      } else {}
-
-      List tags = [];
-      (results[i]['tags'] as List).forEach((tag) {
-        tags.add(tag['name']);
-      });
-
-      String detailedUrl = 'https://api.rawg.io/api/games/${results[i]['id']}';
-      var detailedResponse = await http.get(detailedUrl);
-      String gameDetailsBody = detailedResponse.body;
-      var gameDetails = jsonDecode(gameDetailsBody);
-
-      List publishers = [];
-      (gameDetails['publishers'] as List).forEach((publisher) {
-        publishers.add(publisher['name']);
-      });
-
-      List developers = [];
-      (gameDetails['developers'] as List).forEach((developer) {
-        developers.add(developer['name']);
-      });
-
-      List search = searchList(results[i]['name']);
-
-      (gameDetails['alternative_names'] as List).forEach((element) {
-        search.addAll(searchList(element));
-      });
-
-      //print(gameDetails['description_raw']);
-      //print(utf8.decode(gameDetails['description_raw'].toString().runes.toList()));
-      print('Game: ${fixString(results[i]['name'])}');
-      await firestore
-          .collection('games')
-          .document(results[i]['id'].toString())
-          .setData({
-        'fullName': fixString(results[i]['name']),
-        'slug': results[i]['slug'],
-        'tba': results[i]['tba'],
-        'release_date': results[i]['released'],
-        'description': fixString(gameDetails['description_raw'].toString()),
-        'website': gameDetails['website'],
-        'reddit_url': gameDetails['reddit_url'],
-        'alternative_names': gameDetails['alternative_names'],
-        'platforms': platforms,
-        'stores': stores,
-        'metacritic': results[i]['metacritic'],
-        'esrb_rating': gameDetails['esrb_rating'] == null
-            ? null
-            : gameDetails['esrb_rating']['name'],
-        'metacritic_url': gameDetails['metacritic_url'],
-        'genres': genres,
-        'image': results[i]['background_image'],
-        'publishers': publishers,
-        'developers': developers,
-        'timestamp': FieldValue.serverTimestamp(),
-        'search': search
-      });
-    }
-
-    url = jsonDecode(body)['next'];
-    print('next url: $url');
   }
 }
 

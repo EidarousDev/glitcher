@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:glitcher/constants/constants.dart';
@@ -361,10 +363,16 @@ class _LoginPageState extends State<LoginPage> {
         await addUserToDatabase(userId, user.email, username);
         await DatabaseService.addUserEmailToNewsletter(
             userId, user.email, username);
+
+        saveToken();
+
+        Navigator.of(context).pushReplacementNamed('/');
       } else if (!user.isEmailVerified) {
         await auth.signOut();
         await showVerifyEmailSentDialog(context);
       } else {
+        saveToken();
+
         Navigator.of(context).pushReplacementNamed('/');
       }
     } catch (e) {
@@ -373,6 +381,15 @@ class _LoginPageState extends State<LoginPage> {
     }
     glitcherLoader.hideLoader();
     //print('Should be true: $_loading');
+  }
+
+  saveToken() async {
+    String token = await FirebaseMessaging().getToken();
+    usersRef
+        .document(Constants.currentUserID)
+        .collection('tokens')
+        .document(token)
+        .setData({'modifiedAt': FieldValue.serverTimestamp(), 'signed': true});
   }
 
   @override
