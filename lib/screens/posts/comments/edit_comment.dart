@@ -59,7 +59,7 @@ class _AddCommentPageState extends State<EditComment> {
     scrollcontroller = ScrollController();
     _textEditingController = TextEditingController();
     scrollcontroller..addListener(_scrollListener);
-    DatabaseService.getGameNames();
+    //DatabaseService.getGameNames();
 
     setState(() {
       _textEditingController.text = widget.comment.text;

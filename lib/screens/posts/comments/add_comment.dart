@@ -57,7 +57,7 @@ class _AddCommentPageState extends State<AddComment> {
     scrollController = ScrollController();
     _textEditingController = TextEditingController();
     scrollController..addListener(_scrollListener);
-    DatabaseService.getGameNames();
+    //DatabaseService.getGameNames();
     super.initState();
   }
 
@@ -81,6 +81,7 @@ class _AddCommentPageState extends State<AddComment> {
   /// Submit Comment to save in firebase database
   void _submitButton() async {
     glitcherLoader.showLoader(context);
+
     if (_textEditingController.text.isNotEmpty) {
       DatabaseService.addComment(widget.post.id, _textEditingController.text);
 
@@ -91,7 +92,7 @@ class _AddCommentPageState extends State<AddComment> {
           widget.post.id,
           'comment');
 
-      checkIfContainsMention(_textEditingController.text);
+      await checkIfContainsMention(_textEditingController.text);
 
       Navigator.pop(context);
     } else {
@@ -212,7 +213,7 @@ class _AddCommentPageState extends State<AddComment> {
         false;
   }
 
-  void checkIfContainsMention(String comment) async {
+  checkIfContainsMention(String comment) async {
     comment.split(' ').forEach((word) async {
       if (word.startsWith('@')) {
         User user =

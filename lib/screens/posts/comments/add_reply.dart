@@ -61,7 +61,7 @@ class _AddReplyPageState extends State<AddReply> {
     scrollController = ScrollController();
     _textEditingController = TextEditingController();
     scrollController..addListener(_scrollListener);
-    DatabaseService.getGameNames();
+    //DatabaseService.getGameNames();
 
     super.initState();
 

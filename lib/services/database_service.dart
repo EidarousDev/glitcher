@@ -341,6 +341,15 @@ class DatabaseService {
     return User();
   }
 
+  static Future<User> getUserWithEmail(String email) async {
+    QuerySnapshot userDocSnapshot =
+        await usersRef.where('email', isEqualTo: email).getDocuments();
+    if (userDocSnapshot.documents.length != 0) {
+      return User.fromDoc(userDocSnapshot.documents[0]);
+    }
+    return User();
+  }
+
   static Future<User> getUserWithUsername(String username) async {
     QuerySnapshot userDocSnapshot =
         await usersRef.where('username', isEqualTo: username).getDocuments();
@@ -567,6 +576,20 @@ class DatabaseService {
     return comments;
   }
 
+  static Future<List<Comment>> getNextComments(
+      String postId, Timestamp lastVisiblePostSnapShot) async {
+    QuerySnapshot commentSnapshot = await postsRef
+        .document(postId)
+        .collection('comments')
+        .orderBy('timestamp', descending: true)
+        .startAfter([lastVisiblePostSnapShot])
+        .limit(20)
+        .getDocuments();
+    List<Comment> comments =
+        commentSnapshot.documents.map((doc) => Comment.fromDoc(doc)).toList();
+    return comments;
+  }
+
   static Future<List<Comment>> getCommentReplies(
       String postId, String commentId) async {
     QuerySnapshot commentSnapshot = await postsRef
@@ -601,17 +624,17 @@ class DatabaseService {
     return games;
   }
 
-  static getGameNames() async {
-    Constants.games = [];
-    QuerySnapshot gameSnapshot =
-        await gamesRef.orderBy('fullName', descending: true).getDocuments();
-    List<Game> games =
-        gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
-
-    for (var game in games) {
-      Constants.games.add(game.fullName);
-    }
-  }
+//  static getGameNames() async {
+//    Constants.games = [];
+//    QuerySnapshot gameSnapshot =
+//        await gamesRef.orderBy('fullName', descending: true).getDocuments();
+//    List<Game> games =
+//        gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
+//
+//    for (var game in games) {
+//      Constants.games.add(game.fullName);
+//    }
+//  }
 
   static Future<List<Game>> getNextGames(String lastVisibleGameSnapShot) async {
     QuerySnapshot gameSnapshot = await gamesRef

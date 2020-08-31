@@ -84,7 +84,7 @@ class _CreatePostReplyPageState extends State<EditPost> {
 
     _textEditingController = TextEditingController();
     scrollcontroller..addListener(_scrollListener);
-    DatabaseService.getGameNames();
+    //DatabaseService.getGameNames();
 
     if (widget.post.imageUrl != null) {
       downloadImage(widget.post.imageUrl);

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
 
 import 'widgets/bezier_container.dart';
@@ -92,14 +94,22 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
     );
   }
 
-
   Widget _submitButton() {
     return InkWell(
-      onTap: () async{
-        await auth.sendPasswordResetEmail(email: _email);
-        print('Password reset e-mail sent');
-        AppUtil.showSnackBar(context, _scaffoldKey, 'Password reset e-mail sent');
-        Navigator.of(context).pop();
+      onTap: () async {
+        User user = await DatabaseService.getUserWithEmail(_email);
+        if (user.id == null) {
+          print('Password reset e-mail sent');
+          AppUtil.showSnackBar(
+              context, _scaffoldKey, 'Email is not registered!');
+          return;
+        } else {
+          await auth.sendPasswordResetEmail(email: _email);
+          print('Password reset e-mail sent');
+          AppUtil.showSnackBar(
+              context, _scaffoldKey, 'Password reset e-mail sent');
+          Navigator.of(context).pop();
+        }
       },
       child: Container(
         width: MediaQuery.of(context).size.width,

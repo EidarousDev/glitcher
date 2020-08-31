@@ -45,7 +45,7 @@ class Constants {
   static FirebaseUser currentFirebaseUser;
   static String currentUserID;
   static User currentUser;
-  static List<String> games = [];
+  //static List<String> games = [];
   static const genres = ['Action', 'Sports', 'Racing', 'Fighting'];
   static var currentTheme = AvailableThemes.DARK_THEME;
   static int favouriteFilter;

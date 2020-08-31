@@ -88,7 +88,7 @@ class _PostPreviewState extends State<PostPreview>
               _scrollController.position.maxScrollExtent &&
           !_scrollController.position.outOfRange) {
         print('reached the bottom');
-        //nextComments();
+        nextComments();
       } else if (_scrollController.offset <=
               _scrollController.position.minScrollExtent &&
           !_scrollController.position.outOfRange) {
@@ -113,6 +113,17 @@ class _PostPreviewState extends State<PostPreview>
         _comments = comments;
         this.lastVisibleCommentSnapShot = comments.last.timestamp;
         print('It"s actually here!');
+      });
+    }
+  }
+
+  nextComments() async {
+    var comments = await DatabaseService.getNextComments(
+        widget.post.id, lastVisibleCommentSnapShot);
+    if (comments.length > 0) {
+      setState(() {
+        comments.forEach((element) => _comments.add(element));
+        this.lastVisibleCommentSnapShot = comments.last.timestamp;
       });
     }
   }
