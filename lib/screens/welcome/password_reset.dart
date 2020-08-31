@@ -97,12 +97,12 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
   Widget _submitButton() {
     return InkWell(
       onTap: () async {
+        glitcherLoader.showLoader(context);
         User user = await DatabaseService.getUserWithEmail(_email);
         if (user.id == null) {
-          print('Password reset e-mail sent');
+          print('Email is not registered!');
           AppUtil.showSnackBar(
               context, _scaffoldKey, 'Email is not registered!');
-          return;
         } else {
           await auth.sendPasswordResetEmail(email: _email);
           print('Password reset e-mail sent');
@@ -110,6 +110,8 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
               context, _scaffoldKey, 'Password reset e-mail sent');
           Navigator.of(context).pop();
         }
+
+        glitcherLoader.hideLoader();
       },
       child: Container(
         width: MediaQuery.of(context).size.width,
