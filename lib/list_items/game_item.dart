@@ -48,15 +48,20 @@ class _GameItemState extends State<GameItem> {
             "${widget.game.image}",
           ),
         ),
-        title: Expanded(
-          child: Text(
-            widget.game.fullName,
-            maxLines: 2,
-            overflow: TextOverflow.fade,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
+        title: Flex(
+          direction: Axis.horizontal,
+          children: [
+            Expanded(
+              child: Text(
+                widget.game.fullName,
+                maxLines: 2,
+                overflow: TextOverflow.fade,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
-          ),
+          ],
         ),
         subtitle: widget.game.genres.length > 0
             ? Column(

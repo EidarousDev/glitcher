@@ -149,6 +149,101 @@ class DatabaseService {
 
   static deletePost(String postId) async {
     print('deleting post...');
+
+    CollectionReference commentsRef =
+        postsRef.document(postId).collection('comments');
+
+    CollectionReference likesRef =
+        postsRef.document(postId).collection('likes');
+
+    CollectionReference dislikesRef =
+        postsRef.document(postId).collection('dislikes');
+
+    (await commentsRef.getDocuments()).documents.forEach((comment) async {
+      (await commentsRef
+              .document(comment.documentID)
+              .collection('replies')
+              .getDocuments())
+          .documents
+          .forEach((reply) async {
+        (await commentsRef
+                .document(comment.documentID)
+                .collection('replies')
+                .document(reply.documentID)
+                .collection('likes')
+                .getDocuments())
+            .documents
+            .forEach((replyLike) {
+          commentsRef
+              .document(comment.documentID)
+              .collection('replies')
+              .document(reply.documentID)
+              .collection('likes')
+              .document(replyLike.documentID)
+              .delete();
+        });
+
+        (await commentsRef
+                .document(comment.documentID)
+                .collection('replies')
+                .document(reply.documentID)
+                .collection('dislikes')
+                .getDocuments())
+            .documents
+            .forEach((replyDislike) {
+          commentsRef
+              .document(comment.documentID)
+              .collection('replies')
+              .document(reply.documentID)
+              .collection('dislikes')
+              .document(replyDislike.documentID)
+              .delete();
+        });
+
+        commentsRef
+            .document(comment.documentID)
+            .collection('replies')
+            .document(reply.documentID)
+            .delete();
+      });
+
+      (await commentsRef
+              .document(comment.documentID)
+              .collection('likes')
+              .getDocuments())
+          .documents
+          .forEach((commentLike) async {
+        await commentsRef
+            .document(comment.documentID)
+            .collection('likes')
+            .document(commentLike.documentID)
+            .delete();
+      });
+
+      (await commentsRef
+              .document(comment.documentID)
+              .collection('dislikes')
+              .getDocuments())
+          .documents
+          .forEach((commentDislike) async {
+        await commentsRef
+            .document(comment.documentID)
+            .collection('dislikes')
+            .document(commentDislike.documentID)
+            .delete();
+      });
+
+      await commentsRef.document(comment.documentID).delete();
+    });
+
+    (await likesRef.getDocuments()).documents.forEach((like) async {
+      await likesRef.document(like.documentID).delete();
+    });
+
+    (await dislikesRef.getDocuments()).documents.forEach((dislike) async {
+      await dislikesRef.document(dislike.documentID).delete();
+    });
+
     await postsRef.document(postId).delete();
   }
 
