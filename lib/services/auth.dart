@@ -68,10 +68,14 @@ class Auth implements BaseAuth {
               email: email, password: password))
           .user;
     } catch (signUpError) {
-      print('Sign up error');
       if (signUpError is PlatformException) {
+        print('Sign up error: ${signUpError.code}');
         if (signUpError.code == 'ERROR_EMAIL_ALREADY_IN_USE') {
-          return 'Email already in use';
+          return 'Email is already in use';
+        } else if (signUpError.code == 'ERROR_WEAK_PASSWORD') {
+          return 'Weak Password';
+        } else if (signUpError.code == 'ERROR_INVALID_EMAIL') {
+          return 'Invalid Email';
         } else {
           return 'sign_up_error';
         }

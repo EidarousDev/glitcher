@@ -1,9 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
+import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -39,25 +40,6 @@ class _SignUpPageState extends State<SignUpPage> {
   final FocusNode myFocusNodeEmail = FocusNode();
   final FocusNode myFocusNodeName = FocusNode();
   final FocusNode myFocusNodeConfirmPassword = FocusNode();
-
-  Widget _backButton() {
-    return InkWell(
-      onTap: () {
-        Navigator.pop(context);
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10),
-        child: Row(
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.only(left: 0, top: 10, bottom: 10),
-              child: Icon(Icons.arrow_back, color: Colors.white),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _entryField(String title,
       {FocusNode focusNode,
@@ -102,7 +84,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     FocusScope.of(context)
                         .requestFocus(myFocusNodeConfirmPassword);
                   } else if (isConfirmPassword) {
-                    _signUp();
+                    _submit();
                   }
                 },
                 textInputAction: isConfirmPassword
@@ -183,15 +165,7 @@ class _SignUpPageState extends State<SignUpPage> {
       child: InkWell(
         splashColor: Colors.yellow,
         onTap: () async {
-          if (_email.isNotEmpty &&
-              _username.isNotEmpty &&
-              _password.isNotEmpty &&
-              _confirmPassword.isNotEmpty) {
-            await _signUp();
-          } else {
-            AppUtil.showSnackBar(
-                context, _scaffoldKey, 'Please fill fields above');
-          }
+          await _submit();
         },
         child: Container(
           width: MediaQuery.of(context).size.width,
@@ -302,7 +276,6 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  bool _loading = false;
   String validateEmail(String value) {
     String pattern =
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
@@ -348,15 +321,6 @@ class _SignUpPageState extends State<SignUpPage> {
     return _errorMsgUsername;
   }
 
-  Future<bool> isUsernameTaken(String name) async {
-    final QuerySnapshot result = await Firestore.instance
-        .collection('users')
-        .where('username', isEqualTo: name)
-        .limit(1)
-        .getDocuments();
-    return result.documents.isEmpty;
-  }
-
   @override
   void dispose() {
     super.dispose();
@@ -372,37 +336,45 @@ class _SignUpPageState extends State<SignUpPage> {
     final BaseAuth auth = AuthProvider.of(context).auth;
 
     //print(_email + ' : ' + _password);
-    setState(() {
-      _loading = true;
-    });
-    //print('Should be true: $_loading');
+    glitcherLoader.showLoader(context);
+
     String validEmail = validateEmail(_email);
     String validUsername = validateUsername(_username);
 
     print('validEmail: $validEmail ');
     print('validEmail: $validUsername ');
 
-    final valid = await isUsernameTaken(_username);
+    final valid = await DatabaseService.isUsernameTaken(_username);
 
     if (!valid) {
       // username exists
       AppUtil.showSnackBar(context, _scaffoldKey,
           '$_username is already in use. Please choose a different username.');
-      myFocusNodeName.requestFocus();
+      _setFocusNode(myFocusNodeName);
+      return;
     } else {
       if (validEmail == null &&
           validUsername == null &&
           _password == _confirmPassword) {
         // Validation Passed
-        try {
-          userId = await auth.signUp(_username, _email, _password);
-          if (userId == 'Email already in use') {
-            AppUtil.showSnackBar(context, _scaffoldKey, userId);
-            return;
-          } else if (userId == 'sign_up_error') {
-            AppUtil.showSnackBar(context, _scaffoldKey, 'Sign up error!');
-            return;
-          }
+        userId = await auth.signUp(_username, _email, _password);
+        if (userId == 'Email is already in use') {
+          AppUtil.showSnackBar(context, _scaffoldKey, userId);
+          _setFocusNode(myFocusNodeEmail);
+          return;
+        } else if (userId == 'Weak Password') {
+          AppUtil.showSnackBar(context, _scaffoldKey, 'Weak Password!');
+          _setFocusNode(myFocusNodePassword);
+          return;
+        } else if (userId == 'Invalid Email') {
+          AppUtil.showSnackBar(context, _scaffoldKey, 'Invalid Email!');
+          _setFocusNode(myFocusNodeEmail);
+          return;
+        } else if (userId == 'sign_up_error') {
+          AppUtil.showSnackBar(context, _scaffoldKey, 'Sign up error!');
+          _setFocusNode(myFocusNodeName);
+          return;
+        }
 
 //          ////TODO test
 //          await FirebaseAuth.instance
@@ -414,51 +386,50 @@ class _SignUpPageState extends State<SignUpPage> {
 //          await FirebaseAuth.instance.signOut();
 //          ////
 
-          await auth.sendEmailVerification();
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          prefs.setString('username', _username);
-
-          Navigator.of(context).pushReplacementNamed('/login');
-        } catch (signUpError) {
-          if (signUpError is PlatformException) {
-            if (signUpError.code == 'ERROR_EMAIL_ALREADY_IN_USE') {
-              AppUtil.showSnackBar(
-                  context, _scaffoldKey, '$_email is already in use.');
-              myFocusNodeEmail.requestFocus();
-            } else if (signUpError.code == 'ERROR_WEAK_PASSWORD') {
-              AppUtil.showSnackBar(context, _scaffoldKey,
-                  'Password is too weak. Please, type in a more complex password.');
-              myFocusNodePassword.requestFocus();
-            } else if (signUpError.code == 'ERROR_INVALID_EMAIL') {
-              AppUtil.showSnackBar(context, _scaffoldKey, 'Invalid Email.');
-              myFocusNodeEmail.requestFocus();
-            } else {
-              AppUtil.showSnackBar(
-                  context, _scaffoldKey, 'Unknown Error.. $signUpError');
-            }
-          }
-          //print(e);
-        }
+        // await auth.sendEmailVerification(); // It's already implemented in the auth.signUp method
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('username', _username);
+        glitcherLoader.hideLoader();
+        Navigator.of(context).pushReplacementNamed('/login',
+            arguments: {'on_sign_up_callback': true});
       } else {
         if (_password != _confirmPassword) {
           AppUtil.showSnackBar(context, _scaffoldKey, "Passwords don't match");
-          myFocusNodePassword.requestFocus();
+          _setFocusNode(myFocusNodePassword);
+          return;
         } else {
           if (_errorMsgUsername != null) {
             AppUtil.showSnackBar(context, _scaffoldKey, _errorMsgUsername);
+            _setFocusNode(myFocusNodeName);
+            return;
           } else if (_errorMsgEmail != null) {
             AppUtil.showSnackBar(context, _scaffoldKey, _errorMsgEmail);
+            _setFocusNode(myFocusNodeEmail);
+            return;
           } else {
             print('$_errorMsgUsername\n$_errorMsgEmail');
             AppUtil.showSnackBar(context, _scaffoldKey, "An Error Occurred");
+            _setFocusNode(myFocusNodeEmail);
+            return;
           }
         }
       }
     }
+  }
 
-    setState(() {
-      _loading = false;
-    });
-    print('Should be false: $_loading');
+  Future<void> _submit() async {
+    if (_email.isNotEmpty &&
+        _username.isNotEmpty &&
+        _password.isNotEmpty &&
+        _confirmPassword.isNotEmpty) {
+      await _signUp();
+    } else {
+      AppUtil.showSnackBar(context, _scaffoldKey, 'Please fill fields above');
+    }
+  }
+
+  void _setFocusNode(FocusNode focusNode) {
+    FocusScope.of(context).requestFocus(focusNode);
+    glitcherLoader.hideLoader();
   }
 }

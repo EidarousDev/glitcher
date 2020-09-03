@@ -1,20 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:glitcher/constants/constants.dart';
-import 'package:glitcher/constants/constants.dart';
-import 'package:glitcher/constants/constants.dart';
-import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
-import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
-import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 
-import 'login_page.dart';
 import 'widgets/bezier_container.dart';
 
 class PasswordChangeScreen extends StatefulWidget {

@@ -37,7 +37,7 @@ class CreatePost extends StatefulWidget {
 class _CreatePostReplyPageState extends State<CreatePost> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isScrollingDown = false;
-  ScrollController scrollcontroller;
+  ScrollController scrollController;
 
   File _image;
   File _video;
@@ -65,14 +65,14 @@ class _CreatePostReplyPageState extends State<CreatePost> {
 
   @override
   void dispose() {
-    scrollcontroller.dispose();
+    scrollController.dispose();
     _textEditingController.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
-    scrollcontroller = ScrollController();
+    scrollController = ScrollController();
 
     createPostVideo = CreatePostVideo(
       video: _video,
@@ -80,13 +80,13 @@ class _CreatePostReplyPageState extends State<CreatePost> {
     );
 
     _textEditingController = TextEditingController();
-    scrollcontroller..addListener(_scrollListener);
+    scrollController..addListener(_scrollListener);
     //DatabaseService.getGameNames();
     super.initState();
   }
 
   _scrollListener() {
-    if (scrollcontroller.position.userScrollDirection ==
+    if (scrollController.position.userScrollDirection ==
         ScrollDirection.reverse) {}
   }
 
@@ -100,7 +100,8 @@ class _CreatePostReplyPageState extends State<CreatePost> {
   void _onImageIconSelected(File file) {
     print('File size: ${file.lengthSync()}');
     if (file.lengthSync() / (1024 * 1024) == 3) {
-      customSnackBar(_scaffoldKey, 'Image exceeded 3 Megabytes limit.');
+      AppUtil.showSnackBar(
+          context, _scaffoldKey, 'Image exceeded 3 Megabytes limit.');
     } else {
       setState(() {
         _image = file;
@@ -258,7 +259,7 @@ class _CreatePostReplyPageState extends State<CreatePost> {
           child: Stack(
             children: <Widget>[
               SingleChildScrollView(
-                controller: scrollcontroller,
+                controller: scrollController,
                 child: _ComposeTweet(this),
               ),
               Align(

@@ -212,7 +212,10 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => SignUpPage());
 
       case '/login':
-        return MaterialPageRoute(builder: (_) => LoginPage());
+        return MaterialPageRoute(
+            builder: (_) => LoginPage(
+                  onSignUpCallback: args['on_sign_up_callback'],
+                ));
 
       case '/password-reset':
         return MaterialPageRoute(builder: (_) => PasswordResetScreen());

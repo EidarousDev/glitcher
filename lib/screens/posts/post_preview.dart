@@ -106,7 +106,7 @@ class _PostPreviewState extends State<PostPreview>
     super.dispose();
   }
 
-  void loadComments() async {
+  Future<void> loadComments() async {
     List<Comment> comments = await DatabaseService.getComments(widget.post.id);
     if (comments.length > 0) {
       setState(() {
@@ -166,19 +166,6 @@ class _PostPreviewState extends State<PostPreview>
         //_errorCode = _youtubeController.value.errorCode.toString();
       });
     }
-  }
-
-  Future uploadComment() async {
-    print('posting Comment...');
-    setState(() {
-      _loading = true;
-    });
-
-    DatabaseService.addComment(widget.post.id, _commentText);
-
-    setState(() {
-      _loading = false;
-    });
   }
 
   Widget getList() {
@@ -333,7 +320,7 @@ class _PostPreviewState extends State<PostPreview>
     _currentPost = await DatabaseService.getPostWithId(widget.post.id);
     _author = await DatabaseService.getUserWithId(_currentPost.authorId);
     print('currentPost = $_currentPost and author= $_author');
-    loadComments();
+    await loadComments();
     print('comments.length = ${_comments.length}');
     setState(() {
       _loading = false;

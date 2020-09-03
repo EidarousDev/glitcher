@@ -64,6 +64,16 @@ class DatabaseService {
     }
   }
 
+  /// Check Username availability
+  static Future<bool> isUsernameTaken(String name) async {
+    final QuerySnapshot result = await Firestore.instance
+        .collection('users')
+        .where('username', isEqualTo: name)
+        .limit(1)
+        .getDocuments();
+    return result.documents.isEmpty;
+  }
+
   // Get Post info of a specific post
   static Future<Post> getPostWithId(String postId) async {
     DocumentSnapshot postDocSnapshot = await postsRef.document(postId).get();

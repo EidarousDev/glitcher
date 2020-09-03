@@ -41,9 +41,9 @@ class RateApp {
           FlatButton(
             child: Text('OK'),
             onPressed: () async {
-              if (stars.round() < 5) {
+              if (stars.round() < 4) {
                 print('move the user to contact us page!');
-              } else if (stars == 5) {
+              } else if (stars >= 4) {
                 print('5 stars!!');
                 rateMyApp.launchStore();
               } else {
@@ -52,6 +52,13 @@ class RateApp {
               // You can handle the result as you want (for instance if the user puts 1 star then open your contact page, if he puts more then open the store page, etc...).
               // This allows to mimic the behavior of the default "Rate" button. See "Advanced > Broadcasting events" for more information :
               await rateMyApp.callEvent(RateMyAppEventType.rateButtonPressed);
+              Navigator.pop<RateMyAppDialogButton>(
+                  context, RateMyAppDialogButton.rate);
+            },
+          ),
+          FlatButton(
+            child: Text('Cancel'),
+            onPressed: () async {
               Navigator.pop<RateMyAppDialogButton>(
                   context, RateMyAppDialogButton.rate);
             },

@@ -16,9 +16,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'widgets/bezier_container.dart';
 
 class LoginPage extends StatefulWidget {
-  LoginPage({Key key, this.title}) : super(key: key);
+  LoginPage({Key key, this.title, this.onSignUpCallback = false})
+      : super(key: key);
 
   final String title;
+  final bool onSignUpCallback;
 
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -188,6 +190,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
+    print('onSignUpCallback = ${widget.onSignUpCallback}');
   }
 
   Widget _divider() {
@@ -369,9 +372,9 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.of(context).pushReplacementNamed('/');
       } else if (!user.isEmailVerified) {
         await auth.signOut();
-        await showVerifyEmailSentDialog(context);
+        //await showVerifyEmailSentDialog(context);
       } else {
-        saveToken();
+        //saveToken(); // We don't want to saveToken for non-verified users
 
         Navigator.of(context).pushReplacementNamed('/');
       }
@@ -394,6 +397,11 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    Future.delayed(
+        Duration.zero,
+        () => widget.onSignUpCallback
+            ? showVerifyEmailSentDialog(context)
+            : Container());
     final height = MediaQuery.of(context).size.height;
     return Scaffold(
         key: _scaffoldKey,
