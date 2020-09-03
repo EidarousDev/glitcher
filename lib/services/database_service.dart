@@ -260,23 +260,91 @@ class DatabaseService {
   static deleteComment(
       String postId, String commentId, String parentCommentId) async {
     if (parentCommentId == null) {
-      await postsRef
-          .document(postId)
-          .collection('comments')
-          .document(commentId)
-          .delete();
+      DocumentReference commentRef =
+          postsRef.document(postId).collection('comments').document(commentId);
+      (await commentRef.collection('replies').getDocuments())
+          .documents
+          .forEach((reply) async {
+        (await commentRef
+                .collection('replies')
+                .document(reply.documentID)
+                .collection('likes')
+                .getDocuments())
+            .documents
+            .forEach((replyLike) {
+          commentRef
+              .collection('replies')
+              .document(reply.documentID)
+              .collection('likes')
+              .document(replyLike.documentID)
+              .delete();
+        });
+
+        (await commentRef
+                .collection('replies')
+                .document(reply.documentID)
+                .collection('dislikes')
+                .getDocuments())
+            .documents
+            .forEach((replyDislike) {
+          commentRef
+              .collection('replies')
+              .document(reply.documentID)
+              .collection('dislikes')
+              .document(replyDislike.documentID)
+              .delete();
+        });
+
+        commentRef.collection('replies').document(reply.documentID).delete();
+      });
+
+      (await commentRef.collection('likes').getDocuments())
+          .documents
+          .forEach((commentLike) async {
+        await commentRef
+            .collection('likes')
+            .document(commentLike.documentID)
+            .delete();
+      });
+
+      (await commentRef.collection('dislikes').getDocuments())
+          .documents
+          .forEach((commentDislike) async {
+        await commentRef
+            .collection('dislikes')
+            .document(commentDislike.documentID)
+            .delete();
+      });
+
+      await commentRef.delete();
 
       await postsRef
           .document(postId)
           .updateData({'comments': FieldValue.increment(-1)});
     } else {
-      await postsRef
+      DocumentReference replyRef = postsRef
           .document(postId)
           .collection('comments')
           .document(parentCommentId)
           .collection('replies')
-          .document(commentId)
-          .delete();
+          .document(commentId);
+
+      (await replyRef.collection('likes').getDocuments())
+          .documents
+          .forEach((replyLike) {
+        replyRef.collection('likes').document(replyLike.documentID).delete();
+      });
+
+      (await replyRef.collection('dislikes').getDocuments())
+          .documents
+          .forEach((replyDislike) {
+        replyRef
+            .collection('dislikes')
+            .document(replyDislike.documentID)
+            .delete();
+      });
+
+      replyRef.delete();
 
       await postsRef
           .document(postId)
@@ -1181,14 +1249,16 @@ class DatabaseService {
         .where('object_id', isEqualTo: objectId)
         .getDocuments();
 
-    await usersRef
-        .document(receiverId)
-        .collection('notifications')
-        .document(snapshot.documents[0].documentID)
-        .delete();
+    if (snapshot.documents.length > 0) {
+      await usersRef
+          .document(receiverId)
+          .collection('notifications')
+          .document(snapshot.documents[0].documentID)
+          .delete();
 
-    await usersRef
-        .document(receiverId)
-        .updateData({'notificationsNumber': FieldValue.increment(-1)});
+      await usersRef
+          .document(receiverId)
+          .updateData({'notificationsNumber': FieldValue.increment(-1)});
+    }
   }
 }

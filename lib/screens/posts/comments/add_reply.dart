@@ -103,8 +103,6 @@ class _AddReplyPageState extends State<AddReply> {
           'comment');
 
       checkIfContainsMention(_textEditingController.text);
-
-      Navigator.pop(context);
     } else {
       showDialog(
         context: context,

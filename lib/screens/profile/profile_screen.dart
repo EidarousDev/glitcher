@@ -13,6 +13,7 @@ import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
@@ -719,6 +720,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
 
     await DatabaseService.unfollowUser(userId);
+    await NotificationHandler.removeNotification(
+        userId, Constants.currentUserID, 'follow');
 
     checkUser();
 
