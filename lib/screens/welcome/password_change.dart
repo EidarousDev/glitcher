@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
@@ -20,13 +22,16 @@ class PasswordChangeScreen extends StatefulWidget {
 class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
   bool _isObscure = true;
 
-  String _password = '';
+  String _newPassword = '';
 
   String _confirmPassword = '';
 
+  String _currentPassword = '';
+
   String userId = "";
 
-  final FocusNode myFocusNodePassword = FocusNode();
+  final FocusNode myFocusNodeCurrentPassword = FocusNode();
+  final FocusNode myFocusNodeNewPassword = FocusNode();
   final FocusNode myFocusNodeConfirmPassword = FocusNode();
 
   Widget _backButton() {
@@ -50,7 +55,8 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
 
   Widget _entryField(String title,
       {FocusNode focusNode,
-      bool isPassword = false,
+      bool isCurrentPassword = false,
+      bool isNewPassword = false,
       bool isConfirmPassword = false}) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 10),
@@ -62,16 +68,22 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
             child: TextFormField(
                 focusNode: focusNode,
                 onChanged: (value) {
-                  if (isPassword) {
+                  if (isCurrentPassword) {
                     setState(() {
-                      _password = value;
+                      _currentPassword = value;
+                    });
+                  } else if (isNewPassword) {
+                    setState(() {
+                      _newPassword = value;
                     });
                   } else if (isConfirmPassword) {
                     _confirmPassword = value;
                   }
                 },
                 onFieldSubmitted: (v) {
-                  if (isPassword) {
+                  if (isCurrentPassword) {
+                    FocusScope.of(context).requestFocus(myFocusNodeNewPassword);
+                  } else if (isNewPassword) {
                     FocusScope.of(context)
                         .requestFocus(myFocusNodeConfirmPassword);
                   } else if (isConfirmPassword) {
@@ -82,7 +94,7 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
                     ? TextInputAction.done
                     : TextInputAction.next,
                 style: TextStyle(color: MyColors.darkCardBG),
-                obscureText: _isObscure && (isPassword || isConfirmPassword),
+                obscureText: _isObscure,
                 decoration: InputDecoration(
                     hintText: title,
                     hintStyle: TextStyle(color: Colors.grey),
@@ -95,7 +107,7 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
                         )),
                     suffixIcon: Container(
                       width: 48,
-                      child: _isObscure && (isPassword || isConfirmPassword)
+                      child: _isObscure
                           ? IconButton(
                               onPressed: () {
                                 setState(() {
@@ -108,7 +120,9 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
                               ),
                               color: Colors.grey.shade400,
                             )
-                          : isPassword || isConfirmPassword
+                          : isCurrentPassword ||
+                                  isNewPassword ||
+                                  isConfirmPassword
                               ? IconButton(
                                   onPressed: () {
                                     setState(() {
@@ -135,11 +149,11 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
   Widget _submitButton() {
     return InkWell(
       onTap: () async {
-        if (_password.isNotEmpty && _confirmPassword.isNotEmpty) {
+        if (_newPassword.isNotEmpty && _confirmPassword.isNotEmpty) {
           await _changePassword();
         } else {
           AppUtil.showSnackBar(
-              context, _scaffoldKey, 'Please fill fields above');
+              context, _scaffoldKey, 'Please fill fields above!');
         }
       },
       child: Container(
@@ -170,8 +184,10 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
   Widget _textFieldWidgets() {
     return Column(
       children: <Widget>[
+        _entryField("Current Password",
+            focusNode: myFocusNodeCurrentPassword, isCurrentPassword: true),
         _entryField("Password",
-            focusNode: myFocusNodePassword, isPassword: true),
+            focusNode: myFocusNodeNewPassword, isNewPassword: true),
         _entryField("Confirm Password",
             focusNode: myFocusNodeConfirmPassword, isConfirmPassword: true)
       ],
@@ -209,7 +225,7 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    SizedBox(height: 200),
+                    SizedBox(height: 150),
                     //_icon(),
                     SizedBox(
                       height: 50,
@@ -234,8 +250,9 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
   @override
   void dispose() {
     super.dispose();
+    myFocusNodeCurrentPassword.dispose();
     myFocusNodeConfirmPassword.dispose();
-    myFocusNodePassword.dispose();
+    myFocusNodeNewPassword.dispose();
   }
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -249,30 +266,50 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
   }
 
   Future _changePassword() async {
-    final BaseAuth auth = AuthProvider.of(context).auth;
+    final BaseAuth baseAuth = AuthProvider.of(context).auth;
 
-    setState(() {
-      _loading = true;
-    });
+    glitcherLoader.showLoader(context);
 
-    if (_password == _confirmPassword) {
+    try {
+      String email = (await firebaseAuth.currentUser()).email;
+      await firebaseAuth.signInWithEmailAndPassword(
+          email: email, password: _currentPassword);
+    } catch (ex) {
+      print('authResult: ${ex.toString()}');
+
+      if (ex.code == 'ERROR_WRONG_PASSWORD') {
+        AppUtil.showSnackBar(
+            context, _scaffoldKey, 'Current Password is not correct!');
+        glitcherLoader.hideLoader();
+        return;
+      }
+    }
+
+    if (_newPassword == _confirmPassword) {
       // Validation Passed
-      try {
-        await auth.changePassword(_password);
+
+      String errorCode = await baseAuth.changePassword(_newPassword);
+      print('change pass error: $errorCode');
+      if (errorCode == null) {
         AppUtil.showSnackBar(
             context, _scaffoldKey, 'Password changed successfully');
-        Navigator.of(context).pushReplacementNamed('/login');
-      } catch (signUpError) {}
+        firebaseAuth.signOut();
+        Navigator.of(context).pushReplacementNamed('/login',
+            arguments: {'on_sign_up_callback': false});
+      } else {
+        if (errorCode == 'ERROR_WEAK_PASSWORD') {
+          AppUtil.showSnackBar(context, _scaffoldKey, 'Weak password!');
+        }
+      }
     } else {
-      if (_password != _confirmPassword) {
+      if (_newPassword != _confirmPassword) {
         AppUtil.showSnackBar(context, _scaffoldKey, "Passwords don't match");
-        myFocusNodePassword.requestFocus();
+        myFocusNodeNewPassword.requestFocus();
       } else {}
     }
 
-    setState(() {
-      _loading = false;
-    });
+    glitcherLoader.hideLoader();
+
     print('Should be false: $_loading');
   }
 }

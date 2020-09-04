@@ -153,7 +153,6 @@ class _BuildDrawerState extends State<BuildDrawer> {
           ListTile(
             onTap: () async {
               try {
-                auth.signOut();
                 String token = await FirebaseMessaging().getToken();
                 usersRef
                     .document(Constants.currentUserID)
@@ -163,6 +162,8 @@ class _BuildDrawerState extends State<BuildDrawer> {
                   'modifiedAt': FieldValue.serverTimestamp(),
                   'signed': false
                 });
+
+                await firebaseAuth.signOut();
 
                 setState(() {
                   authStatus = AuthStatus.NOT_LOGGED_IN;

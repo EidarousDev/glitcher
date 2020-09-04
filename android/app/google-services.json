@@ -15,6 +15,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "844244619365-brvac5ickedikp8rloup9os6d1ta80jt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.devyat.glitcher",
+            "certificate_hash": "01d458b8cdabc9559c201be367751ff47decf9e0"
+          }
+        },
+        {
+          "client_id": "844244619365-ua7i5g9oevlr97g9fepq2d6q4lnquqfn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.devyat.glitcher",
+            "certificate_hash": "2f058ab21c563f8cfc3b609e760e1c086e0c64e6"
+          }
+        },
+        {
           "client_id": "844244619365-m1h5hqveov4jor2f6v3pv7b9bnrvekjb.apps.googleusercontent.com",
           "client_type": 3
         }

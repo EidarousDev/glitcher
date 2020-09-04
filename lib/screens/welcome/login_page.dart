@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/user_model.dart';
@@ -11,6 +12,7 @@ import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'widgets/bezier_container.dart';
@@ -187,6 +189,8 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
   @override
   void initState() {
     super.initState();
@@ -346,9 +350,10 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  GoogleSignInAccount _currentGoogleUser;
+
   Future _login() async {
     final BaseAuth auth = AuthProvider.of(context).auth;
-
     //print(mEmail + ' : ' + mPassword);
     glitcherLoader.showLoader(context);
     //print('Should be true: $_loading');
@@ -438,8 +443,14 @@ class _LoginPageState extends State<LoginPage> {
                                   fontSize: 14, fontWeight: FontWeight.w500)),
                         ),
                       ),
+
 //                      _divider(),
-//                      _facebookButton(),
+//                      SignInButton(
+//                        Buttons.GoogleDark,
+//                        onPressed: () async {
+//                          _signInWithGoogle();
+//                        },
+//                      ),
                       SizedBox(height: 10.0),
                       _createAccountLabel(),
                     ],
@@ -449,6 +460,12 @@ class _LoginPageState extends State<LoginPage> {
             ],
           ),
         ));
+  }
+
+  _signInWithGoogle() async {
+    await _googleSignIn.signIn();
+    AppUtil.showSnackBar(
+        context, _scaffoldKey, '${_googleSignIn.currentUser.email}');
   }
 
   Future<void> _checkFields() async {
