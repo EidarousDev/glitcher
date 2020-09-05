@@ -104,7 +104,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
           AppUtil.showSnackBar(
               context, _scaffoldKey, 'Email is not registered!');
         } else {
-          await auth.sendPasswordResetEmail(email: _email);
+          await firebaseAuth.sendPasswordResetEmail(email: _email);
           print('Password reset e-mail sent');
           AppUtil.showSnackBar(
               context, _scaffoldKey, 'Password reset e-mail sent');

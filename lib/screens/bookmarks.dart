@@ -167,7 +167,7 @@ class _BookmarksScreenState extends State<BookmarksScreen>
   }
 
   void loadUserData() async {
-    currentUser = await auth.currentUser();
+    currentUser = await firebaseAuth.currentUser();
     //print('currentUserID: ${currentUser.uid}');
     // here you write the codes to input the data into firestore
     loggedInUser = await DatabaseService.getUserWithId(currentUser.uid);

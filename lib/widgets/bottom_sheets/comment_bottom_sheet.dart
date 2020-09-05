@@ -205,8 +205,9 @@ class CommentBottomSheet {
                     'comment');
 
                 Navigator.of(context).pop();
-                Navigator.of(context)
-                    .pushReplacementNamed('/post', arguments: {'post': postId});
+                Navigator.of(context).pushReplacementNamed('/post', arguments: {
+                  'post': await DatabaseService.getPostWithId(postId)
+                });
               },
               child: Padding(
                 padding: const EdgeInsets.all(16.0),

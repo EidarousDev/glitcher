@@ -138,8 +138,27 @@ class _CreatePostReplyPageState extends State<CreatePost> {
     }
   }
 
+  englishOnly(String input) {
+    String englishPattern = r'[\u0000-\u007F]+$';
+    String emojiPattern = r'([^\x00-\x7F]+\ *(?:[^\x00-\x7F]| )*)';
+    RegExp regex = RegExp(emojiPattern);
+    //List<RegExpMatch> matches = regex.allMatches(input);
+    //print('matches: ${matches.length}');
+    while (regex.hasMatch(input)) {
+      input = input.replaceAll(regex, '');
+      print(input);
+    }
+
+    regex = RegExp(englishPattern);
+    print('english? ${regex.hasMatch(input)}');
+    return regex.hasMatch(input);
+  }
+
   /// Submit tweet to save in firebase database
   void _submitButton() async {
+//    englishOnly(_textEditingController.text);
+//    return;
+
     if (selectedGame.isEmpty) {
       AppUtil().customSnackBar(_scaffoldKey, 'You must choose a game category');
       return;

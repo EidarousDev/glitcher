@@ -86,6 +86,7 @@ class _HashtagPostsScreenState extends State<HashtagPostsScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     print('hashtag: ${widget.hashtag.text}');
+
     ///Set up listener here
     _scrollController
       ..addListener(() {
@@ -129,7 +130,7 @@ class _HashtagPostsScreenState extends State<HashtagPostsScreen>
   }
 
   void loadUserData() async {
-    currentUser = await auth.currentUser();
+    currentUser = await firebaseAuth.currentUser();
     //print('currentUserID: ${currentUser.uid}');
     // here you write the codes to input the data into firestore
     loggedInUser = await DatabaseService.getUserWithId(currentUser.uid);

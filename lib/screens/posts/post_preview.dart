@@ -108,9 +108,11 @@ class _PostPreviewState extends State<PostPreview>
 
   Future<void> loadComments() async {
     List<Comment> comments = await DatabaseService.getComments(widget.post.id);
+    setState(() {
+      _comments = comments;
+    });
     if (comments.length > 0) {
       setState(() {
-        _comments = comments;
         this.lastVisibleCommentSnapShot = comments.last.timestamp;
         print('It"s actually here!');
       });
@@ -225,6 +227,7 @@ class _PostPreviewState extends State<PostPreview>
       ..play()
       ..dispose();
     setState(() => ++_spawnedAudioCount);
+    loadPostData();
     loadComments();
     //await Future.delayed(Duration(milliseconds: 1000));
     _refreshController.refreshCompleted();

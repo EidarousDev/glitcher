@@ -6,6 +6,7 @@ import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
 
@@ -250,8 +251,10 @@ class PostBottomSheet {
             ),
             SizedBox(height: 16),
             new GestureDetector(
-              onTap: () {
-                DatabaseService.unfollowUser(user.id);
+              onTap: () async {
+                await DatabaseService.unfollowUser(user.id);
+                await NotificationHandler.removeNotification(
+                    user.id, Constants.currentUserID, 'follow');
                 Navigator.of(context).pop();
               },
               child: Padding(

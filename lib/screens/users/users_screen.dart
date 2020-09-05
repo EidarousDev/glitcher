@@ -5,6 +5,7 @@ import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
@@ -130,6 +131,10 @@ class _UsersScreenState extends State<UsersScreen> {
                                 onPressed: () async {
                                   await DatabaseService.unfollowUser(
                                       users[index].id);
+                                  await NotificationHandler.removeNotification(
+                                      users[index].id,
+                                      Constants.currentUserID,
+                                      'follow');
                                   Navigator.of(context)
                                       .pushReplacementNamed('/friends');
                                 },
@@ -171,6 +176,10 @@ class _UsersScreenState extends State<UsersScreen> {
                                 onPressed: () async {
                                   await DatabaseService.unfollowUser(
                                       filteredUsers[index].id);
+                                  await NotificationHandler.removeNotification(
+                                      filteredUsers[index].id,
+                                      Constants.currentUserID,
+                                      'follow');
                                   Navigator.of(context)
                                       .pushReplacementNamed('/friends');
                                 },

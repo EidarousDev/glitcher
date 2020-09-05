@@ -30,7 +30,7 @@ abstract class BaseAuth {
 
   Future<void> changeEmail(String email);
 
-  Future<void> changePassword(String password);
+  Future<String> changePassword(String password);
 
   Future<void> deleteUser();
 
@@ -120,7 +120,7 @@ class Auth implements BaseAuth {
   Future<void> changeEmail(String email) async {
     FirebaseUser user = await _firebaseAuth.currentUser();
     user.updateEmail(email).then((_) {
-      print("Succesfull changed email");
+      print("Succesfully changed email");
     }).catchError((error) {
       print("email can't be changed" + error.toString());
     });
@@ -128,14 +128,16 @@ class Auth implements BaseAuth {
   }
 
   @override
-  Future<void> changePassword(String password) async {
-    FirebaseUser user = await _firebaseAuth.currentUser();
-    user.updatePassword(password).then((_) {
-      print("Succesfull changed password");
-    }).catchError((error) {
-      print("Password can't be changed" + error.toString());
-    });
-    return null;
+  Future<String> changePassword(String password) async {
+    try {
+      FirebaseUser user = await _firebaseAuth.currentUser();
+      await user.updatePassword(password);
+      print("Successfully changed password");
+      return null;
+    } catch (error) {
+      print("Password can't be changed " + error.code);
+      return error.code;
+    }
   }
 
   @override
@@ -157,7 +159,7 @@ class Auth implements BaseAuth {
   }
 
   Future<User> loadUserData() async {
-    final FirebaseUser user = await auth.currentUser();
+    final FirebaseUser user = await firebaseAuth.currentUser();
     final uid = user.uid;
     //print('currentUserID: $uid');
     // here you write the codes to input the data into firestore

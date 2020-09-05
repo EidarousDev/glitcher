@@ -5,6 +5,7 @@ import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/services/notification_handler.dart';
 
 class GroupMembers extends StatefulWidget {
   final String groupId;
@@ -172,9 +173,17 @@ class _GroupMembersState extends State<GroupMembers>
                                         Text('Sure to remove this member?'),
                                     actions: <Widget>[
                                       MaterialButton(
-                                        onPressed: () {
-                                          DatabaseService.removeGroupMember(
-                                              groupId, members[index]['id']);
+                                        onPressed: () async {
+                                          await DatabaseService
+                                              .removeGroupMember(groupId,
+                                                  members[index]['id']);
+
+                                          await NotificationHandler
+                                              .removeNotification(
+                                                  members[index]['id'],
+                                                  groupId,
+                                                  'new_group');
+
                                           setState(() {
                                             members.removeAt(index);
                                           });

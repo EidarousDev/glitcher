@@ -5,6 +5,7 @@ import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/drawer.dart';
@@ -152,6 +153,11 @@ class _SearchScreenState extends State<SearchScreen> {
                                       onPressed: () async {
                                         await DatabaseService.unfollowUser(
                                             filteredUsers[index].id);
+                                        await NotificationHandler
+                                            .removeNotification(
+                                                filteredUsers[index].id,
+                                                Constants.currentUserID,
+                                                'follow');
                                         _searchUsers(_searchController.text);
                                       },
                                       color: MyColors.darkPrimary,

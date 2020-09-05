@@ -10,7 +10,7 @@ import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:stack/stack.dart';
 
 /// Firebase Constants
-final auth = FirebaseAuth.instance;
+final firebaseAuth = FirebaseAuth.instance;
 final firestore = Firestore.instance;
 final storageRef = FirebaseStorage.instance.ref();
 final postsRef = firestore.collection('posts');
