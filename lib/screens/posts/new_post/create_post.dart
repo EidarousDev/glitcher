@@ -154,9 +154,16 @@ class _CreatePostReplyPageState extends State<CreatePost> {
     return regex.hasMatch(input);
   }
 
+  englishOnly2(String input) {
+    String pattern = r'^(?:[a-zA-Z]|\P{L})+$';
+    RegExp regex = RegExp(pattern);
+    print(regex.hasMatch(input));
+    return regex.hasMatch(input);
+  }
+
   /// Submit tweet to save in firebase database
   void _submitButton() async {
-//    englishOnly(_textEditingController.text);
+//    englishOnly2(_textEditingController.text);
 //    return;
 
     if (selectedGame.isEmpty) {

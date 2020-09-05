@@ -303,8 +303,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ],
           ),
-          SizedBox(height: 50),
-          _signInButton(),
         ],
       ),
     );
@@ -360,8 +358,8 @@ class _LoginPageState extends State<LoginPage> {
       }
     } catch (e) {
       // Email or Password Incorrect
-      AppUtil.showSnackBar(context, _scaffoldKey,
-          'The email address or password is incorrect.');
+      AppUtil.showSnackBar(
+          context, _scaffoldKey, 'The email address or password is incorrect.');
     }
     glitcherLoader.hideLoader();
     //print('Should be true: $_loading');
@@ -414,6 +412,9 @@ class _LoginPageState extends State<LoginPage> {
 //                      _facebookButton(),
                       SizedBox(height: 10.0),
                       _createAccountLabel(),
+                      _divider(),
+                      _signInButton(),
+                      SizedBox(height: 40),
                     ],
                   ),
                 ),
@@ -438,12 +439,19 @@ class _LoginPageState extends State<LoginPage> {
       onPressed: () async {
         print('Google SignIn Button Tapped!');
         FirebaseUser user = await signInWithGoogle();
-        Navigator.of(context)
-            .pushReplacementNamed('/set-username', arguments: {'user': user});
+        if ((await DatabaseService.getUserWithId(userId)).id != null) {
+          print('existing user');
+          saveToken();
+          Navigator.of(context).pushReplacementNamed('/');
+        } else {
+          print('new user');
+          Navigator.of(context)
+              .pushReplacementNamed('/set-username', arguments: {'user': user});
+        }
       },
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
       highlightElevation: 0,
-      borderSide: BorderSide(color: Colors.grey),
+      borderSide: BorderSide(color: Colors.white),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
         child: Row(
@@ -459,7 +467,7 @@ class _LoginPageState extends State<LoginPage> {
                 'Sign in with Google',
                 style: TextStyle(
                   fontSize: 20,
-                  color: Colors.grey,
+                  color: Colors.white,
                 ),
               ),
             )

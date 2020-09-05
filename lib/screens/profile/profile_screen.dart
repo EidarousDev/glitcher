@@ -583,7 +583,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   height: 8,
                 ),
                 customDivider(3.0, width: Sizes.fullWidth(context) - 100.0),
-                _postsReady == true
+                _postsReady == true && _posts.length > 0
                     ? ListView.builder(
                         physics: NeverScrollableScrollPhysics(),
                         scrollDirection: Axis.vertical,
@@ -604,7 +604,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               });
                         },
                       )
-                    : Container(),
+                    :Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
+                  child: Center(
+                      child: Text(
+                        'User has no posts yet.',
+                        style: TextStyle(fontSize: 20, color: Colors.grey),
+                      )),
+                ),
               ],
             ),
           ),
