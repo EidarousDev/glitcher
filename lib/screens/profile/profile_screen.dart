@@ -604,14 +604,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               });
                         },
                       )
-                    :Padding(
-                  padding: const EdgeInsets.only(top: 10.0),
-                  child: Center(
-                      child: Text(
-                        'User has no posts yet.',
-                        style: TextStyle(fontSize: 20, color: Colors.grey),
-                      )),
-                ),
+                    : Padding(
+                        padding: const EdgeInsets.only(top: 10.0),
+                        child: Center(
+                            child: Text(
+                          'User has no posts yet.',
+                          style: TextStyle(fontSize: 20, color: Colors.grey),
+                        )),
+                      ),
               ],
             ),
           ),
