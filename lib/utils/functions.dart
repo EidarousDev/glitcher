@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/hashtag_model.dart';
@@ -17,6 +18,41 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/constants.dart';
+import 'app_util.dart';
+
+saveToken() async {
+  String token = await FirebaseMessaging().getToken();
+  usersRef
+      .document(Constants.currentUserID)
+      .collection('tokens')
+      .document(token)
+      .setData({'modifiedAt': FieldValue.serverTimestamp(), 'signed': true});
+}
+
+List<String> searchList(String text) {
+  List<String> list = [];
+  for (int i = 1; i <= text.length; i++) {
+    list.add(text.substring(0, i).toLowerCase());
+  }
+  return list;
+}
+
+String validateUsername(String value) {
+  String _errorMsgUsername = '';
+  String pattern =
+      r'^(?=.{4,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$';
+  RegExp regExp = new RegExp(pattern);
+  if (value.length == 0) {
+    AppUtil().showToast("Username is Required");
+    _errorMsgUsername = "Username is Required";
+  } else if (!regExp.hasMatch(value)) {
+    AppUtil().showToast("Invalid Username");
+    _errorMsgUsername = "Invalid Username";
+  } else {
+    _errorMsgUsername = null;
+  }
+  return _errorMsgUsername;
+}
 
 void setTheme(BuildContext context) async {
   if (Constants.currentTheme == AvailableThemes.LIGHT_THEME) {

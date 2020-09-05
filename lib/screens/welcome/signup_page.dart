@@ -6,6 +6,7 @@ import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
+import 'package:glitcher/utils/functions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'widgets/bezier_container.dart';
@@ -296,29 +297,6 @@ class _SignUpPageState extends State<SignUpPage> {
       });
     }
     return _errorMsgEmail;
-  }
-
-  String validateUsername(String value) {
-    String pattern =
-        r'^(?=.{4,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$';
-    RegExp regExp = new RegExp(pattern);
-    if (value.length == 0) {
-      AppUtil().showToast("Username is Required");
-      setState(() {
-        _errorMsgUsername = "Username is Required";
-      });
-    } else if (!regExp.hasMatch(value)) {
-      AppUtil().showToast("Invalid Username");
-      setState(() {
-        _errorMsgUsername = "Invalid Username";
-      });
-      return _errorMsgUsername;
-    } else {
-      setState(() {
-        _errorMsgUsername = null;
-      });
-    }
-    return _errorMsgUsername;
   }
 
   @override

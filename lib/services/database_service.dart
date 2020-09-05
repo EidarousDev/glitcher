@@ -9,6 +9,7 @@ import 'package:glitcher/models/notification_model.dart' as notification;
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/notification_handler.dart';
+import 'package:glitcher/utils/functions.dart';
 
 class DatabaseService {
   // This function is used to get the recent posts (unfiltered)
@@ -1148,6 +1149,21 @@ class DatabaseService {
     Constants.userFollowing = following;
     List<User> followers = await getFollowers(Constants.currentUserID);
     Constants.userFollowers = followers;
+  }
+
+  static addUserToDatabase(String id, String email, String username) async {
+    List search = searchList(username);
+    Map<String, dynamic> userMap = {
+      'name': 'John Doe',
+      'username': username,
+      'email': email,
+      'description': 'Write something about yourself',
+      'notificationsNumber': 0,
+      'violations': 0,
+      'search': search
+    };
+
+    await usersRef.document(id).setData(userMap);
   }
 
   static addUserEmailToNewsletter(

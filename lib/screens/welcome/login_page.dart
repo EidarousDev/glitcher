@@ -1,6 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:glitcher/constants/constants.dart';
@@ -11,6 +9,8 @@ import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
+import 'package:glitcher/utils/functions.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'widgets/bezier_container.dart';
@@ -27,6 +27,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn googleSignIn = GoogleSignIn();
   String _email = '', _password = '';
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String userId = "";
@@ -50,29 +52,6 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
-  }
-
-  searchList(String text) {
-    List<String> list = [];
-    for (int i = 1; i <= text.length; i++) {
-      list.add(text.substring(0, i).toLowerCase());
-    }
-    return list;
-  }
-
-  addUserToDatabase(String id, String email, String username) async {
-    List search = searchList(username);
-    Map<String, dynamic> userMap = {
-      'name': 'Your name here',
-      'username': username,
-      'email': email,
-      'description': 'Write something about yourself',
-      'notificationsNumber': 0,
-      'violations': 0,
-      'search': search
-    };
-
-    await usersRef.document(id).setData(userMap);
   }
 
   Widget _entryField(String title, {bool isPassword = false}) {
@@ -303,29 +282,30 @@ class _LoginPageState extends State<LoginPage> {
       onTap: () {
         Navigator.pushNamed(context, '/sign-up');
       },
-      child: Container(
-        margin: EdgeInsets.symmetric(vertical: 5),
-        padding: EdgeInsets.all(15),
-        alignment: Alignment.bottomCenter,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'Don\'t have an account ?',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-            ),
-            SizedBox(
-              width: 10,
-            ),
-            Text(
-              'Register',
-              style: TextStyle(
-                  color: MyColors.darkPrimary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600),
-            ),
-          ],
-        ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                'Don\'t have an account ?',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Text(
+                'Register',
+                style: TextStyle(
+                    color: MyColors.darkPrimary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+          SizedBox(height: 50),
+          _signInButton(),
+        ],
       ),
     );
   }
@@ -363,7 +343,7 @@ class _LoginPageState extends State<LoginPage> {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         String username = prefs.getString('username');
 
-        await addUserToDatabase(userId, user.email, username);
+        await DatabaseService.addUserToDatabase(userId, user.email, username);
         await DatabaseService.addUserEmailToNewsletter(
             userId, user.email, username);
 
@@ -380,19 +360,11 @@ class _LoginPageState extends State<LoginPage> {
       }
     } catch (e) {
       // Email or Password Incorrect
-      AppUtil.showSnackBar(context, _scaffoldKey, 'Authentication failed');
+      AppUtil.showSnackBar(context, _scaffoldKey,
+          'The email address or password is incorrect.');
     }
     glitcherLoader.hideLoader();
     //print('Should be true: $_loading');
-  }
-
-  saveToken() async {
-    String token = await FirebaseMessaging().getToken();
-    usersRef
-        .document(Constants.currentUserID)
-        .collection('tokens')
-        .document(token)
-        .setData({'modifiedAt': FieldValue.serverTimestamp(), 'signed': true});
   }
 
   @override
@@ -458,5 +430,70 @@ class _LoginPageState extends State<LoginPage> {
       AppUtil.showSnackBar(
           context, _scaffoldKey, 'Please enter your login details');
     }
+  }
+
+  Widget _signInButton() {
+    return OutlineButton(
+      splashColor: Colors.grey,
+      onPressed: () async {
+        print('Google SignIn Button Tapped!');
+        FirebaseUser user = await signInWithGoogle();
+        Navigator.of(context)
+            .pushReplacementNamed('/set-username', arguments: {'user': user});
+      },
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+      highlightElevation: 0,
+      borderSide: BorderSide(color: Colors.grey),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Image(
+                image: AssetImage("assets/images/google_logo.png"),
+                height: 35.0),
+            Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: Text(
+                'Sign in with Google',
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.grey,
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<FirebaseUser> signInWithGoogle() async {
+    final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
+    final GoogleSignInAuthentication googleSignInAuthentication =
+        await googleSignInAccount.authentication;
+
+    final AuthCredential credential = GoogleAuthProvider.getCredential(
+      accessToken: googleSignInAuthentication.accessToken,
+      idToken: googleSignInAuthentication.idToken,
+    );
+
+    final AuthResult authResult = await _auth.signInWithCredential(credential);
+    final FirebaseUser user = authResult.user;
+
+    assert(!user.isAnonymous);
+    assert(await user.getIdToken() != null);
+
+    final FirebaseUser currentUser = await _auth.currentUser();
+    assert(user.uid == currentUser.uid);
+
+    return user;
+  }
+
+  void signOutGoogle() async {
+    await googleSignIn.signOut();
+
+    print("User Sign Out");
   }
 }
