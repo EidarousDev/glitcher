@@ -16,6 +16,7 @@ class Game {
   final List stores;
   final List developers;
   final List<dynamic> search;
+  final int frequency;
   final dynamic timestamp;
 
   Game({
@@ -34,6 +35,7 @@ class Game {
     this.stores,
     this.developers,
     this.search,
+    this.frequency,
     this.timestamp,
   });
 
@@ -54,6 +56,7 @@ class Game {
       stores: doc['stores'],
       developers: doc['developers'],
       search: doc['search'],
+      frequency: doc['frequency'],
       timestamp: doc['timestamp'],
     );
   }

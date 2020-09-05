@@ -14,6 +14,7 @@ import 'package:glitcher/screens/posts/new_post/widget/create_post_image.dart';
 import 'package:glitcher/screens/posts/new_post/widget/widget_view.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/custom_url_text.dart';
@@ -80,6 +81,11 @@ class _AddCommentPageState extends State<AddComment> {
 
   /// Submit Comment to save in firebase database
   void _submitButton() async {
+    if (!AppUtil.englishOnly(_textEditingController.text)) {
+      AppUtil.showSnackBar(context, _scaffoldKey, 'Only English is allowed.');
+      return;
+    }
+
     glitcherLoader.showLoader(context);
 
     if (_textEditingController.text.isNotEmpty) {

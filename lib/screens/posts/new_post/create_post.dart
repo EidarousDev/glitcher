@@ -138,33 +138,12 @@ class _CreatePostReplyPageState extends State<CreatePost> {
     }
   }
 
-  englishOnly(String input) {
-    String englishPattern = r'[\u0000-\u007F]+$';
-    String emojiPattern = r'([^\x00-\x7F]+\ *(?:[^\x00-\x7F]| )*)';
-    RegExp regex = RegExp(emojiPattern);
-    //List<RegExpMatch> matches = regex.allMatches(input);
-    //print('matches: ${matches.length}');
-    while (regex.hasMatch(input)) {
-      input = input.replaceAll(regex, '');
-      print(input);
-    }
-
-    regex = RegExp(englishPattern);
-    print('english? ${regex.hasMatch(input)}');
-    return regex.hasMatch(input);
-  }
-
-  englishOnly2(String input) {
-    String pattern = r'^(?:[a-zA-Z]|\P{L})+$';
-    RegExp regex = RegExp(pattern);
-    print(regex.hasMatch(input));
-    return regex.hasMatch(input);
-  }
-
   /// Submit tweet to save in firebase database
   void _submitButton() async {
-//    englishOnly2(_textEditingController.text);
-//    return;
+    if (!AppUtil.englishOnly(_textEditingController.text)) {
+      AppUtil.showSnackBar(context, _scaffoldKey, 'Only English is allowed.');
+      return;
+    }
 
     if (selectedGame.isEmpty) {
       AppUtil().customSnackBar(_scaffoldKey, 'You must choose a game category');
@@ -235,6 +214,10 @@ class _CreatePostReplyPageState extends State<CreatePost> {
     await postsRef.document(postId).setData(postData);
 
     await checkIfContainsHashtag(_textEditingController.text, postId);
+
+    await gamesRef
+        .document((await DatabaseService.getGameWithGameName(selectedGame)).id)
+        .updateData({'frequency': FieldValue.increment(1)});
 
     /// Checks for username in tweet description
     /// If found sends notification to all tagged user

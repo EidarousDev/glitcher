@@ -17,6 +17,13 @@ class AppUtil {
     return _instance;
   }
 
+  static englishOnly(String input) {
+    String pattern = r'^(?:[a-zA-Z]|\P{L})+$';
+    RegExp regex = RegExp(pattern, unicode: true);
+    print(regex.hasMatch(input));
+    return regex.hasMatch(input);
+  }
+
   bool isNetworkWorking() {
     return networkStatus;
   }
