@@ -242,22 +242,29 @@ class _PostPreviewState extends State<PostPreview>
   }
 
   Widget _buildWidget() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        PostItem(post: _currentPost, author: _author),
-        _comments.length > 0
-            ? getList()
-            : Center(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 32.0),
-                  child: Text('Be the first to comment...'),
-                ),
-              ),
-      ],
-    );
+    return _currentPost.id != null
+        ? Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              PostItem(post: _currentPost, author: _author),
+              _comments.length > 0
+                  ? getList()
+                  : Center(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 32.0),
+                        child: Text('Be the first to comment...'),
+                      ),
+                    ),
+            ],
+          )
+        : Center(
+            child: Text(
+              'This post has been deleted',
+              style: TextStyle(fontSize: 20),
+            ),
+          );
   }
 
   @override

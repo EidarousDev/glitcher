@@ -790,11 +790,11 @@ class DatabaseService {
 
   static getGames() async {
     QuerySnapshot gameSnapshot = await gamesRef
+        // .orderBy(
+        //   'frequency',
+        //   descending: true,
+        // )
         .orderBy('fullName', descending: false)
-        .orderBy(
-          'frequency',
-          descending: true,
-        )
         .limit(20)
         .getDocuments();
     List<Game> games =

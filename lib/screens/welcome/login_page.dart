@@ -413,7 +413,7 @@ class _LoginPageState extends State<LoginPage> {
                       SizedBox(height: 10.0),
                       _createAccountLabel(),
                       _divider(),
-                      _signInButton(),
+                      _googleSignInButton(),
                       SizedBox(height: 40),
                     ],
                   ),
@@ -433,7 +433,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Widget _signInButton() {
+  Widget _googleSignInButton() {
     return OutlineButton(
       splashColor: Colors.grey,
       onPressed: () async {

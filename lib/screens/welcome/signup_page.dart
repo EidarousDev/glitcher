@@ -320,7 +320,7 @@ class _SignUpPageState extends State<SignUpPage> {
     String validUsername = validateUsername(_username);
 
     print('validEmail: $validEmail ');
-    print('validEmail: $validUsername ');
+    print('validUsername: $validUsername ');
 
     final valid = await DatabaseService.isUsernameTaken(_username);
 

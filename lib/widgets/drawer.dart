@@ -135,7 +135,7 @@ class _BuildDrawerState extends State<BuildDrawer> {
             onTap: () async {
               final Email email = Email(
                 body:
-                    '\nPlease don\'t remove this line (${Constants.currentUserID})',
+                    '\n\n\n\nPlease don\'t remove this line (${Constants.currentUserID})',
                 subject: 'State subject here',
                 recipients: ['support@gl1tch3r.com'],
                 isHTML: false,

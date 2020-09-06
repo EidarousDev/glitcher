@@ -18,7 +18,6 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/constants.dart';
-import 'app_util.dart';
 
 saveToken() async {
   String token = await FirebaseMessaging().getToken();
@@ -43,14 +42,15 @@ String validateUsername(String value) {
       r'^(?=.{4,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$';
   RegExp regExp = new RegExp(pattern);
   if (value.length == 0) {
-    AppUtil().showToast("Username is Required");
+    //AppUtil().showToast("Username is Required");
     _errorMsgUsername = "Username is Required";
   } else if (!regExp.hasMatch(value)) {
-    AppUtil().showToast("Invalid Username");
+    //AppUtil().showToast("Invalid Username");
     _errorMsgUsername = "Invalid Username";
   } else {
     _errorMsgUsername = null;
   }
+  print('errorMsgUsername = $_errorMsgUsername');
   return _errorMsgUsername;
 }
 
