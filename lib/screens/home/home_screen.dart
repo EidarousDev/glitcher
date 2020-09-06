@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:glitcher/constants/cache.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -417,6 +418,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         this.lastVisiblePostSnapShot = posts.last.timestamp;
       });
     }
+
+    setState(() {
+      Cache.homePosts = _posts;
+    });
   }
 
   @override
@@ -441,7 +446,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       });
     loadUserData();
 
-    _setupFeed();
+    if (Cache.homePosts.length == 0) {
+      print('refreshed');
+      _setupFeed();
+    } else {
+      print('from cache');
+      setState(() {
+        _posts = Cache.homePosts;
+      });
+    }
+    print('cache posts length: ${Cache.homePosts.length}');
+
     RateApp(context).rateGlitcher();
     _loadAudioByteData();
   }
@@ -459,7 +474,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     updateOnlineUserState(state);
     if (state == AppLifecycleState.resumed) {
       // user returned to our app
-      _setupFeed();
+      //_setupFeed();
       print('resumed');
     } else if (state == AppLifecycleState.inactive) {
       // app is inactive
@@ -517,6 +532,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         this.lastVisiblePostSnapShot = posts.last.timestamp;
       });
     }
+
+    setState(() {
+      Cache.homePosts = _posts;
+    });
+    print('cache posts length: ${Cache.homePosts}');
   }
 
   void _onRefresh() async {
@@ -549,14 +569,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _loadAudioByteData() async {
     _swipeUpSFX = await rootBundle.load(Strings.swipe_up_to_reload);
-  }
-}
-
-fixString(String s) {
-  try {
-    return utf8.decode(s.runes.toList());
-  } catch (ex) {
-    return s;
   }
 }
 

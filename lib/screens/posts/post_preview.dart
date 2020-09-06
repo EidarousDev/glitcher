@@ -78,8 +78,9 @@ class _PostPreviewState extends State<PostPreview>
 
   @override
   void initState() {
-    loadPostData();
     super.initState();
+
+    loadPostData();
     _loadAudioByteData();
 
     ///Set up listener here
@@ -242,7 +243,7 @@ class _PostPreviewState extends State<PostPreview>
   }
 
   Widget _buildWidget() {
-    return _currentPost.id != null
+    return _currentPost != null
         ? Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -260,6 +261,7 @@ class _PostPreviewState extends State<PostPreview>
             ],
           )
         : Center(
+            heightFactor: 20,
             child: Text(
               'This post has been deleted',
               style: TextStyle(fontSize: 20),
@@ -324,6 +326,11 @@ class _PostPreviewState extends State<PostPreview>
   }
 
   void loadPostData() async {
+    if (widget.post.id == null) {
+      _currentPost = null;
+      return;
+    }
+
     setState(() {
       _loading = true;
     });

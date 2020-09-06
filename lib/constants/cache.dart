@@ -4,6 +4,7 @@ import 'package:glitcher/models/user_model.dart';
 
 class Cache {
   static Map<String, Post> posts;
+  static List<Post> homePosts = List<Post>();
   static Map<String, User> users;
   static Map<String, Notification> notifications;
 }

@@ -63,7 +63,8 @@ class NotificationHandler {
     });
   }
 
-  static navigateToScreen(BuildContext context, String type, String objectId) {
+  static navigateToScreen(
+      BuildContext context, String type, String objectId) async {
     switch (type) {
       case 'message':
         Navigator.of(context)
@@ -81,8 +82,8 @@ class NotificationHandler {
         break;
 
       default:
-        Navigator.of(context)
-            .pushNamed('/post', arguments: {'postId': objectId});
+        Navigator.of(context).pushNamed('/post',
+            arguments: {'post': await DatabaseService.getPostWithId(objectId)});
         break;
     }
   }
