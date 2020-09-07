@@ -18,7 +18,6 @@ import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/drawer.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/widgets/rate_app.dart';
-import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -76,6 +75,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          await gamesRef.getDocuments().then((value) async {
+            for (var doc in value.documents) {
+              await gamesRef
+                  .document(doc.documentID)
+                  .updateData({'frequency': 0});
+              print('doc ${doc.documentID} done');
+            }
+          });
+        },
+        child: Icon(Icons.code),
+      ),
       appBar: AppBar(
         centerTitle: true,
         title: Text('Home'),

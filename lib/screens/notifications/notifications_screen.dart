@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/constants/cache.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/list_items/notification_item.dart';
 import 'package:glitcher/models/notification_model.dart' as notification_model;
@@ -127,7 +128,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           print("reached the top");
         } else {}
       });
-    _setupFeed();
+    if (Cache.notifications.length == 0) {
+      _setupFeed();
+    } else {
+      setState(() {
+        _notifications = Cache.notifications;
+      });
+    }
   }
 
   Future<bool> _onBackPressed() {
