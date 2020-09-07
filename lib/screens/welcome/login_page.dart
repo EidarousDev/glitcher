@@ -439,7 +439,7 @@ class _LoginPageState extends State<LoginPage> {
       onPressed: () async {
         print('Google SignIn Button Tapped!');
         FirebaseUser user = await signInWithGoogle();
-        if ((await DatabaseService.getUserWithId(userId)).id != null) {
+        if ((await DatabaseService.getUserWithId(user.uid)).id != null) {
           print('existing user');
           saveToken();
           Navigator.of(context).pushReplacementNamed('/');
