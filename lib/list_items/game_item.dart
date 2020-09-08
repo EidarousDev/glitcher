@@ -72,7 +72,7 @@ class _GameItemState extends State<GameItem> {
                       height: 3,
                     ),
                     Text(
-                      "${widget.game.genres}",
+                      "${widget.game.genres} - ${widget.game.id}",
                       style: TextStyle(
                         fontWeight: FontWeight.w300,
                         fontSize: 11,

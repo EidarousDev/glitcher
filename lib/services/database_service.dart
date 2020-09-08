@@ -790,11 +790,10 @@ class DatabaseService {
 
   static getGames() async {
     QuerySnapshot gameSnapshot = await gamesRef
-        // .orderBy(
-        //   'frequency',
-        //   descending: true,
-        // )
-        .orderBy('fullName', descending: false)
+        .orderBy(
+          'frequency',
+          descending: true,
+        )
         .limit(20)
         .getDocuments();
     List<Game> games =
@@ -816,7 +815,10 @@ class DatabaseService {
 
   static Future<List<Game>> getNextGames(String lastVisibleGameSnapShot) async {
     QuerySnapshot gameSnapshot = await gamesRef
-        .orderBy('fullName', descending: false)
+        .orderBy(
+          'frequency',
+          descending: true,
+        )
         .startAfter([lastVisibleGameSnapShot])
         .limit(20)
         .getDocuments();

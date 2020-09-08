@@ -11,6 +11,7 @@ import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/list_items/post_item.dart';
+import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
@@ -78,14 +79,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          await gamesRef.getDocuments().then((value) async {
-            for (var doc in value.documents) {
-              await gamesRef
-                  .document(doc.documentID)
-                  .updateData({'frequency': 0});
-              print('doc ${doc.documentID} done');
-            }
-          });
+          QuerySnapshot gameSnapshot =
+              await gamesRef.where('fullName', isEqualTo: null).getDocuments();
+          List<Game> games =
+              gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
         },
         child: Icon(Icons.code),
       ),
@@ -431,9 +428,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       });
     }
 
-    setState(() {
-      Cache.homePosts = _posts;
-    });
+//    setState(() {
+//      Cache.homePosts = _posts;
+//    });
   }
 
   @override
@@ -458,16 +455,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       });
     loadUserData();
 
-    if (Cache.homePosts.length == 0) {
-      print('refreshed');
-      _setupFeed();
-    } else {
-      print('from cache');
-      setState(() {
-        _posts = Cache.homePosts;
-      });
-    }
-    print('cache posts length: ${Cache.homePosts.length}');
+    _setupFeed();
+//    if (Cache.homePosts.length == 0) {
+//      print('refreshed');
+//      _setupFeed();
+//    } else {
+//      print('from cache');
+//      setState(() {
+//        _posts = Cache.homePosts;
+//      });
+//    }
+//    print('cache posts length: ${Cache.homePosts.length}');
 
     RateApp(context).rateGlitcher();
     _loadAudioByteData();
@@ -545,10 +543,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       });
     }
 
-    setState(() {
-      Cache.homePosts = _posts;
-    });
-    print('cache posts length: ${Cache.homePosts}');
+//    setState(() {
+//      Cache.homePosts = _posts;
+//    });
+//    print('cache posts length: ${Cache.homePosts}');
   }
 
   void _onRefresh() async {
