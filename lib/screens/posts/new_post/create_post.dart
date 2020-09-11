@@ -30,7 +30,8 @@ import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class CreatePost extends StatefulWidget {
-  CreatePost({Key key}) : super(key: key);
+  String selectedGame;
+  CreatePost({Key key, this.selectedGame}) : super(key: key);
   _CreatePostReplyPageState createState() => _CreatePostReplyPageState();
 }
 
@@ -42,7 +43,6 @@ class _CreatePostReplyPageState extends State<CreatePost> {
   File _image;
   File _video;
   var _uploadedFileURL;
-  String selectedGame = "";
   GlobalKey<AutoCompleteTextFieldState<String>> autocompleteKey = GlobalKey();
   TextEditingController _textEditingController;
   var _typeAheadController = TextEditingController();
@@ -80,6 +80,7 @@ class _CreatePostReplyPageState extends State<CreatePost> {
     );
 
     _textEditingController = TextEditingController();
+    _typeAheadController.text = widget.selectedGame;
     scrollController..addListener(_scrollListener);
     //DatabaseService.getGameNames();
     super.initState();
@@ -145,7 +146,7 @@ class _CreatePostReplyPageState extends State<CreatePost> {
       return;
     }
 
-    if (selectedGame.isEmpty) {
+    if (widget.selectedGame.isEmpty) {
       AppUtil().customSnackBar(_scaffoldKey, 'You must choose a game category');
       return;
     }
@@ -158,7 +159,7 @@ class _CreatePostReplyPageState extends State<CreatePost> {
     if (_textEditingController.text == null ||
         _textEditingController.text.isEmpty ||
         _textEditingController.text.length > Sizes.maxPostChars ||
-        selectedGame.isEmpty) {
+        widget.selectedGame.isEmpty) {
       return;
     }
     glitcherLoader.showLoader(context);
@@ -192,7 +193,7 @@ class _CreatePostReplyPageState extends State<CreatePost> {
       'dislikes': 0,
       'comments': 0,
       'timestamp': FieldValue.serverTimestamp(),
-      'game': selectedGame
+      'game': widget.selectedGame
     };
 
     int coolDownMinutes = 10;
@@ -216,7 +217,8 @@ class _CreatePostReplyPageState extends State<CreatePost> {
     await checkIfContainsHashtag(_textEditingController.text, postId);
 
     await gamesRef
-        .document((await DatabaseService.getGameWithGameName(selectedGame)).id)
+        .document(
+            (await DatabaseService.getGameWithGameName(widget.selectedGame)).id)
         .updateData({'frequency': FieldValue.increment(1)});
 
     /// Checks for username in tweet description
@@ -537,7 +539,8 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                 viewState._typeAheadController.text =
                     (suggestion as Game).fullName;
                 viewState.setState(() {
-                  viewState.selectedGame = viewState._typeAheadController.text;
+                  viewState.widget.selectedGame =
+                      viewState._typeAheadController.text;
                 });
               },
               validator: (value) {
@@ -546,7 +549,7 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                 }
                 return '';
               },
-              onSaved: (value) => viewState.selectedGame = value,
+              onSaved: (value) => viewState.widget.selectedGame = value,
             ),
           ),
           Flexible(

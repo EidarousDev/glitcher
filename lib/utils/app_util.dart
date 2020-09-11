@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/widgets/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
@@ -155,5 +157,17 @@ class AppUtil {
     }
     print('Launching URL : $url');
     return url;
+  }
+
+  static sendSupportEmail(String subject) async {
+    final Email email = Email(
+      body:
+          '\n\n\n\nPlease don\'t remove this line (${Constants.currentUserID})',
+      subject: subject,
+      recipients: ['support@gl1tch3r.com'],
+      isHTML: false,
+    );
+
+    await FlutterEmailSender.send(email);
   }
 }

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/strings.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:rate_my_app/rate_my_app.dart';
 
 class RateApp {
@@ -43,6 +46,35 @@ class RateApp {
             onPressed: () async {
               if (stars.round() < 4) {
                 print('move the user to contact us page!');
+                showDialog(
+                  context: context,
+                  builder: (context) => Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: new AlertDialog(
+                      content: new Text(
+                          'Care to tell us what you don\'t like about our app?'),
+                      actions: <Widget>[
+                        new GestureDetector(
+                          onTap: () => Navigator.of(context).pop(false),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text("NO"),
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                        new GestureDetector(
+                          onTap: () async {
+                            await AppUtil.sendSupportEmail('App Review');
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text("YES"),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
               } else if (stars >= 4) {
                 print('5 stars!!');
                 rateMyApp.launchStore();

@@ -54,7 +54,10 @@ class RouteGenerator {
             child: AppPage(), type: PageTransitionType.leftToRightWithFade);
 
       case '/new-post':
-        return MaterialPageRoute(builder: (_) => CreatePost());
+        return MaterialPageRoute(
+            builder: (_) => CreatePost(
+                  selectedGame: args['selectedGame'],
+                ));
 
       case '/edit-post':
         return MaterialPageRoute(builder: (_) => EditPost(post: args['post']));

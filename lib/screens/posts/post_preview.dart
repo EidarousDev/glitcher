@@ -271,45 +271,47 @@ class _PostPreviewState extends State<PostPreview>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomPadding: true,
-      appBar: AppBar(
-        leading: new IconButton(
-          icon: new Icon(Icons.arrow_back),
-          onPressed: () {
-            _onBackPressed();
-          },
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: Scaffold(
+        resizeToAvoidBottomPadding: true,
+        appBar: AppBar(
+          leading: new IconButton(
+            icon: new Icon(Icons.arrow_back),
+            onPressed: () {
+              _onBackPressed();
+            },
+          ),
+          title: Text('Post Preview'),
+          flexibleSpace: gradientAppBar(),
         ),
-        title: Text('Post Preview'),
-        flexibleSpace: gradientAppBar(),
-      ),
-      body: SmartRefresher(
-        controller: _refreshController,
-        enablePullDown: true,
-        header: WaterDropHeader(),
-        onRefresh: _onRefresh,
-        onLoading: _onLoading,
-        child: new InkWell(
-          // to dismiss the keyboard when the user tabs out of the TextField
-          splashColor: Colors.transparent,
-          onTap: () {
-            FocusScope.of(context).requestFocus(FocusNode());
-          },
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            scrollDirection: Axis.vertical,
-            child: _loading
-                ? Center(
-                    child: Center(
-                        child: Image.asset(
-                    'assets/images/glitcher_loader.gif',
-                    height: 250,
-                    width: 250,
-                  )))
-                : _buildWidget(),
+        body: SmartRefresher(
+          controller: _refreshController,
+          enablePullDown: true,
+          header: WaterDropHeader(),
+          onRefresh: _onRefresh,
+          onLoading: _onLoading,
+          child: new InkWell(
+            // to dismiss the keyboard when the user tabs out of the TextField
+            splashColor: Colors.transparent,
+            onTap: () {
+              FocusScope.of(context).requestFocus(FocusNode());
+            },
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              scrollDirection: Axis.vertical,
+              child: _loading
+                  ? Center(
+                      child: Center(
+                          child: Image.asset(
+                      'assets/images/glitcher_loader.gif',
+                      height: 250,
+                      width: 250,
+                    )))
+                  : _buildWidget(),
+            ),
           ),
         ),
-      ),
 //      floatingActionButton: FloatingActionButton(
 //        child: Icon(
 //          Icons.comment,
@@ -322,6 +324,7 @@ class _PostPreviewState extends State<PostPreview>
 //          });
 //        },
 //      ),
+      ),
     );
   }
 
@@ -344,7 +347,7 @@ class _PostPreviewState extends State<PostPreview>
     });
   }
 
-  void _onBackPressed() {
+  Future<bool> _onBackPressed() {
     Constants.routesStack.pop();
     Navigator.of(context).pop();
   }

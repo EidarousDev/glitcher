@@ -5,6 +5,7 @@ import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
+import 'package:glitcher/widgets/caching_image.dart';
 
 class GameItem extends StatefulWidget {
   final Game game;
@@ -41,12 +42,11 @@ class _GameItemState extends State<GameItem> {
       padding: EdgeInsets.all(7),
       child: ListTile(
         contentPadding: EdgeInsets.all(0),
-        leading: Image(
-          width: 50,
+        leading: CacheThisImage(
           height: 50,
-          image: NetworkImage(
-            "${widget.game.image}",
-          ),
+          imageUrl: widget.game.image,
+          imageShape: BoxShape.rectangle,
+          width: 50,
         ),
         title: Flex(
           direction: Axis.horizontal,
@@ -72,7 +72,7 @@ class _GameItemState extends State<GameItem> {
                       height: 3,
                     ),
                     Text(
-                      "${widget.game.genres} - ${widget.game.id}",
+                      "${widget.game.genres}",
                       style: TextStyle(
                         fontWeight: FontWeight.w300,
                         fontSize: 11,

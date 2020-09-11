@@ -77,15 +77,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          QuerySnapshot gameSnapshot =
-              await gamesRef.where('fullName', isEqualTo: null).getDocuments();
-          List<Game> games =
-              gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
-        },
-        child: Icon(Icons.code),
-      ),
+//      floatingActionButton: FloatingActionButton(
+//        onPressed: () async {
+//          QuerySnapshot gameSnapshot =
+//              await gamesRef.where('fullName', isEqualTo: null).getDocuments();
+//          List<Game> games =
+//              gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
+//        },
+//        child: Icon(Icons.code),
+//      ),
       appBar: AppBar(
         centerTitle: true,
         title: Text('Home'),

@@ -6,6 +6,7 @@ import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/screens/games/games_screen.dart';
 import 'package:glitcher/screens/profile/profile_screen.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/widgets/rate_app.dart';
 
 class BuildDrawer extends StatefulWidget {
@@ -133,15 +134,7 @@ class _BuildDrawerState extends State<BuildDrawer> {
           ),
           ListTile(
             onTap: () async {
-              final Email email = Email(
-                body:
-                    '\n\n\n\nPlease don\'t remove this line (${Constants.currentUserID})',
-                subject: 'State subject here',
-                recipients: ['support@gl1tch3r.com'],
-                isHTML: false,
-              );
-
-              await FlutterEmailSender.send(email);
+              await AppUtil.sendSupportEmail('State subject here');
             },
             title: Text(
               'Contact us',

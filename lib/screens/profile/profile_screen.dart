@@ -14,6 +14,7 @@ import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
+import 'package:glitcher/services/share_link.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
@@ -23,6 +24,7 @@ import 'package:glitcher/widgets/custom_widgets.dart';
 import 'package:glitcher/widgets/drawer.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
 import 'package:random_string/random_string.dart';
+import 'package:share/share.dart';
 
 enum ScreenState { to_edit, to_follow, to_save, to_unfollow }
 
@@ -627,10 +629,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: InkWell(
                     onTap: () => Scaffold.of(context).openDrawer(),
                     child: Icon(
-                        const IconData(58311, fontFamily: 'MaterialIcons')),
+                      const IconData(58311, fontFamily: 'MaterialIcons'),
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
+              actions: [
+                GestureDetector(
+                  onTap: () async {
+                    await shareProfile(userId, _usernameText, _profileImageUrl);
+                  },
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Icon(
+                          Icons.share,
+                          color: Colors.white,
+                        ),
+                      )
+                      //, Text('Share Profile')
+                    ],
+                  ),
+                )
+              ],
             ),
           ),
           _loading
@@ -647,6 +670,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
     );
+  }
+
+  shareProfile(String userId, String username, String profileImageUrl) async {
+    var userLink = await DynamicLinks.createProfileDynamicLink(
+        {'userId': userId, 'text': username, 'imageUrl': profileImageUrl});
+    Share.share('Check out @$username profile: $userLink');
+    print('Check out @$username profile: $userLink');
   }
 
   updateUsername() async {

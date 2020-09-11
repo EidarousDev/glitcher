@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/services/share_link.dart';
+import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/drawer.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
@@ -14,19 +16,17 @@ import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:readmore/readmore.dart';
+import 'package:share/share.dart';
 
 class GameScreen extends StatefulWidget {
   GameScreen({this.game});
 
   final Game game;
   @override
-  _GameScreenState createState() => _GameScreenState(game: game);
+  _GameScreenState createState() => _GameScreenState();
 }
 
 class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
-  _GameScreenState({this.game});
-
-  Game game;
   String username;
   String profileImageUrl = '';
   var _posts = [];
@@ -37,194 +37,238 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
 
   ScrollController _scrollController = ScrollController();
 
+  Image _gameImage;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        flexibleSpace: gradientAppBar(),
-        leading: Builder(
-          builder: (context) => Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: InkWell(
-              onTap: () => Scaffold.of(context).openDrawer(),
-              child: IconButton(
-                icon: Icon(Icons.arrow_back),
-                onPressed: () => Navigator.of(context).pushReplacementNamed('/home'),
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: Scaffold(
+        appBar: AppBar(
+          actions: [
+            IconButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed('/suggestion', arguments: {
+                  'initial_title': '${widget.game.fullName} edit suggestion',
+                  'initial_details':
+                      'I (${Constants.currentUser.username}) suggest the following edit:',
+                  'game_id': widget.game.id
+                });
+              },
+              icon: Icon(Icons.lightbulb_outline),
+            ),
+            IconButton(
+              onPressed: () async {
+                await shareGame(
+                    widget.game.id, widget.game.fullName, widget.game.image);
+              },
+              icon: Icon(
+                Icons.share,
+                color: Colors.white,
+              ),
+            )
+          ],
+          flexibleSpace: gradientAppBar(),
+          leading: Builder(
+            builder: (context) => Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: InkWell(
+                onTap: () => Scaffold.of(context).openDrawer(),
+                child: IconButton(
+                  icon: Icon(Icons.arrow_back),
+                  onPressed: () => _onBackPressed(),
+                ),
               ),
             ),
           ),
+          centerTitle: true,
         ),
-        title: Text(game.fullName),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(
-              height: 15,
-            ),
-            Stack(
-              children: <Widget>[
-                Container(
-                    height: 200,
+        body: SingleChildScrollView(
+          controller: _scrollController,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              SizedBox(
+                height: 15,
+              ),
+              Stack(
+                children: <Widget>[
+                  CacheThisImage(
+                    height: 180,
+                    imageUrl: widget.game.image,
+                    imageShape: BoxShape.rectangle,
                     width: Sizes.fullWidth(context),
-                    child: Image.network(game.image)),
-                Positioned.fill(
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius:
-                          BorderRadius.all(Radius.circular((5)))),
-                      padding: EdgeInsets.all(5),
-                      child: Text(
-                        game.fullName,
-                        style: TextStyle(fontSize: 22, shadows: [
-                          Shadow(
-                            blurRadius: 5.0,
-                            color: Colors.black,
-                            offset: Offset(2.0, 2.0),
-                          ),
-                        ]),
+                  ),
+                  Positioned.fill(
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: Colors.black54,
+                            borderRadius:
+                                BorderRadius.all(Radius.circular((5)))),
+                        padding: EdgeInsets.all(5),
+                        child: Text(
+                          widget.game.fullName,
+                          style: TextStyle(fontSize: 22, shadows: [
+                            Shadow(
+                              blurRadius: 5.0,
+                              color: Colors.black,
+                              offset: Offset(2.0, 2.0),
+                            ),
+                          ]),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 5,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                "${game.genres}",
-                style: TextStyle(fontSize: 14),
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Flexible(
-              fit: FlexFit.loose,
-              child: ExpansionTile(
-                title: Text('Details', style: TextStyle(color: MyColors.darkPrimary),),
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ReadMoreText(
-                      game.description,
-                      colorClickableText: MyColors.darkPrimary,
-                      trimLength: 300,
-                      style: TextStyle(fontSize: 12),
-                    ),
-                  ),
-
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Container(
-                    height: 1,
-                    color: switchColor(
-                        MyColors.lightLineBreak, Colors.grey.shade600),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text('Platforms: ${game.platforms}'),
-                  ),
-                  Container(
-                    height: 1,
-                    color: switchColor(
-                        MyColors.lightLineBreak, Colors.grey.shade600),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text('Stores: ${game.stores}'),
-                  ),
-                  Container(
-                    height: 1,
-                    color: switchColor(
-                        MyColors.lightLineBreak, Colors.grey.shade600),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text('ESRB Rating: ${game.esrbRating}'),
-                  ),
-                  Container(
-                    height: 1,
-                    color: switchColor(
-                        MyColors.lightLineBreak, Colors.grey.shade600),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text('Metacritic score: ${game.metacritic}'),
-                  ),
-                  Container(
-                    height: 1,
-                    color: switchColor(
-                        MyColors.lightLineBreak, Colors.grey.shade600),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text('Developers: ${game.developers}'),
-                  ),
-                  Container(
-                    height: 1,
-                    color: switchColor(
-                        MyColors.lightLineBreak, Colors.grey.shade600),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text('Release Date: ${game.tba ? 'TBA' : game.releaseDate}'),
-                  ),
                 ],
               ),
-            ),
-            ListView.builder(
-              physics: NeverScrollableScrollPhysics(),
-              scrollDirection: Axis.vertical,
-              itemCount: _posts.length,
-              shrinkWrap: true,
-              itemBuilder: (BuildContext context, int index) {
-                Post post = _posts[index];
-                return FutureBuilder(
-                    future: DatabaseService.getUserWithId(post.authorId),
-                    builder: (BuildContext context, AsyncSnapshot snapshot) {
-                      if (!snapshot.hasData) {
-                        return SizedBox.shrink();
-                      }
-                      User author = snapshot.data;
-                      return PostItem(post: post, author: author);
-                    });
-              },
-            ),
-          ],
+              SizedBox(
+                height: 5,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
+                  widthFactor: 10,
+                  child: Text(
+                    "${widget.game.genres}",
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Flexible(
+                fit: FlexFit.loose,
+                child: ExpansionTile(
+                  title: Text(
+                    'Details',
+                    style: TextStyle(color: MyColors.darkPrimary),
+                  ),
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ReadMoreText(
+                        widget.game.description,
+                        colorClickableText: MyColors.darkPrimary,
+                        trimLength: 300,
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Container(
+                      height: 1,
+                      color: switchColor(
+                          MyColors.lightLineBreak, Colors.grey.shade600),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text('Platforms: ${widget.game.platforms}'),
+                    ),
+                    Container(
+                      height: 1,
+                      color: switchColor(
+                          MyColors.lightLineBreak, Colors.grey.shade600),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text('Stores: ${widget.game.stores}'),
+                    ),
+                    Container(
+                      height: 1,
+                      color: switchColor(
+                          MyColors.lightLineBreak, Colors.grey.shade600),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text('ESRB Rating: ${widget.game.esrbRating}'),
+                    ),
+                    Container(
+                      height: 1,
+                      color: switchColor(
+                          MyColors.lightLineBreak, Colors.grey.shade600),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child:
+                          Text('Metacritic score: ${widget.game.metacritic}'),
+                    ),
+                    Container(
+                      height: 1,
+                      color: switchColor(
+                          MyColors.lightLineBreak, Colors.grey.shade600),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text('Developers: ${widget.game.developers}'),
+                    ),
+                    Container(
+                      height: 1,
+                      color: switchColor(
+                          MyColors.lightLineBreak, Colors.grey.shade600),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                          'Release Date: ${widget.game.tba ? 'TBA' : widget.game.releaseDate}'),
+                    ),
+                  ],
+                ),
+              ),
+              _posts.length > 0
+                  ? ListView.builder(
+                      physics: NeverScrollableScrollPhysics(),
+                      scrollDirection: Axis.vertical,
+                      itemCount: _posts.length,
+                      shrinkWrap: true,
+                      itemBuilder: (BuildContext context, int index) {
+                        Post post = _posts[index];
+                        return FutureBuilder(
+                            future:
+                                DatabaseService.getUserWithId(post.authorId),
+                            builder:
+                                (BuildContext context, AsyncSnapshot snapshot) {
+                              if (!snapshot.hasData) {
+                                return SizedBox.shrink();
+                              }
+                              User author = snapshot.data;
+                              return PostItem(post: post, author: author);
+                            });
+                      },
+                    )
+                  : Center(child: Text('Be the first to post on this game!')),
+            ],
+          ),
         ),
-
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(
-          Icons.email,
+        floatingActionButton: FloatingActionButton(
+          child: Icon(
+            Icons.add,
+          ),
+          onPressed: () {
+            Navigator.of(context).pushNamed('/new-post',
+                arguments: {'selectedGame': widget.game.fullName});
+          },
         ),
-        onPressed: () {
-          Navigator.of(context).pushNamed('/suggestion', arguments: {'initial_title': '${game.fullName} edit suggestion',
-            'initial_details': 'I (${Constants.currentUser.username}) suggest the following edit:', 'game_id': game.id});
-        },
+        drawer: BuildDrawer(),
       ),
-      drawer: BuildDrawer(),
     );
   }
 
-
+  shareGame(String gameId, String gameName, String imageUrl) async {
+    var gameLink = await DynamicLinks.createGameDynamicLink(
+        {'gameId': gameId, 'gameName': gameName, 'imageUrl': imageUrl});
+    Share.share('Check out ($gameName) : $gameLink');
+    print('Check out this game ($gameName): $gameLink');
+  }
 
   _setupFeed() async {
     //print('what\'s happening?');
-    List<Post> posts = await DatabaseService.getGamePosts(game.fullName);
+    List<Post> posts = await DatabaseService.getGamePosts(widget.game.fullName);
     setState(() {
       _posts = posts;
       this.lastVisiblePostSnapShot = posts.last.timestamp;
@@ -235,6 +279,9 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _gameImage = Image.network(
+      widget.game.image,
+    );
 
     ///Set up listener here
     _scrollController
@@ -277,15 +324,18 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     }
   }
 
-
   void nextGamePosts() async {
     var posts = await DatabaseService.getNextGamePosts(
-        lastVisiblePostSnapShot, game.fullName);
+        lastVisiblePostSnapShot, widget.game.fullName);
     if (posts.length > 0) {
       setState(() {
         posts.forEach((element) => _posts.add(element));
         this.lastVisiblePostSnapShot = posts.last.timestamp;
       });
     }
+  }
+
+  Future<bool> _onBackPressed() {
+    Navigator.of(context).pop();
   }
 }

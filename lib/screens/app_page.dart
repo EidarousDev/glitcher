@@ -8,6 +8,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/strings.dart';
+import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
@@ -129,10 +130,11 @@ class _AppPageState extends State<AppPage> {
   @override
   void initState() {
     super.initState();
+    initDynamicLinks();
     setPackageInfo();
     print('Constants.loggedInUser: ${Constants.currentUser}');
     _pageController = PageController(initialPage: 0);
-    _retrieveDynamicLink();
+    //_retrieveDynamicLink();
     userListener();
     _saveDeviceToken();
     setFriends();
@@ -164,21 +166,62 @@ class _AppPageState extends State<AppPage> {
     });
   }
 
-  Future<void> _retrieveDynamicLink() async {
+  void initDynamicLinks() async {
+    FirebaseDynamicLinks.instance.onLink(
+        onSuccess: (PendingDynamicLinkData dynamicLink) async {
+      final Uri deepLink = dynamicLink?.link;
+
+      if (deepLink != null) {
+        if (deepLink.pathSegments[deepLink.pathSegments.length - 2] ==
+            'posts') {
+          Post post =
+              await DatabaseService.getPostWithId(deepLink.pathSegments.last);
+          Navigator.of(context).pushNamed('/post', arguments: {'post': post});
+        } else if (deepLink.pathSegments[deepLink.pathSegments.length - 2] ==
+            'users') {
+          User user =
+              await DatabaseService.getUserWithId(deepLink.pathSegments.last);
+          Navigator.of(context)
+              .pushNamed('/user-profile', arguments: {'userId': user.id});
+        } else if (deepLink.pathSegments[deepLink.pathSegments.length - 2] ==
+            'games') {
+          Game game =
+              await DatabaseService.getGameWithId(deepLink.pathSegments.last);
+          Navigator.of(context)
+              .pushNamed('/game-screen', arguments: {'game': game});
+        }
+      }
+    }, onError: (OnLinkErrorException e) async {
+      print('onLinkError');
+      print(e.message);
+    });
+
     final PendingDynamicLinkData data =
         await FirebaseDynamicLinks.instance.getInitialLink();
     final Uri deepLink = data?.link;
 
     if (deepLink != null) {
-      // to get the parameters we sent
-      // to get what link it is use deepLink.path
-      print('test link $deepLink.path');
-      String postId = deepLink.queryParameters['postId'];
-      // perform your navigation operations here
-      Post post = await DatabaseService.getPostWithId(postId);
+      Post post =
+          await DatabaseService.getPostWithId(deepLink.pathSegments.last);
       Navigator.of(context).pushNamed('/post', arguments: {'post': post});
     }
   }
+
+//  Future<void> _retrieveDynamicLink() async {
+//    final PendingDynamicLinkData data =
+//        await FirebaseDynamicLinks.instance.getInitialLink();
+//    final Uri deepLink = data?.link;
+//
+//    if (deepLink != null) {
+//      // to get the parameters we sent
+//      // to get what link it is use deepLink.path
+//      print('test link $deepLink.path');
+//      String postId = deepLink.queryParameters['postId'];
+//      // perform your navigation operations here
+//      Post post = await DatabaseService.getPostWithId(postId);
+//      Navigator.of(context).pushNamed('/post', arguments: {'post': post});
+//    }
+//  }
 
   @override
   void dispose() {
