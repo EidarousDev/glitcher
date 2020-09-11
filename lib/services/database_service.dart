@@ -632,7 +632,7 @@ class DatabaseService {
         msgSnapshot.documents.map((doc) => Message.fromDoc(doc)).toList();
     if (messages.length == 0)
       return Message(
-          message: 'No previous messages.',
+          message: 'Say hi to your new friend!',
           type: 'text',
           sender: otherUserId,
           timestamp: Timestamp.fromDate(DateTime.now()));

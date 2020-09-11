@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/user_model.dart';
@@ -434,8 +435,9 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _googleSignInButton() {
-    return OutlineButton(
-      splashColor: Colors.grey,
+    return SignInButton(
+      Buttons.Google,
+      text: "Sign up with Google",
       onPressed: () async {
         print('Google SignIn Button Tapped!');
         FirebaseUser user = await signInWithGoogle();
@@ -449,36 +451,16 @@ class _LoginPageState extends State<LoginPage> {
               .pushReplacementNamed('/set-username', arguments: {'user': user});
         }
       },
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
-      highlightElevation: 0,
-      borderSide: BorderSide(color: Colors.white),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Image(
-                image: AssetImage("assets/images/google_logo.png"),
-                height: 35.0),
-            Padding(
-              padding: const EdgeInsets.only(left: 10),
-              child: Text(
-                'Sign in with Google',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
     );
   }
 
   Future<FirebaseUser> signInWithGoogle() async {
-    final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
+    final GoogleSignInAccount googleSignInAccount =
+        await googleSignIn.signIn().catchError((onError) {
+      print('google sign in error code: ${onError.code}');
+      AppUtil.showSnackBar(context, _scaffoldKey,
+          'Unknown error, please try another sign in method!');
+    });
     final GoogleSignInAuthentication googleSignInAuthentication =
         await googleSignInAccount.authentication;
 
