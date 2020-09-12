@@ -3,7 +3,7 @@ import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 
 class InAppBrowser extends StatefulWidget {
-  String url = 'http://gl1tch3r.com';
+  String url = 'https://gl1tch3r.com';
   InAppBrowser(this.url);
   @override
   _InAppBrowserState createState() => _InAppBrowserState();

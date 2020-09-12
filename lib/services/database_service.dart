@@ -456,7 +456,7 @@ class DatabaseService {
 
   static Future<List<Post>> getPostsFilteredByFollowedGames() async {
     QuerySnapshot postSnapshot = await postsRef
-        .where('game', whereIn: Constants.followedGamesNames)
+        .where('game', whereIn: Constants.followedGames)
         .orderBy('timestamp', descending: true)
         .limit(20)
         .getDocuments();
@@ -600,8 +600,11 @@ class DatabaseService {
 
     for (DocumentSnapshot doc in followedGames.documents) {
       Game game = await getGameWithId(doc.documentID);
+      Constants.followedGames.add(game);
       Constants.followedGamesNames.add(game.fullName);
     }
+
+    return Constants.followedGames;
   }
 
   // This function is used to get the recent messages (unfiltered)
@@ -1155,13 +1158,9 @@ class DatabaseService {
           .document(Constants.currentUserID)
           .delete();
     }
-
-    List<User> friends = await getFriends(Constants.currentUserID);
-    Constants.userFriends = friends;
-    List<User> following = await getFollowing(Constants.currentUserID);
-    Constants.userFollowing = following;
-    List<User> followers = await getFollowers(Constants.currentUserID);
-    Constants.userFollowers = followers;
+    User user = await DatabaseService.getUserWithId(userId);
+    Constants.userFriends.remove(user);
+    Constants.userFollowing.remove(user);
   }
 
   static followUser(String userId) async {
@@ -1217,12 +1216,9 @@ class DatabaseService {
           'follow');
     }
 
-    List<User> friends = await getFriends(Constants.currentUserID);
-    Constants.userFriends = friends;
-    List<User> following = await getFollowing(Constants.currentUserID);
-    Constants.userFollowing = following;
-    List<User> followers = await getFollowers(Constants.currentUserID);
-    Constants.userFollowers = followers;
+    User user = await DatabaseService.getUserWithId(userId);
+    Constants.userFriends.add(user);
+    Constants.userFollowing.add(user);
   }
 
   static addUserToDatabase(String id, String email, String username) async {

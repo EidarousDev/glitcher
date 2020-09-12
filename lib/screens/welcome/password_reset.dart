@@ -4,6 +4,7 @@ import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
+import 'package:glitcher/widgets/custom_loader.dart';
 
 import 'widgets/bezier_container.dart';
 
@@ -97,7 +98,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
   Widget _submitButton() {
     return InkWell(
       onTap: () async {
-        glitcherLoader.showLoader(context);
+        Navigator.of(context).push(CustomScreenLoader());
         User user = await DatabaseService.getUserWithEmail(_email);
         if (user.id == null) {
           print('Email is not registered!');
@@ -111,7 +112,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
           Navigator.of(context).pop();
         }
 
-        glitcherLoader.hideLoader();
+        Navigator.of(context).pop();
       },
       child: Container(
         width: MediaQuery.of(context).size.width,

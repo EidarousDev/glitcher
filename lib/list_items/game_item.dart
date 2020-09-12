@@ -6,6 +6,7 @@ import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/widgets/caching_image.dart';
+import 'package:glitcher/widgets/custom_loader.dart';
 
 class GameItem extends StatefulWidget {
   final Game game;
@@ -109,25 +110,33 @@ class _GameItemState extends State<GameItem> {
   }
 
   followUnfollow() async {
+    Navigator.of(context).push(CustomScreenLoader());
+
     DocumentSnapshot game = await usersRef
         .document(Constants.currentUserID)
         .collection('followedGames')
         .document(widget.game.id)
         .get();
+
     if (game.exists) {
-      DatabaseService.unFollowGame(widget.game.id);
+      await DatabaseService.unFollowGame(widget.game.id);
       setState(() {
         followBtnText = 'Follow';
       });
+      Constants.followedGames.remove(widget.game);
+      Constants.followedGamesNames.remove(widget.game.fullName);
       AppUtil.showSnackBar(context, _scaffoldKey, 'Game unfollowed');
     } else {
-      DatabaseService.followGame(widget.game.id);
+      await DatabaseService.followGame(widget.game.id);
       setState(() {
         followBtnText = 'Unfollow';
       });
+      Constants.followedGames.add(widget.game);
+      Constants.followedGamesNames.add(widget.game.fullName);
       AppUtil.showSnackBar(context, _scaffoldKey, 'Game followed');
     }
-    DatabaseService.getFollowedGames();
+    Navigator.of(context).pop();
+    //DatabaseService.getFollowedGames();
   }
 
   checkStates() async {

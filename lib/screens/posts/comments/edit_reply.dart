@@ -17,6 +17,7 @@ import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
+import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:glitcher/widgets/custom_url_text.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
@@ -89,7 +90,7 @@ class _AddReplyPageState extends State<EditReply> {
 
   /// Submit Comment to save in firebase database
   void _submitButton() async {
-    glitcherLoader.showLoader(context);
+    Navigator.of(context).push(CustomScreenLoader());
     if (_textEditingController.text.isNotEmpty) {
       DatabaseService.editReply(widget.post.id, widget.comment.id,
           widget.reply.id, _textEditingController.text);
@@ -129,7 +130,7 @@ class _AddReplyPageState extends State<EditReply> {
     /// If foud sends notification to all tagged user
     /// If no user found or not compost tweet screen is closed and redirect back to home page.
     /// Hide running loader on screen
-    glitcherLoader.hideLoader();
+    Navigator.of(context).pop();
 
     /// Navigate back to home page
     Navigator.of(context).pushNamed('/post', arguments: {'post': widget.post});

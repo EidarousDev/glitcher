@@ -7,6 +7,7 @@ import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
+import 'package:glitcher/widgets/custom_loader.dart';
 
 import 'widgets/bezier_container.dart';
 
@@ -145,7 +146,7 @@ class _SetUsernameScreenState extends State<SetUsernameScreen> {
 
   void _createUser() async {
     final BaseAuth auth = AuthProvider.of(context).auth;
-    glitcherLoader.showLoader(context);
+    Navigator.of(context).push(CustomScreenLoader());
     String validUsername = validateUsername(_username);
     try {
       if (_username != '' && validUsername == null) {
@@ -168,6 +169,6 @@ class _SetUsernameScreenState extends State<SetUsernameScreen> {
       // Email or Password Incorrect
       AppUtil.showSnackBar(context, _scaffoldKey, 'Unknown Error occurred!');
     }
-    glitcherLoader.hideLoader();
+    Navigator.of(context).pop();
   }
 }

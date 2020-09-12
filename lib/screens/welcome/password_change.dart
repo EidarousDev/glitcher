@@ -6,6 +6,7 @@ import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/utils/app_util.dart';
+import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 
 import 'widgets/bezier_container.dart';
@@ -268,7 +269,7 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
   Future _changePassword() async {
     final BaseAuth baseAuth = AuthProvider.of(context).auth;
 
-    glitcherLoader.showLoader(context);
+    Navigator.of(context).push(CustomScreenLoader());
 
     try {
       String email = (await firebaseAuth.currentUser()).email;
@@ -280,7 +281,7 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
       if (ex.code == 'ERROR_WRONG_PASSWORD') {
         AppUtil.showSnackBar(
             context, _scaffoldKey, 'Current Password is not correct!');
-        glitcherLoader.hideLoader();
+        Navigator.of(context).pop();
         return;
       }
     }
@@ -308,7 +309,7 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
       } else {}
     }
 
-    glitcherLoader.hideLoader();
+    Navigator.of(context).pop();
 
     print('Should be false: $_loading');
   }

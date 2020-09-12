@@ -8,6 +8,7 @@ import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
+import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 
 class UsersScreen extends StatefulWidget {
@@ -129,12 +130,18 @@ class _UsersScreenState extends State<UsersScreen> {
                                   style: TextStyle(color: Colors.white),
                                 ),
                                 onPressed: () async {
+                                  Navigator.of(context)
+                                      .push(CustomScreenLoader());
+
                                   await DatabaseService.unfollowUser(
                                       users[index].id);
                                   await NotificationHandler.removeNotification(
                                       users[index].id,
                                       Constants.currentUserID,
                                       'follow');
+
+                                  Navigator.of(context).pop();
+
                                   Navigator.of(context)
                                       .pushReplacementNamed('/friends');
                                 },
@@ -174,12 +181,18 @@ class _UsersScreenState extends State<UsersScreen> {
                                   ),
                                 ),
                                 onPressed: () async {
+                                  Navigator.of(context)
+                                      .push(CustomScreenLoader());
+
                                   await DatabaseService.unfollowUser(
                                       filteredUsers[index].id);
                                   await NotificationHandler.removeNotification(
                                       filteredUsers[index].id,
                                       Constants.currentUserID,
                                       'follow');
+
+                                  Navigator.of(context).pop();
+
                                   Navigator.of(context)
                                       .pushReplacementNamed('/friends');
                                 },

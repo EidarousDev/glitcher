@@ -13,6 +13,7 @@ import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
+import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
 import 'package:image_picker/image_picker.dart';
@@ -115,12 +116,12 @@ class _GroupDetailsState extends State<GroupDetails>
             actions: <Widget>[
               GestureDetector(
                 onTap: () async {
-                  glitcherLoader.showLoader(context);
+                  Navigator.of(context).push(CustomScreenLoader());
 
                   await DatabaseService.removeGroupMember(
                       groupId, Constants.currentUserID);
 
-                  glitcherLoader.hideLoader();
+                  Navigator.of(context).pop();
 
                   Navigator.pushNamedAndRemoveUntil(context, '/', (r) => false);
                 },

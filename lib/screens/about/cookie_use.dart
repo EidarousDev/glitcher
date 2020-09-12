@@ -5,7 +5,7 @@ import 'package:glitcher/widgets/gradient_appbar.dart';
 
 class CookieUse extends StatelessWidget {
   final flutterWebViewPlugin = FlutterWebviewPlugin();
-  String selectedUrl = 'http://www.gl1tch3r.com/help-center/glitcher-cookies';
+  String selectedUrl = 'https://www.gl1tch3r.com/help-center/glitcher-cookies';
   // ignore: prefer_collection_literals
   final Set<JavascriptChannel> jsChannels = [
     JavascriptChannel(

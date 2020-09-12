@@ -5,7 +5,7 @@ import 'package:glitcher/widgets/gradient_appbar.dart';
 
 class LegalNotices extends StatelessWidget {
   final flutterWebViewPlugin = FlutterWebviewPlugin();
-  String selectedUrl = 'http://gl1tch3r.com/legal-notices.html';
+  String selectedUrl = 'https://gl1tch3r.com/legal-notices.html';
   // ignore: prefer_collection_literals
   final Set<JavascriptChannel> jsChannels = [
     JavascriptChannel(

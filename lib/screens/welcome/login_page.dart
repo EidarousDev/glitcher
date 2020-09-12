@@ -11,6 +11,7 @@ import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
+import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -329,7 +330,7 @@ class _LoginPageState extends State<LoginPage> {
     final BaseAuth auth = AuthProvider.of(context).auth;
 
     //print(mEmail + ' : ' + mPassword);
-    glitcherLoader.showLoader(context);
+    Navigator.of(context).push(CustomScreenLoader());
     //print('Should be true: $_loading');
     try {
       FirebaseUser user =
@@ -362,7 +363,7 @@ class _LoginPageState extends State<LoginPage> {
       AppUtil.showSnackBar(
           context, _scaffoldKey, 'The email address or password is incorrect.');
     }
-    glitcherLoader.hideLoader();
+    Navigator.of(context).push(CustomScreenLoader());
     //print('Should be true: $_loading');
   }
 

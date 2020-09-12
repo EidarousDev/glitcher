@@ -9,6 +9,7 @@ import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/list_items/post_item.dart';
+import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/auth.dart';
@@ -20,6 +21,7 @@ import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/circular_clipper.dart';
+import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
 import 'package:glitcher/widgets/drawer.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
@@ -132,11 +134,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
           print("reached the top");
         } else {}
       });
-
+    getFollowedGames();
     checkUser();
   }
 
-  void checkUser() async {
+  getFollowedGames() async {
+    List<Game> games = await DatabaseService.getFollowedGames();
+    setState(() {
+      Constants.followedGames = games;
+    });
+  }
+
+  checkUser() async {
     currentUser = await Auth().getCurrentUser();
 
     if (this.userId != currentUser.uid) {
@@ -529,52 +538,76 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   height: 8,
                 ),
                 userId == Constants.currentUserID
-                    ? Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
+                    ? Column(
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: <Widget>[
+                              InkWell(
+                                onTap: () => Navigator.of(context).pushNamed(
+                                    '/users',
+                                    arguments: {'screen_type': 'Followers'}),
+                                child: Column(
+                                  children: <Widget>[
+                                    Text(
+                                      'Followers',
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                    Text(Constants.userFollowers.length
+                                        .toString())
+                                  ],
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () => Navigator.of(context).pushNamed(
+                                    '/users',
+                                    arguments: {'screen_type': 'Following'}),
+                                child: Column(
+                                  children: <Widget>[
+                                    Text(
+                                      'Following',
+                                      style: TextStyle(
+                                          color: Colors.grey, fontSize: 14),
+                                    ),
+                                    Text(Constants.userFollowing.length
+                                        .toString())
+                                  ],
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  Navigator.of(context).pushNamed('/users',
+                                      arguments: {'screen_type': 'Friends'});
+                                },
+                                child: Column(
+                                  children: <Widget>[
+                                    Text(
+                                      'Friends',
+                                      style: TextStyle(
+                                          color: Colors.grey, fontSize: 14),
+                                    ),
+                                    Text(
+                                        Constants.userFriends.length.toString())
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
                           InkWell(
                             onTap: () => Navigator.of(context).pushNamed(
-                                '/users',
-                                arguments: {'screen_type': 'Followers'}),
+                              '/followed-games',
+                            ),
                             child: Column(
                               children: <Widget>[
                                 Text(
-                                  'Followers',
+                                  'Followed Games',
                                   style: TextStyle(color: Colors.grey),
                                 ),
-                                Text(Constants.userFollowers.length.toString())
-                              ],
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () => Navigator.of(context).pushNamed(
-                                '/users',
-                                arguments: {'screen_type': 'Following'}),
-                            child: Column(
-                              children: <Widget>[
-                                Text(
-                                  'Following',
-                                  style: TextStyle(
-                                      color: Colors.grey, fontSize: 14),
-                                ),
-                                Text(Constants.userFollowing.length.toString())
-                              ],
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              Navigator.of(context).pushNamed('/users',
-                                  arguments: {'screen_type': 'Friends'});
-                            },
-                            child: Column(
-                              children: <Widget>[
-                                Text(
-                                  'Friends',
-                                  style: TextStyle(
-                                      color: Colors.grey, fontSize: 14),
-                                ),
-                                Text(Constants.userFriends.length.toString())
+                                Text(Constants.followedGames?.length.toString())
                               ],
                             ),
                           ),
@@ -680,7 +713,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   updateUsername() async {
-    glitcherLoader.showLoader(context);
+    Navigator.of(context).push(CustomScreenLoader());
     String validUsername = validateUsername(_usernameEditingController.text);
     final valid = await isUsernameTaken(_usernameEditingController.text);
 
@@ -701,7 +734,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         AppUtil.showSnackBar(context, _scaffoldKey, 'Invalid Username!');
       }
     }
-    glitcherLoader.hideLoader();
+    Navigator.of(context).pop();
   }
 
   searchList(String text) {
@@ -735,38 +768,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void followUser() async {
-    setState(() {
-      _isBtnEnabled = false;
-      _loading = true;
-    });
+//    setState(() {
+//      _isBtnEnabled = false;
+//      _loading = true;
+//    });
+
+    Navigator.of(context).push(CustomScreenLoader());
 
     await DatabaseService.followUser(userId);
-    checkUser();
+    await checkUser();
 
-    setState(() {
-      _loading = false;
-      _isBtnEnabled = true;
-      isFollowing = false;
-    });
+//    setState(() {
+//      _loading = false;
+//      _isBtnEnabled = true;
+//      isFollowing = false;
+//    });
+    Navigator.of(context).pop();
   }
 
   void unfollowUser() async {
-    setState(() {
-      _isBtnEnabled = false;
-      _loading = true;
-    });
+//    setState(() {
+//      _isBtnEnabled = false;
+//      _loading = true;
+//    });
+
+    Navigator.of(context).push(CustomScreenLoader());
 
     await DatabaseService.unfollowUser(userId);
     await NotificationHandler.removeNotification(
         userId, Constants.currentUserID, 'follow');
 
-    checkUser();
+    await checkUser();
 
-    setState(() {
-      _loading = false;
-      _isBtnEnabled = true;
-      isFollowing = false;
-    });
+    Navigator.of(context).pop();
+
+//    setState(() {
+//      _loading = false;
+//      _isBtnEnabled = true;
+//      isFollowing = false;
+//    });
   }
 
   @override
@@ -787,7 +827,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _coverImageFile = image;
         _coverImageUrl = null;
       });
-      glitcherLoader.showLoader(context);
+      Navigator.of(context).push(CustomScreenLoader());
       String url = await AppUtil.uploadFile(
           _coverImageFile, context, 'cover_images/$userId');
       setState(() {
@@ -795,7 +835,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _coverImageFile = null;
       });
       await usersRef.document(userId).updateData({'cover_url': _coverImageUrl});
-      glitcherLoader.hideLoader();
+      Navigator.of(context).pop();
     } else {
       await showDialog(
           barrierDismissible: true,
@@ -815,7 +855,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _coverImageFile = image;
                   _coverImageUrl = null;
                 });
-                glitcherLoader.showLoader(context);
+                Navigator.of(context).push(CustomScreenLoader());
                 String url = await AppUtil.uploadFile(
                     _coverImageFile, context, 'cover_images/$userId');
                 setState(() {
@@ -826,7 +866,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 await usersRef
                     .document(userId)
                     .updateData({'cover_url': _coverImageUrl});
-                glitcherLoader.hideLoader();
+                Navigator.of(context).pop();
 
                 Navigator.of(context).pop();
               },
@@ -845,7 +885,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _profileImageFile = image;
         _profileImageUrl = null;
       });
-      glitcherLoader.showLoader(context);
+      Navigator.of(context).push(CustomScreenLoader());
       String url = await AppUtil.uploadFile(
           _profileImageFile, context, 'cover_images/$userId');
       setState(() {
@@ -855,7 +895,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await usersRef
           .document(userId)
           .updateData({'profile_url': _profileImageUrl});
-      glitcherLoader.hideLoader();
+      Navigator.of(context).pop();
     } else {
       showDialog(
           barrierDismissible: true,
@@ -875,7 +915,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _profileImageFile = image;
                   _profileImageUrl = null;
                 });
-                glitcherLoader.showLoader(context);
+                Navigator.of(context).push(CustomScreenLoader());
                 String url = await AppUtil.uploadFile(
                     _profileImageFile, context, 'profile_images/$userId');
                 setState(() {
@@ -885,7 +925,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 await usersRef
                     .document(userId)
                     .updateData({'profile_url': _profileImageUrl});
-                glitcherLoader.hideLoader();
+                Navigator.of(context).pop();
                 Navigator.of(context).pop();
               },
             ),

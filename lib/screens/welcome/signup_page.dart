@@ -7,6 +7,7 @@ import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
+import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'widgets/bezier_container.dart';
@@ -314,7 +315,7 @@ class _SignUpPageState extends State<SignUpPage> {
     final BaseAuth auth = AuthProvider.of(context).auth;
 
     //print(_email + ' : ' + _password);
-    glitcherLoader.showLoader(context);
+    Navigator.of(context).push(CustomScreenLoader());
 
     String validEmail = validateEmail(_email);
     String validUsername = validateUsername(_username);
@@ -367,7 +368,7 @@ class _SignUpPageState extends State<SignUpPage> {
         // await auth.sendEmailVerification(); // It's already implemented in the auth.signUp method
         SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setString('username', _username);
-        glitcherLoader.hideLoader();
+        Navigator.of(context).pop();
         Navigator.of(context).pushReplacementNamed('/login',
             arguments: {'on_sign_up_callback': true});
       } else {
@@ -408,6 +409,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
   void _setFocusNode(FocusNode focusNode) {
     FocusScope.of(context).requestFocus(focusNode);
-    glitcherLoader.hideLoader();
+    Navigator.of(context).pop();
   }
 }

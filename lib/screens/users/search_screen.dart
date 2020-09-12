@@ -8,6 +8,7 @@ import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
+import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:glitcher/widgets/drawer.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 
@@ -151,6 +152,9 @@ class _SearchScreenState extends State<SearchScreen> {
                                         ),
                                       ),
                                       onPressed: () async {
+                                        Navigator.of(context)
+                                            .push(CustomScreenLoader());
+
                                         await DatabaseService.unfollowUser(
                                             filteredUsers[index].id);
                                         await NotificationHandler
@@ -159,6 +163,8 @@ class _SearchScreenState extends State<SearchScreen> {
                                                 Constants.currentUserID,
                                                 'follow');
                                         _searchUsers(_searchController.text);
+
+                                        Navigator.of(context).pop();
                                       },
                                       color: MyColors.darkPrimary,
                                     )
@@ -170,9 +176,14 @@ class _SearchScreenState extends State<SearchScreen> {
                                         ),
                                       ),
                                       onPressed: () async {
+                                        Navigator.of(context)
+                                            .push(CustomScreenLoader());
+
                                         await DatabaseService.followUser(
                                             filteredUsers[index].id);
                                         _searchUsers(_searchController.text);
+
+                                        Navigator.of(context).pop();
                                       },
                                       color: MyColors.darkPrimary,
                                     ));

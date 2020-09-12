@@ -23,6 +23,7 @@ import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
+import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:http/http.dart' show get;
@@ -168,7 +169,7 @@ class _CreatePostReplyPageState extends State<EditPost> {
         selectedGame.isEmpty) {
       return;
     }
-    glitcherLoader.showLoader(context);
+    Navigator.of(context).push(CustomScreenLoader());
 
     /// If tweet contain image
     /// First image is uploaded on firebase storage
@@ -211,7 +212,7 @@ class _CreatePostReplyPageState extends State<EditPost> {
     /// If no user found or not compost tweet screen is closed and redirect back to home page.
 
     /// Hide running loader on screen
-    glitcherLoader.hideLoader();
+    Navigator.of(context).pop();
 
     /// Navigate back to home page
     Navigator.of(context).pushReplacementNamed('/home');

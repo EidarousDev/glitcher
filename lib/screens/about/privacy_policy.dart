@@ -5,7 +5,7 @@ import 'package:glitcher/widgets/gradient_appbar.dart';
 
 class PrivacyPolicy extends StatelessWidget {
   final flutterWebViewPlugin = FlutterWebviewPlugin();
-  String selectedUrl = 'http://www.gl1tch3r.com/privacy-policy';
+  String selectedUrl = 'https://www.gl1tch3r.com/privacy-policy';
   // ignore: prefer_collection_literals
   final Set<JavascriptChannel> jsChannels = [
     JavascriptChannel(

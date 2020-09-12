@@ -17,6 +17,7 @@ import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
+import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:glitcher/widgets/custom_url_text.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
@@ -86,7 +87,7 @@ class _AddCommentPageState extends State<AddComment> {
       return;
     }
 
-    glitcherLoader.showLoader(context);
+    Navigator.of(context).push(CustomScreenLoader());
 
     if (_textEditingController.text.isNotEmpty) {
       DatabaseService.addComment(widget.post.id, _textEditingController.text);
@@ -122,7 +123,7 @@ class _AddCommentPageState extends State<AddComment> {
       );
     }
 
-    glitcherLoader.hideLoader();
+    Navigator.of(context).pop();
 
     //Navigator.of(context).pop();
     Navigator.of(context)

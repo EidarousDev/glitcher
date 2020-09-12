@@ -10,7 +10,7 @@ class HelpCenter extends StatefulWidget {
 
 class _HelpCenterState extends State<HelpCenter> {
   final flutterWebViewPlugin = FlutterWebviewPlugin();
-  String selectedUrl = 'http://www.gl1tch3r.com/category/help-center';
+  String selectedUrl = 'https://www.gl1tch3r.com/category/help-center';
   // ignore: prefer_collection_literals
   final Set<JavascriptChannel> jsChannels = [
     JavascriptChannel(
