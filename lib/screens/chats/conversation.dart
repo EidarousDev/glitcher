@@ -38,6 +38,7 @@ class Conversation extends StatefulWidget {
 
 class _ConversationState extends State<Conversation>
     with WidgetsBindingObserver {
+  bool isMicrophoneGranted = false;
   Firestore _firestore = Firestore.instance;
 //  static Random random = Random();
 //  String name;
@@ -64,8 +65,6 @@ class _ConversationState extends State<Conversation>
   String recordTime = 'recording...';
 
   var _currentStatus;
-
-  var isMicrophoneGranted = false;
 
   _ConversationState();
 
@@ -115,8 +114,7 @@ class _ConversationState extends State<Conversation>
         .listen((querySnapshot) {
       querySnapshot.documentChanges.forEach((change) {
         if (change.type == DocumentChangeType.added) {
-          //print('type is her');
-          //if (change.document['timestamp'] == null) return;
+          print('type is her');
           if (_messages != null) {
             if (this.mounted) {
               setState(() {
@@ -160,9 +158,11 @@ class _ConversationState extends State<Conversation>
     usersRef.snapshots().listen((querySnapshot) {
       querySnapshot.documentChanges.forEach((change) {
         if (change.document.documentID == widget.otherUid) {
-          setState(() {
-            otherUser = User.fromDoc(change.document);
-          });
+          if (mounted) {
+            setState(() {
+              otherUser = User.fromDoc(change.document);
+            });
+          }
         }
       });
     });
@@ -569,7 +569,11 @@ class _ConversationState extends State<Conversation>
                                             await PermissionsService()
                                                 .requestMicrophonePermission(
                                                     onPermissionDenied: () {
-                                          alertDialog(context);
+                                          alertDialog(
+                                              context,
+                                              'info',
+                                              'You must grant this microphone access to be able to use this feature.',
+                                              'OK');
                                           print('Permission has been denied');
                                         });
                                         setState(() {
@@ -631,20 +635,20 @@ class _ConversationState extends State<Conversation>
     );
   }
 
-  void alertDialog(BuildContext context) {
+  void alertDialog(
+      BuildContext context, String heading, String message, String okBtn) {
     showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: Text('Info'),
-            content: Text(
-                'You must grant this microphone access to be able to use this feature.'),
+            title: Text(heading),
+            content: Text(message),
             actions: <Widget>[
               MaterialButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: Text('OK'),
+                child: Text(okBtn),
               )
             ],
           );

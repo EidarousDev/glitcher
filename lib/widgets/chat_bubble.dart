@@ -39,13 +39,10 @@ class _ChatBubbleState extends State<ChatBubble> {
   static Random random = Random();
   int rNum = random.nextInt(18);
 
-  AudioMessagePlayer audioPlayerWidget;
-
   @override
   void initState() {
     super.initState();
     //print('Message: ${widget.message}');
-    audioPlayerWidget = AudioMessagePlayer(url: widget.message);
     print('type: ${widget.type}, message: ${widget.message}');
   }
 
@@ -187,7 +184,8 @@ class _ChatBubbleState extends State<ChatBubble> {
                                       imageUrl: widget.message,
                                       btnText: 'Download',
                                       btnFunction: () {
-                                        downloadImage(widget.message, randomAlphaNumeric(20));
+                                        downloadImage(widget.message,
+                                            randomAlphaNumeric(20));
                                       },
                                     ),
                                   ),
@@ -201,7 +199,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                             ),
                           )
                         : widget.type == 'audio'
-                            ? audioPlayerWidget
+                            ? AudioMessagePlayer(url: widget.message)
                             : Container(),
               ),
             ],

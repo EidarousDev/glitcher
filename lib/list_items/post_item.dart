@@ -481,7 +481,7 @@ class _PostItemState extends State<PostItem> {
   // Sharing a post with a shortened url
   sharePost(String postId, String postText, String imageUrl) async {
     var postLink = await DynamicLinks.createPostDynamicLink(
-        {'postId': postId, 'postText': postText, 'imageUrl': imageUrl});
+        {'postId': postId, 'text': postText, 'imageUrl': imageUrl});
     Share.share('Check out: $postText : $postLink');
     print('Check out: $postText : $postLink');
   }

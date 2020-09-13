@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:glitcher/constants/strings.dart';
 
@@ -11,6 +12,11 @@ class DynamicLinks {
       uriPrefix: _urlPrefix,
       // This can be whatever you want for the uri, https://yourapp.com/groupinvite?username=$userName
       link: Uri.parse('$_urlPrefix/posts/${args["postId"]}'),
+      socialMetaTagParameters: SocialMetaTagParameters(
+        title: '${args["text"]}'.replaceRange(25, args["text"].length, '...'),
+        description: '${args["text"]}',
+        imageUrl: Uri.parse('${args["imageUrl"]}'),
+      ),
       androidParameters: AndroidParameters(
         packageName: Strings.packageName,
       ),
