@@ -101,7 +101,7 @@ class _AddCommentPageState extends State<AddComment> {
 
       await checkIfContainsMention(_textEditingController.text);
 
-      Navigator.pop(context);
+      //Navigator.pop(context);
     } else {
       showDialog(
         context: context,
@@ -205,7 +205,7 @@ class _AddCommentPageState extends State<AddComment> {
                 SizedBox(height: 16),
                 new GestureDetector(
                   onTap: () {
-                    Navigator.of(context).pop();
+                    Navigator.of(context).pop(false);
                     Navigator.of(context).pop();
                   },
                   child: Padding(

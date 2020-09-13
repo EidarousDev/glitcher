@@ -74,6 +74,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
 
+  getFollowedGames() async {
+    List<Game> games = await DatabaseService.getFollowedGames();
+    setState(() {
+      Constants.followedGames = games;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,6 +121,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               Icons.tune,
             ),
             onPressed: () {
+              getFollowedGames();
               setState(() {
                 isFiltering = !isFiltering;
               });
@@ -206,8 +214,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                     child: MaterialButton(
                                       color: MyColors.darkPrimary,
                                       child: Text('Filter'),
-                                      onPressed: () {
-                                        _setupFeed();
+                                      onPressed: () async {
+                                        await _setupFeed();
                                         setState(() {
                                           isFiltering = false;
                                         });
@@ -270,8 +278,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               ),
                             ),
                             onTap: () {
-                              Navigator.of(context)
-                                  .pushReplacementNamed('/new-post');
+                              Navigator.of(context).pushReplacementNamed(
+                                  '/new-post',
+                                  arguments: {'selectedGame': ''});
                             },
                           ),
                         ),
@@ -421,6 +430,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         this.lastVisiblePostSnapShot = posts.last.timestamp;
       });
     } else if (feedFilter == 2) {
+      print('1st game:' + Constants.followedGamesNames[0]);
       posts = await DatabaseService.getPostsFilteredByFollowedGames();
       setState(() {
         _posts = posts;

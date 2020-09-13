@@ -456,7 +456,7 @@ class DatabaseService {
 
   static Future<List<Post>> getPostsFilteredByFollowedGames() async {
     QuerySnapshot postSnapshot = await postsRef
-        .where('game', whereIn: Constants.followedGames)
+        .where('game', whereIn: Constants.followedGamesNames)
         .orderBy('timestamp', descending: true)
         .limit(20)
         .getDocuments();
