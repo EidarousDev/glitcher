@@ -1,23 +1,19 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:glitcher/screens/chats/conversation.dart';
+import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/constants/sizes.dart';
+import 'package:glitcher/constants/strings.dart';
+import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/utils/app_util.dart';
+import 'package:glitcher/widgets/caching_image.dart';
+import 'package:glitcher/widgets/custom_loader.dart';
 
 class UserItem extends StatefulWidget {
-  final String dp;
-  final String name;
-  final String time;
-  final String description;
-  final bool isOnline;
-  final int counter;
+  final User user;
 
-  UserItem({
-    Key key,
-    @required this.dp,
-    @required this.name,
-    @required this.time,
-    @required this.description,
-    @required this.isOnline,
-    @required this.counter,
-  }) : super(key: key);
+  UserItem({Key key, this.user}) : super(key: key);
 
   @override
   _UserItemState createState() => _UserItemState();
@@ -29,91 +25,94 @@ class _UserItemState extends State<UserItem> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: ListTile(
-        contentPadding: EdgeInsets.all(0),
-        leading: Stack(
-          children: <Widget>[
-            CircleAvatar(
-              backgroundImage: NetworkImage(
-                "${widget.dp}",
-              ),
-              radius: 25,
-            ),
-            Positioned(
-              bottom: 0.0,
-              left: 6.0,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                height: 11,
-                width: 11,
-                child: Center(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: widget.isOnline ? Colors.greenAccent : Colors.grey,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    height: 7,
-                    width: 7,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        title: Text(
-          "${widget.name}",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        subtitle: Text("${widget.description}"),
-        trailing: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: <Widget>[
-            SizedBox(height: 10),
-            Text(
-              "${widget.time}",
-              style: TextStyle(
-                fontWeight: FontWeight.w300,
-                fontSize: 11,
-              ),
-            ),
-            SizedBox(height: 5),
-            widget.counter == 0
-                ? SizedBox()
-                : Container(
-                    padding: EdgeInsets.all(1),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    constraints: BoxConstraints(
-                      minWidth: 11,
-                      minHeight: 11,
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 1, left: 5, right: 5),
-                      child: Text(
-                        "${widget.counter}",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-          ],
-        ),
         onTap: () {
-          ValueKey key = this.widget.key;
-          String uid = key.value;
-          Navigator.of(context)
-              .pushNamed('/conversation', arguments: {'otherUid': uid});
+          Navigator.of(context).pushNamed('/user-profile', arguments: {
+            'userId': widget.user.id,
+          });
         },
+        contentPadding: EdgeInsets.all(10),
+        leading: InkWell(
+            child: CacheThisImage(
+              imageUrl: widget.user.profileImageUrl,
+              imageShape: BoxShape.circle,
+              width: Sizes.md_profile_image_w,
+              height: Sizes.md_profile_image_h,
+              defaultAssetImage: Strings.default_profile_image,
+            ),
+            onTap: () {
+              Navigator.of(context).pushNamed('/user-profile', arguments: {
+                'userId': widget.user.id,
+              });
+            }),
+        title: Text(widget.user.username),
+        trailing: widget.user.id != Constants.currentUserID
+            ? ButtonTheme(
+                height: 20,
+                minWidth: 40,
+                child: MaterialButton(
+                  height: 30,
+                  onPressed: () {
+                    followUnfollow();
+                  },
+                  textColor: Colors.white,
+                  color: MyColors.badgeColor,
+                  child: Text(followBtnText == null ? '' : followBtnText),
+                ),
+              )
+            : null,
       ),
     );
+  }
+
+  String followBtnText;
+  String snackbarText;
+
+  followUnfollow() async {
+    Navigator.of(context).push(CustomScreenLoader());
+
+    DocumentSnapshot user = await usersRef
+        .document(Constants.currentUserID)
+        .collection('following')
+        .document(widget.user.id)
+        .get();
+
+    if (user.exists) {
+      await DatabaseService.unfollowUser(widget.user.id);
+      setState(() {
+        followBtnText = 'Follow';
+      });
+    } else {
+      await DatabaseService.followUser(widget.user.id);
+      setState(() {
+        followBtnText = 'Unfollow';
+      });
+    }
+    Navigator.of(context).pop();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    checkStates();
+  }
+
+  checkStates() async {
+    DocumentSnapshot user = await usersRef
+        .document(Constants.currentUserID)
+        .collection('following')
+        .document(widget.user.id)
+        .get();
+
+    if (user.exists) {
+      setState(() {
+        followBtnText = 'Unfollow';
+      });
+    } else {
+      if (mounted) {
+        setState(() {
+          followBtnText = 'Follow';
+        });
+      }
+    }
   }
 }

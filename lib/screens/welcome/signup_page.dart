@@ -1,7 +1,9 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/screens/web_browser/webview_modal.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
 import 'package:glitcher/services/database_service.dart';
@@ -42,6 +44,8 @@ class _SignUpPageState extends State<SignUpPage> {
   final FocusNode myFocusNodeEmail = FocusNode();
   final FocusNode myFocusNodeName = FocusNode();
   final FocusNode myFocusNodeConfirmPassword = FocusNode();
+
+  bool _isTermsOfTermsAgreed = false;
 
   Widget _entryField(String title,
       {FocusNode focusNode,
@@ -163,10 +167,14 @@ class _SignUpPageState extends State<SignUpPage> {
           gradient: LinearGradient(
               begin: Alignment.centerRight,
               end: Alignment.centerRight,
-              colors: [MyColors.darkCardBG, MyColors.darkPrimary])),
+              colors: [
+                MyColors.darkCardBG,
+                _isTermsOfTermsAgreed ? MyColors.darkPrimary : Colors.blueGrey
+              ])),
       child: InkWell(
         splashColor: Colors.yellow,
         onTap: () async {
+          if (!_isTermsOfTermsAgreed) return;
           await _submit();
         },
         child: Container(
@@ -176,7 +184,9 @@ class _SignUpPageState extends State<SignUpPage> {
           child: Text(
             'Register now',
             style: TextStyle(
-                fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                fontSize: 20,
+                color: _isTermsOfTermsAgreed ? Colors.white : Colors.grey,
+                fontWeight: FontWeight.bold),
           ),
         ),
       ),
@@ -238,6 +248,8 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
+    TextStyle defaultStyle = TextStyle(color: Colors.white, fontSize: 12);
+    TextStyle linkStyle = TextStyle(color: Colors.blue);
     return Scaffold(
       key: _scaffoldKey,
       body: Container(
@@ -264,6 +276,53 @@ class _SignUpPageState extends State<SignUpPage> {
                     _textFieldWidgets(),
                     SizedBox(
                       height: 20,
+                    ),
+                    Row(
+                      children: [
+                        Checkbox(
+                          onChanged: (value) {
+                            setState(() {
+                              _isTermsOfTermsAgreed = !_isTermsOfTermsAgreed;
+                            });
+                          },
+                          value: _isTermsOfTermsAgreed,
+                          activeColor: MyColors.darkPrimary,
+                        ),
+                        Expanded(
+                          child: RichText(
+                            softWrap: true,
+                            text: TextSpan(
+                              style: defaultStyle,
+                              children: <TextSpan>[
+                                TextSpan(
+                                    text:
+                                        'By clicking Sign Up, you agree to our '),
+                                TextSpan(
+                                    text: 'Terms of Service',
+                                    style: linkStyle,
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        Navigator.of(context).push(WebViewModal(
+                                            url:
+                                                'https://www.gl1tch3r.com/terms-of-service'));
+                                        print('Terms of Service"');
+                                      }),
+                                TextSpan(text: ' and that you have read our '),
+                                TextSpan(
+                                    text: 'Privacy Policy',
+                                    style: linkStyle,
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        Navigator.of(context).push(WebViewModal(
+                                            url:
+                                                'https://www.gl1tch3r.com/privacy-policy'));
+                                        print('Privacy Policy"');
+                                      }),
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
                     ),
                     _submitButton(),
                     SizedBox(height: 10.0),

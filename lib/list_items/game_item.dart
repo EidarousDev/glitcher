@@ -90,7 +90,7 @@ class _GameItemState extends State<GameItem> {
               child: MaterialButton(
                 height: 30,
                 onPressed: () {
-                  DatabaseService.followGame(widget.game.id);
+                  //DatabaseService.followGame(widget.game.id);
                   followUnfollow();
                 },
                 textColor: Colors.white,
@@ -125,7 +125,7 @@ class _GameItemState extends State<GameItem> {
       });
       Constants.followedGames.remove(widget.game);
       Constants.followedGamesNames.remove(widget.game.fullName);
-      AppUtil.showSnackBar(context, _scaffoldKey, 'Game unfollowed');
+      //AppUtil.showSnackBar(context, _scaffoldKey, 'Game unfollowed');
     } else {
       await DatabaseService.followGame(widget.game.id);
       setState(() {
@@ -133,7 +133,7 @@ class _GameItemState extends State<GameItem> {
       });
       Constants.followedGames.add(widget.game);
       Constants.followedGamesNames.add(widget.game.fullName);
-      AppUtil.showSnackBar(context, _scaffoldKey, 'Game followed');
+      //AppUtil.showSnackBar(context, _scaffoldKey, 'Game followed');
     }
     Navigator.of(context).pop();
     //DatabaseService.getFollowedGames();

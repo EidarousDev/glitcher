@@ -638,7 +638,7 @@ class DatabaseService {
           message: 'Say hi to your new friend!',
           type: 'text',
           sender: otherUserId,
-          timestamp: Timestamp.fromDate(DateTime.now()));
+          timestamp: null);
     return messages[0];
   }
 

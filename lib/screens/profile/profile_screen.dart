@@ -659,13 +659,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
               leading: Builder(
                 builder: (context) => Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: InkWell(
-                    onTap: () => Scaffold.of(context).openDrawer(),
-                    child: Icon(
-                      const IconData(58311, fontFamily: 'MaterialIcons'),
-                      color: Colors.white,
-                    ),
-                  ),
+                  child: userId == Constants.currentUserID
+                      ? InkWell(
+                          onTap: () => Scaffold.of(context).openDrawer(),
+                          child: Icon(
+                            const IconData(58311, fontFamily: 'MaterialIcons'),
+                            color: Colors.white,
+                          ),
+                        )
+                      : InkWell(
+                          onTap: () => _onBackPressed(),
+                          child: Icon(
+                            Icons.arrow_back,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
               actions: [
@@ -984,6 +992,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<bool> _onBackPressed() {
     /// Navigate back to home page
-    Navigator.of(context).pushReplacementNamed('/home');
+    if (userId == Constants.currentUserID)
+      Navigator.of(context).pushReplacementNamed('/home');
+    else
+      Navigator.of(context).pop();
   }
 }

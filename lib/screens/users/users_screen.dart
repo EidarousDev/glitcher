@@ -3,6 +3,7 @@ import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
+import 'package:glitcher/list_items/user_item.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
@@ -100,105 +101,11 @@ class _UsersScreenState extends State<UsersScreen> {
               padding: EdgeInsets.all(10),
               itemBuilder: (context, index) {
                 return !_searching
-                    ? ListTile(
-                        onTap: () {
-                          Navigator.of(context)
-                              .pushNamed('/user-profile', arguments: {
-                            'userId': users[index].id,
-                          });
-                        },
-                        contentPadding: EdgeInsets.all(10),
-                        leading: InkWell(
-                            child: CacheThisImage(
-                              imageUrl: users[index].profileImageUrl,
-                              imageShape: BoxShape.circle,
-                              width: Sizes.md_profile_image_w,
-                              height: Sizes.md_profile_image_h,
-                              defaultAssetImage: Strings.default_profile_image,
-                            ),
-                            onTap: () {
-                              Navigator.of(context)
-                                  .pushNamed('/user-profile', arguments: {
-                                'userId': users[index].id,
-                              });
-                            }),
-                        title: Text(users[index].username),
-                        trailing: widget.screenType != 'followers'
-                            ? MaterialButton(
-                                child: Text(
-                                  'Unfollow',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                onPressed: () async {
-                                  Navigator.of(context)
-                                      .push(CustomScreenLoader());
-
-                                  await DatabaseService.unfollowUser(
-                                      users[index].id);
-                                  await NotificationHandler.removeNotification(
-                                      users[index].id,
-                                      Constants.currentUserID,
-                                      'follow');
-
-                                  Navigator.of(context).pop();
-
-                                  Navigator.of(context)
-                                      .pushReplacementNamed('/friends');
-                                },
-                                color: MyColors.darkPrimary,
-                              )
-                            : null,
+                    ? UserItem(
+                        user: users[index],
                       )
-                    : ListTile(
-                        onTap: () {
-                          Navigator.of(context)
-                              .pushNamed('/user-profile', arguments: {
-                            'userId': filteredUsers[index].id,
-                          });
-                        },
-                        contentPadding: EdgeInsets.all(10),
-                        leading: InkWell(
-                            child: CacheThisImage(
-                              imageUrl: filteredUsers[index].profileImageUrl,
-                              imageShape: BoxShape.circle,
-                              width: Sizes.md_profile_image_w,
-                              height: Sizes.md_profile_image_h,
-                              defaultAssetImage: Strings.default_profile_image,
-                            ),
-                            onTap: () {
-                              Navigator.of(context)
-                                  .pushNamed('/user-profile', arguments: {
-                                'userId': filteredUsers[index].id,
-                              });
-                            }),
-                        title: Text(filteredUsers[index].username),
-                        trailing: widget.screenType != 'followers'
-                            ? MaterialButton(
-                                child: Text(
-                                  'Unfollow',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                onPressed: () async {
-                                  Navigator.of(context)
-                                      .push(CustomScreenLoader());
-
-                                  await DatabaseService.unfollowUser(
-                                      filteredUsers[index].id);
-                                  await NotificationHandler.removeNotification(
-                                      filteredUsers[index].id,
-                                      Constants.currentUserID,
-                                      'follow');
-
-                                  Navigator.of(context).pop();
-
-                                  Navigator.of(context)
-                                      .pushReplacementNamed('/friends');
-                                },
-                                color: MyColors.darkPrimary,
-                              )
-                            : null,
+                    : UserItem(
+                        user: filteredUsers[index],
                       );
               })
           : Center(

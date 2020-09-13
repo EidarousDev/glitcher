@@ -65,6 +65,8 @@ class _ConversationState extends State<Conversation>
 
   var _currentStatus;
 
+  var isMicrophoneGranted = false;
+
   _ConversationState();
 
   initRecorder() async {
@@ -113,7 +115,8 @@ class _ConversationState extends State<Conversation>
         .listen((querySnapshot) {
       querySnapshot.documentChanges.forEach((change) {
         if (change.type == DocumentChangeType.added) {
-          print('type is her');
+          //print('type is her');
+          //if (change.document['timestamp'] == null) return;
           if (_messages != null) {
             if (this.mounted) {
               setState(() {
@@ -556,20 +559,26 @@ class _ConversationState extends State<Conversation>
                                   )
                                 : GestureDetector(
                                     onLongPress: () async {
-                                      bool isGranted;
                                       if (await PermissionsService()
                                           .hasMicrophonePermission()) {
-                                        isGranted = true;
+                                        setState(() {
+                                          isMicrophoneGranted = true;
+                                        });
                                       } else {
-                                        isGranted = await PermissionsService()
-                                            .requestMicrophonePermission(
-                                                onPermissionDenied: () {
+                                        bool isGranted =
+                                            await PermissionsService()
+                                                .requestMicrophonePermission(
+                                                    onPermissionDenied: () {
+                                          alertDialog(context);
                                           print('Permission has been denied');
+                                        });
+                                        setState(() {
+                                          isMicrophoneGranted = isGranted;
                                         });
                                         return;
                                       }
 
-                                      if (isGranted) {
+                                      if (isMicrophoneGranted) {
                                         setState(() {
                                           _currentStatus =
                                               RecordingStatus.Recording;
@@ -577,43 +586,26 @@ class _ConversationState extends State<Conversation>
                                         await initRecorder();
                                         await recorder.startRecording(
                                             conversation: this.widget);
-                                      } else {
-                                        showDialog(
-                                            context: context,
-                                            builder: (context) {
-                                              return AlertDialog(
-                                                title: Text('Info'),
-                                                content: Text(
-                                                    'You must grant this microphone access to be able to use this feature.'),
-                                                actions: <Widget>[
-                                                  MaterialButton(
-                                                    onPressed: () {
-                                                      Navigator.of(context)
-                                                          .pop();
-                                                    },
-                                                    child: Text('OK'),
-                                                  )
-                                                ],
-                                              );
-                                            });
-                                      }
+                                      } else {}
                                     },
                                     onLongPressEnd: (longPressDetails) async {
-                                      setState(() {
-                                        _currentStatus =
-                                            RecordingStatus.Stopped;
-                                      });
-                                      Recording result =
-                                          await recorder.stopRecording();
+                                      if (isMicrophoneGranted) {
+                                        setState(() {
+                                          _currentStatus =
+                                              RecordingStatus.Stopped;
+                                        });
+                                        Recording result =
+                                            await recorder.stopRecording();
 
-                                      //Storage path is voice_messages/sender_id/receiver_id/file
-                                      _url = await AppUtil.uploadFile(
-                                          File(result.path),
-                                          context,
-                                          'voice_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}');
+                                        //Storage path is voice_messages/sender_id/receiver_id/file
+                                        _url = await AppUtil.uploadFile(
+                                            File(result.path),
+                                            context,
+                                            'voice_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}');
 
-                                      await DatabaseService.sendMessage(
-                                          widget.otherUid, 'audio', _url);
+                                        await DatabaseService.sendMessage(
+                                            widget.otherUid, 'audio', _url);
+                                      }
                                     },
                                     child: IconButton(
                                       icon: Icon(
@@ -637,6 +629,26 @@ class _ConversationState extends State<Conversation>
         ),
       ),
     );
+  }
+
+  void alertDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Info'),
+            content: Text(
+                'You must grant this microphone access to be able to use this feature.'),
+            actions: <Widget>[
+              MaterialButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              )
+            ],
+          );
+        });
   }
 
   void updateRecordTime(String rt) {

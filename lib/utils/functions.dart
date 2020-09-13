@@ -221,6 +221,8 @@ class Functions {
 
   /// Format Time
   static String formatTimestamp(Timestamp timestamp) {
+    if (timestamp == null) return '';
+
     var now = Timestamp.now().toDate();
     var date = new DateTime.fromMillisecondsSinceEpoch(
         timestamp.millisecondsSinceEpoch);

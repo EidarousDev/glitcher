@@ -3,6 +3,7 @@ import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
+import 'package:glitcher/list_items/user_item.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
@@ -68,6 +69,9 @@ class _SearchScreenState extends State<SearchScreen> {
                       icon: Icon(Icons.close),
                       onPressed: () {
                         _searchController.clear();
+                        setState(() {
+                          filteredUsers = [];
+                        });
                       })
                   : null,
               hintText: 'Search',
@@ -113,80 +117,9 @@ class _SearchScreenState extends State<SearchScreen> {
                 itemCount: filteredUsers.length,
                 padding: EdgeInsets.all(10),
                 itemBuilder: (context, index) {
-                  return ListTile(
-                      onTap: () {
-                        Navigator.of(context)
-                            .pushNamed('/user-profile', arguments: {
-                          'userId': filteredUsers[index].id,
-                        });
-                      },
-                      contentPadding: EdgeInsets.all(10),
-                      leading: InkWell(
-                          child: CacheThisImage(
-                            imageUrl: filteredUsers[index].profileImageUrl,
-                            imageShape: BoxShape.circle,
-                            width: Sizes.md_profile_image_w,
-                            height: Sizes.md_profile_image_h,
-                            defaultAssetImage: Strings.default_profile_image,
-                          ),
-                          onTap: () {
-                            Navigator.of(context)
-                                .pushNamed('/user-profile', arguments: {
-                              'userId': filteredUsers[index].id,
-                            });
-                          }),
-                      title: Text(filteredUsers[index].username),
-                      trailing:
-                          filteredUsers[index].id == Constants.currentUserID
-                              ? Container(
-                                  height: 0,
-                                  width: 0,
-                                )
-                              : Constants.followingIds
-                                      .contains(filteredUsers[index].id)
-                                  ? MaterialButton(
-                                      child: Text(
-                                        'Unfollow',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      onPressed: () async {
-                                        Navigator.of(context)
-                                            .push(CustomScreenLoader());
-
-                                        await DatabaseService.unfollowUser(
-                                            filteredUsers[index].id);
-                                        await NotificationHandler
-                                            .removeNotification(
-                                                filteredUsers[index].id,
-                                                Constants.currentUserID,
-                                                'follow');
-                                        _searchUsers(_searchController.text);
-
-                                        Navigator.of(context).pop();
-                                      },
-                                      color: MyColors.darkPrimary,
-                                    )
-                                  : MaterialButton(
-                                      child: Text(
-                                        'Follow',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      onPressed: () async {
-                                        Navigator.of(context)
-                                            .push(CustomScreenLoader());
-
-                                        await DatabaseService.followUser(
-                                            filteredUsers[index].id);
-                                        _searchUsers(_searchController.text);
-
-                                        Navigator.of(context).pop();
-                                      },
-                                      color: MyColors.darkPrimary,
-                                    ));
+                  return UserItem(
+                    user: filteredUsers[index],
+                  );
                 })
             : Center(
                 child: Text(

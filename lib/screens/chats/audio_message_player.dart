@@ -65,14 +65,20 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
   void initAudioPlayer() {
     advancedPlayer = AudioPlayer();
     audioCache = AudioCache(fixedPlayer: advancedPlayer);
-    advancedPlayer.durationHandler = (d) => setState((){
-     _duration = d;
-    });
+    advancedPlayer.durationHandler = (d) => setState(() {
+          _duration = d;
+        });
 
-    advancedPlayer.positionHandler = (p) => setState((){
-     position = p;
-    });
-
+    advancedPlayer.positionHandler = (p) => setState(() {
+          position = p;
+          print('d:${_duration.inMilliseconds} - p:${p.inMilliseconds}');
+          if (_duration.inMilliseconds - p.inMilliseconds < 200) {
+            setState(() {
+              playerState = AudioPlayerState.STOPPED;
+              _duration = null;
+            });
+          }
+        });
 
 //    _positionSubscription =
 //        advancedPlayer.onAudioPositionChanged.listen((Duration p) {
@@ -106,7 +112,6 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
 //        position = Duration(seconds: 0);
 //      });
 //    });
-
   }
 
   Future play() async {
@@ -131,7 +136,7 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
     await advancedPlayer.stop();
     setState(() {
       playerState = AudioPlayerState.STOPPED;
-      position = Duration();
+      position = _duration;
     });
 
     _positionSubscription.cancel();
