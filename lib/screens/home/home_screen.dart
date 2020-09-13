@@ -413,7 +413,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   _setupFeed() async {
     List<Post> posts;
-    feedFilter = await getFavouriteFilter();
 
     print('Home Filter: $feedFilter');
 
@@ -434,7 +433,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       posts = await DatabaseService.getPostsFilteredByFollowedGames();
       setState(() {
         _posts = posts;
-        this.lastVisiblePostSnapShot = posts.last.timestamp;
+        if (_posts.length > 0)
+          this.lastVisiblePostSnapShot = posts.last.timestamp;
       });
     }
 
@@ -464,7 +464,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         } else {}
       });
     loadUserData();
-
+    loadUserFavoriteFilter();
     _setupFeed();
 //    if (Cache.homePosts.length == 0) {
 //      print('refreshed');
@@ -479,6 +479,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     RateApp(context).rateGlitcher();
     _loadAudioByteData();
+  }
+
+  loadUserFavoriteFilter() async {
+    feedFilter = await getFavouriteFilter();
   }
 
   @override

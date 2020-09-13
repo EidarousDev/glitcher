@@ -63,6 +63,10 @@ class _PostItemState extends State<PostItem> {
   Game currentGame;
   final number = ValueNotifier(0);
 
+  String _hashtagText = '';
+
+  String _mentionText;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -155,9 +159,8 @@ class _PostItemState extends State<PostItem> {
                                   context: context,
                                   text: post.text,
                                   onMentionPressed: (text) =>
-                                      mentionedUserProfile(post.text),
-                                  onHashTagPressed: (text) =>
-                                      hashtagScreen(post.text),
+                                      mentionedUserProfile(),
+                                  onHashTagPressed: (text) => hashtagScreen(),
                                   style: TextStyle(
                                     color:
                                         switchColor(Colors.black, Colors.white),
@@ -174,9 +177,8 @@ class _PostItemState extends State<PostItem> {
                                       ? (firstHalf + '...')
                                       : (firstHalf + secondHalf),
                                   onMentionPressed: (text) =>
-                                      mentionedUserProfile(post.text),
-                                  onHashTagPressed: (text) =>
-                                      hashtagScreen(post.text),
+                                      mentionedUserProfile(),
+                                  onHashTagPressed: (text) => hashtagScreen(),
                                   style: TextStyle(
                                     color:
                                         switchColor(Colors.black, Colors.white),
@@ -517,6 +519,9 @@ class _PostItemState extends State<PostItem> {
     _loadAudioByteData();
     super.initState();
 
+    checkIfContainsHashtag();
+    checkIfContainsMention();
+
     _youtubeController = YoutubePlayerController(
       initialVideoId: widget.post.youtubeId ?? '',
       flags: YoutubePlayerFlags(
@@ -779,28 +784,40 @@ class _PostItemState extends State<PostItem> {
     );
   }
 
-  Future mentionedUserProfile(String w) async {
-    var words = w.split(' ');
-    String username =
-        words.length > 0 && words[words.length - 1].startsWith('@')
-            ? words[words.length - 1]
-            : '';
-    if (username.length > 1) username = username.substring(1);
-    print(username);
-    User user = await DatabaseService.getUserWithUsername(username);
+  Future mentionedUserProfile() async {
+    print('mention: $_mentionText');
+    User user =
+        await DatabaseService.getUserWithUsername(_mentionText.substring(1));
     Navigator.of(context)
         .pushNamed('/user-profile', arguments: {'userId': user.id});
     print(user.id);
   }
 
-  Future hashtagScreen(String w) async {
-    var words = w.split(' ');
-    String hashtagText =
-        words.length > 0 && words[words.length - 1].startsWith('#')
-            ? words[words.length - 1]
-            : '';
-    print(hashtagText);
-    Hashtag hashtag = await DatabaseService.getHashtagWithText(hashtagText);
+  checkIfContainsHashtag() {
+    var words = widget.post.text.split(' ');
+    print(words.length);
+    for (String word in words) {
+      print('word: $word');
+      _hashtagText = words.length > 0 && word.startsWith('#') ? word : '';
+      break;
+    }
+  }
+
+  checkIfContainsMention() {
+    var words = widget.post.text.split(' ');
+
+    for (String word in words) {
+      print('word: $word');
+      _mentionText = words.length > 0 && word.startsWith('@') ? word : '';
+      //if (_mentionText.length > 1) _mentionText = _mentionText.substring(1);
+      break;
+    }
+  }
+
+  Future hashtagScreen() async {
+    print('hashtagText: $_hashtagText');
+    Hashtag hashtag = await DatabaseService.getHashtagWithText(_hashtagText);
+
     Navigator.of(context)
         .pushNamed('/hashtag-posts', arguments: {'hashtag': hashtag});
     print(hashtag.id);
