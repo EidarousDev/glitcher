@@ -20,7 +20,7 @@ class UrlText extends StatelessWidget {
   List<InlineSpan> getTextSpans() {
     List<InlineSpan> widgets = List<InlineSpan>();
     RegExp reg = RegExp(
-        r"([#])\w+| [@]\w+|(https?|ftp|file|#)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]*");
+        r"([#])\w+|([@])\w+|(https?|ftp|file|#)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]*");
     Iterable<Match> _matches = reg.allMatches(text);
     List<_ResultMatch> resultMatches = List<_ResultMatch>();
     int start = 0;
