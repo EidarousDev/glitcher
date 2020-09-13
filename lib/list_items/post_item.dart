@@ -76,6 +76,9 @@ class _PostItemState extends State<PostItem> {
     return Column(
       children: <Widget>[
         GestureDetector(
+          onLongPress: () async {
+            _onLongPressedPost(context);
+          },
           onTap: () {
             if (Constants.routesStack.top() == '/post') return;
             Navigator.of(context).pushNamed('/post', arguments: {
@@ -815,14 +818,18 @@ class _PostItemState extends State<PostItem> {
     });
   }
 
-  void onLongPressedPost(BuildContext context, String postText,
-      GlobalKey<ScaffoldState> scaffoldKey) {
-    var text = ClipboardData(text: postText);
-    Clipboard.setData(text);
-    AppUtil.showSnackBar(context, scaffoldKey, 'Post copied to clipboard');
-  }
-
   void setCurrentGame() async {
     currentGame = await DatabaseService.getGameWithGameName(widget.post.game);
+  }
+
+  _onLongPressedPost(BuildContext context) async {
+    var postLink = await DynamicLinks.createPostDynamicLink({
+      'postId': widget.post.id,
+      'text': widget.post.text,
+      'imageUrl': widget.post.imageUrl
+    });
+    var text = ClipboardData(text: '$postLink');
+    Clipboard.setData(text);
+    AppUtil().showToast('Post copied to clipboard');
   }
 }

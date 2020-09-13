@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -7,6 +8,8 @@ import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
+import 'package:glitcher/services/share_link.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
@@ -80,10 +83,22 @@ class PostBottomSheet {
                 }
               })
             : Container(),
-        _widgetBottomSheetRow(
-          context,
-          Icon(Icons.link),
-          text: 'Copy link to post',
+        InkWell(
+          onTap: () async {
+            var postLink = await DynamicLinks.createPostDynamicLink({
+              'postId': post.id,
+              'text': post.text,
+              'imageUrl': post.imageUrl
+            });
+            var text = ClipboardData(text: '$postLink');
+            Clipboard.setData(text);
+            AppUtil().showToast('Post copied to clipboard');
+          },
+          child: _widgetBottomSheetRow(
+            context,
+            Icon(Icons.link),
+            text: 'Copy link to post',
+          ),
         ),
         Constants.routesStack.top() == '/bookmarks'
             ?

@@ -3,10 +3,11 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
-import 'package:glitcher/constants/sizes.dart';
+import 'package:glitcher/constants/sizetants/strings.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/audio_recorder.dart';
@@ -40,6 +41,8 @@ class _ConversationState extends State<Conversation>
     with WidgetsBindingObserver {
   bool isMicrophoneGranted = false;
   Firestore _firestore = Firestore.instance;
+  //int _spawnedAudioCount = 0;
+  //ByteData _recordingSFX;
 //  static Random random = Random();
 //  String name;
 //  String profileImage;
@@ -269,6 +272,7 @@ class _ConversationState extends State<Conversation>
   @override
   void initState() {
     super.initState();
+    //_loadAudioByteData();
     WidgetsBinding.instance.addObserver(this);
     getMessages();
     listenToMessagesChanges();
@@ -669,4 +673,8 @@ class _ConversationState extends State<Conversation>
     Navigator.of(context).pop(message);
     //Constants.chats.ChatsState
   }
+
+  // void _loadAudioByteData() async {
+  //   _recordingSFX = await rootBundle.load(Strings.recording_sound);
+  // }
 }

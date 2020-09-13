@@ -86,6 +86,7 @@ class Strings {
   static const String dislike_sound = 'assets/sounds/dislikesfx.mp3';
   static const String swipe_up_to_reload =
       'assets/sounds/swipe_up_to_reload.mp3';
+  static const String recording_sound = 'assets/sounds/recording_sound.mp3';
   String appFont = 'HelveticaNeuea';
   List<String> defaultProfilePics = [
     'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6TaCLCqU4K0ieF27ayjl51NmitWaJAh_X0r1rLX4gMvOe0MDaYw&s',
