@@ -13,7 +13,9 @@ class DynamicLinks {
       // This can be whatever you want for the uri, https://yourapp.com/groupinvite?username=$userName
       link: Uri.parse('$_urlPrefix/posts/${args["postId"]}'),
       socialMetaTagParameters: SocialMetaTagParameters(
-        title: '${args["text"]}'.replaceRange(25, args["text"].length, '...'),
+        title: '${args["text"]}'.length > 25
+            ? '${args["text"]}'.replaceRange(25, args["text"].length, '...')
+            : '${args["text"]}',
         description: '${args["text"]}',
         imageUrl: Uri.parse('${args["imageUrl"]}'),
       ),
@@ -37,6 +39,13 @@ class DynamicLinks {
       uriPrefix: _urlPrefix,
       // This can be whatever you want for the uri, https://yourapp.com/groupinvite?username=$userName
       link: Uri.parse('$_urlPrefix/users/${args["userId"]}'),
+      socialMetaTagParameters: SocialMetaTagParameters(
+        title: '${args["text"]}'.length > 25
+            ? '${args["text"]}'.replaceRange(25, args["text"].length, '...')
+            : '${args["text"]}',
+        description: '${args["text"]}',
+        imageUrl: Uri.parse('${args["imageUrl"]}'),
+      ),
       androidParameters: AndroidParameters(
         packageName: Strings.packageName,
       ),
@@ -57,6 +66,13 @@ class DynamicLinks {
       uriPrefix: _urlPrefix,
       // This can be whatever you want for the uri, https://yourapp.com/groupinvite?username=$userName
       link: Uri.parse('$_urlPrefix/games/${args["gameId"]}'),
+      socialMetaTagParameters: SocialMetaTagParameters(
+        title: '${args["text"]}'.length > 25
+            ? '${args["text"]}'.replaceRange(25, args["text"].length, '...')
+            : '${args["text"]}',
+        description: '${args["text"]}',
+        imageUrl: Uri.parse('${args["imageUrl"]}'),
+      ),
       androidParameters: AndroidParameters(
         packageName: Strings.packageName,
       ),

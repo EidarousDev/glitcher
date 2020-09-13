@@ -438,7 +438,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget _googleSignInButton() {
     return SignInButton(
       Buttons.Google,
-      text: "Sign up with Google",
+      text: "Sign in with Google",
       onPressed: () async {
         print('Google SignIn Button Tapped!');
         FirebaseUser user = await signInWithGoogle();

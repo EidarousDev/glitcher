@@ -227,7 +227,7 @@ class _ConversationState extends State<Conversation>
         .document(widget.otherUid)
         .collection('conversations')
         .document(Constants.currentUserID)
-        .updateData({'isSeen': true});
+        .setData({'isSeen': true});
   }
 
   makeMessagesUnseen() async {

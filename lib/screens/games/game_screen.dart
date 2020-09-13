@@ -261,7 +261,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
 
   shareGame(String gameId, String gameName, String imageUrl) async {
     var gameLink = await DynamicLinks.createGameDynamicLink(
-        {'gameId': gameId, 'gameName': gameName, 'imageUrl': imageUrl});
+        {'gameId': gameId, 'text': gameName, 'imageUrl': imageUrl});
     Share.share('Check out ($gameName) : $gameLink');
     print('Check out this game ($gameName): $gameLink');
   }

@@ -714,6 +714,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   shareProfile(String userId, String username, String profileImageUrl) async {
+    print('profileImageUrl: $profileImageUrl');
     var userLink = await DynamicLinks.createProfileDynamicLink(
         {'userId': userId, 'text': username, 'imageUrl': profileImageUrl});
     Share.share('Check out @$username profile: $userLink');
