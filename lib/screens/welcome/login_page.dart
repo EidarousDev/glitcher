@@ -363,7 +363,6 @@ class _LoginPageState extends State<LoginPage> {
       AppUtil.showSnackBar(
           context, _scaffoldKey, 'The email address or password is incorrect.');
     }
-    Navigator.of(context).pop();
     //print('Should be true: $_loading');
   }
 
