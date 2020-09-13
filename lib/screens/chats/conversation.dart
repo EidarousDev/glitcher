@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
-import 'package:glitcher/constants/sizetants/strings.dart';
+import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/audio_recorder.dart';
