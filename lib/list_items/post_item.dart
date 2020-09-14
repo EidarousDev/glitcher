@@ -785,19 +785,19 @@ class _PostItemState extends State<PostItem> {
   }
 
   Future mentionedUserProfile() async {
-    print('mention: $_mentionText');
+    //print('mention: $_mentionText');
     User user =
         await DatabaseService.getUserWithUsername(_mentionText.substring(1));
     Navigator.of(context)
         .pushNamed('/user-profile', arguments: {'userId': user.id});
-    print(user.id);
+    //print(user.id);
   }
 
   checkIfContainsHashtag() {
     var words = widget.post.text.split(' ');
-    print(words.length);
+    //print(words.length);
     for (String word in words) {
-      print('word: $word');
+      //print('word: $word');
       _hashtagText = words.length > 0 && word.startsWith('#') ? word : '';
       break;
     }
@@ -807,7 +807,7 @@ class _PostItemState extends State<PostItem> {
     var words = widget.post.text.split(' ');
 
     for (String word in words) {
-      print('word: $word');
+      //print('word: $word');
       _mentionText = words.length > 0 && word.startsWith('@') ? word : '';
       //if (_mentionText.length > 1) _mentionText = _mentionText.substring(1);
       break;
@@ -815,12 +815,12 @@ class _PostItemState extends State<PostItem> {
   }
 
   Future hashtagScreen() async {
-    print('hashtagText: $_hashtagText');
+    //print('hashtagText: $_hashtagText');
     Hashtag hashtag = await DatabaseService.getHashtagWithText(_hashtagText);
 
     Navigator.of(context)
         .pushNamed('/hashtag-posts', arguments: {'hashtag': hashtag});
-    print(hashtag.id);
+    //print(hashtag.id);
   }
 
   dropDownOptions() {
@@ -847,6 +847,6 @@ class _PostItemState extends State<PostItem> {
     });
     var text = ClipboardData(text: '$postLink');
     Clipboard.setData(text);
-    AppUtil().showToast('Post copied to clipboard');
+    //AppUtil().showToast('Post copied to clipboard');
   }
 }

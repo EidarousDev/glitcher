@@ -32,6 +32,20 @@ class PostBottomSheet {
         ));
   }
 
+  double calculateHeightRatio(bool isMyPost) {
+    double ratio = 1.0;
+    if (!isMyPost && Constants.routesStack.top() != '/post') {
+      ratio = 0.375;
+    } else if (!isMyPost && Constants.routesStack.top() == '/post') {
+      ratio = 0.3;
+    } else if (isMyPost && Constants.routesStack.top() != '/post') {
+      ratio = 0.375;
+    } else if (isMyPost && Constants.routesStack.top() == '/post') {
+      ratio = 0.31;
+    }
+    return ratio;
+  }
+
   void _openBottomSheet(BuildContext context, Post post) async {
     print('route: ${Constants.routesStack.top()}');
     User user = await DatabaseService.getUserWithId(post.authorId);
@@ -42,7 +56,7 @@ class PostBottomSheet {
       builder: (context) {
         return Container(
             padding: EdgeInsets.only(top: 5, bottom: 0),
-            height: Sizes.fullHeight(context) * (isMyPost ? .35 : .5),
+            height: Sizes.fullHeight(context) * calculateHeightRatio(isMyPost),
             width: Sizes.fullWidth(context),
             decoration: BoxDecoration(
               color: switchColor(
@@ -175,36 +189,47 @@ class PostBottomSheet {
 
   Widget _widgetBottomSheetRow(BuildContext context, Icon icon,
       {String text, Function onPressed, bool isEnable = false}) {
-    return Expanded(
-      child: customInkWell(
-        context: context,
-        onPressed: () {
-          if (onPressed != null)
-            onPressed();
-          else {
-            Navigator.pop(context);
-          }
-        },
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            children: <Widget>[
-              icon,
-              SizedBox(
-                width: 15,
-              ),
-              customText(
-                text,
-                context: context,
-                style: TextStyle(
-                  color: isEnable ? MyColors.darkPrimary : MyColors.darkGrey,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Flex(
+        direction: Axis.horizontal,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        verticalDirection: VerticalDirection.down,
+        children: [
+          Expanded(
+            child: customInkWell(
+              context: context,
+              onPressed: () {
+                if (onPressed != null)
+                  onPressed();
+                else {
+                  Navigator.pop(context);
+                }
+              },
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: <Widget>[
+                    icon,
+                    SizedBox(
+                      width: 15,
+                    ),
+                    customText(
+                      text,
+                      context: context,
+                      style: TextStyle(
+                        color:
+                            isEnable ? MyColors.darkPrimary : MyColors.darkGrey,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    )
+                  ],
                 ),
-              )
-            ],
-          ),
-        ),
+              ),
+            ),
+          )
+        ],
       ),
     );
   }
