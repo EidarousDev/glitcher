@@ -9,6 +9,7 @@ import 'package:glitcher/models/notification_model.dart' as notification;
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/notification_handler.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 
 class DatabaseService {
@@ -358,8 +359,15 @@ class DatabaseService {
   // This function is used to get the recent posts (filtered by followed games)
   static Future<List<Post>> getNextPostsFilteredByFollowedGames(
       Timestamp lastVisiblePostSnapShot) async {
+    List list = List();
+    if (Constants.followedGamesNames.length > 10) {
+      list = AppUtil.randomIndices(Constants.followedGamesNames);
+    } else {
+      list = Constants.followedGamesNames;
+    }
+
     QuerySnapshot postSnapshot = await postsRef
-        .where('game', whereIn: Constants.followedGamesNames)
+        .where('game', whereIn: list)
         .orderBy('timestamp', descending: true)
         .startAfter([lastVisiblePostSnapShot])
         .limit(20)
@@ -372,8 +380,15 @@ class DatabaseService {
   // This function is used to get the recent posts (filtered by followed gamers)
   static Future<List<Post>> getNextPostsFilteredByFollowing(
       Timestamp lastVisiblePostSnapShot) async {
+    List list = List();
+    if (Constants.followingIds.length > 10) {
+      list = AppUtil.randomIndices(Constants.followingIds);
+    } else {
+      list = Constants.followedGamesNames;
+    }
+
     QuerySnapshot postSnapshot = await postsRef
-        .where('author', whereIn: Constants.followingIds)
+        .where('author', whereIn: list)
         .orderBy('timestamp', descending: true)
         .startAfter([lastVisiblePostSnapShot])
         .limit(20)
@@ -455,8 +470,14 @@ class DatabaseService {
   }
 
   static Future<List<Post>> getPostsFilteredByFollowedGames() async {
+    List list = List();
+    if (Constants.followedGamesNames.length > 10) {
+      list = AppUtil.randomIndices(Constants.followedGamesNames);
+    } else {
+      list = Constants.followedGamesNames;
+    }
     QuerySnapshot postSnapshot = await postsRef
-        .where('game', whereIn: Constants.followedGamesNames)
+        .where('game', whereIn: list)
         .orderBy('timestamp', descending: true)
         .limit(20)
         .getDocuments();
@@ -466,8 +487,14 @@ class DatabaseService {
   }
 
   static Future<List<Post>> getPostsFilteredByFollowing() async {
+    List list = List();
+    if (Constants.followingIds.length > 10) {
+      list = AppUtil.randomIndices(Constants.followingIds);
+    } else {
+      list = Constants.followedGamesNames;
+    }
     QuerySnapshot postSnapshot = await postsRef
-        .where('author', whereIn: Constants.followingIds)
+        .where('author', whereIn: list)
         .orderBy('timestamp', descending: true)
         .limit(20)
         .getDocuments();
@@ -1116,6 +1143,14 @@ class DatabaseService {
         .collection('bookmarks')
         .document(postId)
         .setData({'timestamp': FieldValue.serverTimestamp()});
+  }
+
+  static removePostFromBookmarks(String postId) async {
+    await usersRef
+        .document(Constants.currentUserID)
+        .collection('bookmarks')
+        .document(postId)
+        .delete();
   }
 
   static unfollowUser(String userId) async {

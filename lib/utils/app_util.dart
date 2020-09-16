@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +37,22 @@ class AppUtil {
     } else {
       print('Could not launch $url');
     }
+  }
+
+  static randomIndices(List list, {int requiredRandoms = 10}) {
+    Random r = Random();
+    List randoms = List();
+
+    for (int i = 0; i < requiredRandoms; i++) {
+      int random = r.nextInt(list.length);
+
+      while (randoms.contains(random)) {
+        random = r.nextInt(list.length);
+      }
+      randoms.add(list[random]);
+    }
+
+    return randoms;
   }
 
   showToast(String msg) {

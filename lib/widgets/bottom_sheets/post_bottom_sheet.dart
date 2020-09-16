@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_icons/font_awesome.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -106,7 +107,7 @@ class PostBottomSheet {
             });
             var text = ClipboardData(text: '$postLink');
             Clipboard.setData(text);
-            AppUtil().showToast('Post copied to clipboard');
+            //AppUtil().showToast('Post copied to clipboard');
           },
           child: _widgetBottomSheetRow(
             context,
@@ -115,14 +116,17 @@ class PostBottomSheet {
           ),
         ),
         Constants.routesStack.top() == '/bookmarks'
-            ?
-//          _widgetBottomSheetRow(
-//          context,
-//          Icon(FontAwesome.getIconData('bookmark-remove')),
-//          text: 'Unbookmark this post',
-//          onPressed: () {
-//          },
-            Container()
+            ? _widgetBottomSheetRow(
+                context,
+                Icon(Icons.close),
+                text: 'Remove post from bookmarks',
+                onPressed: () async {
+                  await DatabaseService.removePostFromBookmarks(post.id);
+                  Constants.routesStack.pop();
+                  Navigator.of(context).pushReplacementNamed('/bookmarks');
+                },
+              )
+//            Container()
             : _widgetBottomSheetRow(
                 context,
                 Icon(Icons.bookmark),
@@ -268,6 +272,7 @@ class PostBottomSheet {
       ),
     );
     Navigator.of(context).pop();
+    Constants.routesStack.pop();
     Navigator.of(context).pushReplacementNamed('/home');
     print('deleting post!');
   }

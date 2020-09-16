@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:glitcher/services/share_link.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/drawer.dart';
@@ -55,7 +56,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                   'game_id': widget.game.id
                 });
               },
-              icon: Icon(Icons.lightbulb_outline),
+              icon: Icon(MaterialCommunityIcons.getIconData('lightbulb-on')),
             ),
             IconButton(
               onPressed: () async {

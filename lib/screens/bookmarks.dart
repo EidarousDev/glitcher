@@ -27,85 +27,90 @@ class _BookmarksScreenState extends State<BookmarksScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        flexibleSpace: gradientAppBar(),
-        leading: new IconButton(
-          icon: new Icon(Icons.arrow_back),
-          onPressed: () {
-            _onBackPressed();
-          },
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: Scaffold(
+        appBar: AppBar(
+          flexibleSpace: gradientAppBar(),
+          leading: new IconButton(
+            icon: new Icon(Icons.arrow_back),
+            onPressed: () {
+              _onBackPressed();
+            },
+          ),
+          title: Text('Bookmarks'),
+          centerTitle: true,
         ),
-        title: Text('Bookmarks'),
-        centerTitle: true,
+        body: _posts.length > 0
+            ? SingleChildScrollView(
+                controller: _scrollController,
+                child: ListView.separated(
+                  separatorBuilder: (BuildContext context, int index) {
+                    return Container(
+                      height: 1,
+                      color: MyColors.darkAccent,
+                      width: MediaQuery.of(context).size.width / 1.3,
+                      child: Divider(),
+                    );
+                  },
+                  physics: NeverScrollableScrollPhysics(),
+                  scrollDirection: Axis.vertical,
+                  itemCount: _posts.length,
+                  shrinkWrap: true,
+                  itemBuilder: (BuildContext context, int index) {
+                    Post post = _posts[index];
+                    //print('post author: ${post.authorId}');
+                    return post.authorId != 'deleted'
+                        ? FutureBuilder(
+                            future:
+                                DatabaseService.getUserWithId(post.authorId),
+                            builder:
+                                (BuildContext context, AsyncSnapshot snapshot) {
+                              if (!snapshot.hasData) {
+                                return SizedBox.shrink();
+                              }
+                              User author = snapshot.data;
+                              return PostItem(
+                                post: post,
+                                author: author,
+                              );
+                            })
+                        : SizedBox(
+                            child: Center(
+                                child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                Text(
+                                    'This post has been deleted by the author.'),
+                                IconButton(
+                                  icon: Icon(Icons.close),
+                                  onPressed: () async {
+                                    await usersRef
+                                        .document(Constants.currentUserID)
+                                        .collection('bookmarks')
+                                        .document(post.id)
+                                        .delete();
+                                    _setupFeed();
+                                  },
+                                )
+                              ],
+                            )),
+                            height: 100,
+                          );
+                  },
+                ),
+              )
+            : Center(
+                child: Text(
+                'No posts bookmarked',
+                style: TextStyle(fontSize: 20, color: Colors.grey),
+              )),
       ),
-      body: _posts.length > 0
-          ? SingleChildScrollView(
-              controller: _scrollController,
-              child: ListView.separated(
-                separatorBuilder: (BuildContext context, int index) {
-                  return Container(
-                    height: 1,
-                    color: MyColors.darkAccent,
-                    width: MediaQuery.of(context).size.width / 1.3,
-                    child: Divider(),
-                  );
-                },
-                physics: NeverScrollableScrollPhysics(),
-                scrollDirection: Axis.vertical,
-                itemCount: _posts.length,
-                shrinkWrap: true,
-                itemBuilder: (BuildContext context, int index) {
-                  Post post = _posts[index];
-                  //print('post author: ${post.authorId}');
-                  return post.authorId != 'deleted'
-                      ? FutureBuilder(
-                          future: DatabaseService.getUserWithId(post.authorId),
-                          builder:
-                              (BuildContext context, AsyncSnapshot snapshot) {
-                            if (!snapshot.hasData) {
-                              return SizedBox.shrink();
-                            }
-                            User author = snapshot.data;
-                            return PostItem(
-                              post: post,
-                              author: author,
-                            );
-                          })
-                      : SizedBox(
-                          child: Center(
-                              child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              Text('This post has been deleted by the author.'),
-                              IconButton(
-                                icon: Icon(Icons.close),
-                                onPressed: () async {
-                                  await usersRef
-                                      .document(Constants.currentUserID)
-                                      .collection('bookmarks')
-                                      .document(post.id)
-                                      .delete();
-                                  _setupFeed();
-                                },
-                              )
-                            ],
-                          )),
-                          height: 100,
-                        );
-                },
-              ),
-            )
-          : Center(
-              child: Text(
-              'No posts bookmarked',
-              style: TextStyle(fontSize: 20, color: Colors.grey),
-            )),
     );
   }
 
-  _onBackPressed() {
+  Future<bool> _onBackPressed() {
     Constants.routesStack.pop();
     Navigator.of(context).pop();
   }

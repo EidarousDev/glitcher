@@ -36,6 +36,8 @@ class _AddCommentPageState extends State<AddComment> {
   ScrollController scrollController;
 
   File _image;
+  String _mentionText = '';
+  var words = [];
   var _video;
   var _uploadedFileURL;
   GlobalKey<AutoCompleteTextFieldState<String>> autocompleteKey = GlobalKey();
@@ -365,46 +367,131 @@ class _ComposeComment extends WidgetView<AddComment, _AddCommentPageState> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           _postCard(context),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              CacheThisImage(
-                imageUrl: loggedInProfileImageURL,
-                imageShape: BoxShape.circle,
-                width: Sizes.sm_profile_image_w,
-                height: Sizes.sm_profile_image_h,
-                defaultAssetImage: Strings.default_profile_image,
+          Stack(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  CacheThisImage(
+                    imageUrl: loggedInProfileImageURL,
+                    imageShape: BoxShape.circle,
+                    width: Sizes.sm_profile_image_w,
+                    height: Sizes.sm_profile_image_h,
+                    defaultAssetImage: Strings.default_profile_image,
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    child: TextField(
+                      onChanged: (text) {
+                        if (text.length > Sizes.maxPostChars) {
+                          viewState.setState(() {
+                            viewState.canSubmit = false;
+                          });
+                        } else {
+                          viewState.setState(() {
+                            viewState.canSubmit = true;
+                          });
+                        }
+                        // Mention Users
+                        viewState.setState(() {
+                          viewState.words = text.split(' ');
+                          viewState._mentionText = viewState.words.length > 0 &&
+                                  viewState.words[viewState.words.length - 1]
+                                      .startsWith('@')
+                              ? viewState.words[viewState.words.length - 1]
+                              : '';
+                        });
+                      },
+                      maxLength: Sizes.maxPostChars,
+                      minLines: 5,
+                      maxLines: 15,
+                      autofocus: true,
+                      maxLengthEnforced: true,
+                      controller: viewState._textEditingController,
+                      decoration: InputDecoration(
+                          counterText: "",
+                          border: InputBorder.none,
+                          hintText: 'Post your comment...'),
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  )
+                ],
               ),
-              SizedBox(
-                width: 10,
-              ),
-              Expanded(
-                child: TextField(
-                  onChanged: (text) {
-                    if (text.length > Sizes.maxPostChars) {
-                      viewState.setState(() {
-                        viewState.canSubmit = false;
-                      });
-                    } else {
-                      viewState.setState(() {
-                        viewState.canSubmit = true;
-                      });
-                    }
-                    // Mention Users
-                  },
-                  maxLength: Sizes.maxPostChars,
-                  minLines: 5,
-                  maxLines: 15,
-                  autofocus: true,
-                  maxLengthEnforced: true,
-                  controller: viewState._textEditingController,
-                  decoration: InputDecoration(
-                      counterText: "",
-                      border: InputBorder.none,
-                      hintText: 'Post your comment...'),
-                  style: TextStyle(fontSize: 18),
-                ),
-              )
+              viewState._mentionText.length > 1
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 45.0),
+                      child: ListView.builder(
+                        itemCount: Constants.userFriends.length,
+                        itemBuilder: (context, index) {
+                          String friendUsername =
+                              Constants.userFriends[index].username;
+                          print('username:' + friendUsername);
+                          if (('@' + friendUsername.toLowerCase())
+                              .contains(viewState._mentionText.toLowerCase()))
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage: Constants.userFriends[index]
+                                            .profileImageUrl !=
+                                        null
+                                    ? NetworkImage(Constants
+                                        .userFriends[index].profileImageUrl)
+                                    : AssetImage(Strings.default_profile_image),
+                              ),
+                              title:
+                                  Text(Constants.userFriends[index].username),
+                              onTap: () {
+//                          String tmp = viewState._mentionText
+//                              .substring(1, viewState._mentionText.length);
+                                if (viewState._textEditingController.text
+                                    .contains('@$friendUsername')) {
+                                  AppUtil.showSnackBar(
+                                      context,
+                                      viewState._scaffoldKey,
+                                      'User already mentioned!');
+                                  return;
+                                }
+                                viewState.setState(() {
+                                  viewState._mentionText =
+                                      ''; //                            += friendUsername
+//                                .substring(
+//                            friendUsername.indexOf(tmp) +
+//                            1 +
+//                            tmp.length,
+//                            friendUsername.length)
+//                                .replaceAll(' ', '_');
+
+                                  String s = viewState
+                                      ._textEditingController.text
+                                      .replaceFirst(
+                                          RegExp(r'\B\@\w+'),
+                                          '@$friendUsername',
+                                          viewState._textEditingController.text
+                                                      .length <
+                                                  8
+                                              ? 0
+                                              : viewState._textEditingController
+                                                      .selection.baseOffset -
+                                                  8);
+                                  viewState._textEditingController.text = s;
+
+                                  viewState._textEditingController.selection =
+                                      TextSelection.collapsed(
+                                          offset: viewState
+                                              ._textEditingController
+                                              .text
+                                              .length);
+                                });
+                              },
+                            );
+
+                          return SizedBox();
+                        },
+                        shrinkWrap: true,
+                      ),
+                    )
+                  : SizedBox(),
             ],
           ),
           Flexible(

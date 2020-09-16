@@ -382,139 +382,231 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           SizedBox.shrink(),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: CacheThisImage(
-                    imageUrl: loggedInProfileImageURL,
-                    imageShape: BoxShape.circle,
-                    width: Sizes.sm_profile_image_w,
-                    height: Sizes.sm_profile_image_h,
-                    defaultAssetImage: Strings.default_profile_image,
-                  )),
-              SizedBox(
-                width: 10,
+          Stack(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: CacheThisImage(
+                        imageUrl: loggedInProfileImageURL,
+                        imageShape: BoxShape.circle,
+                        width: Sizes.sm_profile_image_w,
+                        height: Sizes.sm_profile_image_h,
+                        defaultAssetImage: Strings.default_profile_image,
+                      )),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    child: TextFormField(
+                      onChanged: (text) {
+                        if (text.length > Sizes.maxPostChars) {
+                          viewState.setState(() {
+                            viewState.canSubmit = false;
+                          });
+                        } else {
+                          viewState.setState(() {
+                            viewState.canSubmit = true;
+                          });
+                        }
+
+                        // Mention Users
+                        viewState.setState(() {
+                          viewState.words = text.split(' ');
+                          viewState._mentionText = viewState.words.length > 0 &&
+                                  viewState.words[viewState.words.length - 1]
+                                      .startsWith('@')
+                              ? viewState.words[viewState.words.length - 1]
+                              : '';
+
+                          //Hashtag
+                          viewState._hashtagText = viewState.words.length > 0 &&
+                                  viewState.words[viewState.words.length - 1]
+                                      .startsWith('#')
+                              ? viewState.words[viewState.words.length - 1]
+                              : '';
+
+                          if (viewState._youtubeId == null) {
+                            viewState._youtubeId = viewState.words.length > 0 &&
+                                    (viewState.words[viewState.words.length - 1]
+                                            .contains('www.youtube.com') ||
+                                        viewState
+                                            .words[viewState.words.length - 1]
+                                            .contains('https://youtu.be'))
+                                ? YoutubePlayer.convertUrlToId(
+                                    viewState.words[viewState.words.length - 1])
+                                : null;
+                          }
+                        });
+
+                        print(viewState.words[viewState.words.length - 1]);
+                        print('yotubeId: ${viewState._youtubeId}');
+                      },
+                      maxLength: Sizes.maxPostChars,
+                      minLines: 5,
+                      maxLines: 15,
+                      autofocus: true,
+                      maxLengthEnforced: true,
+                      controller: viewState._textEditingController,
+                      decoration: InputDecoration(
+                          counterText: "",
+                          border: InputBorder.none,
+                          hintText: 'Any thoughts?'),
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ),
+                ],
               ),
-              Expanded(
-                child: TextFormField(
-                  onChanged: (text) {
-                    if (text.length > Sizes.maxPostChars) {
-                      viewState.setState(() {
-                        viewState.canSubmit = false;
-                      });
-                    } else {
-                      viewState.setState(() {
-                        viewState.canSubmit = true;
-                      });
-                    }
+              viewState._mentionText.length > 1
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 55),
+                      child: ListView.builder(
+                        itemCount: Constants.userFriends.length,
+                        itemBuilder: (context, index) {
+                          String friendUsername =
+                              Constants.userFriends[index].username;
+                          print('username:' + friendUsername);
+                          if (('@' + friendUsername.toLowerCase())
+                              .contains(viewState._mentionText.toLowerCase()))
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage: Constants.userFriends[index]
+                                            .profileImageUrl !=
+                                        null
+                                    ? NetworkImage(Constants
+                                        .userFriends[index].profileImageUrl)
+                                    : AssetImage(Strings.default_profile_image),
+                              ),
+                              title:
+                                  Text(Constants.userFriends[index].username),
+                              onTap: () {
+//                          String tmp = viewState._mentionText
+//                              .substring(1, viewState._mentionText.length);
+                                if (viewState._textEditingController.text
+                                    .contains('@$friendUsername')) {
+                                  AppUtil.showSnackBar(
+                                      context,
+                                      viewState._scaffoldKey,
+                                      'User already mentioned!');
+                                  return;
+                                }
+                                viewState.setState(() {
+                                  viewState._mentionText =
+                                      ''; //                            += friendUsername
+//                                .substring(
+//                            friendUsername.indexOf(tmp) +
+//                            1 +
+//                            tmp.length,
+//                            friendUsername.length)
+//                                .replaceAll(' ', '_');
 
-                    // Mention Users
-                    viewState.setState(() {
-                      viewState.words = text.split(' ');
-                      viewState._mentionText = viewState.words.length > 0 &&
-                              viewState.words[viewState.words.length - 1]
-                                  .startsWith('@')
-                          ? viewState.words[viewState.words.length - 1]
-                          : '';
+                                  String s = viewState
+                                      ._textEditingController.text
+                                      .replaceFirst(
+                                          RegExp(r'\B\@\w+'),
+                                          '@$friendUsername',
+                                          viewState._textEditingController.text
+                                                      .length <
+                                                  8
+                                              ? 0
+                                              : viewState._textEditingController
+                                                      .selection.baseOffset -
+                                                  8);
+                                  viewState._textEditingController.text = s;
 
-                      //Hashtag
-                      viewState._hashtagText = viewState.words.length > 0 &&
-                              viewState.words[viewState.words.length - 1]
-                                  .startsWith('#')
-                          ? viewState.words[viewState.words.length - 1]
-                          : '';
+                                  viewState._textEditingController.selection =
+                                      TextSelection.collapsed(
+                                          offset: viewState
+                                              ._textEditingController
+                                              .text
+                                              .length);
+                                });
+                              },
+                            );
 
-                      if (viewState._youtubeId == null) {
-                        viewState._youtubeId = viewState.words.length > 0 &&
-                                (viewState.words[viewState.words.length - 1]
-                                        .contains('www.youtube.com') ||
-                                    viewState.words[viewState.words.length - 1]
-                                        .contains('https://youtu.be'))
-                            ? YoutubePlayer.convertUrlToId(
-                                viewState.words[viewState.words.length - 1])
-                            : null;
-                      }
-                    });
+                          return SizedBox();
+                        },
+                        shrinkWrap: true,
+                      ),
+                    )
+                  : SizedBox(),
+              viewState._hashtagText.length > 1
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 55),
+                      child: ListView.builder(
+                        itemCount: Constants.hashtags.length,
+                        itemBuilder: (context, index) {
+                          String hashtag = Constants.hashtags[index].text;
+                          print('hashtag:' + hashtag);
+                          if (('#' + hashtag.toLowerCase())
+                              .contains(viewState._hashtagText.toLowerCase()))
+                            return ListTile(
+                              title: Text(Constants.hashtags[index].text),
+                              onTap: () {
+                                viewState.newHashtag = false;
 
-                    print(viewState.words[viewState.words.length - 1]);
-                    print('yotubeId: ${viewState._youtubeId}');
-                  },
-                  maxLength: Sizes.maxPostChars,
-                  minLines: 5,
-                  maxLines: 15,
-                  autofocus: true,
-                  maxLengthEnforced: true,
-                  controller: viewState._textEditingController,
-                  decoration: InputDecoration(
-                      counterText: "",
-                      border: InputBorder.none,
-                      hintText: 'Any thoughts?'),
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
+                                if (viewState._textEditingController.text
+                                    .contains('#$hashtag')) {
+                                  AppUtil.showSnackBar(
+                                      context,
+                                      viewState._scaffoldKey,
+                                      'Post already contains this hashtag!');
+                                  return;
+                                }
+                                viewState.setState(() {
+                                  viewState._hashtagText =
+                                      ''; //                            += friendUsername
+//                                .substring(
+//                            friendUsername.indexOf(tmp) +
+//                            1 +
+//                            tmp.length,
+//                            friendUsername.length)
+//                                .replaceAll(' ', '_');
+
+                                  String s = viewState
+                                      ._textEditingController.text
+                                      .replaceFirst(
+                                          RegExp(r'\B\#\w+'),
+                                          '$hashtag',
+                                          viewState._textEditingController.text
+                                                      .length <
+                                                  8
+                                              ? 0
+                                              : viewState._textEditingController
+                                                      .selection.baseOffset -
+                                                  8);
+                                  viewState._textEditingController.text = s;
+
+                                  viewState._textEditingController.selection =
+                                      TextSelection.collapsed(
+                                          offset: viewState
+                                              ._textEditingController
+                                              .text
+                                              .length);
+                                });
+
+//                          String tmp = viewState._hashtagText
+//                              .substring(1, viewState._hashtagText.length);
+//                          viewState.setState(() {
+//                            viewState._hashtagText = '';
+//                            viewState._textEditingController.text += hashtag
+//                                .substring(hashtag.indexOf(tmp) + tmp.length,
+//                                    hashtag.length)
+//                                .replaceAll(' ', '_');
+//                          });
+                              },
+                            );
+
+                          return SizedBox();
+                        },
+                        shrinkWrap: true,
+                      ),
+                    )
+                  : SizedBox(),
             ],
           ),
-          viewState._mentionText.length > 1
-              ? ListView.builder(
-                  itemCount: Constants.userFriends.length,
-                  itemBuilder: (context, index) {
-                    String s = Constants.userFriends[index].username;
-                    print('username:' + s);
-                    if (('@' + s).contains(viewState._mentionText))
-                      return ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage(
-                              Constants.userFriends[index].profileImageUrl),
-                        ),
-                        title: Text(Constants.userFriends[index].username),
-                        onTap: () {
-                          String tmp = viewState._mentionText
-                              .substring(1, viewState._mentionText.length);
-                          viewState.setState(() {
-                            viewState._mentionText = '';
-                            viewState._textEditingController.text += s
-                                .substring(
-                                    s.indexOf(tmp) + tmp.length, s.length)
-                                .replaceAll(' ', '_');
-                          });
-                        },
-                      );
-
-                    return SizedBox();
-                  },
-                  shrinkWrap: true,
-                )
-              : SizedBox(),
-          viewState._hashtagText.length > 1
-              ? ListView.builder(
-                  itemCount: Constants.hashtags.length,
-                  itemBuilder: (context, index) {
-                    String s = Constants.hashtags[index].text;
-                    print('hashtag:' + s);
-                    if (('#' + s).contains(viewState._hashtagText))
-                      return ListTile(
-                        title: Text(Constants.hashtags[index].text),
-                        onTap: () {
-                          viewState.newHashtag = false;
-                          String tmp = viewState._hashtagText
-                              .substring(1, viewState._hashtagText.length);
-                          viewState.setState(() {
-                            viewState._hashtagText = '';
-                            viewState._textEditingController.text += s
-                                .substring(
-                                    s.indexOf(tmp) + tmp.length, s.length)
-                                .replaceAll(' ', '_');
-                          });
-                        },
-                      );
-
-                    return SizedBox();
-                  },
-                  shrinkWrap: true,
-                )
-              : SizedBox(),
           Padding(
             padding: const EdgeInsets.only(left: 8, bottom: 8),
             child: TypeAheadFormField(

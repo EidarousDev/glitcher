@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icon_data.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/list_items/game_item.dart';
 import 'package:glitcher/models/game_model.dart';
@@ -31,8 +33,8 @@ class _GamesScreenState extends State<GamesScreen> {
       key: _scaffoldKey,
       floatingActionButton: FloatingActionButton(
         child: Icon(
-          Icons.email,
-        ),
+            //Icons.lightbulb_outline,
+            MaterialCommunityIcons.getIconData('lightbulb-on')),
         onPressed: () async {
           Navigator.of(context).pushNamed('/suggestion', arguments: {
             'initial_title': 'New game suggestion',
