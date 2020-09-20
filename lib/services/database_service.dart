@@ -36,6 +36,12 @@ class DatabaseService {
     return posts;
   }
 
+  static updateUserCountry() async {
+    usersRef
+        .document(Constants.currentUserID)
+        .updateData({'country': Constants.country});
+  }
+
   // This function is used to get the recent posts of a certain user
   static Future<List<Post>> getNextUserPosts(
       String authorId, Timestamp lastVisiblePostSnapShot) async {

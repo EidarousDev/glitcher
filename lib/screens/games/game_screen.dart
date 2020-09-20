@@ -56,7 +56,10 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                   'game_id': widget.game.id
                 });
               },
-              icon: Icon(MaterialCommunityIcons.getIconData('lightbulb-on')),
+              icon: Icon(
+                MaterialCommunityIcons.getIconData('lightbulb-on'),
+                color: Colors.white,
+              ),
             ),
             IconButton(
               onPressed: () async {
@@ -76,7 +79,10 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
               child: InkWell(
                 onTap: () => Scaffold.of(context).openDrawer(),
                 child: IconButton(
-                  icon: Icon(Icons.arrow_back),
+                  icon: Icon(
+                    Icons.arrow_back,
+                    color: Colors.white,
+                  ),
                   onPressed: () => _onBackPressed(),
                 ),
               ),

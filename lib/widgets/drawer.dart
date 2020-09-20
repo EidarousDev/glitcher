@@ -80,7 +80,7 @@ class _BuildDrawerState extends State<BuildDrawer> {
               'Games',
             ),
             leading: Icon(
-              Icons.list,
+              Icons.games,
             ),
           ),
           ListTile(

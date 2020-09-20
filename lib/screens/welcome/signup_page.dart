@@ -81,7 +81,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 },
                 keyboardType:
                     isEmail ? TextInputType.emailAddress : TextInputType.text,
-                onFieldSubmitted: (v) {
+                onFieldSubmitted: (v) async {
                   if (isUsername) {
                     FocusScope.of(context).requestFocus(myFocusNodeEmail);
                   } else if (isEmail) {
@@ -90,7 +90,12 @@ class _SignUpPageState extends State<SignUpPage> {
                     FocusScope.of(context)
                         .requestFocus(myFocusNodeConfirmPassword);
                   } else if (isConfirmPassword) {
-                    _submit();
+                    if (!_isTermsOfTermsAgreed) {
+                      AppUtil.showSnackBar(context, _scaffoldKey,
+                          'Please agree to terms of use.');
+                      return;
+                    }
+                    await _submit();
                   }
                 },
                 textInputAction: isConfirmPassword
@@ -174,7 +179,11 @@ class _SignUpPageState extends State<SignUpPage> {
       child: InkWell(
         splashColor: Colors.yellow,
         onTap: () async {
-          if (!_isTermsOfTermsAgreed) return;
+          if (!_isTermsOfTermsAgreed) {
+            AppUtil.showSnackBar(
+                context, _scaffoldKey, 'Please agree to terms of use.');
+            return;
+          }
           await _submit();
         },
         child: Container(

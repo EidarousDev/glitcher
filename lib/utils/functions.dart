@@ -214,6 +214,7 @@ class Functions {
     var response = await http.get(url);
     String body = response.body;
     Constants.country = jsonDecode(body)['country'];
+    DatabaseService.updateUserCountry();
     print('Country: ${Constants.country}');
   }
 

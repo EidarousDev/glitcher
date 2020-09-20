@@ -254,9 +254,8 @@ class _PostItemState extends State<PostItem> {
                           Container(
                             child:
                                 //TODO: Fix YouTube Player
-                                post.youtubeId == null
-                                    ? null
-                                    : YoutubePlayerBuilder(
+                                post.youtubeId != null && post.imageUrl == null
+                                    ? YoutubePlayerBuilder(
                                         onExitFullScreen: () {
                                           SystemChrome.setPreferredOrientations(
                                               DeviceOrientation.values);
@@ -271,7 +270,8 @@ class _PostItemState extends State<PostItem> {
                                             //FullScreenButton()
                                           ],
                                         ),
-                                        builder: (context, player) => player),
+                                        builder: (context, player) => player)
+                                    : null,
                           ),
                           Padding(
                             padding: const EdgeInsets.only(top: 8.0),
@@ -511,6 +511,8 @@ class _PostItemState extends State<PostItem> {
 
   @override
   void dispose() {
+    print('youtube disposed');
+    _youtubeController.dispose();
     super.dispose();
   }
 
