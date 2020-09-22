@@ -170,14 +170,14 @@ class _CommentItemState extends State<CommentItem> {
                       child: (widget.comment.repliesCount != null &&
                               widget.comment.repliesCount != 0)
                           ? Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
                                 !repliesVisible
                                     ? 'view ${widget.comment.repliesCount} replies'
                                     : 'hide replies',
                                 style: TextStyle(color: MyColors.darkPrimary),
                               ),
-                          )
+                            )
                           : Container(),
                     ),
                   ),
@@ -871,17 +871,19 @@ class _CommentItemState extends State<CommentItem> {
   loadReplies(String postId, String commentId) async {
     List<Comment> replies =
         await DatabaseService.getCommentReplies(postId, commentId);
-      if(mounted){
-        setState(() {
-          this.replies = replies;
-        });
-      }
+    if (mounted) {
+      setState(() {
+        this.replies = replies;
+      });
+    }
 
     this.replies.forEach((element) async {
       User user = await DatabaseService.getUserWithId(element.commenterID);
-      setState(() {
-        this.repliers.add(user);
-      });
+      if (mounted) {
+        setState(() {
+          this.repliers.add(user);
+        });
+      }
     });
   }
 

@@ -360,6 +360,7 @@ class _LoginPageState extends State<LoginPage> {
       }
     } catch (e) {
       // Email or Password Incorrect
+      Navigator.of(context).pop();
       AppUtil.showSnackBar(
           context, _scaffoldKey, 'The email address or password is incorrect.');
     }

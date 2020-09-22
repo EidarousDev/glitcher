@@ -43,7 +43,7 @@ class _PostItemState extends State<PostItem> {
   int _spawnedAudioCount = 0;
   ByteData _likeSFX;
   ByteData _dislikeSFX;
-  YoutubePlayerController _youtubeController;
+  //YoutubePlayerController _youtubeController;
   bool _isPlaying;
   VideoPlayerController videoPlayerController;
   ChewieController chewieController;
@@ -79,83 +79,85 @@ class _PostItemState extends State<PostItem> {
     initLikes(post);
     return Column(
       children: <Widget>[
-        GestureDetector(
-          onLongPress: () async {
-            _onLongPressedPost(context);
-          },
-          onTap: () {
-            if (Constants.routesStack.top() == '/post') return;
-            Navigator.of(context).pushNamed('/post', arguments: {
-              'post': post,
-            });
-          },
-          child: Column(
-            children: [
-              ListTile(
-                contentPadding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
-                leading: InkWell(
-                    child: CacheThisImage(
-                      imageUrl: author.profileImageUrl,
-                      imageShape: BoxShape.circle,
-                      width: Sizes.md_profile_image_w,
-                      height: Sizes.md_profile_image_h,
-                      defaultAssetImage: Strings.default_profile_image,
-                    ),
+        Column(
+          children: [
+            ListTile(
+              contentPadding: EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+              leading: InkWell(
+                  child: CacheThisImage(
+                    imageUrl: author.profileImageUrl,
+                    imageShape: BoxShape.circle,
+                    width: Sizes.md_profile_image_w,
+                    height: Sizes.md_profile_image_h,
+                    defaultAssetImage: Strings.default_profile_image,
+                  ),
+                  onTap: () {
+                    Navigator.of(context)
+                        .pushNamed('/user-profile', arguments: {
+                      'userId': post.authorId,
+                    });
+                  }),
+              title: Row(
+                children: <Widget>[
+                  InkWell(
+                    child: Text('@${author.username}' ?? '',
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: MyColors.darkPrimary)),
                     onTap: () {
                       Navigator.of(context)
                           .pushNamed('/user-profile', arguments: {
-                        'userId': post.authorId,
+                        'userId': author.id,
                       });
-                    }),
-                title: Row(
-                  children: <Widget>[
-                    InkWell(
-                      child: Text('@${author.username}' ?? '',
-                          style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: MyColors.darkPrimary)),
-                      onTap: () {
-                        Navigator.of(context)
-                            .pushNamed('/user-profile', arguments: {
-                          'userId': author.id,
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                subtitle: InkWell(
-                  child: Text('↳ ${post.game}' ?? '',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: MyColors.darkGrey,
-                      )),
-                  onTap: () {
-                    print('currentGame : ${currentGame.id}');
-                    Navigator.of(context).pushNamed('/game-screen', arguments: {
-                      'game': currentGame,
-                    });
-                  },
-                ),
-                trailing: ValueListenableBuilder<int>(
-                  valueListenable: number,
-                  builder: (context, value, child) {
-                    return PostBottomSheet().postOptionIcon(context, post);
-                  },
-                ),
+                    },
+                  ),
+                ],
               ),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          secondHalf.isEmpty
-                              ? UrlText(
+              subtitle: InkWell(
+                child: Text('↳ ${post.game}' ?? '',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: MyColors.darkGrey,
+                    )),
+                onTap: () {
+                  print('currentGame : ${currentGame.id}');
+                  Navigator.of(context).pushNamed('/game-screen', arguments: {
+                    'game': currentGame,
+                  });
+                },
+              ),
+              trailing: ValueListenableBuilder<int>(
+                valueListenable: number,
+                builder: (context, value, child) {
+                  return PostBottomSheet().postOptionIcon(context, post);
+                },
+              ),
+            ),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        secondHalf.isEmpty
+                            ? GestureDetector(
+                                onLongPress: () async {
+                                  _onLongPressedPost(context);
+                                },
+                                onTap: () {
+                                  if (Constants.routesStack.top() == '/post')
+                                    return;
+                                  Navigator.of(context)
+                                      .pushNamed('/post', arguments: {
+                                    'post': post,
+                                  });
+                                },
+                                child: UrlText(
                                   context: context,
                                   text: post.text,
                                   onMentionPressed: (text) =>
@@ -170,8 +172,21 @@ class _PostItemState extends State<PostItem> {
                                   urlStyle: TextStyle(
                                       color: Colors.blue,
                                       fontWeight: FontWeight.w400),
-                                )
-                              : UrlText(
+                                ),
+                              )
+                            : GestureDetector(
+                                onLongPress: () async {
+                                  _onLongPressedPost(context);
+                                },
+                                onTap: () {
+                                  if (Constants.routesStack.top() == '/post')
+                                    return;
+                                  Navigator.of(context)
+                                      .pushNamed('/post', arguments: {
+                                    'post': post,
+                                  });
+                                },
+                                child: UrlText(
                                   context: context,
                                   text: flag
                                       ? (firstHalf + '...')
@@ -189,115 +204,114 @@ class _PostItemState extends State<PostItem> {
                                       color: Colors.blue,
                                       fontWeight: FontWeight.w400),
                                 ),
-                          InkWell(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: <Widget>[
-                                secondHalf.isEmpty
-                                    ? Text('')
-                                    : Text(
-                                        flag ? 'Show more' : 'Show less',
-                                        style: TextStyle(
-                                            color: MyColors.darkPrimary),
-                                      )
-                              ],
-                            ),
-                            onTap: () {
-                              setState(() {
-                                flag = !flag;
-                              });
-                            },
+                              ),
+                        InkWell(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: <Widget>[
+                              secondHalf.isEmpty
+                                  ? Text('')
+                                  : Text(
+                                      flag ? 'Show more' : 'Show less',
+                                      style: TextStyle(
+                                          color: MyColors.darkPrimary),
+                                    )
+                            ],
                           ),
-                          SizedBox(
-                            height: 8.0,
-                          ),
-                          Container(
-                            child: post.imageUrl == null
-                                ? null
-                                : Container(
-                                    width: Sizes.home_post_image_w,
-                                    height: Sizes.home_post_image_h,
-                                    child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        child: InkWell(
-                                            onTap: () {
-                                              showDialog(
-                                                  barrierDismissible: true,
-                                                  child: Container(
-                                                    width: Sizes
-                                                        .sm_profile_image_w,
-                                                    height: Sizes
-                                                        .sm_profile_image_h,
-                                                    child: ImageOverlay(
-                                                      imageUrl: post.imageUrl,
-                                                      btnText:
-                                                          Strings.SAVE_IMAGE,
-                                                      btnFunction: () {},
-                                                    ),
+                          onTap: () {
+                            setState(() {
+                              flag = !flag;
+                            });
+                          },
+                        ),
+                        SizedBox(
+                          height: 8.0,
+                        ),
+                        Container(
+                          child: post.imageUrl == null
+                              ? null
+                              : Container(
+                                  width: Sizes.home_post_image_w,
+                                  height: Sizes.home_post_image_h,
+                                  child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      child: InkWell(
+                                          onTap: () {
+                                            showDialog(
+                                                barrierDismissible: true,
+                                                child: Container(
+                                                  width:
+                                                      Sizes.sm_profile_image_w,
+                                                  height:
+                                                      Sizes.sm_profile_image_h,
+                                                  child: ImageOverlay(
+                                                    imageUrl: post.imageUrl,
+                                                    btnText: Strings.SAVE_IMAGE,
+                                                    btnFunction: () {},
                                                   ),
-                                                  context: context);
-                                            },
-                                            child: CacheThisImage(
-                                              imageUrl: post.imageUrl,
-                                              imageShape: BoxShape.rectangle,
-                                              width: Sizes.home_post_image_w,
-                                              height: Sizes.home_post_image_h,
-                                              defaultAssetImage:
-                                                  Strings.default_post_image,
-                                            ))),
-                                  ),
+                                                ),
+                                                context: context);
+                                          },
+                                          child: CacheThisImage(
+                                            imageUrl: post.imageUrl,
+                                            imageShape: BoxShape.rectangle,
+                                            width: Sizes.home_post_image_w,
+                                            height: Sizes.home_post_image_h,
+                                            defaultAssetImage:
+                                                Strings.default_post_image,
+                                          ))),
+                                ),
+                        ),
+                        Container(
+                          child: post.video == null ? null : playerWidget,
+                        ),
+                        Container(
+                          child:
+                              //TODO: Fix YouTube Player
+                              post.youtubeId != null && post.imageUrl == null
+                                  ? YoutubePlayerBuilder(
+                                      onExitFullScreen: () {
+                                        SystemChrome.setPreferredOrientations(
+                                            DeviceOrientation.values);
+                                      },
+                                      player: YoutubePlayer(
+                                        controller: Constants
+                                            .youtubeControllers[widget.post.id],
+                                        showVideoProgressIndicator: true,
+                                        bottomActions: [
+                                          CurrentPosition(),
+                                          ProgressBar(isExpanded: true),
+                                          RemainingDuration(),
+                                          //FullScreenButton()
+                                        ],
+                                      ),
+                                      builder: (context, player) => player)
+                                  : null,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            "${Functions.formatTimestamp(post.timestamp)}",
+                            style: TextStyle(
+                                fontSize: 13.0,
+                                color: switchColor(
+                                    MyColors.darkGrey, Colors.white70)),
                           ),
-                          Container(
-                            child: post.video == null ? null : playerWidget,
-                          ),
-                          Container(
-                            child:
-                                //TODO: Fix YouTube Player
-                                post.youtubeId != null && post.imageUrl == null
-                                    ? YoutubePlayerBuilder(
-                                        onExitFullScreen: () {
-                                          SystemChrome.setPreferredOrientations(
-                                              DeviceOrientation.values);
-                                        },
-                                        player: YoutubePlayer(
-                                          controller: _youtubeController,
-                                          showVideoProgressIndicator: true,
-                                          bottomActions: [
-                                            CurrentPosition(),
-                                            ProgressBar(isExpanded: true),
-                                            RemainingDuration(),
-                                            //FullScreenButton()
-                                          ],
-                                        ),
-                                        builder: (context, player) => player)
-                                    : null,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(
-                              "${Functions.formatTimestamp(post.timestamp)}",
-                              style: TextStyle(
-                                  fontSize: 13.0,
-                                  color: switchColor(
-                                      MyColors.darkGrey, Colors.white70)),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Container(
-                  width: double.infinity,
-                  height: .5,
                 ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Container(
+                width: double.infinity,
+                height: .5,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
         SizedBox(
           height: 1.0,
@@ -511,8 +525,7 @@ class _PostItemState extends State<PostItem> {
 
   @override
   void dispose() {
-    print('youtube disposed');
-    _youtubeController.dispose();
+    //Constants.youtubeControllers[widget.post.id].dispose();
     super.dispose();
   }
 
@@ -524,13 +537,18 @@ class _PostItemState extends State<PostItem> {
     checkIfContainsHashtag();
     checkIfContainsMention();
 
-    _youtubeController = YoutubePlayerController(
-      initialVideoId: widget.post.youtubeId ?? '',
-      flags: YoutubePlayerFlags(
-        autoPlay: false,
-        mute: false,
-      ),
-    );
+    if (Constants.youtubeControllers.containsKey(widget.post.id)) {
+      Constants.youtubeControllers.remove(widget.post.id);
+    }
+    Constants.youtubeControllers.putIfAbsent(
+        widget.post.id,
+        () => YoutubePlayerController(
+              initialVideoId: widget.post.youtubeId ?? '',
+              flags: YoutubePlayerFlags(
+                autoPlay: false,
+                mute: false,
+              ),
+            ));
 
     setCurrentGame();
     if (widget.post.text.length > Sizes.postExcerpt) {

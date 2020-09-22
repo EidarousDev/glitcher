@@ -167,6 +167,7 @@ class _SetUsernameScreenState extends State<SetUsernameScreen> {
       }
     } catch (e) {
       // Email or Password Incorrect
+      Navigator.of(context).pop();
       AppUtil.showSnackBar(context, _scaffoldKey, 'Unknown Error occurred!');
     }
     Navigator.of(context).pop();

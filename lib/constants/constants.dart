@@ -9,6 +9,7 @@ import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/chats/chats.dart';
 import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:stack/stack.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 /// Firebase Constants
 final firebaseAuth = FirebaseAuth.instance;
@@ -63,6 +64,9 @@ class Constants {
   static String country;
 
   static Stack<String> routesStack = Stack();
+
+  //YoutubeControllers
+  static Map<String, YoutubePlayerController> youtubeControllers = {};
 
   //screens
   static Chats chats = Chats();

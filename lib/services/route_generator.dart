@@ -39,11 +39,18 @@ import 'package:glitcher/screens/welcome/set_username.dart';
 import 'package:glitcher/screens/welcome/signup_page.dart';
 import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     // Getting arguments passed in while calling Navigator.pushNamed
     final Map args = settings.arguments as Map;
+
+    for (MapEntry<String, YoutubePlayerController> controller
+        in Constants.youtubeControllers.entries) {
+      controller.value.pause();
+      controller.value.reset();
+    }
 
     switch (settings.name) {
       case '/':
