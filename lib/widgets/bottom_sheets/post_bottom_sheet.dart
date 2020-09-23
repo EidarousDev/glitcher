@@ -247,7 +247,7 @@ class PostBottomSheet {
           title: new Text('Are you sure?'),
           content: new Text('Do you really want to delete this post?'),
           actions: <Widget>[
-            new GestureDetector(
+            InkWell(
               onTap: () =>
                   // CLose bottom sheet
                   Navigator.of(context).pop(),
@@ -257,9 +257,11 @@ class PostBottomSheet {
               ),
             ),
             SizedBox(height: 16),
-            new GestureDetector(
+            InkWell(
               onTap: () async {
+                Navigator.of(context).push(CustomScreenLoader());
                 await DatabaseService.deletePost(postId);
+                Navigator.of(context).pop();
                 Navigator.of(context).pop();
               },
               child: Padding(

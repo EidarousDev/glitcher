@@ -163,6 +163,18 @@ class _CreatePostReplyPageState extends State<CreatePost> {
         widget.selectedGame.isEmpty) {
       return;
     }
+
+    if (_youtubeId == null) {
+      words = _textEditingController.text.split(' ');
+      for (String word in words) {
+        String trimmed = word.trim().split(RegExp(r'[\n\r\s]+')).last;
+        _youtubeId = (word.contains('www.youtube.com') ||
+                word.contains('https://youtu.be'))
+            ? YoutubePlayer.convertUrlToId(trimmed)
+            : null;
+      }
+    }
+
     Navigator.of(context).push(CustomScreenLoader());
 
     /// If tweet contain image
@@ -427,18 +439,6 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                                       .startsWith('#')
                               ? viewState.words[viewState.words.length - 1]
                               : '';
-
-                          if (viewState._youtubeId == null) {
-                            viewState._youtubeId = viewState.words.length > 0 &&
-                                    (viewState.words[viewState.words.length - 1]
-                                            .contains('www.youtube.com') ||
-                                        viewState
-                                            .words[viewState.words.length - 1]
-                                            .contains('https://youtu.be'))
-                                ? YoutubePlayer.convertUrlToId(
-                                    viewState.words[viewState.words.length - 1])
-                                : null;
-                          }
                         });
 
                         print(viewState.words[viewState.words.length - 1]);
