@@ -137,12 +137,8 @@ class _AppPageState extends State<AppPage> {
     //_retrieveDynamicLink();
     userListener();
     _saveDeviceToken();
-    setFriends();
-    setFollowing();
-    setFollowers();
     setHashtags();
     Constants.chats = Chats();
-    print('User Friends = ${Constants.userFriends}');
 
     this._getFavouriteFilter();
     NotificationHandler.receiveNotification(context, _scaffoldKey);
@@ -286,30 +282,6 @@ class _AppPageState extends State<AppPage> {
       Strings.appVersion = packageInfo.version;
       Strings.appName = packageInfo.appName;
       Strings.buildNumber = packageInfo.buildNumber;
-    });
-  }
-
-  Future<void> setFriends() async {
-    List<User> friends = await getFriends();
-    // User Friends
-    setState(() {
-      Constants.userFriends = friends;
-    });
-  }
-
-  Future<void> setFollowing() async {
-    List<User> friends = await getFollowing();
-    // User Friends
-    setState(() {
-      Constants.userFollowing = friends;
-    });
-  }
-
-  Future<void> setFollowers() async {
-    List<User> followers = await getFollowing();
-    // User Friends
-    setState(() {
-      Constants.userFollowers = followers;
     });
   }
 

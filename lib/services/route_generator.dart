@@ -200,6 +200,7 @@ class RouteGenerator {
         return MaterialPageRoute(
             builder: (_) => UsersScreen(
                   screenType: args['screen_type'],
+                  userId: args['userId'],
                 ));
 
       case '/report-post':
@@ -239,7 +240,10 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => PasswordChangeScreen());
 
       case '/followed-games':
-        return MaterialPageRoute(builder: (_) => FollowedGames());
+        return MaterialPageRoute(
+            builder: (_) => FollowedGames(
+                  userId: args['userId'],
+                ));
 
       default:
         // If there is no such named route in the switch statement, e.g. /third

@@ -15,8 +15,10 @@ import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
+import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:glitcher/widgets/drawer.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/widgets/rate_app.dart';
@@ -74,22 +76,30 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
 
-  getFollowedGames() async {
-    List<Game> games = await DatabaseService.getFollowedGames();
-    setState(() {
-      Constants.followedGames = games;
-    });
-  }
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  getFollowedGames() async {}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
 //      floatingActionButton: FloatingActionButton(
 //        onPressed: () async {
-//          QuerySnapshot gameSnapshot =
-//              await gamesRef.where('fullName', isEqualTo: null).getDocuments();
-//          List<Game> games =
-//              gameSnapshot.documents.map((doc) => Game.fromDoc(doc)).toList();
+//          Navigator.of(context).push(CustomScreenLoader());
+//          QuerySnapshot usersSnapshot = await usersRef.getDocuments();
+//          List<User> users =
+//              usersSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
+//          for (User user in users) {
+//            List list = await DatabaseService.getAllFollowedGames(user.id);
+//            await usersRef
+//                .document(user.id)
+//                .updateData({'followed_games': list.length});
+//
+//            print('User(${user.username}) Done!');
+//          }
+//          Navigator.of(context).pop();
+//          AppUtil.showSnackBar(context, _scaffoldKey, 'DONE!!!');
 //        },
 //        child: Icon(Icons.code),
 //      ),
@@ -120,8 +130,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             icon: Icon(
               Icons.tune,
             ),
-            onPressed: () {
-              getFollowedGames();
+            onPressed: () async {
+              //Navigator.of(context).push(CustomScreenLoader());
+
+              if (Constants.followedGamesNames.length == 0) {
+                await DatabaseService.getAllFollowedGames(
+                    Constants.currentUserID);
+              }
+              if (Constants.followingIds.length == 0) {
+                await DatabaseService.getAllFollowing(Constants.currentUserID);
+              }
+
+              //Navigator.of(context).pop();
+
               setState(() {
                 isFiltering = !isFiltering;
               });
@@ -278,8 +299,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               ),
                             ),
                             onTap: () {
-                              Navigator.of(context).pushReplacementNamed(
-                                  '/new-post',
+                              Navigator.of(context).pushNamed('/new-post',
                                   arguments: {'selectedGame': ''});
                             },
                           ),
@@ -429,7 +449,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         this.lastVisiblePostSnapShot = posts.last.timestamp;
       });
     } else if (feedFilter == 2) {
-      print('1st game:' + Constants.followedGamesNames[0]);
       posts = await DatabaseService.getPostsFilteredByFollowedGames();
       setState(() {
         _posts = posts;

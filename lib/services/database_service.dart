@@ -404,7 +404,7 @@ class DatabaseService {
     return posts;
   }
 
-  static getFriends(String userId) async {
+  static getAllFriends(String userId) async {
     QuerySnapshot friendsSnapshot =
         await usersRef.document(userId).collection('friends').getDocuments();
 
@@ -415,10 +415,14 @@ class DatabaseService {
       friends[i] = await DatabaseService.getUserWithId(friends[i].id);
     }
 
+    if (userId == Constants.currentUserID) {
+      Constants.userFriends = friends;
+    }
+
     return friends;
   }
 
-  static getFollowing(String userId) async {
+  static getAllFollowing(String userId) async {
     QuerySnapshot followingSnapshot =
         await usersRef.document(userId).collection('following').getDocuments();
 
@@ -427,16 +431,16 @@ class DatabaseService {
 
     for (int i = 0; i < following.length; i++) {
       following[i] = await DatabaseService.getUserWithId(following[i].id);
-    }
 
-    for (DocumentSnapshot doc in followingSnapshot.documents) {
-      Constants.followingIds.add(doc.documentID);
+      if (userId == Constants.currentUserID) {
+        Constants.followingIds.add(following[i].id);
+      }
     }
 
     return following;
   }
 
-  static getFollowers(String userId) async {
+  static getAllFollowers(String userId) async {
     QuerySnapshot followersSnapshot =
         await usersRef.document(userId).collection('followers').getDocuments();
 
@@ -446,7 +450,28 @@ class DatabaseService {
     for (int i = 0; i < followers.length; i++) {
       followers[i] = await DatabaseService.getUserWithId(followers[i].id);
     }
+
     return followers;
+  }
+
+  static getAllFollowedGames(String userId) async {
+    QuerySnapshot followedGamesSnapshot = await usersRef
+        .document(userId)
+        .collection('followedGames')
+        .getDocuments();
+
+    List<Game> followedGames = [];
+    Constants.followedGamesNames = [];
+
+    for (DocumentSnapshot doc in followedGamesSnapshot.documents) {
+      Game game = await getGameWithId(doc.documentID);
+      followedGames.add(game);
+      if (userId == Constants.currentUserID) {
+        Constants.followedGamesNames.add(game.fullName);
+      }
+    }
+
+    return followedGames;
   }
 
   // This function is used to get the recent posts (filtered by a certain game)
@@ -497,7 +522,7 @@ class DatabaseService {
     if (Constants.followingIds.length > 10) {
       list = AppUtil.randomIndices(Constants.followingIds);
     } else {
-      list = Constants.followedGamesNames;
+      list = Constants.followingIds;
     }
     QuerySnapshot postSnapshot = await postsRef
         .where('author', whereIn: list)
@@ -623,21 +648,6 @@ class DatabaseService {
       'timestamp': FieldValue.serverTimestamp(),
       'type': type
     });
-  }
-
-  static getFollowedGames() async {
-    QuerySnapshot followedGames = await usersRef
-        .document(Constants.currentUserID)
-        .collection('followedGames')
-        .getDocuments();
-
-    for (DocumentSnapshot doc in followedGames.documents) {
-      Game game = await getGameWithId(doc.documentID);
-      Constants.followedGames.add(game);
-      Constants.followedGamesNames.add(game.fullName);
-    }
-
-    return Constants.followedGames;
   }
 
   // This function is used to get the recent messages (unfiltered)
@@ -977,6 +987,10 @@ class DatabaseService {
           .document(gameId)
           .setData({'followedAt': FieldValue.serverTimestamp()});
     }
+
+    await usersRef
+        .document(Constants.currentUserID)
+        .updateData({'followed_games': FieldValue.increment(1)});
   }
 
   static unFollowGame(String gameId) async {
@@ -992,6 +1006,10 @@ class DatabaseService {
           .document(gameId)
           .delete();
     }
+
+    await usersRef
+        .document(Constants.currentUserID)
+        .updateData({'followed_games': FieldValue.increment(-1)});
   }
 
   static Future<Game> getGameWithGameName(String gameName) async {
@@ -1198,10 +1216,23 @@ class DatabaseService {
           .collection('friends')
           .document(Constants.currentUserID)
           .delete();
+
+      await usersRef
+          .document(Constants.currentUserID)
+          .updateData({'friends': FieldValue.increment(-1)});
+
+      await usersRef
+          .document(userId)
+          .updateData({'friends': FieldValue.increment(-1)});
     }
-    User user = await DatabaseService.getUserWithId(userId);
-    Constants.userFriends.remove(user);
-    Constants.userFollowing.remove(user);
+
+    await usersRef
+        .document(Constants.currentUserID)
+        .updateData({'following': FieldValue.increment(-1)});
+
+    await usersRef
+        .document(userId)
+        .updateData({'followers': FieldValue.increment(-1)});
   }
 
   static followUser(String userId) async {
@@ -1242,6 +1273,14 @@ class DatabaseService {
           .document(Constants.currentUserID)
           .setData({'timestamp': FieldValue.serverTimestamp()});
 
+      await usersRef
+          .document(Constants.currentUserID)
+          .updateData({'friends': FieldValue.increment(1)});
+
+      await usersRef
+          .document(userId)
+          .updateData({'friends': FieldValue.increment(1)});
+
       NotificationHandler.sendNotification(
           userId,
           '${Constants.currentUser.username} followed you',
@@ -1257,9 +1296,14 @@ class DatabaseService {
           'follow');
     }
 
-    User user = await DatabaseService.getUserWithId(userId);
-    Constants.userFriends.add(user);
-    Constants.userFollowing.add(user);
+    //Increment current user following and other user followers
+    await usersRef
+        .document(Constants.currentUserID)
+        .updateData({'following': FieldValue.increment(1)});
+
+    await usersRef
+        .document(userId)
+        .updateData({'followers': FieldValue.increment(1)});
   }
 
   static addUserToDatabase(String id, String email, String username) async {

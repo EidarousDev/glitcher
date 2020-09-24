@@ -29,7 +29,7 @@ class _AddMembersToGroupState extends State<AddMembersToGroup>
         await DatabaseService.getGroupMembersIds(widget.groupId);
 
     List<User> friends =
-        await DatabaseService.getFriends(Constants.currentUserID);
+        await DatabaseService.getAllFriends(Constants.currentUserID);
 
     for (int i = 0; i < friends.length; i++) {
       User user = await DatabaseService.getUserWithId(friends[i].id);

@@ -35,7 +35,7 @@ class _ChatsState extends State<Chats>
 
   void getCurrentUserFriends() async {
     List<User> friends =
-        await DatabaseService.getFriends(Constants.currentUserID);
+        await DatabaseService.getAllFriends(Constants.currentUserID);
 
     friends.forEach((f) async {
       await loadUserData(f.id);

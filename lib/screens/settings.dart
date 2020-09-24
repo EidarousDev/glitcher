@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
+import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/strings.dart';
@@ -21,6 +22,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  var _isAccountPrivate = false;
+
   isSubscribedToNewsletter() async {
     bool isSubscribed =
         (await newsletterEmailsRef.document(Constants.currentUserID).get())
@@ -29,6 +32,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _isSubscribedToNewsletter = isSubscribed;
     });
     return isSubscribed;
+  }
+
+  isAccountPrivate() async {
+    bool isPrivate =
+        (await DatabaseService.getUserWithId(Constants.currentUserID))
+            .isAccountPrivate;
+    setState(() {
+      _isAccountPrivate = isPrivate ?? false;
+    });
+    return isPrivate;
   }
 
   @override
@@ -53,7 +66,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: <Widget>[
                   Text(
                     'Theme: ',
-                    style: textStyle(),
+                    style: titleTextStyle(),
                   ),
                   Radio(
                       activeColor: MyColors.darkPrimary,
@@ -91,7 +104,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               padding: const EdgeInsets.only(top: 16, left: 16),
               child: Text(
                 'Favourite Feed filter: ',
-                style: textStyle(),
+                style: titleTextStyle(),
               ),
             ),
             Column(
@@ -160,18 +173,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   Text(
                     'Subscribed to newsletter? : ',
-                    style: textStyle(),
+                    style: titleTextStyle(),
                   ),
                   Checkbox(
                     checkColor: Colors.white,
                     activeColor: MyColors.darkPrimary,
-                    onChanged: (value) {
-                      alterNewsletterState();
+                    onChanged: (value) async {
+                      await alterNewsletterState();
                     },
                     value: _isSubscribedToNewsletter,
                   )
                 ],
               ),
+            ),
+            Divider(
+              height: 2,
+            ),
+            ListTile(
+              title: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(
+                  'Account Privacy',
+                  style: titleTextStyle(),
+                ),
+              ),
+              subtitle: Text(
+                  'Other users  won\'t be able to see  your following, followers, friends, and followed games'),
+              trailing: Switch(
+                  value: _isAccountPrivate,
+                  onChanged: (value) async {
+                    await alternateAccountPrivate();
+                  }),
             ),
             Divider(
               height: 2,
@@ -192,11 +224,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  TextStyle textStyle() {
+  TextStyle titleTextStyle() {
     return TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
   }
 
   alterNewsletterState() async {
+    Navigator.of(context).push(CustomScreenLoader());
+
     bool isSubscribed = await isSubscribedToNewsletter();
     if (isSubscribed) {
       await newsletterEmailsRef.document(Constants.currentUserID).delete();
@@ -211,8 +245,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
       setState(() {
         _isSubscribedToNewsletter = true;
       });
+      Navigator.of(context).pop();
+
       AppUtil.showSnackBar(context, _scaffoldKey, 'Subscribed to newsletter');
     }
+  }
+
+  alternateAccountPrivate() async {
+    Navigator.of(context).push(CustomScreenLoader());
+    bool isPrivate = await isAccountPrivate() ?? false;
+
+    await usersRef
+        .document(Constants.currentUserID)
+        .updateData({'is_account_private': !isPrivate});
+
+    setState(() {
+      _isAccountPrivate = !isPrivate;
+    });
+    Navigator.of(context).pop();
+    AppUtil.showSnackBar(context, _scaffoldKey, 'Privacy changed!');
   }
 
   @override
@@ -232,6 +283,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
 
     isSubscribedToNewsletter();
+    isAccountPrivate();
     super.initState();
   }
 }

@@ -58,6 +58,9 @@ class _AddCommentPageState extends State<AddComment> {
 
   @override
   void initState() {
+    if (Constants.userFriends.length == 0) {
+      DatabaseService.getAllFriends(Constants.currentUserID);
+    }
     scrollController = ScrollController();
     _textEditingController = TextEditingController();
     scrollController..addListener(_scrollListener);
@@ -101,7 +104,8 @@ class _AddCommentPageState extends State<AddComment> {
           widget.post.id,
           'comment');
 
-      await checkIfContainsMention(_textEditingController.text);
+      await AppUtil.checkIfContainsMention(
+          _textEditingController.text, widget.post.id);
 
       //Navigator.pop(context);
     } else {
@@ -220,22 +224,6 @@ class _AddCommentPageState extends State<AddComment> {
           ),
         ) ??
         false;
-  }
-
-  checkIfContainsMention(String comment) async {
-    comment.split(' ').forEach((word) async {
-      if (word.startsWith('@')) {
-        User user =
-            await DatabaseService.getUserWithUsername(word.substring(1));
-
-        await NotificationHandler.sendNotification(
-            user.id,
-            'New post mention',
-            Constants.currentUser.username + ' mentioned you in a comment',
-            widget.post.id,
-            'mention');
-      }
-    });
   }
 }
 
@@ -384,6 +372,7 @@ class _ComposeComment extends WidgetView<AddComment, _AddCommentPageState> {
                   ),
                   Expanded(
                     child: TextField(
+                      cursorColor: MyColors.darkPrimary,
                       onChanged: (text) {
                         if (text.length > Sizes.maxPostChars) {
                           viewState.setState(() {
@@ -442,8 +431,6 @@ class _ComposeComment extends WidgetView<AddComment, _AddCommentPageState> {
                               title:
                                   Text(Constants.userFriends[index].username),
                               onTap: () {
-//                          String tmp = viewState._mentionText
-//                              .substring(1, viewState._mentionText.length);
                                 if (viewState._textEditingController.text
                                     .contains('@$friendUsername')) {
                                   AppUtil.showSnackBar(
@@ -453,15 +440,7 @@ class _ComposeComment extends WidgetView<AddComment, _AddCommentPageState> {
                                   return;
                                 }
                                 viewState.setState(() {
-                                  viewState._mentionText =
-                                      ''; //                            += friendUsername
-//                                .substring(
-//                            friendUsername.indexOf(tmp) +
-//                            1 +
-//                            tmp.length,
-//                            friendUsername.length)
-//                                .replaceAll(' ', '_');
-
+                                  viewState._mentionText = '';
                                   String s = viewState
                                       ._textEditingController.text
                                       .replaceFirst(

@@ -73,19 +73,12 @@ Future getTheme() async {
   return preferences.getString('theme');
 }
 
-downloadImage(String url, String id) async {
+downloadImage(String url, String name) async {
   var response = await get(url);
-  //var documentDirectory = await getApplicationSupportDirectory();
-  //var firstPath = documentDirectory.path + "/Glitcher";
-  //var filePathAndName = documentDirectory.path + '/Glitcher/$id.jpg';
-
   var firstPath = '/sdcard/download/';
-  var filePathAndName = firstPath + '$id.jpg';
-  //await Directory(firstPath).create(recursive: true);
+  var filePathAndName = firstPath + '$name.jpg';
   File file2 = new File(filePathAndName);
   file2.writeAsBytesSync(response.bodyBytes);
-
-  //return File(filePathAndName);
 }
 
 void setFavouriteFilter(BuildContext context, int favouriteFilter) async {
@@ -97,24 +90,6 @@ void setFavouriteFilter(BuildContext context, int favouriteFilter) async {
 Future getFavouriteFilter() async {
   SharedPreferences preferences = await SharedPreferences.getInstance();
   return preferences.getInt('favouriteFilter') ?? 0;
-}
-
-Future<List> getFriends() async {
-  List<User> friends =
-      await DatabaseService.getFriends(Constants.currentUserID);
-  return friends;
-}
-
-Future<List> getFollowing() async {
-  List<User> following =
-      await DatabaseService.getFollowing(Constants.currentUserID);
-  return following;
-}
-
-Future<List> getFollowers() async {
-  List<User> followers =
-      await DatabaseService.getFollowers(Constants.currentUserID);
-  return followers;
 }
 
 Future<List> getHashtags() async {

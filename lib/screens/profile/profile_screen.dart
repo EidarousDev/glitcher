@@ -36,7 +36,7 @@ class ProfileScreen extends StatefulWidget {
   ProfileScreen(this.userId);
 
   @override
-  _ProfileScreenState createState() => _ProfileScreenState(userId);
+  _ProfileScreenState createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
@@ -54,9 +54,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   var _usernameEditingController = TextEditingController()..text = '';
   var _nameEditingController = TextEditingController()..text = '';
 
-  String userId;
-
-  var userData;
+  User userData;
 
   bool _loading = false;
   bool _isBtnEnabled = true;
@@ -82,7 +80,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  _ProfileScreenState(this.userId);
+  _ProfileScreenState();
 
   String validateUsername(String value) {
     String pattern =
@@ -134,26 +132,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
           print("reached the top");
         } else {}
       });
-    getFollowedGames();
     checkUser();
-  }
-
-  getFollowedGames() async {
-    List<Game> games = await DatabaseService.getFollowedGames();
-    setState(() {
-      Constants.followedGames = games;
-    });
   }
 
   checkUser() async {
     currentUser = await Auth().getCurrentUser();
 
-    if (this.userId != currentUser.uid) {
+    if (this.widget.userId != currentUser.uid) {
       DocumentSnapshot followSnapshot = await firestore
           .collection('users')
           .document(currentUser.uid)
           .collection('following')
-          .document(userId)
+          .document(widget.userId)
           .get();
 
       setState(() {
@@ -164,7 +154,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .collection('users')
           .document(currentUser.uid)
           .collection('friends')
-          .document(userId)
+          .document(widget.userId)
           .get();
 
       setState(() {
@@ -180,8 +170,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void nextPosts() async {
     var posts;
-    posts =
-        await DatabaseService.getNextUserPosts(userId, lastVisiblePostSnapShot);
+    posts = await DatabaseService.getNextUserPosts(
+        widget.userId, lastVisiblePostSnapShot);
 
     if (posts.length > 0) {
       setState(() {
@@ -196,67 +186,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _loading = true;
     });
     print('profileUserID = ${widget.userId}');
-    await firestore.collection('users').document(userId).get().then((onValue) {
+    await DatabaseService.getUserWithId(widget.userId).then((onValue) {
       setState(() {
-        userData = onValue.data;
-        _usernameText = onValue.data['username'];
-        _nameText = onValue.data['name'];
-        _descText = onValue.data['description'];
-        _profileImageUrl = onValue.data['profile_url'];
-        _coverImageUrl = onValue.data['cover_url'];
+        userData = onValue;
+        _usernameText = onValue.username;
+        _nameText = onValue.name;
+        _descText = onValue.description;
+        _profileImageUrl = onValue.profileImageUrl;
+        _coverImageUrl = onValue.coverImageUrl;
         _profileImageFile = null;
         _coverImageFile = null;
         _loading = false;
       });
-    });
-  }
-
-  save() async {
-    setState(() {
-      _loading = true;
-      _isBtnEnabled = false;
-      _descText = _descEditingController.text;
-      _usernameText = _usernameEditingController.text;
-      _nameText = _nameEditingController.text;
-    });
-
-    userData['username'] = _usernameText;
-    userData['name'] = _nameText;
-    userData['description'] = _descText;
-
-    usersRef.document(userId).updateData(userData);
-
-    String url;
-
-    if (_profileImageFile != null) {
-      url = await AppUtil.uploadFile(
-        _profileImageFile,
-        context,
-        'profile_images/$userId',
-      );
-
-      setState(() {
-        _profileImageUrl = url;
-      });
-
-      usersRef.document(userId).updateData({'profile_url': _profileImageUrl});
-    }
-    if (_coverImageFile != null) {
-      url = await AppUtil.uploadFile(
-          _coverImageFile, context, 'cover_images/$userId');
-
-      setState(() {
-        _coverImageUrl = url;
-      });
-
-      usersRef.document(userId).updateData({'cover_url': _coverImageUrl});
-    }
-
-    setState(() {
-      _profileImageFile = null;
-      _coverImageFile = null;
-      _loading = false;
-      _isBtnEnabled = true;
     });
   }
 
@@ -275,7 +216,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 shadow: Shadow(blurRadius: 20.0),
                 child: GestureDetector(
                   onTap: () {
-                    if (userId == Constants.currentUserID)
+                    if (widget.userId == Constants.currentUserID)
                       coverEdit();
                     else {
                       coverDownload();
@@ -303,7 +244,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 fillColor: Colors.white,
                 child: GestureDetector(
                   onTap: () {
-                    if (userId == Constants.currentUserID)
+                    if (widget.userId == Constants.currentUserID)
                       profileEdit();
                     else {
                       profileDownload();
@@ -319,7 +260,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 )),
           ),
         ),
-        userId != Constants.currentUserID
+        widget.userId != Constants.currentUserID
             ? Positioned(
                 bottom: 0.0,
                 left: 20.0,
@@ -347,7 +288,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: IconButton(
                   onPressed: () {
                     Navigator.of(context).pushNamed('/conversation',
-                        arguments: {'otherUid': userId});
+                        arguments: {'otherUid': widget.userId});
                   },
                   icon: Icon(Icons.chat),
                   iconSize: 25.0,
@@ -394,7 +335,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 child: TextField(
                                   controller: _nameEditingController,
                                 )),
-                        userId == Constants.currentUserID
+                        widget.userId == Constants.currentUserID
                             ? !isEditingName
                                 ? IconButton(
                                     icon: Icon(
@@ -444,7 +385,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     updateUsername();
                                   },
                                 )),
-                        userId == Constants.currentUserID
+                        widget.userId == Constants.currentUserID
                             ? !isEditingUsername
                                 ? IconButton(
                                     icon: Icon(
@@ -506,7 +447,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    userId == Constants.currentUserID
+                    widget.userId == Constants.currentUserID
                         ? !isEditingDesc
                             ? IconButton(
                                 icon: Icon(
@@ -537,83 +478,114 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(
                   height: 8,
                 ),
-                userId == Constants.currentUserID
-                    ? Column(
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                Column(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        InkWell(
+                          onTap: () {
+                            if (Constants.currentUserID == widget.userId ||
+                                !(userData.isAccountPrivate ?? false)) {
+                              Navigator.of(context).pushNamed('/users',
+                                  arguments: {
+                                    'screen_type': 'Followers',
+                                    'userId': widget.userId
+                                  });
+                            } else {
+                              AppUtil.showSnackBar(context, _scaffoldKey,
+                                  'User set account to private');
+                            }
+                          },
+                          child: Column(
                             children: <Widget>[
-                              InkWell(
-                                onTap: () => Navigator.of(context).pushNamed(
-                                    '/users',
-                                    arguments: {'screen_type': 'Followers'}),
-                                child: Column(
-                                  children: <Widget>[
-                                    Text(
-                                      'Followers',
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                    Text(Constants.userFollowers.length
-                                        .toString())
-                                  ],
-                                ),
+                              Text(
+                                'Followers',
+                                style: TextStyle(color: Colors.grey),
                               ),
-                              InkWell(
-                                onTap: () => Navigator.of(context).pushNamed(
-                                    '/users',
-                                    arguments: {'screen_type': 'Following'}),
-                                child: Column(
-                                  children: <Widget>[
-                                    Text(
-                                      'Following',
-                                      style: TextStyle(
-                                          color: Colors.grey, fontSize: 14),
-                                    ),
-                                    Text(Constants.userFollowing.length
-                                        .toString())
-                                  ],
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () {
-                                  Navigator.of(context).pushNamed('/users',
-                                      arguments: {'screen_type': 'Friends'});
-                                },
-                                child: Column(
-                                  children: <Widget>[
-                                    Text(
-                                      'Friends',
-                                      style: TextStyle(
-                                          color: Colors.grey, fontSize: 14),
-                                    ),
-                                    Text(
-                                        Constants.userFriends.length.toString())
-                                  ],
-                                ),
-                              ),
+                              Text(userData?.followers.toString())
                             ],
                           ),
-                          SizedBox(
-                            height: 20,
+                        ),
+                        InkWell(
+                          onTap: () {
+                            if (Constants.currentUserID == widget.userId ||
+                                !(userData.isAccountPrivate ?? false)) {
+                              Navigator.of(context).pushNamed('/users',
+                                  arguments: {
+                                    'screen_type': 'Following',
+                                    'userId': widget.userId
+                                  });
+                            } else {
+                              AppUtil.showSnackBar(context, _scaffoldKey,
+                                  'User set account to private');
+                            }
+                          },
+                          child: Column(
+                            children: <Widget>[
+                              Text(
+                                'Following',
+                                style:
+                                    TextStyle(color: Colors.grey, fontSize: 14),
+                              ),
+                              Text(userData?.following.toString())
+                            ],
                           ),
-                          InkWell(
-                            onTap: () => Navigator.of(context).pushNamed(
-                              '/followed-games',
-                            ),
-                            child: Column(
-                              children: <Widget>[
-                                Text(
-                                  'Followed Games',
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                                Text(Constants.followedGames?.length.toString())
-                              ],
-                            ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            if (Constants.currentUserID == widget.userId ||
+                                !(userData.isAccountPrivate ?? false)) {
+                              Navigator.of(context).pushNamed('/users',
+                                  arguments: {
+                                    'screen_type': 'Friends',
+                                    'userId': widget.userId
+                                  });
+                            } else {
+                              AppUtil.showSnackBar(context, _scaffoldKey,
+                                  'User set account to private');
+                            }
+                          },
+                          child: Column(
+                            children: <Widget>[
+                              Text(
+                                'Friends',
+                                style:
+                                    TextStyle(color: Colors.grey, fontSize: 14),
+                              ),
+                              Text(userData?.friends.toString())
+                            ],
                           ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        if (Constants.currentUserID == widget.userId ||
+                            !(userData.isAccountPrivate ?? false)) {
+                          Navigator.of(context).pushNamed('/followed-games',
+                              arguments: {'userId': widget.userId});
+                        } else {
+                          AppUtil.showSnackBar(context, _scaffoldKey,
+                              'User set account to private');
+                        }
+                      },
+                      child: Column(
+                        children: <Widget>[
+                          Text(
+                            'Followed Games',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                          Text(userData?.followedGames.toString())
                         ],
-                      )
-                    : Container(),
+                      ),
+                    ),
+                  ],
+                ),
                 SizedBox(
                   height: 8,
                 ),
@@ -659,7 +631,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               leading: Builder(
                 builder: (context) => Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: userId == Constants.currentUserID
+                  child: widget.userId == Constants.currentUserID
                       ? InkWell(
                           onTap: () => Scaffold.of(context).openDrawer(),
                           child: Icon(
@@ -679,7 +651,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               actions: [
                 GestureDetector(
                   onTap: () async {
-                    await shareProfile(userId, _usernameText, _profileImageUrl);
+                    await shareProfile(
+                        widget.userId, _usernameText, _profileImageUrl);
                   },
                   child: Row(
                     children: [
@@ -734,7 +707,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (validUsername == null) {
         List search = searchList(_usernameEditingController.text);
         search.addAll(searchList(_nameText));
-        await usersRef.document(userId).updateData(
+        await usersRef.document(widget.userId).updateData(
             {'username': _usernameEditingController.text, 'search': search});
         setState(() {
           _usernameText = _usernameEditingController.text;
@@ -758,17 +731,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     List search = searchList(_usernameText);
     search.addAll(searchList(_nameText));
     await usersRef
-        .document(userId)
+        .document(widget.userId)
         .updateData({'name': _nameText, 'search': search});
   }
 
   updateDesc() async {
-    await usersRef.document(userId).updateData({'description': _descText});
+    await usersRef
+        .document(widget.userId)
+        .updateData({'description': _descText});
   }
 
   loadPosts() async {
     List<Post> posts;
-    posts = await DatabaseService.getUserPosts(userId);
+    posts = await DatabaseService.getUserPosts(widget.userId);
     setState(() {
       _posts = posts;
       this.lastVisiblePostSnapShot = posts.last.timestamp;
@@ -784,7 +759,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     Navigator.of(context).push(CustomScreenLoader());
 
-    await DatabaseService.followUser(userId);
+    await DatabaseService.followUser(widget.userId);
     await checkUser();
 
 //    setState(() {
@@ -803,9 +778,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     Navigator.of(context).push(CustomScreenLoader());
 
-    await DatabaseService.unfollowUser(userId);
+    await DatabaseService.unfollowUser(widget.userId);
     await NotificationHandler.removeNotification(
-        userId, Constants.currentUserID, 'follow');
+        widget.userId, Constants.currentUserID, 'follow');
 
     await checkUser();
 
@@ -838,12 +813,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
       Navigator.of(context).push(CustomScreenLoader());
       String url = await AppUtil.uploadFile(
-          _coverImageFile, context, 'cover_images/$userId');
+          _coverImageFile, context, 'cover_images/${widget.userId}');
       setState(() {
         _coverImageUrl = url;
         _coverImageFile = null;
       });
-      await usersRef.document(userId).updateData({'cover_url': _coverImageUrl});
+      await usersRef
+          .document(widget.userId)
+          .updateData({'cover_url': _coverImageUrl});
       Navigator.of(context).pop();
     } else {
       await showDialog(
@@ -866,14 +843,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 });
                 Navigator.of(context).push(CustomScreenLoader());
                 String url = await AppUtil.uploadFile(
-                    _coverImageFile, context, 'cover_images/$userId');
+                    _coverImageFile, context, 'cover_images/${widget.userId}');
                 setState(() {
                   _coverImageUrl = url;
                   _coverImageFile = null;
                 });
 
                 await usersRef
-                    .document(userId)
+                    .document(widget.userId)
                     .updateData({'cover_url': _coverImageUrl});
                 Navigator.of(context).pop();
 
@@ -896,13 +873,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
       Navigator.of(context).push(CustomScreenLoader());
       String url = await AppUtil.uploadFile(
-          _profileImageFile, context, 'cover_images/$userId');
+          _profileImageFile, context, 'cover_images/${widget.userId}');
       setState(() {
         _profileImageUrl = url;
         _profileImageFile = null;
       });
       await usersRef
-          .document(userId)
+          .document(widget.userId)
           .updateData({'profile_url': _profileImageUrl});
       Navigator.of(context).pop();
     } else {
@@ -925,14 +902,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _profileImageUrl = null;
                 });
                 Navigator.of(context).push(CustomScreenLoader());
-                String url = await AppUtil.uploadFile(
-                    _profileImageFile, context, 'profile_images/$userId');
+                String url = await AppUtil.uploadFile(_profileImageFile,
+                    context, 'profile_images/${widget.userId}');
                 setState(() {
                   _profileImageUrl = url;
                   _profileImageFile = null;
                 });
                 await usersRef
-                    .document(userId)
+                    .document(widget.userId)
                     .updateData({'profile_url': _profileImageUrl});
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
@@ -993,7 +970,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<bool> _onBackPressed() {
     /// Navigate back to home page
-    if (userId == Constants.currentUserID)
+    if (widget.userId == Constants.currentUserID)
       Navigator.of(context).pushReplacementNamed('/home');
     else
       Navigator.of(context).pop();

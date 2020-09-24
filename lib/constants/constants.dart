@@ -7,7 +7,6 @@ import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/notification_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/chats/chats.dart';
-import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:stack/stack.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -50,13 +49,11 @@ class Constants {
   static const genres = ['Action', 'Sports', 'Racing', 'Fighting'];
   static var currentTheme = AvailableThemes.DARK_THEME;
   static int favouriteFilter;
-  static List<String> followingIds = [];
-  static List<Game> followedGames = [];
-  static List<String> followedGamesNames = [];
 
-  static List<User> userFriends = [];
-  static List<User> userFollowing = [];
-  static List<User> userFollowers = [];
+  static List<String> followingIds = [];
+  static List<String> followedGamesNames = [];
+  static List<User> userFriends = []; //mentioning has to be searched
+
   static List<Hashtag> hashtags = [];
   static List<Notification> unseenNotifications = [];
 

@@ -58,7 +58,7 @@ class _CreatePostReplyPageState extends State<CreatePost> {
 
   String _mentionText = '';
   String _hashtagText = '';
-  bool newHashtag = true;
+  bool _isNewHashtag = true;
 
   var words = [];
 
@@ -73,6 +73,10 @@ class _CreatePostReplyPageState extends State<CreatePost> {
 
   @override
   void initState() {
+    if (Constants.userFriends.length == 0) {
+      DatabaseService.getAllFriends(Constants.currentUserID);
+    }
+
     scrollController = ScrollController();
 
     createPostVideo = CreatePostVideo(
@@ -183,7 +187,7 @@ class _CreatePostReplyPageState extends State<CreatePost> {
     /// Add this image path to tweet model and save to firebase database
     String postId = randomAlphaNumeric(20);
 
-    await checkIfContainsMention(_textEditingController.text, postId);
+    await AppUtil.checkIfContainsMention(_textEditingController.text, postId);
 
     if (_video != null) {
       _uploadedFileURL = await AppUtil.uploadFile(
@@ -227,7 +231,8 @@ class _CreatePostReplyPageState extends State<CreatePost> {
 
     await postsRef.document(postId).setData(postData);
 
-    await checkIfContainsHashtag(_textEditingController.text, postId);
+    await AppUtil.checkIfContainsHashtag(
+        _textEditingController.text, postId, _isNewHashtag);
 
     await gamesRef
         .document(
@@ -320,8 +325,10 @@ class _CreatePostReplyPageState extends State<CreatePost> {
                 ),
                 SizedBox(height: 16),
                 new GestureDetector(
-                  onTap: () =>
-                      Navigator.of(context).pushReplacementNamed('/home'),
+                  onTap: () {
+                    Navigator.of(context).pop(false);
+                    Navigator.of(context).pop();
+                  },
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text("YES"),
@@ -332,51 +339,6 @@ class _CreatePostReplyPageState extends State<CreatePost> {
           ),
         ) ??
         false;
-  }
-
-  checkIfContainsMention(String post, String postId) async {
-    post.split(' ').forEach((word) async {
-      if (word.startsWith('@')) {
-        User user =
-            await DatabaseService.getUserWithUsername(word.substring(1));
-
-        await NotificationHandler.sendNotification(
-            user.id,
-            'New post mention',
-            Constants.currentUser.username + ' mentioned you in a post',
-            postId,
-            'mention');
-      }
-    });
-  }
-
-  Future checkIfContainsHashtag(String post, String postId) async {
-    post.split(' ').forEach((word) async {
-      if (word.startsWith('#')) {
-        Hashtag hashtag = await DatabaseService.getHashtagWithText(word);
-
-        if (newHashtag) {
-          String hashtagId = randomAlphaNumeric(20);
-          await hashtagsRef.document(hashtagId).setData(
-              {'text': word, 'timestamp': FieldValue.serverTimestamp()});
-
-          await hashtagsRef
-              .document(hashtagId)
-              .collection('posts')
-              .document(postId)
-              .setData({'timestamp': FieldValue.serverTimestamp()});
-        } else {
-          await hashtagsRef
-              .document(hashtag.id)
-              .collection('posts')
-              .document(postId)
-              .setData({'timestamp': FieldValue.serverTimestamp()});
-        }
-
-        return hashtag;
-      } else
-        return null;
-    });
   }
 }
 
@@ -413,6 +375,7 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                   ),
                   Expanded(
                     child: TextFormField(
+                      cursorColor: MyColors.darkPrimary,
                       onChanged: (text) {
                         if (text.length > Sizes.maxPostChars) {
                           viewState.setState(() {
@@ -482,8 +445,6 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                               title:
                                   Text(Constants.userFriends[index].username),
                               onTap: () {
-//                          String tmp = viewState._mentionText
-//                              .substring(1, viewState._mentionText.length);
                                 if (viewState._textEditingController.text
                                     .contains('@$friendUsername')) {
                                   AppUtil.showSnackBar(
@@ -493,14 +454,7 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                                   return;
                                 }
                                 viewState.setState(() {
-                                  viewState._mentionText =
-                                      ''; //                            += friendUsername
-//                                .substring(
-//                            friendUsername.indexOf(tmp) +
-//                            1 +
-//                            tmp.length,
-//                            friendUsername.length)
-//                                .replaceAll(' ', '_');
+                                  viewState._mentionText = '';
 
                                   String s = viewState
                                       ._textEditingController.text
@@ -545,7 +499,7 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                             return ListTile(
                               title: Text(Constants.hashtags[index].text),
                               onTap: () {
-                                viewState.newHashtag = false;
+                                viewState._isNewHashtag = false;
 
                                 if (viewState._textEditingController.text
                                     .contains('#$hashtag')) {
@@ -556,14 +510,7 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
                                   return;
                                 }
                                 viewState.setState(() {
-                                  viewState._hashtagText =
-                                      ''; //                            += friendUsername
-//                                .substring(
-//                            friendUsername.indexOf(tmp) +
-//                            1 +
-//                            tmp.length,
-//                            friendUsername.length)
-//                                .replaceAll(' ', '_');
+                                  viewState._hashtagText = '';
 
                                   String s = viewState
                                       ._textEditingController.text

@@ -15,6 +15,7 @@ import 'package:glitcher/screens/posts/new_post/widget/create_post_image.dart';
 import 'package:glitcher/screens/posts/new_post/widget/widget_view.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/custom_loader.dart';
@@ -35,7 +36,7 @@ class _AddCommentPageState extends State<EditComment> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isScrollingDown = false;
   ScrollController scrollcontroller;
-
+  var words = [];
   File _image;
   var _video;
   var _uploadedFileURL;
@@ -47,6 +48,8 @@ class _AddCommentPageState extends State<EditComment> {
   String _youtubeId;
 
   bool canSubmit = true;
+
+  var _mentionText = '';
 
   @override
   void dispose() {
@@ -101,7 +104,8 @@ class _AddCommentPageState extends State<EditComment> {
 //          widget.post.id,
 //          'comment');
 
-      checkIfContainsMention(_textEditingController.text);
+      await AppUtil.checkIfContainsMention(
+          _textEditingController.text, widget.post.id);
 
       Navigator.pop(context);
     } else {
@@ -210,8 +214,10 @@ class _AddCommentPageState extends State<EditComment> {
                 ),
                 SizedBox(height: 16),
                 new GestureDetector(
-                  onTap: () => Navigator.of(context).pushNamed('/post',
-                      arguments: {'postId': widget.post.id}),
+                  onTap: () {
+                    Navigator.of(context).pop(false);
+                    Navigator.of(context).pop();
+                  },
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text("YES"),
@@ -222,22 +228,6 @@ class _AddCommentPageState extends State<EditComment> {
           ),
         ) ??
         false;
-  }
-
-  void checkIfContainsMention(String comment) async {
-    comment.split(' ').forEach((word) async {
-      if (word.startsWith('@')) {
-        User user =
-            await DatabaseService.getUserWithUsername(word.substring(1));
-
-        await NotificationHandler.sendNotification(
-            user.id,
-            'New post mention',
-            Constants.currentUser.username + ' mentioned you in a comment',
-            widget.post.id,
-            'mention');
-      }
-    });
   }
 }
 
@@ -369,46 +359,122 @@ class _ComposeTweet extends WidgetView<EditComment, _AddCommentPageState> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           _tweerCard(context),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              CacheThisImage(
-                imageUrl: loggedInProfileImageURL,
-                imageShape: BoxShape.circle,
-                width: Sizes.sm_profile_image_w,
-                height: Sizes.sm_profile_image_h,
-                defaultAssetImage: Strings.default_profile_image,
+          Stack(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  CacheThisImage(
+                    imageUrl: loggedInProfileImageURL,
+                    imageShape: BoxShape.circle,
+                    width: Sizes.sm_profile_image_w,
+                    height: Sizes.sm_profile_image_h,
+                    defaultAssetImage: Strings.default_profile_image,
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    child: TextField(
+                      cursorColor: MyColors.darkPrimary,
+                      onChanged: (text) {
+                        if (text.length > Sizes.maxPostChars) {
+                          viewState.setState(() {
+                            viewState.canSubmit = false;
+                          });
+                        } else {
+                          viewState.setState(() {
+                            viewState.canSubmit = true;
+                          });
+                        }
+                        // Mention Users
+                        viewState.setState(() {
+                          viewState.words = text.split(' ');
+                          viewState._mentionText = viewState.words.length > 0 &&
+                                  viewState.words[viewState.words.length - 1]
+                                      .startsWith('@')
+                              ? viewState.words[viewState.words.length - 1]
+                              : '';
+                        });
+                      },
+                      maxLength: Sizes.maxPostChars,
+                      minLines: 5,
+                      maxLines: 15,
+                      autofocus: true,
+                      maxLengthEnforced: true,
+                      controller: viewState._textEditingController,
+                      decoration: InputDecoration(
+                          counterText: "",
+                          border: InputBorder.none,
+                          hintText: 'Post your comment...'),
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  )
+                ],
               ),
-              SizedBox(
-                width: 10,
-              ),
-              Expanded(
-                child: TextField(
-                  onChanged: (text) {
-                    if (text.length > Sizes.maxPostChars) {
-                      viewState.setState(() {
-                        viewState.canSubmit = false;
-                      });
-                    } else {
-                      viewState.setState(() {
-                        viewState.canSubmit = true;
-                      });
-                    }
-                    // Mention Users
-                  },
-                  maxLength: Sizes.maxPostChars,
-                  minLines: 5,
-                  maxLines: 15,
-                  autofocus: true,
-                  maxLengthEnforced: true,
-                  controller: viewState._textEditingController,
-                  decoration: InputDecoration(
-                      counterText: "",
-                      border: InputBorder.none,
-                      hintText: 'Post your comment...'),
-                  style: TextStyle(fontSize: 18),
-                ),
-              )
+              viewState._mentionText.length > 1
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 45.0),
+                      child: ListView.builder(
+                        itemCount: Constants.userFriends.length,
+                        itemBuilder: (context, index) {
+                          String friendUsername =
+                              Constants.userFriends[index].username;
+                          print('username:' + friendUsername);
+                          if (('@' + friendUsername.toLowerCase())
+                              .contains(viewState._mentionText.toLowerCase()))
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage: Constants.userFriends[index]
+                                            .profileImageUrl !=
+                                        null
+                                    ? NetworkImage(Constants
+                                        .userFriends[index].profileImageUrl)
+                                    : AssetImage(Strings.default_profile_image),
+                              ),
+                              title:
+                                  Text(Constants.userFriends[index].username),
+                              onTap: () {
+                                if (viewState._textEditingController.text
+                                    .contains('@$friendUsername')) {
+                                  AppUtil.showSnackBar(
+                                      context,
+                                      viewState._scaffoldKey,
+                                      'User already mentioned!');
+                                  return;
+                                }
+                                viewState.setState(() {
+                                  viewState._mentionText = '';
+                                  String s = viewState
+                                      ._textEditingController.text
+                                      .replaceFirst(
+                                          RegExp(r'\B\@\w+'),
+                                          '@$friendUsername',
+                                          viewState._textEditingController.text
+                                                      .length <
+                                                  8
+                                              ? 0
+                                              : viewState._textEditingController
+                                                      .selection.baseOffset -
+                                                  8);
+                                  viewState._textEditingController.text = s;
+
+                                  viewState._textEditingController.selection =
+                                      TextSelection.collapsed(
+                                          offset: viewState
+                                              ._textEditingController
+                                              .text
+                                              .length);
+                                });
+                              },
+                            );
+
+                          return SizedBox();
+                        },
+                        shrinkWrap: true,
+                      ),
+                    )
+                  : SizedBox(),
             ],
           ),
           Flexible(

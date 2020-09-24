@@ -91,13 +91,16 @@ class CommentBottomSheet {
                     });
                   }
                 },
-                isEnable: true,
+                isEnable: false,
               )
             : Container(),
         isMyComment
             ? _widgetBottomSheetRow(
                 context,
-                Icon(Icons.delete_forever),
+                Icon(
+                  Icons.delete_forever,
+                  color: MyColors.darkPrimary,
+                ),
                 text: 'Delete Comment',
                 onPressed: () {
                   _deleteComment(context, post.id, comment.id,

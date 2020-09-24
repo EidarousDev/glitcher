@@ -123,7 +123,6 @@ class _GameItemState extends State<GameItem> {
       setState(() {
         followBtnText = 'Follow';
       });
-      Constants.followedGames.remove(widget.game);
       Constants.followedGamesNames.remove(widget.game.fullName);
       //AppUtil.showSnackBar(context, _scaffoldKey, 'Game unfollowed');
     } else {
@@ -131,7 +130,6 @@ class _GameItemState extends State<GameItem> {
       setState(() {
         followBtnText = 'Unfollow';
       });
-      Constants.followedGames.add(widget.game);
       Constants.followedGamesNames.add(widget.game.fullName);
       //AppUtil.showSnackBar(context, _scaffoldKey, 'Game followed');
     }

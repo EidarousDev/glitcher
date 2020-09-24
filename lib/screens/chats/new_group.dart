@@ -38,7 +38,7 @@ class _NewGroupState extends State<NewGroup>
 
   getFriends() async {
     List<User> friends =
-        await DatabaseService.getFriends(Constants.currentUserID);
+        await DatabaseService.getAllFriends(Constants.currentUserID);
 
     for (int i = 0; i < friends.length; i++) {
       User user = await DatabaseService.getUserWithId(friends[i].id);

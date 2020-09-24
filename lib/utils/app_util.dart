@@ -1,13 +1,19 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/models/hashtag_model.dart';
+import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/widgets/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:random_string/random_string.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AppUtil {
@@ -186,5 +192,51 @@ class AppUtil {
     );
 
     await FlutterEmailSender.send(email);
+  }
+
+  static checkIfContainsMention(String text, String postId) async {
+    text.split(' ').forEach((word) async {
+      if (word.startsWith('@')) {
+        User user =
+            await DatabaseService.getUserWithUsername(word.substring(1));
+
+        await NotificationHandler.sendNotification(
+            user.id,
+            'New mention',
+            Constants.currentUser.username + ' mentioned you',
+            postId,
+            'mention');
+      }
+    });
+  }
+
+  static Future checkIfContainsHashtag(
+      String text, String postId, bool newHashtag) async {
+    text.split(' ').forEach((word) async {
+      if (word.startsWith('#')) {
+        Hashtag hashtag = await DatabaseService.getHashtagWithText(word);
+
+        if (newHashtag) {
+          String hashtagId = randomAlphaNumeric(20);
+          await hashtagsRef.document(hashtagId).setData(
+              {'text': word, 'timestamp': FieldValue.serverTimestamp()});
+
+          await hashtagsRef
+              .document(hashtagId)
+              .collection('posts')
+              .document(postId)
+              .setData({'timestamp': FieldValue.serverTimestamp()});
+        } else {
+          await hashtagsRef
+              .document(hashtag.id)
+              .collection('posts')
+              .document(postId)
+              .setData({'timestamp': FieldValue.serverTimestamp()});
+        }
+
+        return hashtag;
+      } else
+        return null;
+    });
   }
 }
