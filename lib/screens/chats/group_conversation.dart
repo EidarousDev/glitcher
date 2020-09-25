@@ -74,6 +74,8 @@ class _GroupConversationState extends State<GroupConversation>
 
   List<String> groupMembersIds = [];
 
+  bool isMicrophoneGranted = false;
+
   _GroupConversationState();
 
   Future<String> _localPath() async {
@@ -466,20 +468,30 @@ class _GroupConversationState extends State<GroupConversation>
                                   )
                                 : GestureDetector(
                                     onLongPress: () async {
-                                      bool isGranted;
                                       if (await PermissionsService()
                                           .hasMicrophonePermission()) {
-                                        isGranted = true;
+                                        setState(() {
+                                          isMicrophoneGranted = true;
+                                        });
                                       } else {
-                                        isGranted = await PermissionsService()
-                                            .requestMicrophonePermission(
-                                                onPermissionDenied: () {
+                                        bool isGranted =
+                                            await PermissionsService()
+                                                .requestMicrophonePermission(
+                                                    onPermissionDenied: () {
+                                          AppUtil.alertDialog(
+                                              context,
+                                              'info',
+                                              'You must grant this microphone access to be able to use this feature.',
+                                              'OK');
                                           print('Permission has been denied');
+                                        });
+                                        setState(() {
+                                          isMicrophoneGranted = isGranted;
                                         });
                                         return;
                                       }
 
-                                      if (isGranted) {
+                                      if (isMicrophoneGranted) {
                                         setState(() {
                                           _currentStatus =
                                               RecordingStatus.Recording;
@@ -487,27 +499,7 @@ class _GroupConversationState extends State<GroupConversation>
                                         await initRecorder();
                                         await recorder.startRecording(
                                             conversation: this.widget);
-                                        return;
-                                      } else {
-                                        showDialog(
-                                            context: context,
-                                            builder: (context) {
-                                              return AlertDialog(
-                                                title: Text('Info'),
-                                                content: Text(
-                                                    'You must grant this microphone access to be able to use this feature.'),
-                                                actions: <Widget>[
-                                                  MaterialButton(
-                                                    onPressed: () {
-                                                      Navigator.of(context)
-                                                          .pop();
-                                                    },
-                                                    child: Text('OK'),
-                                                  )
-                                                ],
-                                              );
-                                            });
-                                      }
+                                      } else {}
                                     },
                                     onLongPressEnd: (longPressDetails) async {
                                       setState(() {

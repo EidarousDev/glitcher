@@ -10,6 +10,8 @@ import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
 
+import '../custom_loader.dart';
+
 class CommentBottomSheet {
   Widget commentOptionIcon(
       BuildContext context, Post post, Comment comment, Comment parentComment) {
@@ -29,6 +31,16 @@ class CommentBottomSheet {
         ));
   }
 
+  double calculateHeightRatio(bool isMyComment) {
+    double ratio = 1.0;
+    if (!isMyComment) {
+      ratio = 0.17;
+    } else if (isMyComment) {
+      ratio = 0.2;
+    }
+    return ratio;
+  }
+
   void _openBottomSheet(BuildContext context, Post post, Comment comment,
       Comment parentComment) async {
     User user = await DatabaseService.getUserWithId(comment.commenterID);
@@ -39,7 +51,8 @@ class CommentBottomSheet {
       builder: (context) {
         return Container(
             padding: EdgeInsets.only(top: 5, bottom: 0),
-            height: Sizes.fullHeight(context) * (isMyComment ? .25 : .44),
+            height:
+                Sizes.fullHeight(context) * calculateHeightRatio(isMyComment),
             width: Sizes.fullWidth(context),
             decoration: BoxDecoration(
               color: switchColor(
@@ -112,24 +125,25 @@ class CommentBottomSheet {
         isMyComment
             ? Container()
             : _widgetBottomSheetRow(
-                context,
-                Icon(Icons.indeterminate_check_box),
-                text: 'Unfollow ${user.username}',
-              ),
-        isMyComment
-            ? Container()
-            : _widgetBottomSheetRow(
-                context,
-                Icon(Icons.volume_mute),
-                text: 'Mute ${user.username}',
-              ),
-        isMyComment
-            ? Container()
-            : _widgetBottomSheetRow(
-                context,
-                Icon(Icons.block),
-                text: 'Block ${user.username}',
-              ),
+                context, Icon(Icons.indeterminate_check_box),
+                text: 'Unfollow ${user.username}', onPressed: () async {
+                unfollowUser(context, user);
+              }),
+
+//        isMyComment
+//            ? Container()
+//            : _widgetBottomSheetRow(
+//                context,
+//                Icon(Icons.volume_mute),
+//                text: 'Mute ${user.username}',
+//              ),
+//        isMyComment
+//            ? Container()
+//            : _widgetBottomSheetRow(
+//                context,
+//                Icon(Icons.block),
+//                text: 'Block ${user.username}',
+//              ),
 //        isMyComment
 //            ? Container()
 //            : _widgetBottomSheetRow(
@@ -139,6 +153,49 @@ class CommentBottomSheet {
 //              ),
       ],
     );
+  }
+
+  void unfollowUser(BuildContext context, User user) async {
+    await showDialog(
+      context: context,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: new AlertDialog(
+          title: new Text('Are you sure?'),
+          content: new Text('Do you really want to unfollow ${user.username}?'),
+          actions: <Widget>[
+            new GestureDetector(
+              onTap: () =>
+                  // CLose bottom sheet
+                  Navigator.of(context).pop(),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text("NO"),
+              ),
+            ),
+            SizedBox(height: 16),
+            new GestureDetector(
+              onTap: () async {
+                Navigator.of(context).push(CustomScreenLoader());
+
+                await DatabaseService.unfollowUser(user.id);
+                await NotificationHandler.removeNotification(
+                    user.id, Constants.currentUserID, 'follow');
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text("YES"),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    Navigator.of(context).pop();
+    Navigator.of(context).pushReplacementNamed('/home');
+    print('deleting post!');
   }
 
   Widget _widgetBottomSheetRow(BuildContext context, Icon icon,

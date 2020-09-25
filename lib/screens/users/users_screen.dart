@@ -27,6 +27,7 @@ class _UsersScreenState extends State<UsersScreen> {
   TextEditingController _searchController = TextEditingController();
   bool _searching = false;
   List<User> filteredUsers = [];
+  ScrollController _scrollController = ScrollController();
 
   bool _isPageReady = false;
 
@@ -93,6 +94,7 @@ class _UsersScreenState extends State<UsersScreen> {
             ),
             body: _users.length > 0
                 ? ListView.separated(
+                    controller: _scrollController,
                     separatorBuilder: (BuildContext context, int index) {
                       return Align(
                         alignment: Alignment.centerRight,
@@ -177,6 +179,17 @@ class _UsersScreenState extends State<UsersScreen> {
 
   @override
   void initState() {
+    _scrollController.addListener(() {
+      if (_scrollController.offset >=
+              _scrollController.position.maxScrollExtent &&
+          !_scrollController.position.outOfRange) {
+        print('reached the bottom');
+      } else if (_scrollController.offset <=
+              _scrollController.position.minScrollExtent &&
+          !_scrollController.position.outOfRange) {
+        print("reached the top");
+      } else {}
+    });
     getUsers();
     super.initState();
   }

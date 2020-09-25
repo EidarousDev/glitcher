@@ -573,7 +573,7 @@ class _ConversationState extends State<Conversation>
                                             await PermissionsService()
                                                 .requestMicrophonePermission(
                                                     onPermissionDenied: () {
-                                          alertDialog(
+                                          AppUtil.alertDialog(
                                               context,
                                               'info',
                                               'You must grant this microphone access to be able to use this feature.',
@@ -637,26 +637,6 @@ class _ConversationState extends State<Conversation>
         ),
       ),
     );
-  }
-
-  void alertDialog(
-      BuildContext context, String heading, String message, String okBtn) {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text(heading),
-            content: Text(message),
-            actions: <Widget>[
-              MaterialButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text(okBtn),
-              )
-            ],
-          );
-        });
   }
 
   void updateRecordTime(String rt) {

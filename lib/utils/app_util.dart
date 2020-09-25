@@ -239,4 +239,24 @@ class AppUtil {
         return null;
     });
   }
+
+  static void alertDialog(
+      BuildContext context, String heading, String message, String okBtn) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text(heading),
+            content: Text(message),
+            actions: <Widget>[
+              MaterialButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(okBtn),
+              )
+            ],
+          );
+        });
+  }
 }
