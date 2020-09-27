@@ -110,7 +110,7 @@ class _GroupMembersState extends State<GroupMembers>
               imageShape: BoxShape.circle,
               width: 50.0,
               height: 50.0,
-              defaultAssetImage: Strings.default_profile_image,
+              defaultAssetImage: Strings.default_group_image,
             ),
             title: Text(members[index]['name'] ?? ''),
             subtitle: Text(

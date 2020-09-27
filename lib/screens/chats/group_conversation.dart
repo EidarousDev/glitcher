@@ -262,7 +262,7 @@ class _GroupConversationState extends State<GroupConversation>
                       imageShape: BoxShape.circle,
                       width: 40.0,
                       height: 40.0,
-                      defaultAssetImage: Strings.default_profile_image,
+                      defaultAssetImage: Strings.default_group_image,
                     ),
                   ),
                   Expanded(
@@ -318,7 +318,7 @@ class _GroupConversationState extends State<GroupConversation>
                             Message msg = _messages[index];
                             return ChatBubble(
                               message: msg.message,
-                              username: usersMap[msg.sender].username,
+                              username: usersMap[msg.sender]?.username,
                               time: msg.timestamp != null
                                   ? Functions.formatTimestamp(msg.timestamp)
                                   : 'now',
@@ -504,20 +504,22 @@ class _GroupConversationState extends State<GroupConversation>
                                       } else {}
                                     },
                                     onLongPressEnd: (longPressDetails) async {
-                                      setState(() {
-                                        _currentStatus =
-                                            RecordingStatus.Stopped;
-                                      });
-                                      Recording result =
-                                          await recorder.stopRecording();
-                                      _url = await AppUtil.uploadFile(
-                                          File(result.path),
-                                          context,
-                                          'group_chat_voice_messages/${widget.groupId}/${randomAlphaNumeric(20)}',
-                                          groupMembersIds: groupMembersIds);
+                                      if (isMicrophoneGranted) {
+                                        setState(() {
+                                          _currentStatus =
+                                              RecordingStatus.Stopped;
+                                        });
+                                        Recording result =
+                                            await recorder.stopRecording();
+                                        _url = await AppUtil.uploadFile(
+                                            File(result.path),
+                                            context,
+                                            'group_chat_voice_messages/${widget.groupId}/${randomAlphaNumeric(20)}',
+                                            groupMembersIds: groupMembersIds);
 
-                                      await DatabaseService.sendGroupMessage(
-                                          widget.groupId, 'audio', _url);
+                                        await DatabaseService.sendGroupMessage(
+                                            widget.groupId, 'audio', _url);
+                                      }
                                     },
                                     child: IconButton(
                                       icon: Icon(

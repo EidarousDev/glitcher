@@ -223,7 +223,7 @@ class _NewGroupState extends State<NewGroup>
                           imageShape: BoxShape.circle,
                           width: 50.0,
                           height: 50.0,
-                          defaultAssetImage: Strings.default_profile_image,
+                          defaultAssetImage: Strings.default_group_image,
                         ),
                         Positioned(
                           bottom: 0.0,

@@ -448,7 +448,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           )
                         : Container(
-                            width: 200,
+                            width: Sizes.fullWidth(context) - 50,
                             child: TextField(
                               controller: _descEditingController,
                             )),

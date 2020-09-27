@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/screens/games/games_screen.dart';
 import 'package:glitcher/screens/profile/profile_screen.dart';
 import 'package:glitcher/utils/app_util.dart';
@@ -45,7 +46,7 @@ class _BuildDrawerState extends State<BuildDrawer> {
                         Constants.currentUser.profileImageUrl != null
                             ? CachedNetworkImageProvider(
                                 Constants.currentUser.profileImageUrl)
-                            : AssetImage('assets/images/default_profile.png'),
+                            : AssetImage(Strings.default_profile_image),
                   ),
                 ),
                 Row(

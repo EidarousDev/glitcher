@@ -164,7 +164,7 @@ class _GroupDetailsState extends State<GroupDetails>
                       imageUrl: _group?.image,
                       imageShape: BoxShape.rectangle,
                       height: 300,
-                      defaultAssetImage: Strings.default_profile_image,
+                      defaultAssetImage: Strings.default_group_image,
                     ),
                   ),
                   Positioned.fill(

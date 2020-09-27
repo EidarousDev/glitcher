@@ -90,7 +90,13 @@ class _ChatsState extends State<Chats>
     for (int i = 0; i < n - 1; i++) {
       for (int j = 0; j < n - i - 1; j++) {
         var current = chats[j].msg.timestamp;
+        if (current == null) {
+          current = Timestamp.fromDate(DateTime.now());
+        }
         var next = chats[j + 1].msg.timestamp;
+        if (next == null) {
+          next = Timestamp.fromDate(DateTime.now());
+        }
         if (current.seconds <= next.seconds) {
           setState(() {
             ChatItem temp = chats[j];
@@ -308,7 +314,7 @@ class _ChatsState extends State<Chats>
                           imageShape: BoxShape.circle,
                           width: 50.0,
                           height: 50.0,
-                          defaultAssetImage: Strings.default_profile_image,
+                          defaultAssetImage: Strings.default_group_image,
                         ),
                         title: Text(group.name ?? 'Unnamed group'),
                       );

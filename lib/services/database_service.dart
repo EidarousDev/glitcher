@@ -409,7 +409,7 @@ class DatabaseService {
 
   static getAllFriends(String userId) async {
     List<User> friends = await UserSqlite.getByCategory('friends');
-    if (friends.length != Constants.currentUser.friends) {
+    if (friends == null || friends.length != Constants.currentUser.friends) {
       QuerySnapshot friendsSnapshot =
           await usersRef.document(userId).collection('friends').getDocuments();
 
@@ -440,7 +440,8 @@ class DatabaseService {
 
   static getAllFollowing(String userId) async {
     List<User> following = await UserSqlite.getByCategory('following');
-    if (following.length != Constants.currentUser.following) {
+    if (following == null ||
+        following.length != Constants.currentUser.following) {
       QuerySnapshot followingSnapshot = await usersRef
           .document(userId)
           .collection('following')
@@ -483,7 +484,8 @@ class DatabaseService {
 
   static getAllFollowers(String userId) async {
     List<User> followers = await UserSqlite.getByCategory('followers');
-    if (followers.length != Constants.currentUser.followers) {
+    if (followers == null ||
+        followers.length != Constants.currentUser.followers) {
       QuerySnapshot followersSnapshot = await usersRef
           .document(userId)
           .collection('followers')
