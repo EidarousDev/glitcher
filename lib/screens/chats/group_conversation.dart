@@ -18,6 +18,7 @@ import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
+import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/chat_bubble.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
@@ -165,7 +166,8 @@ class _GroupConversationState extends State<GroupConversation>
     });
 
     for (String userId in usersIds) {
-      User user = await DatabaseService.getUserWithId(userId);
+      User user =
+          await DatabaseService.getUserWithId(userId, checkLocally: true);
       setState(() {
         this.usersMap.putIfAbsent(userId, () => user);
       });
@@ -254,21 +256,21 @@ class _GroupConversationState extends State<GroupConversation>
               child: Row(
                 children: <Widget>[
                   Padding(
-                      padding: EdgeInsets.only(left: 0.0, right: 10.0),
-                      child: CircleAvatar(
-                        backgroundColor: Colors.grey.shade400,
-                        backgroundImage: group.image != null
-                            ? NetworkImage(
-                                group.image,
-                              )
-                            : AssetImage(Strings.default_group_image),
-                      )),
+                    padding: EdgeInsets.only(left: 0.0, right: 10.0),
+                    child: CacheThisImage(
+                      imageUrl: group?.image,
+                      imageShape: BoxShape.circle,
+                      width: 40.0,
+                      height: 40.0,
+                      defaultAssetImage: Strings.default_profile_image,
+                    ),
+                  ),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          group.name ?? '',
+                          group?.name ?? '',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,

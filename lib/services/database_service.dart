@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/models/comment_model.dart';
 import 'package:glitcher/models/game_model.dart';
@@ -11,6 +12,8 @@ import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
+
+import 'sqlite_service.dart';
 
 class DatabaseService {
   // This function is used to get the recent posts (unfiltered)
@@ -405,50 +408,105 @@ class DatabaseService {
   }
 
   static getAllFriends(String userId) async {
-    QuerySnapshot friendsSnapshot =
-        await usersRef.document(userId).collection('friends').getDocuments();
+    List<User> friends = await UserSqlite.getByCategory('friends');
+    if (friends.length != Constants.currentUser.friends) {
+      QuerySnapshot friendsSnapshot =
+          await usersRef.document(userId).collection('friends').getDocuments();
 
-    List<User> friends =
-        friendsSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
+      friends =
+          friendsSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
 
-    for (int i = 0; i < friends.length; i++) {
-      friends[i] = await DatabaseService.getUserWithId(friends[i].id);
+      for (int i = 0; i < friends.length; i++) {
+        User user = await DatabaseService.getUserWithId(friends[i].id,
+            checkLocally: false);
+        friends[i] = user;
+
+        user.isFriend = 1;
+        User localUser = await UserSqlite.getUserWithId(user.id);
+        if (localUser == null) {
+          int success = await UserSqlite.insert(user);
+        } else {
+          user.isFollower = localUser.isFollower;
+          user.isFollowing = localUser.isFollowing;
+          int success = await UserSqlite.update(user);
+        }
+      }
     }
-
     if (userId == Constants.currentUserID) {
       Constants.userFriends = friends;
     }
-
     return friends;
   }
 
   static getAllFollowing(String userId) async {
-    QuerySnapshot followingSnapshot =
-        await usersRef.document(userId).collection('following').getDocuments();
+    List<User> following = await UserSqlite.getByCategory('following');
+    if (following.length != Constants.currentUser.following) {
+      QuerySnapshot followingSnapshot = await usersRef
+          .document(userId)
+          .collection('following')
+          .getDocuments();
 
-    List<User> following =
-        followingSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
+      following =
+          followingSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
 
-    for (int i = 0; i < following.length; i++) {
-      following[i] = await DatabaseService.getUserWithId(following[i].id);
+      Constants.followingIds = [];
 
-      if (userId == Constants.currentUserID) {
-        Constants.followingIds.add(following[i].id);
+      for (int i = 0; i < following.length; i++) {
+        User user = await DatabaseService.getUserWithId(following[i].id,
+            checkLocally: false);
+        following[i] = user;
+
+        user.isFollowing = 1;
+        User localUser = await UserSqlite.getUserWithId(user.id);
+        if (localUser == null) {
+          int success = await UserSqlite.insert(user);
+        } else {
+          user.isFollower = localUser.isFollower;
+          user.isFriend = localUser.isFriend;
+          int success = await UserSqlite.update(user);
+        }
+
+        if (userId == Constants.currentUserID) {
+          Constants.followingIds.add(following[i].id);
+        }
+      }
+    } else {
+      Constants.followingIds = [];
+      for (int i = 0; i < following.length; i++) {
+        if (userId == Constants.currentUserID) {
+          Constants.followingIds.add(following[i].id);
+        }
       }
     }
-
     return following;
   }
 
   static getAllFollowers(String userId) async {
-    QuerySnapshot followersSnapshot =
-        await usersRef.document(userId).collection('followers').getDocuments();
+    List<User> followers = await UserSqlite.getByCategory('followers');
+    if (followers.length != Constants.currentUser.followers) {
+      QuerySnapshot followersSnapshot = await usersRef
+          .document(userId)
+          .collection('followers')
+          .getDocuments();
 
-    List<User> followers =
-        followersSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
+      followers =
+          followersSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
 
-    for (int i = 0; i < followers.length; i++) {
-      followers[i] = await DatabaseService.getUserWithId(followers[i].id);
+      for (int i = 0; i < followers.length; i++) {
+        User user = await DatabaseService.getUserWithId(followers[i].id,
+            checkLocally: false);
+        followers[i] = user;
+
+        user.isFollower = 1;
+        User localUser = await UserSqlite.getUserWithId(user.id);
+        if (localUser == null) {
+          int success = await UserSqlite.insert(user);
+        } else {
+          user.isFriend = localUser.isFriend;
+          user.isFollowing = localUser.isFollowing;
+          int success = await UserSqlite.update(user);
+        }
+      }
     }
 
     return followers;
@@ -565,7 +623,14 @@ class DatabaseService {
   }
 
   // This function is used to get the author info of each post
-  static Future<User> getUserWithId(String userId) async {
+  static Future<User> getUserWithId(String userId,
+      {@required bool checkLocally}) async {
+    if (checkLocally) {
+      User user = await UserSqlite.getUserWithId(userId);
+      if (user != null) {
+        return user;
+      }
+    }
     DocumentSnapshot userDocSnapshot = await usersRef?.document(userId)?.get();
     if (userDocSnapshot.exists) {
       return User.fromDoc(userDocSnapshot);
@@ -1196,6 +1261,19 @@ class DatabaseService {
         .document(userId)
         .get();
 
+    //Store/update user locally
+    User user =
+        await DatabaseService.getUserWithId(userId, checkLocally: false);
+    user.isFollowing = 0;
+    user.isFriend = 0;
+    User localUser = await UserSqlite.getUserWithId(user.id);
+    if (localUser == null) {
+      int success = await UserSqlite.insert(user);
+    } else {
+      user.isFollower = localUser.isFollower;
+      int success = await UserSqlite.update(user);
+    }
+
     if (doc.exists) {
       await usersRef
           .document(Constants.currentUserID)
@@ -1281,6 +1359,19 @@ class DatabaseService {
           .document(userId)
           .updateData({'friends': FieldValue.increment(1)});
 
+      //Store/update user locally as a friend
+      User user =
+          await DatabaseService.getUserWithId(userId, checkLocally: false);
+      user.isFollowing = 1;
+      user.isFriend = 1;
+      user.isFollower = 1;
+      User localUser = await UserSqlite.getUserWithId(user.id);
+      if (localUser == null) {
+        int success = await UserSqlite.insert(user);
+      } else {
+        int success = await UserSqlite.update(user);
+      }
+
       NotificationHandler.sendNotification(
           userId,
           '${Constants.currentUser.username} followed you',
@@ -1288,6 +1379,19 @@ class DatabaseService {
           Constants.currentUserID,
           'follow');
     } else {
+      //Store/update user locally as a following
+      User user =
+          await DatabaseService.getUserWithId(userId, checkLocally: false);
+      user.isFollowing = 1;
+      User localUser = await UserSqlite.getUserWithId(user.id);
+      if (localUser == null) {
+        int success = await UserSqlite.insert(user);
+      } else {
+        user.isFollower = localUser.isFollower;
+        user.isFriend = localUser.isFriend;
+        int success = await UserSqlite.update(user);
+      }
+
       NotificationHandler.sendNotification(
           userId,
           '${Constants.currentUser.username} followed you',

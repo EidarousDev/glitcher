@@ -51,8 +51,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         _notifications[index];
 
                     return FutureBuilder(
-                        future:
-                            DatabaseService.getUserWithId(notification.sender),
+                        future: DatabaseService.getUserWithId(
+                            notification.sender,
+                            checkLocally: true),
                         builder:
                             (BuildContext context, AsyncSnapshot snapshot) {
                           if (!snapshot.hasData) {
@@ -104,12 +105,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       });
     }
   }
-
-  loadUserData(String senderUserId) async {
-    DatabaseService.getUserWithId(senderUserId);
-  }
-
-  makeAllNotificationsSeen() {}
 
   @override
   void initState() {

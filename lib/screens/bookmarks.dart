@@ -62,8 +62,8 @@ class _BookmarksScreenState extends State<BookmarksScreen>
                     //print('post author: ${post.authorId}');
                     return post.authorId != 'deleted'
                         ? FutureBuilder(
-                            future:
-                                DatabaseService.getUserWithId(post.authorId),
+                            future: DatabaseService.getUserWithId(post.authorId,
+                                checkLocally: true),
                             builder:
                                 (BuildContext context, AsyncSnapshot snapshot) {
                               if (!snapshot.hasData) {
@@ -143,7 +143,6 @@ class _BookmarksScreenState extends State<BookmarksScreen>
           print("reached the top");
         } else {}
       });
-    loadUserData();
     _setupFeed();
   }
 
@@ -169,19 +168,6 @@ class _BookmarksScreenState extends State<BookmarksScreen>
     } else if (state == AppLifecycleState.detached) {
       // app suspended (not used in iOS)
     }
-  }
-
-  void loadUserData() async {
-    currentUser = await firebaseAuth.currentUser();
-    //print('currentUserID: ${currentUser.uid}');
-    // here you write the codes to input the data into firestore
-    loggedInUser = await DatabaseService.getUserWithId(currentUser.uid);
-
-    setState(() {
-      profileImageUrl = loggedInUser.profileImageUrl;
-      username = loggedInUser.username;
-      //print('profileImageUrl = $profileImageUrl and username = $username');
-    });
   }
 
   void nextBookmarksPosts() async {

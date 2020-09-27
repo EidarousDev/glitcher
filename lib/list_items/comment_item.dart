@@ -878,7 +878,8 @@ class _CommentItemState extends State<CommentItem> {
     }
 
     this.replies.forEach((element) async {
-      User user = await DatabaseService.getUserWithId(element.commenterID);
+      User user = await DatabaseService.getUserWithId(element.commenterID,
+          checkLocally: true);
       if (mounted) {
         setState(() {
           this.repliers.add(user);

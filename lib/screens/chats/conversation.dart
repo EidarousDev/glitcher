@@ -8,6 +8,7 @@ import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
+import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/audio_recorder.dart';
@@ -17,6 +18,7 @@ import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
+import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/chat_bubble.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
@@ -78,7 +80,7 @@ class _ConversationState extends State<Conversation>
 
   void loadUserData(String uid) async {
     User user;
-    user = await DatabaseService.getUserWithId(uid);
+    user = await DatabaseService.getUserWithId(uid, checkLocally: false);
     setState(() {
       otherUser = user;
     });
@@ -338,13 +340,13 @@ class _ConversationState extends State<Conversation>
                 children: <Widget>[
                   Padding(
                     padding: EdgeInsets.only(left: 0.0, right: 10.0),
-                    child: otherUser.profileImageUrl != null
-                        ? CircleAvatar(
-                            backgroundImage: NetworkImage(
-                              otherUser.profileImageUrl,
-                            ),
-                          )
-                        : Container(),
+                    child: CacheThisImage(
+                      imageUrl: otherUser.profileImageUrl,
+                      imageShape: BoxShape.circle,
+                      width: 50.0,
+                      height: 50.0,
+                      defaultAssetImage: Strings.default_profile_image,
+                    ),
                   ),
                   Expanded(
                     child: Column(

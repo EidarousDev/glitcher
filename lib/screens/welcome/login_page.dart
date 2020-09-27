@@ -336,7 +336,8 @@ class _LoginPageState extends State<LoginPage> {
       FirebaseUser user =
           await auth.signInWithEmailAndPassword(_email, _password);
       userId = user.uid;
-      User temp = await DatabaseService.getUserWithId(userId);
+      User temp =
+          await DatabaseService.getUserWithId(userId, checkLocally: false);
 
       if (user.isEmailVerified && temp.id == null) {
         print('signed up');
@@ -442,7 +443,9 @@ class _LoginPageState extends State<LoginPage> {
       onPressed: () async {
         print('Google SignIn Button Tapped!');
         FirebaseUser user = await signInWithGoogle();
-        if ((await DatabaseService.getUserWithId(user.uid)).id != null) {
+        if ((await DatabaseService.getUserWithId(user.uid, checkLocally: false))
+                .id !=
+            null) {
           print('existing user');
           saveToken();
           Navigator.of(context).pushReplacementNamed('/');

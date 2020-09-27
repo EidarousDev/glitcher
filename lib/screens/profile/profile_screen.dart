@@ -16,6 +16,7 @@ import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/services/share_link.dart';
+import 'package:glitcher/services/sqlite_service.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
@@ -186,19 +187,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _loading = true;
     });
     print('profileUserID = ${widget.userId}');
-    await DatabaseService.getUserWithId(widget.userId).then((onValue) {
-      setState(() {
-        userData = onValue;
-        _usernameText = onValue.username;
-        _nameText = onValue.name;
-        _descText = onValue.description;
-        _profileImageUrl = onValue.profileImageUrl;
-        _coverImageUrl = onValue.coverImageUrl;
-        _profileImageFile = null;
-        _coverImageFile = null;
-        _loading = false;
-      });
+    User user =
+        await DatabaseService.getUserWithId(widget.userId, checkLocally: false);
+    setState(() {
+      userData = user;
+      _usernameText = user.username;
+      _nameText = user.name;
+      _descText = user.description;
+      _profileImageUrl = user.profileImageUrl;
+      _coverImageUrl = user.coverImageUrl;
+      _profileImageFile = null;
+      _coverImageFile = null;
+      _loading = false;
     });
+
+    User localUser = await UserSqlite.getUserWithId(user.id);
+    if (localUser == null) {
+      int success = await UserSqlite.insert(user);
+    } else {
+      user.isFriend = localUser.isFriend;
+      user.isFollowing = localUser.isFollowing;
+      user.isFollower = localUser.isFollower;
+      int success = await UserSqlite.update(user);
+    }
   }
 
   Stack _profileAndCover() {
@@ -599,8 +610,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         itemBuilder: (BuildContext context, int index) {
                           Post post = _posts[index];
                           return FutureBuilder(
-                              future:
-                                  DatabaseService.getUserWithId(post.authorId),
+                              future: DatabaseService.getUserWithId(
+                                  post.authorId,
+                                  checkLocally: true),
                               builder: (BuildContext context,
                                   AsyncSnapshot snapshot) {
                                 if (!snapshot.hasData) {

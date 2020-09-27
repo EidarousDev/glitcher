@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/utils/functions.dart';
+import 'package:glitcher/widgets/caching_image.dart';
 
 class ChatItem extends StatefulWidget {
   final String dp;
@@ -34,13 +35,12 @@ class _ChatItemState extends State<ChatItem> {
         contentPadding: EdgeInsets.all(0),
         leading: Stack(
           children: <Widget>[
-            CircleAvatar(
-              backgroundImage: widget.dp != null
-                  ? NetworkImage(
-                      "${widget.dp}",
-                    )
-                  : AssetImage(Strings.default_profile_image),
-              radius: 25,
+            CacheThisImage(
+              imageUrl: widget.dp,
+              imageShape: BoxShape.circle,
+              width: 50.0,
+              height: 50.0,
+              defaultAssetImage: Strings.default_profile_image,
             ),
             Positioned(
               bottom: 0.0,

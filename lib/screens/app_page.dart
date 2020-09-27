@@ -175,8 +175,9 @@ class _AppPageState extends State<AppPage> {
           Navigator.of(context).pushNamed('/post', arguments: {'post': post});
         } else if (deepLink.pathSegments[deepLink.pathSegments.length - 2] ==
             'users') {
-          User user =
-              await DatabaseService.getUserWithId(deepLink.pathSegments.last);
+          User user = await DatabaseService.getUserWithId(
+              deepLink.pathSegments.last,
+              checkLocally: false);
           Navigator.of(context)
               .pushNamed('/user-profile', arguments: {'userId': user.id});
         } else if (deepLink.pathSegments[deepLink.pathSegments.length - 2] ==

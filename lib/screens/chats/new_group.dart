@@ -5,12 +5,14 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/services/permissions_service.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
+import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:random_string/random_string.dart';
@@ -41,7 +43,8 @@ class _NewGroupState extends State<NewGroup>
         await DatabaseService.getAllFriends(Constants.currentUserID);
 
     for (int i = 0; i < friends.length; i++) {
-      User user = await DatabaseService.getUserWithId(friends[i].id);
+      User user = await DatabaseService.getUserWithId(friends[i].id,
+          checkLocally: true);
 
       setState(() {
         friendsData.add(user);
@@ -214,11 +217,13 @@ class _NewGroupState extends State<NewGroup>
                     contentPadding: EdgeInsets.all(0),
                     leading: Stack(
                       children: <Widget>[
-                        CircleAvatar(
-                          backgroundImage: NetworkImage(
-                            friendsData.elementAt(index).profileImageUrl,
-                          ),
-                          radius: 25,
+                        CacheThisImage(
+                          imageUrl:
+                              friendsData.elementAt(index).profileImageUrl,
+                          imageShape: BoxShape.circle,
+                          width: 50.0,
+                          height: 50.0,
+                          defaultAssetImage: Strings.default_profile_image,
                         ),
                         Positioned(
                           bottom: 0.0,

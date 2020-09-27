@@ -236,8 +236,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                       itemBuilder: (BuildContext context, int index) {
                         Post post = _posts[index];
                         return FutureBuilder(
-                            future:
-                                DatabaseService.getUserWithId(post.authorId),
+                            future: DatabaseService.getUserWithId(post.authorId,
+                                checkLocally: false),
                             builder:
                                 (BuildContext context, AsyncSnapshot snapshot) {
                               if (!snapshot.hasData) {

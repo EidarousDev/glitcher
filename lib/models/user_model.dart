@@ -17,6 +17,9 @@ class User {
   final bool isAccountPrivate;
   final int notificationsNumber;
   final List search;
+  int isFollower;
+  int isFollowing;
+  int isFriend;
 
   User(
       {this.id,
@@ -34,7 +37,10 @@ class User {
       this.followedGames,
       this.isAccountPrivate,
       this.notificationsNumber,
-      this.search});
+      this.search,
+      this.isFollower,
+      this.isFollowing,
+      this.isFriend});
 
   factory User.fromDoc(DocumentSnapshot doc) {
     return User(
@@ -54,5 +60,42 @@ class User {
         isAccountPrivate: doc['is_account_private'],
         notificationsNumber: doc['notificationsNumber'],
         search: doc['search']);
+  }
+
+  Map<String, dynamic> toMap() {
+    var map = <String, dynamic>{
+      'id': this.id,
+      'name': this.name,
+      'username': this.username,
+      'profile_url': this.profileImageUrl,
+      'cover_url': this.coverImageUrl,
+      'description': this.description,
+      'following': this.following,
+      'followers': this.followers,
+      'friends': this.friends,
+      'followed_games': this.followedGames,
+      'is_follower': this.isFollower ?? 0,
+      'is_following': this.isFollowing ?? 0,
+      'is_friend': this.isFriend ?? 0,
+    };
+    return map;
+  }
+
+  factory User.fromMap(Map<String, dynamic> map) {
+    return User(
+      id: map['id'],
+      name: map['name'],
+      username: map['username'],
+      profileImageUrl: map['profile_url'],
+      coverImageUrl: map['cover_url'],
+      description: map['description'],
+      following: map['following'],
+      followers: map['followers'],
+      friends: map['friends'],
+      followedGames: map['followed_games'],
+      isFollower: map['is_follower'],
+      isFollowing: map['is_following'],
+      isFriend: map['is_friend'],
+    );
   }
 }

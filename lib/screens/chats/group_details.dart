@@ -13,6 +13,7 @@ import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
+import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
@@ -155,23 +156,17 @@ class _GroupDetailsState extends State<GroupDetails>
             children: <Widget>[
               Stack(
                 children: <Widget>[
-                  _group?.image != null
-                      ? GestureDetector(
-                          onTap: () async {
-                            editImage();
-                          },
-                          child: Image.network(
-                            _group?.image,
-                            fit: BoxFit.fill,
-                            width: MediaQuery.of(context).size.width,
-                            height: 300,
-                          ),
-                        )
-                      : GestureDetector(
-                          onTap: () {
-                            editImage();
-                          },
-                          child: Image.asset(Strings.default_group_image)),
+                  GestureDetector(
+                    onTap: () async {
+                      editImage();
+                    },
+                    child: CacheThisImage(
+                      imageUrl: _group?.image,
+                      imageShape: BoxShape.rectangle,
+                      height: 300,
+                      defaultAssetImage: Strings.default_profile_image,
+                    ),
+                  ),
                   Positioned.fill(
                     child: Align(
                       alignment: Alignment.topRight,

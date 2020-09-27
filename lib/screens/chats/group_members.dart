@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
+import 'package:glitcher/widgets/caching_image.dart';
 
 class GroupMembers extends StatefulWidget {
   final String groupId;
@@ -30,7 +32,8 @@ class _GroupMembersState extends State<GroupMembers>
 
     usersSnapshot.documents.forEach((doc) async {
       Map<String, dynamic> user = {};
-      User temp = await DatabaseService.getUserWithId(doc.documentID);
+      User temp = await DatabaseService.getUserWithId(doc.documentID,
+          checkLocally: true);
       user.putIfAbsent('name', (() => temp.username));
       user.putIfAbsent('image', (() => temp.profileImageUrl));
       user.putIfAbsent('description', (() => temp.description));
@@ -102,9 +105,12 @@ class _GroupMembersState extends State<GroupMembers>
         itemCount: members.length,
         itemBuilder: (BuildContext context, int index) {
           return ListTile(
-            leading: CircleAvatar(
-              radius: 25,
-              backgroundImage: NetworkImage(members[index]['image']),
+            leading: CacheThisImage(
+              imageUrl: members[index]['image'],
+              imageShape: BoxShape.circle,
+              width: 50.0,
+              height: 50.0,
+              defaultAssetImage: Strings.default_profile_image,
             ),
             title: Text(members[index]['name'] ?? ''),
             subtitle: Text(

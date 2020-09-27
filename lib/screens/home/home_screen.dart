@@ -65,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 //  bool arePostsFilteredByFollowedGames = false;
 //  bool arePostsFilteredByFollowing = false;
 //  int gamersFilterRadio = -1;
-  int feedFilter = 0;
+  int _feedFilter = 0;
 
   ScrollController _scrollController = ScrollController();
 
@@ -188,11 +188,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                       Radio(
                                           activeColor: MyColors.darkPrimary,
                                           value: 0,
-                                          groupValue: feedFilter,
+                                          groupValue: _feedFilter,
                                           onChanged: (value) {
                                             setState(() {
                                               //arePostsFilteredByFollowedGames = false;
-                                              feedFilter = value;
+                                              _feedFilter = value;
                                             });
                                           }),
                                       Text(
@@ -205,11 +205,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                       Radio(
                                           activeColor: MyColors.darkPrimary,
                                           value: 1,
-                                          groupValue: feedFilter,
+                                          groupValue: _feedFilter,
                                           onChanged: (value) {
                                             setState(() {
                                               //arePostsFilteredByFollowedGames = false;
-                                              feedFilter = value;
+                                              _feedFilter = value;
                                             });
                                           }),
                                       Text(
@@ -218,11 +218,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                       Radio(
                                           activeColor: MyColors.darkPrimary,
                                           value: 2,
-                                          groupValue: feedFilter,
+                                          groupValue: _feedFilter,
                                           onChanged: (value) {
                                             setState(() {
                                               //arePostsFilteredByFollowedGames = true;
-                                              feedFilter = value;
+                                              _feedFilter = value;
                                             });
                                           }),
                                       Text(
@@ -403,8 +403,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       itemBuilder: (BuildContext context, int index) {
                         Post post = _posts[index];
                         return FutureBuilder(
-                            future:
-                                DatabaseService.getUserWithId(post.authorId),
+                            future: DatabaseService.getUserWithId(post.authorId,
+                                checkLocally: _feedFilter == 1),
                             builder:
                                 (BuildContext context, AsyncSnapshot snapshot) {
                               if (!snapshot.hasData) {
@@ -434,21 +434,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   _setupFeed() async {
     List<Post> posts;
 
-    print('Home Filter: $feedFilter');
+    print('Home Filter: $_feedFilter');
 
-    if (feedFilter == 0) {
+    if (_feedFilter == 0) {
       posts = await DatabaseService.getPosts();
       setState(() {
         _posts = posts;
         this.lastVisiblePostSnapShot = posts.last.timestamp;
       });
-    } else if (feedFilter == 1) {
+    } else if (_feedFilter == 1) {
       posts = await DatabaseService.getPostsFilteredByFollowing();
       setState(() {
         _posts = posts;
         this.lastVisiblePostSnapShot = posts.last.timestamp;
       });
-    } else if (feedFilter == 2) {
+    } else if (_feedFilter == 2) {
       posts = await DatabaseService.getPostsFilteredByFollowedGames();
       setState(() {
         _posts = posts;
@@ -501,7 +501,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   loadUserFavoriteFilter() async {
-    feedFilter = await getFavouriteFilter();
+    _feedFilter = await getFavouriteFilter();
   }
 
   @override
@@ -545,7 +545,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     currentUser = await firebaseAuth.currentUser();
     //print('currentUserID: ${currentUser.uid}');
     // here you write the codes to input the data into firestore
-    loggedInUser = await DatabaseService.getUserWithId(currentUser.uid);
+    loggedInUser = await DatabaseService.getUserWithId(currentUser.uid,
+        checkLocally: false);
 
     if (mounted) {
       setState(() {
@@ -560,12 +561,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void nextPosts() async {
     var posts;
-    if (feedFilter == 0) {
+    if (_feedFilter == 0) {
       posts = await DatabaseService.getNextPosts(lastVisiblePostSnapShot);
-    } else if (feedFilter == 1) {
+    } else if (_feedFilter == 1) {
       posts = await DatabaseService.getNextPostsFilteredByFollowing(
           lastVisiblePostSnapShot);
-    } else if (feedFilter == 2) {
+    } else if (_feedFilter == 2) {
       posts = await DatabaseService.getNextPostsFilteredByFollowedGames(
           lastVisiblePostSnapShot);
     }

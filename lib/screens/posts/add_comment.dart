@@ -1,11 +1,13 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/services/notification_handler.dart';
+import 'package:glitcher/widgets/caching_image.dart';
 
 class AddCommentScreen extends StatefulWidget {
   final String username;
@@ -60,7 +62,8 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
                     post.authorId,
                     Constants.currentUser.username + ' commented on your post',
                     _commentTextController.text,
-                    postId,'comment');
+                    postId,
+                    'comment');
 
                 checkIfContainsMention(_commentTextController.text);
 
@@ -150,16 +153,13 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
                 prefixIcon: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: InkWell(
-                      child: widget.profileImageUrl != null
-                          ? CircleAvatar(
-                              radius: 30.0,
-                              backgroundImage: NetworkImage(
-                                  loggedInProfileImageURL), // no matter how big it is, it won't overflow
-                            )
-                          : CircleAvatar(
-                              backgroundImage: AssetImage(
-                                  'assets/images/default_profile.png'),
-                            ),
+                      child: CacheThisImage(
+                        imageUrl: widget.profileImageUrl,
+                        imageShape: BoxShape.circle,
+                        width: 50.0,
+                        height: 50.0,
+                        defaultAssetImage: Strings.default_profile_image,
+                      ),
                       onTap: () {
                         Navigator.of(context)
                             .pushNamed('/user-profile', arguments: {
@@ -177,9 +177,13 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
                       print('username:' + s);
                       if (('@' + s).contains(_commentText))
                         return ListTile(
-                          leading: CircleAvatar(
-                            backgroundImage: NetworkImage(
-                                Constants.userFriends[index].profileImageUrl),
+                          leading: CacheThisImage(
+                            imageUrl:
+                                Constants.userFriends[index].profileImageUrl,
+                            imageShape: BoxShape.circle,
+                            width: 50.0,
+                            height: 50.0,
+                            defaultAssetImage: Strings.default_profile_image,
                           ),
                           title: Text(Constants.userFriends[index].username),
                           onTap: () {
@@ -223,7 +227,7 @@ class _AddCommentScreenState extends State<AddCommentScreen> {
             'New post mention',
             Constants.currentUser.username + ' mentioned you in a comment',
             postId,
-        'mention');
+            'mention');
       }
     });
   }

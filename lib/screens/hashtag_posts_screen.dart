@@ -54,7 +54,8 @@ class _HashtagPostsScreenState extends State<HashtagPostsScreen>
           itemBuilder: (BuildContext context, int index) {
             Post post = _posts[index];
             return FutureBuilder(
-                future: DatabaseService.getUserWithId(post.authorId),
+                future: DatabaseService.getUserWithId(post.authorId,
+                    checkLocally: false),
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
                   if (!snapshot.hasData) {
                     return SizedBox.shrink();
@@ -133,7 +134,8 @@ class _HashtagPostsScreenState extends State<HashtagPostsScreen>
     currentUser = await firebaseAuth.currentUser();
     //print('currentUserID: ${currentUser.uid}');
     // here you write the codes to input the data into firestore
-    loggedInUser = await DatabaseService.getUserWithId(currentUser.uid);
+    loggedInUser = await DatabaseService.getUserWithId(currentUser.uid,
+        checkLocally: false);
 
     setState(() {
       profileImageUrl = loggedInUser.profileImageUrl;

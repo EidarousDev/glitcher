@@ -377,13 +377,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.9"
-  flutter_recaptcha_v2:
-    dependency: "direct main"
-    description:
-      name: flutter_recaptcha_v2
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.1.0"
   flutter_signin_button:
     dependency: "direct main"
     description:
@@ -855,7 +848,7 @@ packages:
     source: hosted
     version: "1.7.0"
   sqflite:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: sqflite
       url: "https://pub.dartlang.org"
@@ -1008,13 +1001,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.4+2"
-  webview_flutter:
-    dependency: transitive
-    description:
-      name: webview_flutter
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.3.22"
   xdg_directories:
     dependency: transitive
     description:

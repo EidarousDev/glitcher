@@ -420,13 +420,14 @@ class _ComposeComment extends WidgetView<AddComment, _AddCommentPageState> {
                           if (('@' + friendUsername.toLowerCase())
                               .contains(viewState._mentionText.toLowerCase()))
                             return ListTile(
-                              leading: CircleAvatar(
-                                backgroundImage: Constants.userFriends[index]
-                                            .profileImageUrl !=
-                                        null
-                                    ? NetworkImage(Constants
-                                        .userFriends[index].profileImageUrl)
-                                    : AssetImage(Strings.default_profile_image),
+                              leading: CacheThisImage(
+                                imageUrl: Constants
+                                    .userFriends[index].profileImageUrl,
+                                imageShape: BoxShape.circle,
+                                width: 40.0,
+                                height: 40.0,
+                                defaultAssetImage:
+                                    Strings.default_profile_image,
                               ),
                               title:
                                   Text(Constants.userFriends[index].username),

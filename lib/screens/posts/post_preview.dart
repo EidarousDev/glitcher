@@ -193,8 +193,8 @@ class _PostPreviewState extends State<PostPreview>
                 itemBuilder: (BuildContext context, int index) {
                   Comment comment = _comments[index];
                   return FutureBuilder(
-                      future:
-                          DatabaseService.getUserWithId(comment.commenterID),
+                      future: DatabaseService.getUserWithId(comment.commenterID,
+                          checkLocally: true),
                       builder: (BuildContext context, AsyncSnapshot snapshot) {
                         if (!snapshot.hasData) {
                           return SizedBox.shrink();
@@ -338,7 +338,8 @@ class _PostPreviewState extends State<PostPreview>
       _loading = true;
     });
     _currentPost = await DatabaseService.getPostWithId(widget.post.id);
-    _author = await DatabaseService.getUserWithId(_currentPost.authorId);
+    _author = await DatabaseService.getUserWithId(_currentPost.authorId,
+        checkLocally: true);
     print('currentPost = $_currentPost and author= $_author');
     await loadComments();
     print('comments.length = ${_comments.length}');

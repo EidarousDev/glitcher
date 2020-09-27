@@ -104,9 +104,11 @@ class _UserItemState extends State<UserItem> {
         .get();
 
     if (user.exists) {
-      setState(() {
-        followBtnText = 'Unfollow';
-      });
+      if (mounted) {
+        setState(() {
+          followBtnText = 'Unfollow';
+        });
+      }
     } else {
       if (mounted) {
         setState(() {

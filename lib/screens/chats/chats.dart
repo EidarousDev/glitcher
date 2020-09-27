@@ -8,6 +8,7 @@ import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/message_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/drawer.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 
@@ -49,7 +50,7 @@ class _ChatsState extends State<Chats>
 
   Future<ChatItem> loadUserData(String uid) async {
     ChatItem chatItem;
-    User user = await DatabaseService.getUserWithId(uid);
+    User user = await DatabaseService.getUserWithId(uid, checkLocally: true);
     Message message = await DatabaseService.getLastMessage(user.id);
     setState(() {
       chatItem = ChatItem(
@@ -302,12 +303,12 @@ class _ChatsState extends State<Chats>
                           Navigator.of(context).pushNamed('/group-conversation',
                               arguments: {'groupId': group.id});
                         },
-                        leading: CircleAvatar(
-                          radius: 25,
-                          backgroundColor: Colors.grey.shade400,
-                          backgroundImage: group.image != null
-                              ? NetworkImage(group.image)
-                              : AssetImage(Strings.default_group_image),
+                        leading: CacheThisImage(
+                          imageUrl: group.image,
+                          imageShape: BoxShape.circle,
+                          width: 50.0,
+                          height: 50.0,
+                          defaultAssetImage: Strings.default_profile_image,
                         ),
                         title: Text(group.name ?? 'Unnamed group'),
                       );

@@ -4,6 +4,7 @@ import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/notification_model.dart' as notification_model;
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/functions.dart';
+import 'package:glitcher/widgets/caching_image.dart';
 
 class NotificationItem extends StatefulWidget {
   final notification_model.Notification notification;
@@ -46,13 +47,12 @@ class _NotificationItemState extends State<NotificationItem> {
         padding: EdgeInsets.all(7),
         child: ListTile(
           contentPadding: EdgeInsets.all(0),
-          leading: CircleAvatar(
-            backgroundImage: widget.image != null
-                ? NetworkImage(
-                    "${widget.image}",
-                  )
-                : AssetImage(Strings.default_profile_image),
-            radius: 25,
+          leading: CacheThisImage(
+            imageUrl: widget.image,
+            imageShape: BoxShape.circle,
+            width: 50.0,
+            height: 50.0,
+            defaultAssetImage: Strings.default_profile_image,
           ),
           title: Text(
             "${widget.notification.title}",

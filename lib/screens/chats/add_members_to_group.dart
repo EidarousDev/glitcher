@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
+import 'package:glitcher/widgets/caching_image.dart';
 
 class AddMembersToGroup extends StatefulWidget {
   final String groupId;
@@ -32,7 +34,8 @@ class _AddMembersToGroupState extends State<AddMembersToGroup>
         await DatabaseService.getAllFriends(Constants.currentUserID);
 
     for (int i = 0; i < friends.length; i++) {
-      User user = await DatabaseService.getUserWithId(friends[i].id);
+      User user = await DatabaseService.getUserWithId(friends[i].id,
+          checkLocally: true);
 
       setState(() {
         if (!existingMembersIds.contains(user.id)) {
@@ -129,11 +132,12 @@ class _AddMembersToGroupState extends State<AddMembersToGroup>
               contentPadding: EdgeInsets.all(0),
               leading: Stack(
                 children: <Widget>[
-                  CircleAvatar(
-                    backgroundImage: NetworkImage(
-                      friendsData.elementAt(index).profileImageUrl,
-                    ),
-                    radius: 25,
+                  CacheThisImage(
+                    imageUrl: friendsData.elementAt(index).profileImageUrl,
+                    imageShape: BoxShape.circle,
+                    width: 50.0,
+                    height: 50.0,
+                    defaultAssetImage: Strings.default_profile_image,
                   ),
                   Positioned(
                     bottom: 0.0,

@@ -71,8 +71,11 @@ class _RootPageState extends State<RootPage> {
     FirebaseUser user = await Auth().getCurrentUser();
     if (user?.uid != null &&
         user.isEmailVerified &&
-        ((await DatabaseService.getUserWithId(user?.uid)).id != null)) {
-      User loggedInUser = await DatabaseService.getUserWithId(user?.uid);
+        ((await DatabaseService.getUserWithId(user?.uid, checkLocally: false))
+                .id !=
+            null)) {
+      User loggedInUser =
+          await DatabaseService.getUserWithId(user?.uid, checkLocally: false);
       setState(() {
         Constants.currentUser = loggedInUser;
         Constants.currentFirebaseUser = user;

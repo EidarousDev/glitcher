@@ -43,7 +43,8 @@ class CommentBottomSheet {
 
   void _openBottomSheet(BuildContext context, Post post, Comment comment,
       Comment parentComment) async {
-    User user = await DatabaseService.getUserWithId(comment.commenterID);
+    User user = await DatabaseService.getUserWithId(comment.commenterID,
+        checkLocally: false);
     bool isMyComment = Constants.currentUserID == comment.commenterID;
     await showModalBottomSheet(
       backgroundColor: Colors.transparent,

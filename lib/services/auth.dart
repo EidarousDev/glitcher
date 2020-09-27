@@ -163,7 +163,8 @@ class Auth implements BaseAuth {
     final uid = user.uid;
     //print('currentUserID: $uid');
     // here you write the codes to input the data into firestore
-    User loggedInUser = await DatabaseService.getUserWithId(uid);
+    User loggedInUser =
+        await DatabaseService.getUserWithId(uid, checkLocally: false);
     return loggedInUser;
   }
 }
