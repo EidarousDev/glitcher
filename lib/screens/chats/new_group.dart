@@ -39,12 +39,11 @@ class _NewGroupState extends State<NewGroup>
   String _groupId;
 
   getFriends() async {
-    List<User> friends =
-        await DatabaseService.getAllFriends(Constants.currentUserID);
+    List<User> friends = await DatabaseService.getAllMyFriends();
 
     for (int i = 0; i < friends.length; i++) {
-      User user = await DatabaseService.getUserWithId(friends[i].id,
-          checkLocally: true);
+      User user =
+          await DatabaseService.getUserWithId(friends[i].id, checkLocal: true);
 
       setState(() {
         friendsData.add(user);

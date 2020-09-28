@@ -43,94 +43,73 @@ class _FollowedGamesState extends State<FollowedGames> {
                       )),
               flexibleSpace: gradientAppBar(),
               centerTitle: true,
-            ),
-            body: Column(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search games',
-                      filled: false,
-                      prefixIcon: Icon(
-                        Icons.search,
-                        size: 28.0,
-                      ),
-                      suffixIcon: _searching
-                          ? IconButton(
-                              icon: Icon(Icons.close),
-                              onPressed: () {
-                                _typeAheadController.clear();
-                                setState(() {
-                                  _games = [];
-                                  _filteredGames = [];
-                                  _searching = false;
-                                });
-                                _setupFeed();
-                              })
-                          : null,
-                    ),
-                    controller: _typeAheadController,
-                    onChanged: (text) {
-                      _filteredGames = [];
-                      if (text.isEmpty) {
-                        _setupFeed();
-                        setState(() {
-                          _filteredGames = [];
-                          _searching = false;
-                        });
-                      } else {
-                        setState(() {
-                          _searching = true;
-                        });
-                        _searchGames(text);
-                      }
-                    },
+              title: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Search games',
+                  filled: false,
+                  prefixIcon: Icon(
+                    Icons.search,
+                    size: 28.0,
                   ),
-                ),
-                Expanded(
-                  child: !_searching
-                      ? ListView.builder(
-                          controller: _scrollController,
-                          scrollDirection: Axis.vertical,
-                          shrinkWrap: true,
-                          itemCount: _games.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            Game game = _games[index];
-
-                            return StreamBuilder(builder:
-                                (BuildContext context, AsyncSnapshot snapshot) {
-                              return Column(
-                                children: <Widget>[
-                                  GameItem(key: ValueKey(game.id), game: game),
-                                  Divider(height: .5, color: Colors.grey)
-                                ],
-                              );
+                  suffixIcon: _searching
+                      ? IconButton(
+                          icon: Icon(Icons.close),
+                          onPressed: () {
+                            _typeAheadController.clear();
+                            setState(() {
+                              _games = [];
+                              _filteredGames = [];
+                              _searching = false;
                             });
-                          },
-                        )
-                      : ListView.builder(
-                          controller: _scrollController,
-                          scrollDirection: Axis.vertical,
-                          shrinkWrap: true,
-                          itemCount: _filteredGames.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            Game game = _filteredGames[index];
-
-                            return StreamBuilder(builder:
-                                (BuildContext context, AsyncSnapshot snapshot) {
-                              return Column(
-                                children: <Widget>[
-                                  GameItem(key: ValueKey(game.id), game: game),
-                                  Divider(height: .5, color: Colors.grey)
-                                ],
-                              );
-                            });
-                          },
-                        ),
+                            _setupFeed();
+                          })
+                      : null,
                 ),
-              ],
+                controller: _typeAheadController,
+                onChanged: (text) {
+                  _filteredGames = [];
+                  if (text.isEmpty) {
+                    _setupFeed();
+                    setState(() {
+                      _filteredGames = [];
+                      _searching = false;
+                    });
+                  } else {
+                    setState(() {
+                      _searching = true;
+                    });
+                    _searchGames(text);
+                  }
+                },
+              ),
             ),
+            body: _games.length > 0
+                ? ListView.builder(
+                    controller: _scrollController,
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount:
+                        !_searching ? _games.length : _filteredGames.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      Game game =
+                          !_searching ? _games[index] : _filteredGames[index];
+
+                      return StreamBuilder(builder:
+                          (BuildContext context, AsyncSnapshot snapshot) {
+                        return Column(
+                          children: <Widget>[
+                            GameItem(key: ValueKey(game.id), game: game),
+                            Divider(height: .5, color: Colors.grey)
+                          ],
+                        );
+                      });
+                    },
+                  )
+                : Center(
+                    child: Text(
+                    'No games followed',
+                    style: TextStyle(fontSize: 20, color: Colors.grey),
+                  )),
           )
         : Scaffold(
             appBar: AppBar(

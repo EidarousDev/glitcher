@@ -188,7 +188,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
     print('profileUserID = ${widget.userId}');
     User user =
-        await DatabaseService.getUserWithId(widget.userId, checkLocally: false);
+        await DatabaseService.getUserWithId(widget.userId, checkLocal: false);
     setState(() {
       userData = user;
       _usernameText = user.username;
@@ -612,7 +612,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           return FutureBuilder(
                               future: DatabaseService.getUserWithId(
                                   post.authorId,
-                                  checkLocally: true),
+                                  checkLocal: true),
                               builder: (BuildContext context,
                                   AsyncSnapshot snapshot) {
                                 if (!snapshot.hasData) {

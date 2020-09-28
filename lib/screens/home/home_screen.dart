@@ -138,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     Constants.currentUserID);
               }
               if (Constants.followingIds.length == 0) {
-                await DatabaseService.getAllFollowing(Constants.currentUserID);
+                await DatabaseService.getAllMyFollowing();
               }
 
               //Navigator.of(context).pop();
@@ -404,7 +404,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         Post post = _posts[index];
                         return FutureBuilder(
                             future: DatabaseService.getUserWithId(post.authorId,
-                                checkLocally: _feedFilter == 1),
+                                checkLocal: _feedFilter == 1),
                             builder:
                                 (BuildContext context, AsyncSnapshot snapshot) {
                               if (!snapshot.hasData) {
@@ -545,8 +545,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     currentUser = await firebaseAuth.currentUser();
     //print('currentUserID: ${currentUser.uid}');
     // here you write the codes to input the data into firestore
-    loggedInUser = await DatabaseService.getUserWithId(currentUser.uid,
-        checkLocally: false);
+    loggedInUser =
+        await DatabaseService.getUserWithId(currentUser.uid, checkLocal: false);
 
     if (mounted) {
       setState(() {

@@ -59,7 +59,7 @@ class _AddCommentPageState extends State<AddComment> {
   @override
   void initState() {
     if (Constants.userFriends.length == 0) {
-      DatabaseService.getAllFriends(Constants.currentUserID);
+      DatabaseService.getAllMyFriends();
     }
     scrollController = ScrollController();
     _textEditingController = TextEditingController();

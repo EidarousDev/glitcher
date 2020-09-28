@@ -151,21 +151,35 @@ class _UsersScreenState extends State<UsersScreen> {
   }
 
   getUsers() async {
+    List<User> users;
     switch (widget.screenType) {
       case 'Friends':
-        List<User> users = await DatabaseService.getAllFriends(widget.userId);
+        if (widget.userId == Constants.currentUserID) {
+          users = await DatabaseService.getAllMyFriends();
+        } else {
+          users = await DatabaseService.getAllFriends(widget.userId);
+        }
+
         setState(() {
           _users = users;
         });
         break;
       case 'Following':
-        List<User> users = await DatabaseService.getAllFollowing(widget.userId);
+        if (widget.userId == Constants.currentUserID) {
+          users = await DatabaseService.getAllMyFollowing();
+        } else {
+          users = await DatabaseService.getAllFollowing(widget.userId);
+        }
         setState(() {
           _users = users;
         });
         break;
       case 'Followers':
-        List<User> users = await DatabaseService.getAllFollowers(widget.userId);
+        if (widget.userId == Constants.currentUserID) {
+          users = await DatabaseService.getAllMyFollowers();
+        } else {
+          users = await DatabaseService.getAllFollowers(widget.userId);
+        }
         setState(() {
           _users = users;
         });

@@ -37,7 +37,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   isAccountPrivate() async {
     bool isPrivate = (await DatabaseService.getUserWithId(
             Constants.currentUserID,
-            checkLocally: false))
+            checkLocal: false))
         .isAccountPrivate;
     setState(() {
       _isAccountPrivate = isPrivate ?? false;

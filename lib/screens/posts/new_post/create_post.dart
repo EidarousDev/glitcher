@@ -74,7 +74,7 @@ class _CreatePostReplyPageState extends State<CreatePost> {
   @override
   void initState() {
     if (Constants.userFriends.length == 0) {
-      DatabaseService.getAllFriends(Constants.currentUserID);
+      DatabaseService.getAllMyFriends();
     }
 
     scrollController = ScrollController();

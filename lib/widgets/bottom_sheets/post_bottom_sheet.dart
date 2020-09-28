@@ -50,7 +50,7 @@ class PostBottomSheet {
   void _openBottomSheet(BuildContext context, Post post) async {
     print('route: ${Constants.routesStack.top()}');
     User user =
-        await DatabaseService.getUserWithId(post.authorId, checkLocally: false);
+        await DatabaseService.getUserWithId(post.authorId, checkLocal: false);
     bool isMyPost = Constants.currentUserID == post.authorId;
     await showModalBottomSheet(
       backgroundColor: Colors.transparent,

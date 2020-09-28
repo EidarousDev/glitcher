@@ -407,18 +407,20 @@ class DatabaseService {
     return posts;
   }
 
-  static getAllFriends(String userId) async {
+  static getAllMyFriends() async {
     List<User> friends = await UserSqlite.getByCategory('friends');
     if (friends == null || friends.length != Constants.currentUser.friends) {
-      QuerySnapshot friendsSnapshot =
-          await usersRef.document(userId).collection('friends').getDocuments();
+      QuerySnapshot friendsSnapshot = await usersRef
+          .document(Constants.currentUserID)
+          .collection('friends')
+          .getDocuments();
 
       friends =
           friendsSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
 
       for (int i = 0; i < friends.length; i++) {
         User user = await DatabaseService.getUserWithId(friends[i].id,
-            checkLocally: false);
+            checkLocal: false);
         friends[i] = user;
 
         user.isFriend = 1;
@@ -432,18 +434,16 @@ class DatabaseService {
         }
       }
     }
-    if (userId == Constants.currentUserID) {
-      Constants.userFriends = friends;
-    }
+    Constants.userFriends = friends;
     return friends;
   }
 
-  static getAllFollowing(String userId) async {
+  static getAllMyFollowing() async {
     List<User> following = await UserSqlite.getByCategory('following');
     if (following == null ||
         following.length != Constants.currentUser.following) {
       QuerySnapshot followingSnapshot = await usersRef
-          .document(userId)
+          .document(Constants.currentUserID)
           .collection('following')
           .getDocuments();
 
@@ -454,7 +454,7 @@ class DatabaseService {
 
       for (int i = 0; i < following.length; i++) {
         User user = await DatabaseService.getUserWithId(following[i].id,
-            checkLocally: false);
+            checkLocal: false);
         following[i] = user;
 
         user.isFollowing = 1;
@@ -467,27 +467,23 @@ class DatabaseService {
           int success = await UserSqlite.update(user);
         }
 
-        if (userId == Constants.currentUserID) {
-          Constants.followingIds.add(following[i].id);
-        }
+        Constants.followingIds.add(following[i].id);
       }
     } else {
       Constants.followingIds = [];
       for (int i = 0; i < following.length; i++) {
-        if (userId == Constants.currentUserID) {
-          Constants.followingIds.add(following[i].id);
-        }
+        Constants.followingIds.add(following[i].id);
       }
     }
     return following;
   }
 
-  static getAllFollowers(String userId) async {
+  static getAllMyFollowers() async {
     List<User> followers = await UserSqlite.getByCategory('followers');
     if (followers == null ||
         followers.length != Constants.currentUser.followers) {
       QuerySnapshot followersSnapshot = await usersRef
-          .document(userId)
+          .document(Constants.currentUserID)
           .collection('followers')
           .getDocuments();
 
@@ -496,7 +492,7 @@ class DatabaseService {
 
       for (int i = 0; i < followers.length; i++) {
         User user = await DatabaseService.getUserWithId(followers[i].id,
-            checkLocally: false);
+            checkLocal: false);
         followers[i] = user;
 
         user.isFollower = 1;
@@ -532,6 +528,51 @@ class DatabaseService {
     }
 
     return followedGames;
+  }
+
+  static getAllFriends(String userId) async {
+    QuerySnapshot friendsSnapshot =
+        await usersRef.document(userId).collection('friends').getDocuments();
+
+    List<User> friends =
+        friendsSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
+
+    for (int i = 0; i < friends.length; i++) {
+      friends[i] =
+          await DatabaseService.getUserWithId(friends[i].id, checkLocal: false);
+    }
+
+    return friends;
+  }
+
+  static getAllFollowing(String userId) async {
+    QuerySnapshot followingSnapshot =
+        await usersRef.document(userId).collection('following').getDocuments();
+
+    List<User> following =
+        followingSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
+
+    for (int i = 0; i < following.length; i++) {
+      following[i] = await DatabaseService.getUserWithId(following[i].id,
+          checkLocal: false);
+    }
+
+    return following;
+  }
+
+  static getAllFollowers(String userId) async {
+    QuerySnapshot followersSnapshot =
+        await usersRef.document(userId).collection('followers').getDocuments();
+
+    List<User> followers =
+        followersSnapshot.documents.map((doc) => User.fromDoc(doc)).toList();
+
+    for (int i = 0; i < followers.length; i++) {
+      followers[i] = await DatabaseService.getUserWithId(followers[i].id,
+          checkLocal: false);
+    }
+
+    return followers;
   }
 
   // This function is used to get the recent posts (filtered by a certain game)
@@ -626,8 +667,8 @@ class DatabaseService {
 
   // This function is used to get the author info of each post
   static Future<User> getUserWithId(String userId,
-      {@required bool checkLocally}) async {
-    if (checkLocally) {
+      {@required bool checkLocal}) async {
+    if (checkLocal) {
       User user = await UserSqlite.getUserWithId(userId);
       if (user != null) {
         return user;
@@ -1264,8 +1305,7 @@ class DatabaseService {
         .get();
 
     //Store/update user locally
-    User user =
-        await DatabaseService.getUserWithId(userId, checkLocally: false);
+    User user = await DatabaseService.getUserWithId(userId, checkLocal: false);
     user.isFollowing = 0;
     user.isFriend = 0;
     User localUser = await UserSqlite.getUserWithId(user.id);
@@ -1363,7 +1403,7 @@ class DatabaseService {
 
       //Store/update user locally as a friend
       User user =
-          await DatabaseService.getUserWithId(userId, checkLocally: false);
+          await DatabaseService.getUserWithId(userId, checkLocal: false);
       user.isFollowing = 1;
       user.isFriend = 1;
       user.isFollower = 1;
@@ -1383,7 +1423,7 @@ class DatabaseService {
     } else {
       //Store/update user locally as a following
       User user =
-          await DatabaseService.getUserWithId(userId, checkLocally: false);
+          await DatabaseService.getUserWithId(userId, checkLocal: false);
       user.isFollowing = 1;
       User localUser = await UserSqlite.getUserWithId(user.id);
       if (localUser == null) {

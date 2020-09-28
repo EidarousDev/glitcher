@@ -80,7 +80,7 @@ class _ConversationState extends State<Conversation>
 
   void loadUserData(String uid) async {
     User user;
-    user = await DatabaseService.getUserWithId(uid, checkLocally: false);
+    user = await DatabaseService.getUserWithId(uid, checkLocal: false);
     setState(() {
       otherUser = user;
     });
@@ -379,16 +379,11 @@ class _ConversationState extends State<Conversation>
                   ),
                 ],
               ),
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context).pushNamed('/user-profile',
+                    arguments: {'userId': widget.otherUid});
+              },
             ),
-//        actions: <Widget>[
-//          IconButton(
-//            icon: Icon(
-//              Icons.more_horiz,
-//            ),
-//            onPressed: () {},
-//          ),
-//        ],
           ),
           body: Container(
             height: MediaQuery.of(context).size.height,

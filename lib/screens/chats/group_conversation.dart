@@ -166,8 +166,7 @@ class _GroupConversationState extends State<GroupConversation>
     });
 
     for (String userId in usersIds) {
-      User user =
-          await DatabaseService.getUserWithId(userId, checkLocally: true);
+      User user = await DatabaseService.getUserWithId(userId, checkLocal: true);
       setState(() {
         this.usersMap.putIfAbsent(userId, () => user);
       });

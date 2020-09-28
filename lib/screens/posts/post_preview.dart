@@ -194,7 +194,7 @@ class _PostPreviewState extends State<PostPreview>
                   Comment comment = _comments[index];
                   return FutureBuilder(
                       future: DatabaseService.getUserWithId(comment.commenterID,
-                          checkLocally: true),
+                          checkLocal: true),
                       builder: (BuildContext context, AsyncSnapshot snapshot) {
                         if (!snapshot.hasData) {
                           return SizedBox.shrink();
@@ -339,7 +339,7 @@ class _PostPreviewState extends State<PostPreview>
     });
     _currentPost = await DatabaseService.getPostWithId(widget.post.id);
     _author = await DatabaseService.getUserWithId(_currentPost.authorId,
-        checkLocally: true);
+        checkLocal: true);
     print('currentPost = $_currentPost and author= $_author');
     await loadComments();
     print('comments.length = ${_comments.length}');

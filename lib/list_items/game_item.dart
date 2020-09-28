@@ -144,9 +144,11 @@ class _GameItemState extends State<GameItem> {
         .document(widget.game.id)
         .get();
     if (game.exists) {
-      setState(() {
-        followBtnText = 'Unfollow';
-      });
+      if (mounted) {
+        setState(() {
+          followBtnText = 'Unfollow';
+        });
+      }
     } else {
       if (mounted) {
         setState(() {

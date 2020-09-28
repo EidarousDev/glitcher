@@ -63,7 +63,7 @@ class _BookmarksScreenState extends State<BookmarksScreen>
                     return post.authorId != 'deleted'
                         ? FutureBuilder(
                             future: DatabaseService.getUserWithId(post.authorId,
-                                checkLocally: true),
+                                checkLocal: true),
                             builder:
                                 (BuildContext context, AsyncSnapshot snapshot) {
                               if (!snapshot.hasData) {

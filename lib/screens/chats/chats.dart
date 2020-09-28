@@ -35,8 +35,7 @@ class _ChatsState extends State<Chats>
   TextEditingController _searchController = TextEditingController();
 
   void getCurrentUserFriends() async {
-    List<User> friends =
-        await DatabaseService.getAllFriends(Constants.currentUserID);
+    List<User> friends = await DatabaseService.getAllMyFriends();
 
     friends.forEach((f) async {
       await loadUserData(f.id);
@@ -50,7 +49,7 @@ class _ChatsState extends State<Chats>
 
   Future<ChatItem> loadUserData(String uid) async {
     ChatItem chatItem;
-    User user = await DatabaseService.getUserWithId(uid, checkLocally: true);
+    User user = await DatabaseService.getUserWithId(uid, checkLocal: true);
     Message message = await DatabaseService.getLastMessage(user.id);
     setState(() {
       chatItem = ChatItem(

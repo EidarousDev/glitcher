@@ -30,12 +30,11 @@ class _AddMembersToGroupState extends State<AddMembersToGroup>
     existingMembersIds =
         await DatabaseService.getGroupMembersIds(widget.groupId);
 
-    List<User> friends =
-        await DatabaseService.getAllFriends(Constants.currentUserID);
+    List<User> friends = await DatabaseService.getAllMyFriends();
 
     for (int i = 0; i < friends.length; i++) {
-      User user = await DatabaseService.getUserWithId(friends[i].id,
-          checkLocally: true);
+      User user =
+          await DatabaseService.getUserWithId(friends[i].id, checkLocal: true);
 
       setState(() {
         if (!existingMembersIds.contains(user.id)) {

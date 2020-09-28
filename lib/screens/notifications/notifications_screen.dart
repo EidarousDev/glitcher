@@ -53,7 +53,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     return FutureBuilder(
                         future: DatabaseService.getUserWithId(
                             notification.sender,
-                            checkLocally: true),
+                            checkLocal: true),
                         builder:
                             (BuildContext context, AsyncSnapshot snapshot) {
                           if (!snapshot.hasData) {

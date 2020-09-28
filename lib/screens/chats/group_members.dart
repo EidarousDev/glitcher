@@ -32,8 +32,8 @@ class _GroupMembersState extends State<GroupMembers>
 
     usersSnapshot.documents.forEach((doc) async {
       Map<String, dynamic> user = {};
-      User temp = await DatabaseService.getUserWithId(doc.documentID,
-          checkLocally: true);
+      User temp =
+          await DatabaseService.getUserWithId(doc.documentID, checkLocal: true);
       user.putIfAbsent('name', (() => temp.username));
       user.putIfAbsent('image', (() => temp.profileImageUrl));
       user.putIfAbsent('description', (() => temp.description));
