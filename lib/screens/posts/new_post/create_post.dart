@@ -29,6 +29,7 @@ import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:random_string/random_string.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:path/path.dart' as path;
 
 class CreatePost extends StatefulWidget {
   String selectedGame;
@@ -190,12 +191,12 @@ class _CreatePostReplyPageState extends State<CreatePost> {
     await AppUtil.checkIfContainsMention(_textEditingController.text, postId);
 
     if (_video != null) {
-      _uploadedFileURL = await AppUtil.uploadFile(
-          _video, context, 'posts_videos/${Constants.currentUserID}/' + postId);
+      _uploadedFileURL = await AppUtil.uploadFile(_video, context,
+          'posts_videos/${Constants.currentUserID}/$postId${path.extension(_video.path)}');
     } else if (_image != null) {
       //await compressAndUploadFile(_image, 'glitchertemp.jpg');
-      _uploadedFileURL = await AppUtil.uploadFile(
-          _image, context, 'posts_images/${Constants.currentUserID}/' + postId);
+      _uploadedFileURL = await AppUtil.uploadFile(_image, context,
+          'posts_images/${Constants.currentUserID}/$postId${path.extension(_video.path)}');
     } else {}
 
     print(_youtubeId);

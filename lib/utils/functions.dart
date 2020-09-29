@@ -73,14 +73,6 @@ Future getTheme() async {
   return preferences.getString('theme');
 }
 
-downloadImage(String url, String name) async {
-  var response = await get(url);
-  var firstPath = '/sdcard/download/';
-  var filePathAndName = firstPath + '$name.jpg';
-  File file2 = new File(filePathAndName);
-  file2.writeAsBytesSync(response.bodyBytes);
-}
-
 void setFavouriteFilter(BuildContext context, int favouriteFilter) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   Constants.favouriteFilter = favouriteFilter;

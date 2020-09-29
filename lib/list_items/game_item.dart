@@ -25,8 +25,6 @@ class _GameItemState extends State<GameItem> {
 
   String snackbarText;
 
-  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -124,14 +122,14 @@ class _GameItemState extends State<GameItem> {
         followBtnText = 'Follow';
       });
       Constants.followedGamesNames.remove(widget.game.fullName);
-      //AppUtil.showSnackBar(context, _scaffoldKey, 'Game unfollowed');
+      AppUtil.showToast('Game unfollowed.');
     } else {
       await DatabaseService.followGame(widget.game.id);
       setState(() {
         followBtnText = 'Unfollow';
       });
       Constants.followedGamesNames.add(widget.game.fullName);
-      //AppUtil.showSnackBar(context, _scaffoldKey, 'Game followed');
+      AppUtil.showToast('Game followed.');
     }
     Navigator.of(context).pop();
     //DatabaseService.getFollowedGames();

@@ -352,12 +352,12 @@ class _SignUpPageState extends State<SignUpPage> {
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
     RegExp regExp = new RegExp(pattern);
     if (value.length == 0) {
-      AppUtil().showToast("Email is Required");
+      AppUtil.showToast("Email is Required");
       setState(() {
         _errorMsgEmail = "Email is Required";
       });
     } else if (!regExp.hasMatch(value)) {
-      AppUtil().showToast("Invalid Email");
+      AppUtil.showToast("Invalid Email");
       setState(() {
         _errorMsgEmail = "Invalid Email";
       });

@@ -5,6 +5,7 @@ import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/utils/Loader.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:path/path.dart' as path;
 
 class FullScreenOverlay extends StatefulWidget {
   final String url;
@@ -94,13 +95,13 @@ class _FullscreenOverlayState extends State<FullScreenOverlay> {
 
               String url;
               if (whichImage == 1) {
-                url = await AppUtil.uploadFile(
-                    image, context, 'cover_images/$userId');
+                url = await AppUtil.uploadFile(image, context,
+                    'cover_images/$userId${path.extension(image.path)}');
 
                 updateCoverImage(url);
               } else {
-                url = await AppUtil.uploadFile(
-                    image, context, 'profile_images/$userId');
+                url = await AppUtil.uploadFile(image, context,
+                    'profile_images/$userId${path.extension(image.path)}');
 
                 updateProfileImage(url);
               }

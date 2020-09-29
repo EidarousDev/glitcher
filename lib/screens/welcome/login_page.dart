@@ -14,6 +14,7 @@ import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:upgrader/upgrader.dart';
 
 import 'widgets/bezier_container.dart';
 
@@ -378,51 +379,54 @@ class _LoginPageState extends State<LoginPage> {
     final height = MediaQuery.of(context).size.height;
     return Scaffold(
         key: _scaffoldKey,
-        body: Container(
-          height: height,
-          child: Stack(
-            children: <Widget>[
-              Positioned(
-                  top: -height * .15,
-                  right: -MediaQuery.of(context).size.width * .4,
-                  child: BezierContainer()),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      SizedBox(height: 30.0),
-                      _icon(),
-                      SizedBox(height: 50),
-                      _emailPasswordWidget(),
-                      SizedBox(height: 20),
-                      _submitButton(),
-                      GestureDetector(
-                        onTap: () async {
-                          Navigator.of(context).pushNamed('/password-reset');
-                        },
-                        child: Container(
-                          padding: EdgeInsets.symmetric(vertical: 10),
-                          alignment: Alignment.centerRight,
-                          child: Text('Forgot Password ?',
-                              style: TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w500)),
+        body: UpgradeAlert(
+          showIgnore: false,
+          child: Container(
+            height: height,
+            child: Stack(
+              children: <Widget>[
+                Positioned(
+                    top: -height * .15,
+                    right: -MediaQuery.of(context).size.width * .4,
+                    child: BezierContainer()),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        SizedBox(height: 30.0),
+                        _icon(),
+                        SizedBox(height: 50),
+                        _emailPasswordWidget(),
+                        SizedBox(height: 20),
+                        _submitButton(),
+                        GestureDetector(
+                          onTap: () async {
+                            Navigator.of(context).pushNamed('/password-reset');
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(vertical: 10),
+                            alignment: Alignment.centerRight,
+                            child: Text('Forgot Password ?',
+                                style: TextStyle(
+                                    fontSize: 14, fontWeight: FontWeight.w500)),
+                          ),
                         ),
-                      ),
 //                      _divider(),
 //                      _facebookButton(),
-                      SizedBox(height: 10.0),
-                      _createAccountLabel(),
-                      _divider(),
-                      _googleSignInButton(),
-                      SizedBox(height: 40),
-                    ],
+                        SizedBox(height: 10.0),
+                        _createAccountLabel(),
+                        _divider(),
+                        _googleSignInButton(),
+                        SizedBox(height: 40),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ));
   }

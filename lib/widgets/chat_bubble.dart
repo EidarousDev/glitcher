@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/screens/chats/audio_message_player.dart';
+import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:random_string/random_string.dart';
 
@@ -181,13 +182,17 @@ class _ChatBubbleState extends State<ChatBubble> {
                                     width: Sizes.sm_profile_image_w,
                                     height: Sizes.sm_profile_image_h,
                                     child: ImageOverlay(
-                                      imageUrl: widget.message,
-                                      btnText: 'Download',
-                                      btnFunction: () {
-                                        downloadImage(widget.message,
-                                            randomAlphaNumeric(20));
-                                      },
-                                    ),
+                                        imageUrl: widget.message,
+                                        btnIcons: [
+                                          Icons.file_download
+                                        ],
+                                        btnFunctions: [
+                                          () {
+                                            AppUtil.downloadFromFirebaseStorage(
+                                                widget.message,
+                                                randomAlphaNumeric(20));
+                                          },
+                                        ]),
                                   ),
                                   context: context);
                             },

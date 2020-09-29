@@ -26,6 +26,7 @@ import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
 import 'package:glitcher/widgets/drawer.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
+import 'package:path/path.dart' as path;
 import 'package:random_string/random_string.dart';
 import 'package:share/share.dart';
 
@@ -88,7 +89,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         r'^(?=.{4,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$';
     RegExp regExp = new RegExp(pattern);
     if (value.length == 0) {
-      AppUtil().showToast("Username is Required");
+      AppUtil.showToast(
+        "Username is Required",
+      );
       setState(() {
         _errorMsgUsername = "Username is Required";
       });
@@ -824,8 +827,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _coverImageUrl = null;
       });
       Navigator.of(context).push(CustomScreenLoader());
-      String url = await AppUtil.uploadFile(
-          _coverImageFile, context, 'cover_images/${widget.userId}');
+      String url = await AppUtil.uploadFile(_coverImageFile, context,
+          'cover_images/${widget.userId}${path.extension(image.path)}');
       setState(() {
         _coverImageUrl = url;
         _coverImageFile = null;
@@ -841,34 +844,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
             width: Sizes.sm_profile_image_w,
             height: Sizes.sm_profile_image_h,
             child: ImageOverlay(
-              imageUrl: _coverImageUrl,
-              imageFile: _coverImageFile,
-              btnText: 'Edit',
-              btnFunction: () async {
-                ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
-                await bottomSheet.openBottomSheet(context);
-                File image =
-                    await AppUtil.chooseImage(source: bottomSheet.choice);
-                setState(() {
-                  _coverImageFile = image;
-                  _coverImageUrl = null;
-                });
-                Navigator.of(context).push(CustomScreenLoader());
-                String url = await AppUtil.uploadFile(
-                    _coverImageFile, context, 'cover_images/${widget.userId}');
-                setState(() {
-                  _coverImageUrl = url;
-                  _coverImageFile = null;
-                });
+                imageUrl: _coverImageUrl,
+                imageFile: _coverImageFile,
+                btnIcons: [
+                  Icons.edit,
+                  Icons.file_download
+                ],
+                btnFunctions: [
+                  () async {
+                    ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
+                    await bottomSheet.openBottomSheet(context);
+                    File image =
+                        await AppUtil.chooseImage(source: bottomSheet.choice);
+                    setState(() {
+                      _coverImageFile = image;
+                      _coverImageUrl = null;
+                    });
+                    Navigator.of(context).push(CustomScreenLoader());
+                    String url = await AppUtil.uploadFile(
+                        _coverImageFile,
+                        context,
+                        'cover_images/${widget.userId}${path.extension(image.path)}');
+                    setState(() {
+                      _coverImageUrl = url;
+                      _coverImageFile = null;
+                    });
 
-                await usersRef
-                    .document(widget.userId)
-                    .updateData({'cover_url': _coverImageUrl});
-                Navigator.of(context).pop();
+                    await usersRef
+                        .document(widget.userId)
+                        .updateData({'cover_url': _coverImageUrl});
+                    Navigator.of(context).pop();
 
-                Navigator.of(context).pop();
-              },
-            ),
+                    Navigator.of(context).pop();
+                  },
+                  () async {
+                    AppUtil.downloadFromFirebaseStorage(
+                        _coverImageUrl, randomAlphaNumeric(20) + '_cover');
+                    Navigator.of(context).pop();
+                  },
+                ]),
           ),
           context: context);
     }
@@ -884,8 +898,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _profileImageUrl = null;
       });
       Navigator.of(context).push(CustomScreenLoader());
-      String url = await AppUtil.uploadFile(
-          _profileImageFile, context, 'cover_images/${widget.userId}');
+      String url = await AppUtil.uploadFile(_profileImageFile, context,
+          'cover_images/${widget.userId}${path.extension(image.path)}');
       setState(() {
         _profileImageUrl = url;
         _profileImageFile = null;
@@ -901,32 +915,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
             width: Sizes.sm_profile_image_w,
             height: Sizes.sm_profile_image_h,
             child: ImageOverlay(
-              imageUrl: _profileImageUrl,
-              imageFile: _profileImageFile,
-              btnText: 'Edit',
-              btnFunction: () async {
-                ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
-                await bottomSheet.openBottomSheet(context);
-                File image =
-                    await AppUtil.chooseImage(source: bottomSheet.choice);
-                setState(() {
-                  _profileImageFile = image;
-                  _profileImageUrl = null;
-                });
-                Navigator.of(context).push(CustomScreenLoader());
-                String url = await AppUtil.uploadFile(_profileImageFile,
-                    context, 'profile_images/${widget.userId}');
-                setState(() {
-                  _profileImageUrl = url;
-                  _profileImageFile = null;
-                });
-                await usersRef
-                    .document(widget.userId)
-                    .updateData({'profile_url': _profileImageUrl});
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-            ),
+                imageUrl: _profileImageUrl,
+                imageFile: _profileImageFile,
+                btnIcons: [
+                  Icons.edit,
+                  Icons.file_download
+                ],
+                btnFunctions: [
+                  () async {
+                    ImageEditBottomSheet bottomSheet = ImageEditBottomSheet();
+                    await bottomSheet.openBottomSheet(context);
+                    File image =
+                        await AppUtil.chooseImage(source: bottomSheet.choice);
+                    setState(() {
+                      _profileImageFile = image;
+                      _profileImageUrl = null;
+                    });
+                    Navigator.of(context).push(CustomScreenLoader());
+                    String url = await AppUtil.uploadFile(
+                        _profileImageFile,
+                        context,
+                        'profile_images/${widget.userId}${path.extension(image.path)}');
+                    setState(() {
+                      _profileImageUrl = url;
+                      _profileImageFile = null;
+                    });
+                    await usersRef
+                        .document(widget.userId)
+                        .updateData({'profile_url': _profileImageUrl});
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                  },
+                  () async {
+                    await AppUtil.downloadFromFirebaseStorage(
+                        _profileImageUrl, randomAlphaNumeric(20) + '_profile');
+                    Navigator.of(context).pop();
+                  },
+                ]),
           ),
           context: context);
     }
@@ -942,15 +967,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
             width: Sizes.sm_profile_image_w,
             height: Sizes.sm_profile_image_h,
             child: ImageOverlay(
-              imageUrl: _coverImageUrl,
-              imageFile: _coverImageFile,
-              btnText: 'Download',
-              btnFunction: () async {
-                downloadImage(
-                    _coverImageUrl, randomAlphaNumeric(20) + '_cover');
-                Navigator.of(context).pop();
-              },
-            ),
+                imageUrl: _coverImageUrl,
+                imageFile: _coverImageFile,
+                btnIcons: [
+                  Icons.file_download
+                ],
+                btnFunctions: [
+                  () async {
+                    AppUtil.downloadFromFirebaseStorage(
+                        _coverImageUrl, randomAlphaNumeric(20) + '_cover');
+                    Navigator.of(context).pop();
+                  },
+                ]),
           ),
           context: context);
     }
@@ -966,15 +994,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
             width: Sizes.sm_profile_image_w,
             height: Sizes.sm_profile_image_h,
             child: ImageOverlay(
-              imageUrl: _profileImageUrl,
-              imageFile: _profileImageFile,
-              btnText: 'Download',
-              btnFunction: () async {
-                await downloadImage(
-                    _profileImageUrl, randomAlphaNumeric(20) + '_profile');
-                Navigator.of(context).pop();
-              },
-            ),
+                imageUrl: _profileImageUrl,
+                imageFile: _profileImageFile,
+                btnIcons: [
+                  Icons.file_download
+                ],
+                btnFunctions: [
+                  () async {
+                    await AppUtil.downloadFromFirebaseStorage(
+                        _profileImageUrl, randomAlphaNumeric(20) + '_profile');
+                    Navigator.of(context).pop();
+                  },
+                ]),
           ),
           context: context);
     }

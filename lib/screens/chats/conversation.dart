@@ -24,6 +24,7 @@ import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
 import 'package:intl/intl.dart';
 import 'package:random_string/random_string.dart';
+import 'package:path/path.dart' as path;
 
 class Conversation extends StatefulWidget {
   final String otherUid;
@@ -451,7 +452,7 @@ class _ConversationState extends State<Conversation>
                           child: ListTile(
                             leading: IconButton(
                               icon: Icon(
-                                Icons.add,
+                                Icons.image,
                                 color: switchColor(
                                     MyColors.lightPrimary, Colors.white70),
                               ),
@@ -467,32 +468,36 @@ class _ConversationState extends State<Conversation>
                                       width: Sizes.sm_profile_image_w,
                                       height: Sizes.sm_profile_image_h,
                                       child: ImageOverlay(
-                                        imageFile: image,
-                                        btnText: 'Send',
-                                        btnFunction: () async {
-                                          String url = await AppUtil.uploadFile(
-                                              image,
-                                              context,
-                                              'image_messages/${Constants.currentUserID}/${widget.otherUid}/' +
-                                                  randomAlphaNumeric(20));
+                                          imageFile: image,
+                                          btnIcons: [
+                                            Icons.send
+                                          ],
+                                          btnFunctions: [
+                                            () async {
+                                              String url = await AppUtil.uploadFile(
+                                                  image,
+                                                  context,
+                                                  'image_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}${path.extension(image.path)}');
 
-                                          messageController.clear();
-                                          await DatabaseService.sendMessage(
-                                              widget.otherUid, 'image', url);
-                                          makeMessagesUnseen();
-
-                                          await NotificationHandler
-                                              .sendNotification(
+                                              messageController.clear();
+                                              await DatabaseService.sendMessage(
                                                   widget.otherUid,
-                                                  Constants
-                                                      .currentUser.username,
-                                                  ' sent you an image.',
-                                                  Constants.currentUserID,
-                                                  'message');
+                                                  'image',
+                                                  url);
+                                              makeMessagesUnseen();
 
-                                          Navigator.of(context).pop();
-                                        },
-                                      ),
+                                              await NotificationHandler
+                                                  .sendNotification(
+                                                      widget.otherUid,
+                                                      Constants
+                                                          .currentUser.username,
+                                                      ' sent you an image.',
+                                                      Constants.currentUserID,
+                                                      'message');
+
+                                              Navigator.of(context).pop();
+                                            },
+                                          ]),
                                     ),
                                     context: context);
                               },
@@ -606,7 +611,7 @@ class _ConversationState extends State<Conversation>
                                         _url = await AppUtil.uploadFile(
                                             File(result.path),
                                             context,
-                                            'voice_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}');
+                                            'voice_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}${path.extension(result.path)}');
 
                                         await DatabaseService.sendMessage(
                                             widget.otherUid, 'audio', _url);

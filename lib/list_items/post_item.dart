@@ -246,8 +246,19 @@ class _PostItemState extends State<PostItem> {
                                                       Sizes.sm_profile_image_h,
                                                   child: ImageOverlay(
                                                     imageUrl: post.imageUrl,
-                                                    btnText: Strings.SAVE_IMAGE,
-                                                    btnFunction: () {},
+                                                    btnIcons: [
+                                                      Icons.file_download
+                                                    ],
+                                                    btnFunctions: [
+                                                      () async {
+                                                        await AppUtil
+                                                            .downloadFromFirebaseStorage(
+                                                                post.imageUrl,
+                                                                '');
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                      },
+                                                    ],
                                                   ),
                                                 ),
                                                 context: context);

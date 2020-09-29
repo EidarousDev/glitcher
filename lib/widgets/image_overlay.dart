@@ -7,10 +7,14 @@ import 'package:photo_view/photo_view.dart';
 class ImageOverlay extends StatelessWidget {
   final String imageUrl;
   final File imageFile;
-  final String btnText;
-  final Function btnFunction;
+  final List<IconData> btnIcons;
+  final List<Function> btnFunctions;
   const ImageOverlay(
-      {Key key, this.imageUrl, this.imageFile, this.btnText, this.btnFunction})
+      {Key key,
+      this.imageUrl,
+      this.imageFile,
+      this.btnIcons,
+      this.btnFunctions})
       : super(key: key);
 
   @override
@@ -27,37 +31,24 @@ class ImageOverlay extends StatelessWidget {
           backgroundDecoration:
               BoxDecoration(color: Colors.transparent.withOpacity(.3)),
         ),
-        this.btnText,
-        this.btnFunction);
+        this.btnIcons,
+        this.btnFunctions);
   }
 }
 
-imageOverlay(
-    BuildContext context, Widget child, String btnText, Function btnFunction) {
+imageOverlay(BuildContext context, Widget child, List<IconData> btnIcons,
+    List<Function> btnFunctions) {
   return Scaffold(
     appBar: AppBar(
-      title: Text(""),
-      backgroundColor: Colors.transparent,
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back),
-        onPressed: () {
-          Navigator.of(context).pop(true);
-        },
-      ),
-      actions: <Widget>[
-        PopupMenuButton<String>(
-          onSelected: (s) => btnFunction(),
-          itemBuilder: (BuildContext context) {
-            return {btnText ?? ''}.map((String choice) {
-              return PopupMenuItem<String>(
-                value: choice,
-                child: Text(choice),
-              );
-            }).toList();
+        title: Text(""),
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop(true);
           },
         ),
-      ],
-    ),
+        actions: btnList(btnIcons, btnFunctions)),
     body: Stack(
       children: <Widget>[
         child,
@@ -66,8 +57,21 @@ imageOverlay(
   );
 }
 
-void handleClick(String value) {
+void handleClick(String value) {}
 
+List<Widget> btnList(List<IconData> btnIcons, List<Function> btnFunctions) {
+  List<Widget> btnList = [];
+  for (int i = 0; i < btnIcons.length; i++) {
+    btnList.add(IconButton(
+      icon: Icon(
+        btnIcons[i],
+        color: Colors.white,
+      ),
+      onPressed: btnFunctions[i],
+    ));
+  }
+
+  return btnList;
 }
 
 Future<bool> _onBackPressed() {}

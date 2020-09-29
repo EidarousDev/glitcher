@@ -20,6 +20,7 @@ import 'package:glitcher/widgets/image_overlay.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:math' show Random;
 import 'package:random_string/random_string.dart';
+import 'package:path/path.dart' as path;
 
 class GroupDetails extends StatefulWidget {
   final groupId;
@@ -84,12 +85,12 @@ class _GroupDetailsState extends State<GroupDetails>
         child: Container(
           width: Sizes.sm_profile_image_w,
           height: Sizes.sm_profile_image_h,
-          child: ImageOverlay(
-            imageFile: image,
-            btnText: 'Upload',
-            btnFunction: () async {
-              String url = await AppUtil.uploadFile(
-                  image, context, 'group_chat_images/$groupId',
+          child: ImageOverlay(imageFile: image, btnIcons: [
+            Icons.file_upload
+          ], btnFunctions: [
+            () async {
+              String url = await AppUtil.uploadFile(image, context,
+                  'group_chat_images/$groupId${path.extension(image.path)}',
                   groupMembersIds: groupMembersIds);
 
               await chatGroupsRef.document(groupId).updateData({'image': url});
@@ -98,7 +99,7 @@ class _GroupDetailsState extends State<GroupDetails>
 
               Navigator.of(context).pop();
             },
-          ),
+          ]),
         ),
         context: context);
   }

@@ -26,6 +26,7 @@ import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:random_string/random_string.dart';
+import 'package:path/path.dart' as path;
 
 class GroupConversation extends StatefulWidget {
   final String groupId;
@@ -367,7 +368,7 @@ class _GroupConversationState extends State<GroupConversation>
                           child: ListTile(
                             leading: IconButton(
                               icon: Icon(
-                                Icons.add,
+                                Icons.image,
                                 color: switchColor(
                                     MyColors.lightPrimary, Colors.white70),
                               ),
@@ -384,24 +385,29 @@ class _GroupConversationState extends State<GroupConversation>
                                       width: Sizes.sm_profile_image_w,
                                       height: Sizes.sm_profile_image_h,
                                       child: ImageOverlay(
-                                        imageFile: image,
-                                        btnText: 'Send',
-                                        btnFunction: () async {
-                                          _url = await AppUtil.uploadFile(
-                                              image,
-                                              context,
-                                              'group_chat_image_messages/${widget.groupId}/' +
-                                                  randomAlphaNumeric(20),
-                                              groupMembersIds: groupMembersIds);
+                                          imageFile: image,
+                                          btnIcons: [
+                                            Icons.send
+                                          ],
+                                          btnFunctions: [
+                                            () async {
+                                              _url = await AppUtil.uploadFile(
+                                                  image,
+                                                  context,
+                                                  'group_chat_image_messages/${widget.groupId}/${randomAlphaNumeric(20)}${path.extension(image.path)}',
+                                                  groupMembersIds:
+                                                      groupMembersIds);
 
-                                          messageController.clear();
-                                          await DatabaseService
-                                              .sendGroupMessage(widget.groupId,
-                                                  'image', _url);
+                                              messageController.clear();
+                                              await DatabaseService
+                                                  .sendGroupMessage(
+                                                      widget.groupId,
+                                                      'image',
+                                                      _url);
 
-                                          Navigator.of(context).pop();
-                                        },
-                                      ),
+                                              Navigator.of(context).pop();
+                                            },
+                                          ]),
                                     ),
                                     context: context);
                               },
@@ -513,7 +519,7 @@ class _GroupConversationState extends State<GroupConversation>
                                         _url = await AppUtil.uploadFile(
                                             File(result.path),
                                             context,
-                                            'group_chat_voice_messages/${widget.groupId}/${randomAlphaNumeric(20)}',
+                                            'group_chat_voice_messages/${widget.groupId}/${randomAlphaNumeric(20)}${path.extension(result.path)}',
                                             groupMembersIds: groupMembersIds);
 
                                         await DatabaseService.sendGroupMessage(

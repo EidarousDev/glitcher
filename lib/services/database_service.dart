@@ -1099,6 +1099,10 @@ class DatabaseService {
     await usersRef
         .document(Constants.currentUserID)
         .updateData({'followed_games': FieldValue.increment(1)});
+
+    await gamesRef
+        .document(gameId)
+        .updateData({'followers': FieldValue.increment(1)});
   }
 
   static unFollowGame(String gameId) async {
@@ -1118,6 +1122,10 @@ class DatabaseService {
     await usersRef
         .document(Constants.currentUserID)
         .updateData({'followed_games': FieldValue.increment(-1)});
+
+    await gamesRef
+        .document(gameId)
+        .updateData({'followers': FieldValue.increment(-1)});
   }
 
   static Future<Game> getGameWithGameName(String gameName) async {

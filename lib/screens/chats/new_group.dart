@@ -16,6 +16,7 @@ import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:random_string/random_string.dart';
+import 'package:path/path.dart' as path;
 
 class NewGroup extends StatefulWidget {
   @override
@@ -83,8 +84,8 @@ class _NewGroupState extends State<NewGroup>
 
           _groupId = randomAlphaNumeric(20);
 
-          _imageUrl = await AppUtil.uploadFile(
-              _imageFile, context, 'group_chat_images/$_groupId');
+          _imageUrl = await AppUtil.uploadFile(_imageFile, context,
+              'group_chat_images/$_groupId${path.extension(_imageFile.path)}');
           await addGroup();
           await addGroupToUsers();
           Navigator.of(context).pushNamed('/chats');

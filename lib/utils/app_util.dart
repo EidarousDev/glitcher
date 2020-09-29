@@ -5,13 +5,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
-import 'package:glitcher/widgets/fluttertoast.dart';
+import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:random_string/random_string.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -61,13 +62,15 @@ class AppUtil {
     return randoms;
   }
 
-  showToast(String msg) {
-    FlutterToast.showToast(
-        msg: msg,
+  static showToast(String message) {
+    Fluttertoast.showToast(
+        msg: message,
         toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIos: 1,
-        textcolor: '#ffffff');
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: MyColors.darkPrimary,
+        textColor: Colors.white,
+        fontSize: 16.0);
   }
 
   static void showSnackBar(BuildContext context,
@@ -109,6 +112,7 @@ class AppUtil {
   static Future chooseImage({ImageSource source = ImageSource.gallery}) async {
     File image = await ImagePicker.pickImage(source: source, imageQuality: 80);
     print('File size: ${image.lengthSync()}');
+    print('path: ${image.path}');
     return image;
   }
 
@@ -258,5 +262,19 @@ class AppUtil {
             ],
           );
         });
+  }
+
+  static downloadFromFirebaseStorage(String url, String name) async {
+    var response = await get(url);
+    var firstPath = '/sdcard/download/';
+    var contentDisposition = response.headers['content-disposition'];
+    String fileName = contentDisposition
+        .split('filename*=utf-8')
+        .last
+        .replaceAll(RegExp('%20'), ' ')
+        .replaceAll(RegExp('%2C|\''), '');
+    var filePathAndName = firstPath + fileName;
+    File file2 = new File(filePathAndName);
+    file2.writeAsBytesSync(response.bodyBytes);
   }
 }

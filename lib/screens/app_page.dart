@@ -21,6 +21,7 @@ import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:package_info/package_info.dart';
+import 'package:upgrader/upgrader.dart';
 
 import 'chats/chats.dart';
 
@@ -56,17 +57,20 @@ class _AppPageState extends State<AppPage> {
     print('currentUser = ${Constants.currentUser}');
     return Scaffold(
       key: _scaffoldKey,
-      body: PageView(
-        physics: NeverScrollableScrollPhysics(),
-        controller: _pageController,
-        onPageChanged: onPageChanged,
-        children: <Widget>[
-          HomeScreen(),
-          Constants.chats,
-          SearchScreen(),
-          NotificationsScreen(),
-          ProfileScreen(Constants.currentUserID),
-        ],
+      body: UpgradeAlert(
+        showLater: false,
+        child: PageView(
+          physics: NeverScrollableScrollPhysics(),
+          controller: _pageController,
+          onPageChanged: onPageChanged,
+          children: <Widget>[
+            HomeScreen(),
+            Constants.chats,
+            SearchScreen(),
+            NotificationsScreen(),
+            ProfileScreen(Constants.currentUserID),
+          ],
+        ),
       ),
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
