@@ -13,6 +13,7 @@ import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/widgets/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:random_string/random_string.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -24,6 +25,23 @@ class AppUtil {
 
   factory AppUtil() {
     return _instance;
+  }
+
+  static createAppDirectory() async {
+    String initialPath = '${(await getApplicationSupportDirectory()).path}/';
+    if (!(await Directory('$initialPath$appName').exists())) {
+      final dir = await Directory('$initialPath$appName').create();
+      appTempDirectoryPath = dir.path + '/';
+      print('appTempDirectoryPath: $appTempDirectoryPath');
+    } else {
+      appTempDirectoryPath = '$initialPath$appName/';
+    }
+  }
+
+  static deleteAppDirectoryFiles() async {
+    final dir = Directory(appTempDirectoryPath);
+    await dir.delete(recursive: true);
+    await AppUtil.createAppDirectory();
   }
 
   static englishOnly(String input) {

@@ -18,7 +18,6 @@ import 'package:glitcher/screens/home/home_screen.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/services/share_link.dart';
-import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/bottom_sheets/post_bottom_sheet.dart';
 import 'package:glitcher/widgets/caching_image.dart';
@@ -263,7 +262,12 @@ class _PostItemState extends State<PostItem> {
                                 ),
                         ),
                         Container(
-                          child: post.video == null ? null : playerWidget,
+                          child: post.video == null
+                              ? null
+                              : AspectRatio(
+                                  aspectRatio:
+                                      videoPlayerController.value.aspectRatio,
+                                  child: playerWidget),
                         ),
                         Container(
                           child:
@@ -526,6 +530,8 @@ class _PostItemState extends State<PostItem> {
   @override
   void dispose() {
     //Constants.youtubeControllers[widget.post.id].dispose();
+    videoPlayerController.dispose();
+    chewieController.dispose();
     super.dispose();
   }
 
@@ -558,6 +564,23 @@ class _PostItemState extends State<PostItem> {
     } else {
       firstHalf = widget.post.text;
       secondHalf = "";
+    }
+    if (widget.post.video != null) {
+      videoPlayerController = VideoPlayerController.network(widget.post.video)
+        ..initialize().then((_) {
+          // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+          chewieController = ChewieController(
+            videoPlayerController: videoPlayerController,
+            autoPlay: false,
+            looping: false,
+          );
+
+          setState(() {
+            playerWidget = Chewie(
+              controller: chewieController,
+            );
+          });
+        });
     }
   }
 

@@ -5,27 +5,26 @@ import 'package:chewie/chewie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/game_model.dart';
-import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/post_model.dart';
-import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/posts/new_post/widget/create_bottom_icon.dart';
 import 'package:glitcher/screens/posts/new_post/widget/create_post_image.dart';
 import 'package:glitcher/screens/posts/new_post/widget/create_post_video.dart';
 import 'package:glitcher/screens/posts/new_post/widget/widget_view.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
+import 'package:path/path.dart' as path;
 import 'package:random_string/random_string.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -47,7 +46,7 @@ class _CreatePostReplyPageState extends State<CreatePost> {
   GlobalKey<AutoCompleteTextFieldState<String>> autocompleteKey = GlobalKey();
   TextEditingController _textEditingController;
   var _typeAheadController = TextEditingController();
-
+  VideoPlayerController videoPlayerController;
   //YoutubePlayer
   //bool _showYoutubeUrl = false;
   String _youtubeId;
@@ -79,10 +78,10 @@ class _CreatePostReplyPageState extends State<CreatePost> {
 
     scrollController = ScrollController();
 
-    createPostVideo = CreatePostVideo(
-      video: _video,
-      onCrossIconPressed: _onCrossIconPressed,
-    );
+    // createPostVideo = CreatePostVideo(
+    //   video: _video,
+    //   onCrossIconPressed: _onCrossIconPressed,
+    // );
 
     _textEditingController = TextEditingController();
     _typeAheadController.text = widget.selectedGame;
@@ -115,32 +114,39 @@ class _CreatePostReplyPageState extends State<CreatePost> {
     }
   }
 
-  void _onVideoIconSelected(File file) {
+  void _onVideoIconSelected(File file) async {
     print('File size: ${file.lengthSync()}');
     if (file.lengthSync() / (1024 * 1024) == 10) {
       customSnackBar(_scaffoldKey, 'Video exceeded 10 Megabytes limit.');
     } else {
       setState(() {
         print('File xx: ${file.path}');
-
         _video = file;
-        VideoPlayerController controller =
-            VideoPlayerController.file(File(_video.path));
-
-        ChewieController chewieController = ChewieController(
-          videoPlayerController: controller,
-          autoPlay: false,
-          looping: false,
-        );
-        Chewie playerWidget = Chewie(
-          controller: chewieController,
-        );
-        createPostVideo = CreatePostVideo(
-          video: _video,
-          playerWidget: playerWidget,
-          onCrossIconPressed: _onCrossIconPressed,
-        );
       });
+      videoPlayerController = VideoPlayerController.file(File(_video.path))
+        ..initialize().then((value) {
+          ChewieController chewieController = ChewieController(
+            aspectRatio: videoPlayerController.value.aspectRatio,
+            videoPlayerController: videoPlayerController,
+            autoPlay: false,
+            looping: false,
+          );
+          Widget playerWidget = Container(
+            child: AspectRatio(
+              aspectRatio: videoPlayerController.value.aspectRatio,
+              child: Chewie(
+                controller: chewieController,
+              ),
+            ),
+          );
+          setState(() {
+            createPostVideo = CreatePostVideo(
+              video: _video,
+              playerWidget: playerWidget,
+              onCrossIconPressed: _onCrossIconPressed,
+            );
+          });
+        });
     }
   }
 
@@ -190,12 +196,25 @@ class _CreatePostReplyPageState extends State<CreatePost> {
     await AppUtil.checkIfContainsMention(_textEditingController.text, postId);
 
     if (_video != null) {
+      // MediaInfo mediaInfo = await VideoCompress.compressVideo(
+      //   _video.path,
+      //   quality: VideoQuality.LowQuality, includeAudio: true,
+      //   deleteOrigin: false, // It's false by default
+      // );
+      // print('Compressed sized ${mediaInfo.filesize}');
       _uploadedFileURL = await AppUtil.uploadFile(
           _video, context, 'posts_videos/${Constants.currentUserID}/' + postId);
     } else if (_image != null) {
-      //await compressAndUploadFile(_image, 'glitchertemp.jpg');
+      await AppUtil.createAppDirectory();
+      File result = await FlutterImageCompress.compressAndGetFile(
+        _image.absolute.path,
+        '$appTempDirectoryPath/${path.basename(_image.absolute.path)}',
+        quality: 75,
+      );
+
       _uploadedFileURL = await AppUtil.uploadFile(
-          _image, context, 'posts_images/${Constants.currentUserID}/' + postId);
+          result, context, 'posts_images/${Constants.currentUserID}/' + postId);
+      await AppUtil.deleteAppDirectoryFiles();
     } else {}
 
     print(_youtubeId);
@@ -351,7 +370,7 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
   Widget build(BuildContext context) {
     return Container(
       height: Sizes.fullHeight(context),
-      padding: EdgeInsets.only(left: 10, right: 10, bottom: 10),
+      padding: EdgeInsets.only(left: 10, right: 10, bottom: 50),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -603,15 +622,7 @@ class _ComposeTweet extends WidgetView<CreatePost, _CreatePostReplyPageState> {
               ],
             ),
           ),
-          viewState._video != null
-              ? Flexible(
-                  child: Stack(
-                    children: <Widget>[
-                      viewState.createPostVideo,
-                    ],
-                  ),
-                )
-              : Container(),
+          viewState._video != null ? viewState.createPostVideo : Container(),
         ],
       ),
     );

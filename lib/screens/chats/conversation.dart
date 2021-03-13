@@ -275,6 +275,7 @@ class _ConversationState extends State<Conversation>
   void initState() {
     super.initState();
     //_loadAudioByteData();
+    initRecorder();
     WidgetsBinding.instance.addObserver(this);
     getMessages();
     listenToMessagesChanges();
@@ -588,7 +589,7 @@ class _ConversationState extends State<Conversation>
                                           _currentStatus =
                                               RecordingStatus.Recording;
                                         });
-                                        await initRecorder();
+
                                         await recorder.startRecording(
                                             conversation: this.widget);
                                       } else {}

@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/list_items/chat_item.dart';
@@ -209,8 +208,7 @@ class _ChatsState extends State<Chats>
                     padding: const EdgeInsets.all(8.0),
                     child: InkWell(
                       onTap: () => Scaffold.of(context).openDrawer(),
-                      child: Icon(
-                          const IconData(58311, fontFamily: 'MaterialIcons')),
+                      child: Icon(Icons.menu),
                     ),
                   )),
           actions: <Widget>[],

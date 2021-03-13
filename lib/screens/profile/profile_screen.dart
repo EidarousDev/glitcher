@@ -9,7 +9,6 @@ import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/list_items/post_item.dart';
-import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/auth.dart';
@@ -647,7 +646,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ? InkWell(
                           onTap: () => Scaffold.of(context).openDrawer(),
                           child: Icon(
-                            const IconData(58311, fontFamily: 'MaterialIcons'),
+                            Icons.menu,
                             color: Colors.white,
                           ),
                         )

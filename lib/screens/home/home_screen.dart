@@ -1,24 +1,18 @@
-import 'dart:convert';
-
 import 'package:audiofileplayer/audiofileplayer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:glitcher/constants/cache.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/list_items/post_item.dart';
-import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
-import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:glitcher/widgets/drawer.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/widgets/rate_app.dart';
@@ -112,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             padding: const EdgeInsets.all(8.0),
             child: InkWell(
               onTap: () => Scaffold.of(context).openDrawer(),
-              child: Icon(const IconData(58311, fontFamily: 'MaterialIcons')),
+              child: Icon(Icons.menu),
 //                    CachedNetworkImage(
 //                      imageUrl: profileImageUrl,
 //                      imageBuilder: (context, imageProvider) => CircleAvatar(

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -83,14 +84,14 @@ class _CreateBottomIconState extends State<CreateBottomIcon> {
                     color: MyColors.darkPrimary,
                   ))
               : Container(),
-//          IconButton(
-//              onPressed: () {
-//                setVideo();
-//              },
-//              icon: Icon(
-//                Icons.videocam,
-//                color: MyColors.darkPrimary,
-//              )),
+          IconButton(
+              onPressed: () {
+                setVideo();
+              },
+              icon: Icon(
+                Icons.videocam,
+                color: MyColors.darkPrimary,
+              )),
           Expanded(
               child: Align(
             alignment: Alignment.centerRight,
@@ -137,15 +138,30 @@ class _CreateBottomIconState extends State<CreateBottomIcon> {
   }
 
   void setVideo() async {
-    ImagePicker imagePicker = ImagePicker();
-    await imagePicker.getVideo(source: ImageSource.gallery).then((value) async {
-      print(value.path);
-      File file = File(value.path);
+    FilePickerResult result = await FilePicker.platform
+        .pickFiles(type: FileType.custom, allowedExtensions: [
+      'mp4',
+    ]);
+
+    if (result != null) {
+      print(result.files[0].path);
+      File file = File(result.files[0].path);
       setState(() {
         widget.onVideoIconSelected(file);
         print('file video xx $file');
       });
-    });
+    } else {
+      // User canceled the picker
+    }
+    // ImagePicker imagePicker = ImagePicker();
+    // await imagePicker.getVideo(source: ImageSource.gallery).then((value) async {
+    //   print(value.path);
+    //   File file = File(value.path);
+    //   setState(() {
+    //     widget.onVideoIconSelected(file);
+    //     print('file video xx $file');
+    //   });
+    // });
   }
 
   double getTweetLimit() {

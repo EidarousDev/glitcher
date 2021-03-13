@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
-import 'package:glitcher/constants/sizes.dart';
-import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/list_items/user_item.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/functions.dart';
-import 'package:glitcher/widgets/caching_image.dart';
-import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:glitcher/widgets/drawer.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 
@@ -97,8 +91,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: InkWell(
                       onTap: () => Scaffold.of(context).openDrawer(),
-                      child: Icon(
-                          const IconData(58311, fontFamily: 'MaterialIcons')),
+                      child: Icon(Icons.menu),
                     ),
                   )),
         ),
