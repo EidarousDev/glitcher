@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_icons/font_awesome.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -18,6 +19,8 @@ import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/widgets/rate_app.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+
+import '../../widgets/card_icon_text.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -161,8 +164,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Container(
-                height: isFiltering ? 252 : 70,
-                //height: 120,//TODO use this if video fixed
+                height: isFiltering ? 252 : 120,
                 color: switchColor(MyColors.lightBG, MyColors.darkBG),
                 child: Column(
                   children: <Widget>[
@@ -309,73 +311,72 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 MyColors.lightCardBG, MyColors.darkLineBreak)),
                       ),
                     ),
-//TODO uncomment after fixing video
-//                    Center(
-//                      child: Row(
-//                        crossAxisAlignment: CrossAxisAlignment.center,
-//                        mainAxisAlignment: MainAxisAlignment.center,
-//                        children: <Widget>[
-//                          Expanded(
-//                              child: CardIconText(
-//                            tStyle: TextStyle(fontWeight: FontWeight.bold),
-//                            icon: FontAwesome.getIconData("image"),
-//                            text: "Image",
-//                            color: Constants.currentTheme ==
-//                                    AvailableThemes.LIGHT_THEME
-//                                ? MyColors.lightBG
-//                                : MyColors.darkLineBreak,
-//                            ccolor:
-//                                switchColor(MyColors.lightPrimary, Colors.blue),
-//                          )),
-//                          SizedBox(
-//                            height: 25,
-//                            width: 1.0,
-//                            child: DecoratedBox(
-//                              decoration: BoxDecoration(
-//                                  color: Constants.currentTheme ==
-//                                          AvailableThemes.LIGHT_THEME
-//                                      ? MyColors.lightLineBreak
-//                                      : MyColors.darkLineBreak),
-//                            ),
-//                          ),
-//                          Expanded(
-//                              child: CardIconText(
-//                            tStyle: TextStyle(fontWeight: FontWeight.bold),
-//                            icon: FontAwesome.getIconData("file-video-o"),
-//                            text: "Video",
-//                            color: Constants.currentTheme ==
-//                                    AvailableThemes.LIGHT_THEME
-//                                ? MyColors.lightBG
-//                                : MyColors.darkLineBreak,
-//                            ccolor: switchColor(
-//                                MyColors.lightPrimary, Colors.greenAccent),
-//                          )),
-//                          SizedBox(
-//                            height: 25,
-//                            width: 1.0,
-//                            child: DecoratedBox(
-//                              decoration: BoxDecoration(
-//                                  color: Constants.currentTheme ==
-//                                          AvailableThemes.LIGHT_THEME
-//                                      ? MyColors.lightLineBreak
-//                                      : MyColors.darkLineBreak),
-//                            ),
-//                          ),
-//                          Expanded(
-//                              child: CardIconText(
-//                            tStyle: TextStyle(fontWeight: FontWeight.bold),
-//                            icon: FontAwesome.getIconData("youtube"),
-//                            text: "YouTube",
-//                            color: Constants.currentTheme ==
-//                                    AvailableThemes.LIGHT_THEME
-//                                ? MyColors.lightBG
-//                                : MyColors.darkLineBreak,
-//                            ccolor:
-//                                switchColor(MyColors.lightPrimary, Colors.pink),
-//                          )),
-//                        ],
-//                      ),
-//                    ),
+                    Center(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Expanded(
+                              child: CardIconText(
+                            tStyle: TextStyle(fontWeight: FontWeight.bold),
+                            icon: FontAwesome.getIconData("image"),
+                            text: "Image",
+                            color: Constants.currentTheme ==
+                                    AvailableThemes.LIGHT_THEME
+                                ? MyColors.lightBG
+                                : MyColors.darkLineBreak,
+                            ccolor:
+                                switchColor(MyColors.lightPrimary, Colors.blue),
+                          )),
+                          SizedBox(
+                            height: 25,
+                            width: 1.0,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                  color: Constants.currentTheme ==
+                                          AvailableThemes.LIGHT_THEME
+                                      ? MyColors.lightLineBreak
+                                      : MyColors.darkLineBreak),
+                            ),
+                          ),
+                          Expanded(
+                              child: CardIconText(
+                            tStyle: TextStyle(fontWeight: FontWeight.bold),
+                            icon: FontAwesome.getIconData("file-video-o"),
+                            text: "Video",
+                            color: Constants.currentTheme ==
+                                    AvailableThemes.LIGHT_THEME
+                                ? MyColors.lightBG
+                                : MyColors.darkLineBreak,
+                            ccolor: switchColor(
+                                MyColors.lightPrimary, Colors.greenAccent),
+                          )),
+                          SizedBox(
+                            height: 25,
+                            width: 1.0,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                  color: Constants.currentTheme ==
+                                          AvailableThemes.LIGHT_THEME
+                                      ? MyColors.lightLineBreak
+                                      : MyColors.darkLineBreak),
+                            ),
+                          ),
+                          Expanded(
+                              child: CardIconText(
+                            tStyle: TextStyle(fontWeight: FontWeight.bold),
+                            icon: FontAwesome.getIconData("youtube"),
+                            text: "YouTube",
+                            color: Constants.currentTheme ==
+                                    AvailableThemes.LIGHT_THEME
+                                ? MyColors.lightBG
+                                : MyColors.darkLineBreak,
+                            ccolor:
+                                switchColor(MyColors.lightPrimary, Colors.pink),
+                          )),
+                        ],
+                      ),
+                    ),
                     SizedBox(
                       height: 1,
                       width: double.infinity,
@@ -388,35 +389,59 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ],
                 ),
               ),
-              _posts.length > 0
-                  ? ListView.builder(
-                      physics: NeverScrollableScrollPhysics(),
-                      scrollDirection: Axis.vertical,
-                      itemCount: _posts.length,
-                      shrinkWrap: true,
-                      itemBuilder: (BuildContext context, int index) {
-                        Post post = _posts[index];
-                        return FutureBuilder(
-                            future: DatabaseService.getUserWithId(post.authorId,
-                                checkLocal: _feedFilter == 1),
-                            builder:
-                                (BuildContext context, AsyncSnapshot snapshot) {
-                              if (!snapshot.hasData) {
-                                return SizedBox.shrink();
-                              }
-                              User author = snapshot.data;
-                              return PostItem(post: post, author: author);
-                            });
-                      },
-                    )
-                  : Padding(
-                      padding: const EdgeInsets.only(top: 160.0),
-                      child: Center(
-                          child: Text(
-                        'No posts to show',
-                        style: TextStyle(fontSize: 20, color: Colors.grey),
-                      )),
-                    ),
+              FutureBuilder(
+                future: _setupFeed(),
+                builder: (context, snapshot) {
+                  List<Post> posts = snapshot.data as List<Post>;
+                  return snapshot.connectionState == ConnectionState.done
+                      ? ListView.builder(
+                          physics: NeverScrollableScrollPhysics(),
+                          scrollDirection: Axis.vertical,
+                          itemCount: posts.length,
+                          shrinkWrap: true,
+                          itemBuilder: (BuildContext context, int index) {
+                            Post post = posts[index];
+                            return FutureBuilder(
+                                future: DatabaseService.getUserWithId(
+                                    post.authorId,
+                                    checkLocal: _feedFilter == 1),
+                                builder: (BuildContext context,
+                                    AsyncSnapshot snapshot) {
+                                  if (!snapshot.hasData) {
+                                    return SizedBox.shrink();
+                                  }
+                                  User author = snapshot.data;
+                                  return PostItem(post: post, author: author);
+                                });
+                          },
+                        )
+                      : ListView.builder(
+                          physics: NeverScrollableScrollPhysics(),
+                          scrollDirection: Axis.vertical,
+                          itemCount: 10,
+                          shrinkWrap: true,
+                          itemBuilder: (BuildContext context, int index) {
+                            Post post = Post(text: '');
+                            return FutureBuilder(
+                                future: DatabaseService.getUserWithId(
+                                    post.authorId,
+                                    checkLocal: _feedFilter == 1),
+                                builder: (BuildContext context,
+                                    AsyncSnapshot snapshot) {
+                                  if (!snapshot.hasData) {
+                                    return SizedBox.shrink();
+                                  }
+                                  User author = snapshot.data;
+                                  return PostItem(
+                                    post: post,
+                                    author: author,
+                                    isLoading: true,
+                                  );
+                                });
+                          },
+                        );
+                },
+              ),
             ],
           ),
         ),
@@ -425,31 +450,26 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
-  _setupFeed() async {
+  Future<List<Post>> _setupFeed() async {
     List<Post> posts;
 
     print('Home Filter: $_feedFilter');
 
     if (_feedFilter == 0) {
       posts = await DatabaseService.getPosts();
-      setState(() {
-        _posts = posts;
-        this.lastVisiblePostSnapShot = posts.last.timestamp;
-      });
+      _posts = posts;
+      this.lastVisiblePostSnapShot = posts.last.timestamp;
     } else if (_feedFilter == 1) {
       posts = await DatabaseService.getPostsFilteredByFollowing();
-      setState(() {
-        _posts = posts;
-        this.lastVisiblePostSnapShot = posts.last.timestamp;
-      });
+      _posts = posts;
+      this.lastVisiblePostSnapShot = posts.last.timestamp;
     } else if (_feedFilter == 2) {
       posts = await DatabaseService.getPostsFilteredByFollowedGames();
-      setState(() {
-        _posts = posts;
-        if (_posts.length > 0)
-          this.lastVisiblePostSnapShot = posts.last.timestamp;
-      });
+      _posts = posts;
+      if (_posts.length > 0)
+        this.lastVisiblePostSnapShot = posts.last.timestamp;
     }
+    return posts;
 
 //    setState(() {
 //      Cache.homePosts = _posts;
@@ -478,17 +498,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       });
     loadUserData();
     loadUserFavoriteFilter();
-    _setupFeed();
-//    if (Cache.homePosts.length == 0) {
-//      print('refreshed');
-//      _setupFeed();
-//    } else {
-//      print('from cache');
-//      setState(() {
-//        _posts = Cache.homePosts;
-//      });
-//    }
-//    print('cache posts length: ${Cache.homePosts.length}');
 
     RateApp(context).rateGlitcher();
     _loadAudioByteData();
@@ -511,15 +520,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     updateOnlineUserState(state);
     if (state == AppLifecycleState.resumed) {
       // user returned to our app
-      //_setupFeed();
       print('resumed');
     } else if (state == AppLifecycleState.inactive) {
       // app is inactive
-      //_setupFeed();
       print('inactive');
     } else if (state == AppLifecycleState.paused) {
       // user is about quit our app temporally
-      //_setupFeed();
       print('paused');
     } else if (state == AppLifecycleState.detached) {
       // app suspended (not used in iOS)
