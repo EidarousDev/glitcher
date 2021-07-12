@@ -464,37 +464,39 @@ class _ConversationState extends State<Conversation>
                                     source: bottomSheet.choice);
                                 showDialog(
                                     barrierDismissible: true,
-                                    child: Container(
-                                      width: Sizes.sm_profile_image_w,
-                                      height: Sizes.sm_profile_image_h,
-                                      child: ImageOverlay(
-                                        imageFile: image,
-                                        btnText: 'Send',
-                                        btnFunction: () async {
-                                          String url = await AppUtil.uploadFile(
-                                              image,
-                                              context,
-                                              'image_messages/${Constants.currentUserID}/${widget.otherUid}/' +
-                                                  randomAlphaNumeric(20));
+                                    builder: (_) {
+                                      return Container(
+                                        width: Sizes.sm_profile_image_w,
+                                        height: Sizes.sm_profile_image_h,
+                                        child: ImageOverlay(
+                                          imageFile: image,
+                                          btnText: 'Send',
+                                          btnFunction: () async {
+                                            String url = await AppUtil.uploadFile(
+                                                image,
+                                                context,
+                                                'image_messages/${Constants.currentUserID}/${widget.otherUid}/' +
+                                                    randomAlphaNumeric(20));
 
-                                          messageController.clear();
-                                          await DatabaseService.sendMessage(
-                                              widget.otherUid, 'image', url);
-                                          makeMessagesUnseen();
+                                            messageController.clear();
+                                            await DatabaseService.sendMessage(
+                                                widget.otherUid, 'image', url);
+                                            makeMessagesUnseen();
 
-                                          await NotificationHandler
-                                              .sendNotification(
-                                                  widget.otherUid,
-                                                  Constants
-                                                      .currentUser.username,
-                                                  ' sent you an image.',
-                                                  Constants.currentUserID,
-                                                  'message');
+                                            await NotificationHandler
+                                                .sendNotification(
+                                                    widget.otherUid,
+                                                    Constants
+                                                        .currentUser.username,
+                                                    ' sent you an image.',
+                                                    Constants.currentUserID,
+                                                    'message');
 
-                                          Navigator.of(context).pop();
-                                        },
-                                      ),
-                                    ),
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      );
+                                    },
                                     context: context);
                               },
                             ),

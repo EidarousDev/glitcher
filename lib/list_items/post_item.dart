@@ -287,19 +287,21 @@ class _PostItemState extends State<PostItem> {
                                                 onTap: () {
                                                   showDialog(
                                                       barrierDismissible: true,
-                                                      child: Container(
-                                                        width: Sizes
-                                                            .sm_profile_image_w,
-                                                        height: Sizes
-                                                            .sm_profile_image_h,
-                                                        child: ImageOverlay(
-                                                          imageUrl:
-                                                              post.imageUrl,
-                                                          btnText: Strings
-                                                              .SAVE_IMAGE,
-                                                          btnFunction: () {},
-                                                        ),
-                                                      ),
+                                                      builder: (_) {
+                                                        return Container(
+                                                          width: Sizes
+                                                              .sm_profile_image_w,
+                                                          height: Sizes
+                                                              .sm_profile_image_h,
+                                                          child: ImageOverlay(
+                                                            imageUrl:
+                                                                post.imageUrl,
+                                                            btnText: Strings
+                                                                .SAVE_IMAGE,
+                                                            btnFunction: () {},
+                                                          ),
+                                                        );
+                                                      },
                                                       context: context);
                                                 },
                                                 child: CacheThisImage(

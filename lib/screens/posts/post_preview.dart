@@ -274,7 +274,7 @@ class _PostPreviewState extends State<PostPreview>
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
-        resizeToAvoidBottomPadding: true,
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           leading: new IconButton(
             icon: new Icon(Icons.arrow_back),

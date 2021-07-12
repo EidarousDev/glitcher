@@ -380,29 +380,34 @@ class _GroupConversationState extends State<GroupConversation>
 
                                 showDialog(
                                     barrierDismissible: true,
-                                    child: Container(
-                                      width: Sizes.sm_profile_image_w,
-                                      height: Sizes.sm_profile_image_h,
-                                      child: ImageOverlay(
-                                        imageFile: image,
-                                        btnText: 'Send',
-                                        btnFunction: () async {
-                                          _url = await AppUtil.uploadFile(
-                                              image,
-                                              context,
-                                              'group_chat_image_messages/${widget.groupId}/' +
-                                                  randomAlphaNumeric(20),
-                                              groupMembersIds: groupMembersIds);
+                                    builder: (_) {
+                                      return Container(
+                                        width: Sizes.sm_profile_image_w,
+                                        height: Sizes.sm_profile_image_h,
+                                        child: ImageOverlay(
+                                          imageFile: image,
+                                          btnText: 'Send',
+                                          btnFunction: () async {
+                                            _url = await AppUtil.uploadFile(
+                                                image,
+                                                context,
+                                                'group_chat_image_messages/${widget.groupId}/' +
+                                                    randomAlphaNumeric(20),
+                                                groupMembersIds:
+                                                    groupMembersIds);
 
-                                          messageController.clear();
-                                          await DatabaseService
-                                              .sendGroupMessage(widget.groupId,
-                                                  'image', _url);
+                                            messageController.clear();
+                                            await DatabaseService
+                                                .sendGroupMessage(
+                                                    widget.groupId,
+                                                    'image',
+                                                    _url);
 
-                                          Navigator.of(context).pop();
-                                        },
-                                      ),
-                                    ),
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      );
+                                    },
                                     context: context);
                               },
                             ),

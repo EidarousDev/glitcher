@@ -103,7 +103,9 @@ class _ChatBubbleState extends State<ChatBubble> {
                         )
                       : SizedBox(),
               widget.isGroup
-                  ? widget.isMe ? SizedBox() : SizedBox(height: 5)
+                  ? widget.isMe
+                      ? SizedBox()
+                      : SizedBox(height: 5)
                   : SizedBox(),
               widget.isReply
                   ? Container(
@@ -177,18 +179,20 @@ class _ChatBubbleState extends State<ChatBubble> {
                             onTap: () {
                               showDialog(
                                   barrierDismissible: true,
-                                  child: Container(
-                                    width: Sizes.sm_profile_image_w,
-                                    height: Sizes.sm_profile_image_h,
-                                    child: ImageOverlay(
-                                      imageUrl: widget.message,
-                                      btnText: 'Download',
-                                      btnFunction: () {
-                                        downloadImage(widget.message,
-                                            randomAlphaNumeric(20));
-                                      },
-                                    ),
-                                  ),
+                                  builder: (_) {
+                                    return Container(
+                                      width: Sizes.sm_profile_image_w,
+                                      height: Sizes.sm_profile_image_h,
+                                      child: ImageOverlay(
+                                        imageUrl: widget.message,
+                                        btnText: 'Download',
+                                        btnFunction: () {
+                                          downloadImage(widget.message,
+                                              randomAlphaNumeric(20));
+                                        },
+                                      ),
+                                    );
+                                  },
                                   context: context);
                             },
                             child: Image.network(

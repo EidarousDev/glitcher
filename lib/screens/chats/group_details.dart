@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
@@ -10,16 +9,12 @@ import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/group_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:math' show Random;
-import 'package:random_string/random_string.dart';
 
 class GroupDetails extends StatefulWidget {
   final groupId;
@@ -81,25 +76,29 @@ class _GroupDetailsState extends State<GroupDetails>
     File image = await AppUtil.chooseImage();
     showDialog(
         barrierDismissible: true,
-        child: Container(
-          width: Sizes.sm_profile_image_w,
-          height: Sizes.sm_profile_image_h,
-          child: ImageOverlay(
-            imageFile: image,
-            btnText: 'Upload',
-            btnFunction: () async {
-              String url = await AppUtil.uploadFile(
-                  image, context, 'group_chat_images/$groupId',
-                  groupMembersIds: groupMembersIds);
+        builder: (_) {
+          return Container(
+            width: Sizes.sm_profile_image_w,
+            height: Sizes.sm_profile_image_h,
+            child: ImageOverlay(
+              imageFile: image,
+              btnText: 'Upload',
+              btnFunction: () async {
+                String url = await AppUtil.uploadFile(
+                    image, context, 'group_chat_images/$groupId',
+                    groupMembersIds: groupMembersIds);
 
-              await chatGroupsRef.document(groupId).updateData({'image': url});
+                await chatGroupsRef
+                    .document(groupId)
+                    .updateData({'image': url});
 
-              getGroup();
+                getGroup();
 
-              Navigator.of(context).pop();
-            },
-          ),
-        ),
+                Navigator.of(context).pop();
+              },
+            ),
+          );
+        },
         context: context);
   }
 
