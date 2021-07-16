@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -22,7 +20,6 @@ import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/chat_bubble.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
-import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:random_string/random_string.dart';
@@ -129,17 +126,17 @@ class _GroupConversationState extends State<GroupConversation>
 
   void listenToMessagesChanges() async {
     messagesSubscription = chatGroupsRef
-        .document(widget.groupId)
+        .doc(widget.groupId)
         .collection('messages')
         .orderBy('timestamp', descending: true)
         .snapshots()
         .listen((querySnapshot) {
-      querySnapshot.documentChanges.forEach((change) {
+      querySnapshot.docChanges.forEach((change) {
         if (change.type == DocumentChangeType.added) {
           if (_messages != null) {
             if (this.mounted) {
               setState(() {
-                _messages.insert(0, Message.fromDoc(change.document));
+                _messages.insert(0, Message.fromDoc(change.doc));
               });
             }
           }
@@ -151,13 +148,11 @@ class _GroupConversationState extends State<GroupConversation>
   getGroupUsersData() async {
     List<Map<String, dynamic>> users = [];
     List<String> usersIds = [];
-    QuerySnapshot usersSnapshot = await chatGroupsRef
-        .document(widget.groupId)
-        .collection('users')
-        .getDocuments();
-    usersSnapshot.documents.forEach((doc) {
-      users.add(doc.data);
-      usersIds.add(doc.documentID);
+    QuerySnapshot usersSnapshot =
+        await chatGroupsRef.doc(widget.groupId).collection('users').get();
+    usersSnapshot.docs.forEach((document) {
+      users.add(document.data());
+      usersIds.add(document.id);
     });
 
     print('member: ${usersIds[0]}');
@@ -187,8 +182,9 @@ class _GroupConversationState extends State<GroupConversation>
   }
 
   initRecorder() async {
-    recorder = AudioRecorder();
-    await recorder.init();
+    String path = (await getApplicationSupportDirectory()).path + '/temp.mp3';
+
+    recorder = AudioRecorder(path);
   }
 
   @override
@@ -503,8 +499,7 @@ class _GroupConversationState extends State<GroupConversation>
                                               RecordingStatus.Recording;
                                         });
                                         await initRecorder();
-                                        await recorder.startRecording(
-                                            conversation: this.widget);
+                                        await recorder.startRecording();
                                       } else {}
                                     },
                                     onLongPressEnd: (longPressDetails) async {
@@ -513,10 +508,10 @@ class _GroupConversationState extends State<GroupConversation>
                                           _currentStatus =
                                               RecordingStatus.Stopped;
                                         });
-                                        Recording result =
+                                        String result =
                                             await recorder.stopRecording();
                                         _url = await AppUtil.uploadFile(
-                                            File(result.path),
+                                            File(result),
                                             context,
                                             'group_chat_voice_messages/${widget.groupId}/${randomAlphaNumeric(20)}',
                                             groupMembersIds: groupMembersIds);
@@ -569,16 +564,6 @@ class _GroupConversationState extends State<GroupConversation>
       _focusNode.unfocus();
       _typing = false;
     }
-  }
-
-  Future<Uint8List> _loadFileBytes(String url, {OnError onError}) async {
-    Uint8List bytes;
-    try {
-      bytes = await readBytes(url);
-    } on ClientException {
-      rethrow;
-    }
-    return bytes;
   }
 
   void updateRecordTime(String rt) {

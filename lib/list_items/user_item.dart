@@ -6,7 +6,6 @@ import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/custom_loader.dart';
 
@@ -71,9 +70,9 @@ class _UserItemState extends State<UserItem> {
     Navigator.of(context).push(CustomScreenLoader());
 
     DocumentSnapshot user = await usersRef
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('following')
-        .document(widget.user.id)
+        .doc(widget.user.id)
         .get();
 
     if (user.exists) {
@@ -98,9 +97,9 @@ class _UserItemState extends State<UserItem> {
 
   checkStates() async {
     DocumentSnapshot user = await usersRef
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('following')
-        .document(widget.user.id)
+        .doc(widget.user.id)
         .get();
 
     if (user.exists) {

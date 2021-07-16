@@ -21,7 +21,7 @@ class Suggestion {
 
   factory Suggestion.fromDoc(DocumentSnapshot doc) {
     return Suggestion(
-      id: doc.documentID,
+      id: doc.id,
       title: doc['title'],
       details: doc['details'],
       submitter: doc['submitter'],

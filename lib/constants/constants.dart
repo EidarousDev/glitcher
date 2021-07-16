@@ -4,14 +4,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/notification_model.dart';
-import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/models/user_model.dart' as user;
 import 'package:glitcher/screens/chats/chats.dart';
 import 'package:stack/stack.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 /// Firebase Constants
 final firebaseAuth = FirebaseAuth.instance;
-final firestore = Firestore.instance;
+final firestore = FirebaseFirestore.instance;
 final storageRef = FirebaseStorage.instance.ref();
 final postsRef = firestore.collection('posts');
 final usersRef = firestore.collection('users');
@@ -37,18 +37,14 @@ AuthStatus authStatus = AuthStatus.NOT_DETERMINED;
 String loggedInProfileImageURL; // TODO: Assign Default image url
 
 /// App Theme Constants
-enum AvailableThemes {
-  LIGHT_THEME,
-  DARK_THEME,
-}
 
 class Constants {
-  static FirebaseUser currentFirebaseUser;
+  static User currentFirebaseUser;
   static String currentUserID;
-  static User currentUser;
+  static user.User currentUser;
   //static List<String> games = [];
   static const genres = ['Action', 'Sports', 'Racing', 'Fighting'];
-  static var currentTheme = AvailableThemes.DARK_THEME;
+  //static var isDarkTheme = AvailableThemes.DARK_THEME;
   static int favouriteFilter;
 
   static List<String> followingIds = [];
@@ -68,4 +64,6 @@ class Constants {
 
   //screens
   static Chats chats = Chats();
+
+  static int endPositionOffsetInMilliSeconds = 600;
 }

@@ -1,12 +1,13 @@
-import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
-import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/strings.dart';
+import 'package:glitcher/models/app_model.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
-import 'package:glitcher/utils/functions.dart';
+import 'package:glitcher/style/dark_theme.dart';
+import 'package:glitcher/style/light_theme.dart';
+import 'package:provider/provider.dart';
 
 import 'services/route_generator.dart';
 
@@ -33,51 +34,50 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  AppModel _app;
+
   @override
   Widget build(BuildContext context) {
     retrieveDynamicLink(context);
-    return AuthProvider(
-      auth: Auth(),
-      child: DynamicTheme(
-          defaultBrightness:
-              Constants.currentTheme == AvailableThemes.DARK_THEME
-                  ? Brightness.dark
-                  : Brightness.light,
-          data: (brightness) =>
-              Constants.currentTheme == AvailableThemes.DARK_THEME
-                  ? MyColors.darkTheme
-                  : MyColors.lightTheme,
-          themedWidgetBuilder: (context, theme) {
-            return MaterialApp(
+    return ChangeNotifierProvider<AppModel>(
+      create: (context) => _app,
+      child: Consumer<AppModel>(
+        builder: (context, value, child) {
+          return AuthProvider(
+            auth: Auth(),
+            child: MaterialApp(
               title: Strings.appName,
               debugShowCheckedModeBanner: false,
-              theme: theme,
+              theme: getTheme(context),
               initialRoute: '/',
               onGenerateRoute: RouteGenerator.generateRoute,
-            );
-          }),
+            ),
+          );
+        },
+      ),
     );
   }
 
   @override
   void initState() {
-    getCurrentTheme();
+    _app = AppModel();
     super.initState();
   }
 
-  getCurrentTheme() async {
-    String theme = await getTheme();
-    print("Fucking theme :  $theme ");
-    if (theme == "AvailableThemes.LIGHT_THEME") {
-      //DynamicTheme.of(context).setThemeData(MyColors.lightTheme);
-      setState(() {
-        Constants.currentTheme = AvailableThemes.LIGHT_THEME;
-      });
-    } else {
-      //DynamicTheme.of(context).setThemeData(MyColors.darkTheme);
-      setState(() {
-        Constants.currentTheme = AvailableThemes.DARK_THEME;
-      });
+  /// Build the App Theme
+  ThemeData getTheme(context) {
+    var appModel = Provider.of<AppModel>(context);
+    var isDarkTheme = appModel.darkTheme ?? true;
+
+    var fontFamily = 'Roboto';
+
+    if (isDarkTheme) {
+      return buildDarkTheme('en', fontFamily).copyWith(
+        primaryColor: MyColors.darkPrimary,
+      );
     }
+    return buildLightTheme('en', fontFamily).copyWith(
+      primaryColor: MyColors.lightPrimary,
+    );
   }
 }

@@ -25,20 +25,17 @@ class _GroupMembersState extends State<GroupMembers>
   _GroupMembersState({this.groupId});
 
   loadUsersData() async {
-    QuerySnapshot usersSnapshot = await chatGroupsRef
-        .document(groupId)
-        .collection('users')
-        .getDocuments();
+    QuerySnapshot usersSnapshot =
+        await chatGroupsRef.doc(groupId).collection('users').get();
 
-    usersSnapshot.documents.forEach((doc) async {
+    usersSnapshot.docs.forEach((doc) async {
       Map<String, dynamic> user = {};
-      User temp =
-          await DatabaseService.getUserWithId(doc.documentID, checkLocal: true);
+      User temp = await DatabaseService.getUserWithId(doc.id, checkLocal: true);
       user.putIfAbsent('name', (() => temp.username));
       user.putIfAbsent('image', (() => temp.profileImageUrl));
       user.putIfAbsent('description', (() => temp.description));
-      user.putIfAbsent('is_admin', (() => doc.data['is_admin']));
-      user.putIfAbsent('id', (() => doc.documentID));
+      user.putIfAbsent('is_admin', (() => doc['is_admin']));
+      user.putIfAbsent('id', (() => doc.id));
       setState(() {
         members.add(user);
       });
@@ -128,8 +125,7 @@ class _GroupMembersState extends State<GroupMembers>
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
                         IconButton(
-                          icon: Icon(
-                              MaterialCommunityIcons.getIconData('crown'),
+                          icon: Icon(MaterialCommunityIcons.crown,
                               color: members[index]['is_admin']
                                   ? Colors.yellow
                                   : Colors.white70),

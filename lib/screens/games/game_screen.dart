@@ -11,7 +11,7 @@ import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/post_model.dart';
-import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/models/user_model.dart' as user;
 import 'package:glitcher/list_items/post_item.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/permissions_service.dart';
@@ -31,7 +31,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   String username;
   String profileImageUrl = '';
   var _posts = [];
-  FirebaseUser currentUser;
+  User currentFirebaseUser;
   Timestamp lastVisiblePostSnapShot;
   //bool _noMorePosts = false;
   //bool _isFetching = false;
@@ -57,7 +57,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                 });
               },
               icon: Icon(
-                MaterialCommunityIcons.getIconData('lightbulb-on'),
+                MaterialCommunityIcons.lightbulb_on,
                 color: Colors.white,
               ),
             ),
@@ -243,7 +243,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                               if (!snapshot.hasData) {
                                 return SizedBox.shrink();
                               }
-                              User author = snapshot.data;
+                              user.User author = snapshot.data;
                               return PostItem(post: post, author: author);
                             });
                       },

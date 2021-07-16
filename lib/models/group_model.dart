@@ -15,7 +15,7 @@ class Group {
 
   factory Group.fromDoc(DocumentSnapshot doc) {
     return Group(
-      id: doc.documentID,
+      id: doc.id,
       name: doc['name'],
       image: doc['image'],
       timestamp: doc['timestamp'],

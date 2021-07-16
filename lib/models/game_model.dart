@@ -41,7 +41,7 @@ class Game {
 
   factory Game.fromDoc(DocumentSnapshot doc) {
     return Game(
-      id: doc.documentID,
+      id: doc.id,
       fullName: doc['fullName'],
       shortName: doc['shortName'],
       description: doc['description'],

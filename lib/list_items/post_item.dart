@@ -1,6 +1,5 @@
 import 'dart:typed_data';
-
-import 'package:audiofileplayer/audiofileplayer.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:chewie/chewie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -70,6 +69,8 @@ class _PostItemState extends State<PostItem> {
   String _hashtagText = '';
 
   String _mentionText;
+
+  var audioPlayer = AudioPlayer();
 
   @override
   Widget build(BuildContext context) {
@@ -381,17 +382,12 @@ class _PostItemState extends State<PostItem> {
           height: 1.0,
           width: double.infinity,
           child: DecoratedBox(
-            decoration: BoxDecoration(
-                color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
-                    ? MyColors.lightLineBreak
-                    : MyColors.darkLineBreak),
+            decoration: BoxDecoration(color: Theme.of(context).dividerColor),
           ),
         ),
         Container(
           height: Sizes.inline_break,
-          color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
-              ? MyColors.lightCardBG
-              : MyColors.darkCardBG,
+          color: Theme.of(context).cardColor,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
@@ -401,12 +397,12 @@ class _PostItemState extends State<PostItem> {
                     SizedBox(
                       child: isLiked
                           ? Icon(
-                              FontAwesome.getIconData('thumbs-up'),
+                              FontAwesome.thumbs_up,
                               size: Sizes.card_btn_size,
                               color: MyColors.darkPrimary,
                             )
                           : Icon(
-                              FontAwesome.getIconData('thumbs-o-up'),
+                              FontAwesome.thumbs_o_up,
                               size: Sizes.card_btn_size,
                             ),
                     ),
@@ -421,14 +417,8 @@ class _PostItemState extends State<PostItem> {
                 ),
                 onTap: () async {
                   if (isLikeEnabled) {
-                    _likeSFX == null
-                        ? null
-                        : Audio.loadFromByteData(_likeSFX,
-                            onComplete: () =>
-                                setState(() => --_spawnedAudioCount))
-                      ..play()
-                      ..dispose();
-                    setState(() => ++_spawnedAudioCount);
+                    audioPlayer.setAsset(Strings.like_sound,
+                    ).then((value) => audioPlayer.play());
                     await likeBtnHandler(post);
                   }
                 },
@@ -437,11 +427,8 @@ class _PostItemState extends State<PostItem> {
                 width: 1.0,
                 height: Sizes.inline_break,
                 child: DecoratedBox(
-                  decoration: BoxDecoration(
-                      color:
-                          Constants.currentTheme == AvailableThemes.LIGHT_THEME
-                              ? MyColors.lightInLineBreak
-                              : MyColors.darkLineBreak),
+                  decoration:
+                      BoxDecoration(color: Theme.of(context).dividerColor),
                 ),
               ),
               InkWell(
@@ -450,12 +437,12 @@ class _PostItemState extends State<PostItem> {
                     SizedBox(
                       child: isDisliked
                           ? Icon(
-                              FontAwesome.getIconData('thumbs-down'),
+                              FontAwesome.thumbs_down,
                               size: Sizes.card_btn_size,
                               color: MyColors.darkPrimary,
                             )
                           : Icon(
-                              FontAwesome.getIconData('thumbs-o-down'),
+                              FontAwesome.thumbs_o_down,
                               size: Sizes.card_btn_size,
                             ),
                     ),
@@ -470,14 +457,8 @@ class _PostItemState extends State<PostItem> {
                 ),
                 onTap: () async {
                   if (isDislikedEnabled) {
-                    _dislikeSFX == null
-                        ? null
-                        : Audio.loadFromByteData(_dislikeSFX,
-                            onComplete: () =>
-                                setState(() => --_spawnedAudioCount))
-                      ..play()
-                      ..dispose();
-                    setState(() => ++_spawnedAudioCount);
+                    audioPlayer.setAsset(Strings.dislike_sound,
+                    ).then((value) => audioPlayer.play());
                     await dislikeBtnHandler(post);
                   }
                 },
@@ -486,11 +467,8 @@ class _PostItemState extends State<PostItem> {
                 width: 1.0,
                 height: Sizes.inline_break,
                 child: DecoratedBox(
-                  decoration: BoxDecoration(
-                      color:
-                          Constants.currentTheme == AvailableThemes.LIGHT_THEME
-                              ? MyColors.lightInLineBreak
-                              : MyColors.darkLineBreak),
+                  decoration:
+                      BoxDecoration(color: Theme.of(context).dividerColor),
                 ),
               ),
               InkWell(
@@ -526,11 +504,8 @@ class _PostItemState extends State<PostItem> {
                 width: 1.0,
                 height: Sizes.inline_break,
                 child: DecoratedBox(
-                  decoration: BoxDecoration(
-                      color:
-                          Constants.currentTheme == AvailableThemes.LIGHT_THEME
-                              ? MyColors.lightInLineBreak
-                              : MyColors.darkLineBreak),
+                  decoration:
+                      BoxDecoration(color: Theme.of(context).dividerColor),
                 ),
               ),
               InkWell(
@@ -551,10 +526,7 @@ class _PostItemState extends State<PostItem> {
           height: 14.0,
           width: double.infinity,
           child: DecoratedBox(
-            decoration: BoxDecoration(
-                color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
-                    ? MyColors.lightLineBreak
-                    : MyColors.darkLineBreak),
+            decoration: BoxDecoration(color: Theme.of(context).dividerColor),
           ),
         ),
       ],
@@ -650,13 +622,11 @@ class _PostItemState extends State<PostItem> {
     });
     if (isLiked == true && isDisliked == false) {
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('likes')
-          .document(Constants.currentUserID)
+          .doc(Constants.currentUserID)
           .delete();
-      await postsRef
-          .document(post.id)
-          .updateData({'likes': FieldValue.increment(-1)});
+      await postsRef.doc(post.id).update({'likes': FieldValue.increment(-1)});
 
       await NotificationHandler.removeNotification(
           post.authorId, post.id, 'like');
@@ -666,26 +636,24 @@ class _PostItemState extends State<PostItem> {
       });
     } else if (isDisliked == true && isLiked == false) {
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('dislikes')
-          .document(Constants.currentUserID)
+          .doc(Constants.currentUserID)
           .delete();
       await postsRef
-          .document(post.id)
-          .updateData({'dislikes': FieldValue.increment(-1)});
+          .doc(post.id)
+          .update({'dislikes': FieldValue.increment(-1)});
 
       setState(() {
         isDisliked = false;
         //post.disLikesCount = dislikesNo;
       });
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('likes')
-          .document(Constants.currentUserID)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
-      await postsRef
-          .document(post.id)
-          .updateData({'likes': FieldValue.increment(1)});
+          .doc(Constants.currentUserID)
+          .set({'timestamp': FieldValue.serverTimestamp()});
+      await postsRef.doc(post.id).update({'likes': FieldValue.increment(1)});
 
       setState(() {
         isLiked = true;
@@ -696,13 +664,11 @@ class _PostItemState extends State<PostItem> {
           Constants.currentUser.username + ' likes your post', post.id, 'like');
     } else if (isLiked == false && isDisliked == false) {
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('likes')
-          .document(Constants.currentUserID)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
-      await postsRef
-          .document(post.id)
-          .updateData({'likes': FieldValue.increment(1)});
+          .doc(Constants.currentUserID)
+          .set({'timestamp': FieldValue.serverTimestamp()});
+      await postsRef.doc(post.id).update({'likes': FieldValue.increment(1)});
       setState(() {
         isLiked = true;
         //post.likesCount = likesNo;
@@ -730,38 +696,34 @@ class _PostItemState extends State<PostItem> {
     });
     if (isDisliked == true && isLiked == false) {
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('dislikes')
-          .document(Constants.currentUserID)
+          .doc(Constants.currentUserID)
           .delete();
       await postsRef
-          .document(post.id)
-          .updateData({'dislikes': FieldValue.increment(-1)});
+          .doc(post.id)
+          .update({'dislikes': FieldValue.increment(-1)});
       setState(() {
         isDisliked = false;
         //post.disLikesCount = dislikesNo;
       });
     } else if (isLiked == true && isDisliked == false) {
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('likes')
-          .document(Constants.currentUserID)
+          .doc(Constants.currentUserID)
           .delete();
-      await postsRef
-          .document(post.id)
-          .updateData({'likes': FieldValue.increment(-1)});
+      await postsRef.doc(post.id).update({'likes': FieldValue.increment(-1)});
       setState(() {
         isLiked = false;
         //post.likesCount = likesNo;
       });
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('dislikes')
-          .document(Constants.currentUserID)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
-      await postsRef
-          .document(post.id)
-          .updateData({'dislikes': FieldValue.increment(1)});
+          .doc(Constants.currentUserID)
+          .set({'timestamp': FieldValue.serverTimestamp()});
+      await postsRef.doc(post.id).update({'dislikes': FieldValue.increment(1)});
 
       setState(() {
         isDisliked = true;
@@ -769,13 +731,11 @@ class _PostItemState extends State<PostItem> {
       });
     } else if (isDisliked == false && isLiked == false) {
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('dislikes')
-          .document(Constants.currentUserID)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
-      await postsRef
-          .document(post.id)
-          .updateData({'dislikes': FieldValue.increment(1)});
+          .doc(Constants.currentUserID)
+          .set({'timestamp': FieldValue.serverTimestamp()});
+      await postsRef.doc(post.id).update({'dislikes': FieldValue.increment(1)});
 
       setState(() {
         isDisliked = true;
@@ -799,14 +759,14 @@ class _PostItemState extends State<PostItem> {
 
   void initLikes(Post post) async {
     DocumentSnapshot likedSnapshot = await postsRef
-        .document(post.id)
+        .doc(post.id)
         .collection('likes')
-        ?.document(Constants.currentUserID)
+        ?.doc(Constants.currentUserID)
         ?.get();
     DocumentSnapshot dislikedSnapshot = await postsRef
-        .document(post.id)
+        .doc(post.id)
         .collection('dislikes')
-        ?.document(Constants.currentUserID)
+        ?.doc(Constants.currentUserID)
         ?.get();
     //Solves the problem setState() called after dispose()
     if (mounted) {

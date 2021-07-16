@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -23,6 +22,7 @@ import 'package:glitcher/widgets/chat_bubble.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/widgets/image_overlay.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:random_string/random_string.dart';
 
 class Conversation extends StatefulWidget {
@@ -42,7 +42,7 @@ class Conversation extends StatefulWidget {
 class _ConversationState extends State<Conversation>
     with WidgetsBindingObserver {
   bool isMicrophoneGranted = false;
-  Firestore _firestore = Firestore.instance;
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
   //int _spawnedAudioCount = 0;
   //ByteData _recordingSFX;
 //  static Random random = Random();
@@ -74,8 +74,8 @@ class _ConversationState extends State<Conversation>
   _ConversationState();
 
   initRecorder() async {
-    recorder = AudioRecorder();
-    await recorder.init();
+    String path = (await getApplicationSupportDirectory()).path + '/temp.mp3';
+    recorder = AudioRecorder(path);
   }
 
   void loadUserData(String uid) async {
@@ -110,26 +110,26 @@ class _ConversationState extends State<Conversation>
   void listenToMessagesChanges() async {
     messagesSubscription = _firestore
         .collection('chats')
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('conversations')
-        .document(widget.otherUid)
+        .doc(widget.otherUid)
         .collection('messages')
         .orderBy('timestamp', descending: true)
         .snapshots()
         .listen((querySnapshot) {
-      querySnapshot.documentChanges.forEach((change) {
+      querySnapshot.docChanges.forEach((change) {
         if (change.type == DocumentChangeType.added) {
           print('type is her');
           if (_messages != null) {
             if (this.mounted) {
               setState(() {
-                _messages.insert(0, Message.fromDoc(change.document));
+                _messages.insert(0, Message.fromDoc(change.doc));
               });
             }
           }
         }
 
-        if (Message.fromDoc(change.document).sender == widget.otherUid) {
+        if (Message.fromDoc(change.doc).sender == widget.otherUid) {
           //print('made seen');
           makeMessagesSeen();
         }
@@ -140,17 +140,17 @@ class _ConversationState extends State<Conversation>
   void listenIfMessagesSeen() {
     _firestore
         .collection('chats')
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('conversations')
-        .document(widget.otherUid)
+        .doc(widget.otherUid)
         .collection('messages')
         .snapshots()
         .listen((querySnapshot) {
-      querySnapshot.documentChanges.forEach((change) {
-        if (change.document.documentID == 'seen') {
+      querySnapshot.docChanges.forEach((change) {
+        if (change.doc.id == 'seen') {
           if (this.mounted) {
             setState(() {
-              seen = change.document.data['isSeen'];
+              seen = change.doc['isSeen'];
               print('seen');
             });
           }
@@ -161,11 +161,11 @@ class _ConversationState extends State<Conversation>
 
   void otherUserListener() {
     usersRef.snapshots().listen((querySnapshot) {
-      querySnapshot.documentChanges.forEach((change) {
-        if (change.document.documentID == widget.otherUid) {
+      querySnapshot.docChanges.forEach((change) {
+        if (change.doc.id == widget.otherUid) {
           if (mounted) {
             setState(() {
-              otherUser = User.fromDoc(change.document);
+              otherUser = User.fromDoc(change.doc);
             });
           }
         }
@@ -214,38 +214,36 @@ class _ConversationState extends State<Conversation>
   void updateOnlineUserState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused) {
       await usersRef
-          .document(Constants.currentUserID)
-          .updateData({'online': FieldValue.serverTimestamp()});
+          .doc(Constants.currentUserID)
+          .update({'online': FieldValue.serverTimestamp()});
     } else if (state == AppLifecycleState.resumed) {
-      await usersRef
-          .document(Constants.currentUserID)
-          .updateData({'online': 'online'});
+      await usersRef.doc(Constants.currentUserID).update({'online': 'online'});
     }
   }
 
   makeMessagesSeen() async {
     await _firestore
         .collection('chats')
-        .document(widget.otherUid)
+        .doc(widget.otherUid)
         .collection('conversations')
-        .document(Constants.currentUserID)
-        .setData({'isSeen': true});
+        .doc(Constants.currentUserID)
+        .set({'isSeen': true});
   }
 
   makeMessagesUnseen() async {
     await _firestore
         .collection('chats')
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('conversations')
-        .document(widget.otherUid)
-        .setData({'isSeen': false});
+        .doc(widget.otherUid)
+        .set({'isSeen': false});
 
     await _firestore
         .collection('chats')
-        .document(widget.otherUid)
+        .doc(widget.otherUid)
         .collection('conversations')
-        .document(Constants.currentUserID)
-        .setData({'isSeen': false});
+        .doc(Constants.currentUserID)
+        .set({'isSeen': false});
   }
 
   void _onFocusChange() {
@@ -592,8 +590,7 @@ class _ConversationState extends State<Conversation>
                                               RecordingStatus.Recording;
                                         });
 
-                                        await recorder.startRecording(
-                                            conversation: this.widget);
+                                        await recorder.startRecording();
                                       } else {}
                                     },
                                     onLongPressEnd: (longPressDetails) async {
@@ -602,12 +599,12 @@ class _ConversationState extends State<Conversation>
                                           _currentStatus =
                                               RecordingStatus.Stopped;
                                         });
-                                        Recording result =
+                                        String result =
                                             await recorder.stopRecording();
 
                                         //Storage path is voice_messages/sender_id/receiver_id/file
                                         _url = await AppUtil.uploadFile(
-                                            File(result.path),
+                                            File(result),
                                             context,
                                             'voice_messages/${Constants.currentUserID}/${widget.otherUid}/${randomAlphaNumeric(20)}');
 

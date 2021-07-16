@@ -11,7 +11,7 @@ class Message {
 
   factory Message.fromDoc(DocumentSnapshot doc) {
     return Message(
-      id: doc.documentID,
+      id: doc.id,
       sender: doc['sender'],
       message: doc['message'],
       timestamp: doc['timestamp'],

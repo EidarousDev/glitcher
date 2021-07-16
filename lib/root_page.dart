@@ -1,16 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
-import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/models/user_model.dart' as user;
 import 'package:glitcher/screens/app_page.dart';
 import 'package:glitcher/screens/welcome/login_page.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
-
-import 'models/post_model.dart';
 
 class RootPage extends StatefulWidget {
   @override
@@ -68,22 +65,25 @@ class _RootPageState extends State<RootPage> {
   }
 
   Future authAssignment() async {
-    FirebaseUser user = await Auth().getCurrentUser();
-    if (user?.uid != null &&
-        user.isEmailVerified &&
-        ((await DatabaseService.getUserWithId(user?.uid, checkLocal: false))
+    User firebaseUser = await Auth().getCurrentUser();
+    if (firebaseUser?.uid != null &&
+        firebaseUser.emailVerified &&
+        ((await DatabaseService.getUserWithId(firebaseUser?.uid,
+                    checkLocal: false))
                 .id !=
             null)) {
-      User loggedInUser =
-          await DatabaseService.getUserWithId(user?.uid, checkLocal: false);
+      user.User loggedInUser = await DatabaseService.getUserWithId(
+          firebaseUser?.uid,
+          checkLocal: false);
       setState(() {
         Constants.currentUser = loggedInUser;
-        Constants.currentFirebaseUser = user;
-        Constants.currentUserID = user?.uid;
+        Constants.currentFirebaseUser = firebaseUser;
+        Constants.currentUserID = firebaseUser?.uid;
         authStatus = AuthStatus.LOGGED_IN;
       });
-    } else if (user?.uid != null && !(user.isEmailVerified)) {
-      print('!(user.isEmailVerified) = ${!(user.isEmailVerified)}');
+    } else if (firebaseUser?.uid != null && !(firebaseUser.emailVerified)) {
+      print(
+          '!(firebaseUser.isEmailVerified) = ${!(firebaseUser.emailVerified)}');
       //await showVerifyEmailSentDialog(context);
       setState(() {
         authStatus = AuthStatus.NOT_LOGGED_IN;

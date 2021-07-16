@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
-import 'package:glitcher/utils/Loader.dart';
 import 'package:glitcher/utils/app_util.dart';
+import 'package:glitcher/utils/loader.dart';
 import 'package:photo_view/photo_view.dart';
 
 class FullScreenOverlay extends StatefulWidget {

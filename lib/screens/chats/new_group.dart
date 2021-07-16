@@ -279,7 +279,7 @@ class _NewGroupState extends State<NewGroup>
   }
 
   addGroup() async {
-    await chatGroupsRef.document(_groupId).setData({
+    await chatGroupsRef.doc(_groupId).set({
       'name': textEditingController.text,
       'image': _imageUrl,
       'timestamp': FieldValue.serverTimestamp()
@@ -287,10 +287,10 @@ class _NewGroupState extends State<NewGroup>
 
     for (Map<String, dynamic> user in chosenUsers) {
       chatGroupsRef
-          .document(_groupId)
+          .doc(_groupId)
           .collection('users')
-          .document(user['user_id'])
-          .setData({
+          .doc(user['user_id'])
+          .set({
         'is_admin': user['is_admin'],
         'timestamp': FieldValue.serverTimestamp()
       });
@@ -300,10 +300,10 @@ class _NewGroupState extends State<NewGroup>
   addGroupToUsers() async {
     for (Map<String, dynamic> user in chosenUsers) {
       await usersRef
-          .document(user['user_id'])
+          .doc(user['user_id'])
           .collection('chat_groups')
-          .document(_groupId)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
+          .doc(_groupId)
+          .set({'timestamp': FieldValue.serverTimestamp()});
 
       await NotificationHandler.sendNotification(
           user['user_id'],

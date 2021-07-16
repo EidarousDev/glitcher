@@ -531,7 +531,7 @@ Widget customDivider(double height, {double width = double.infinity}) {
     width: width,
     child: DecoratedBox(
       decoration: BoxDecoration(
-          color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
+          color: Constants.isDarkTheme == AvailableThemes.LIGHT_THEME
               ? MyColors.lightLineBreak
               : MyColors.darkLineBreak),
     ),

@@ -24,7 +24,7 @@ class Notification {
 
   factory Notification.fromDoc(DocumentSnapshot doc) {
     return Notification(
-        id: doc.documentID,
+        id: doc.id,
         title: doc['title'],
         body: doc['body'],
         icon: doc['icon'],

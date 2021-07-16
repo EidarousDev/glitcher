@@ -13,7 +13,7 @@ class Hashtag {
 
   factory Hashtag.fromDoc(DocumentSnapshot doc) {
     return Hashtag(
-      id: doc.documentID,
+      id: doc.id,
       text: doc['text'],
       timestamp: doc['timestamp'],
     );

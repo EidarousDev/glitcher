@@ -23,7 +23,7 @@ class Report {
 
   factory Report.fromDoc(DocumentSnapshot doc) {
     return Report(
-      id: doc.documentID,
+      id: doc.id,
       reason: doc['reason'],
       details: doc['details'],
       postAuthor: doc['post_author'],

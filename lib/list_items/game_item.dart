@@ -4,7 +4,6 @@ import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/custom_loader.dart';
 
@@ -113,9 +112,9 @@ class _GameItemState extends State<GameItem> {
     Navigator.of(context).push(CustomScreenLoader());
 
     DocumentSnapshot game = await usersRef
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('followedGames')
-        .document(widget.game.id)
+        .doc(widget.game.id)
         .get();
 
     if (game.exists) {
@@ -139,9 +138,9 @@ class _GameItemState extends State<GameItem> {
 
   checkStates() async {
     DocumentSnapshot game = await usersRef
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('followedGames')
-        .document(widget.game.id)
+        .doc(widget.game.id)
         .get();
     if (game.exists) {
       if (mounted) {

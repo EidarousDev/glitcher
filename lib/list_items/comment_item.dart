@@ -1,11 +1,10 @@
 import 'dart:typed_data';
 
-import 'package:audiofileplayer/audiofileplayer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_icons/font_awesome.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -16,8 +15,9 @@ import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/functions.dart';
-import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/bottom_sheets/comment_bottom_sheet.dart';
+import 'package:glitcher/widgets/caching_image.dart';
+import 'package:just_audio/just_audio.dart';
 
 class CommentItem extends StatefulWidget {
   final Post post;
@@ -39,10 +39,6 @@ class CommentItem extends StatefulWidget {
 }
 
 class _CommentItemState extends State<CommentItem> {
-  int _spawnedAudioCount = 0;
-  ByteData _likeSFX;
-  ByteData _dislikeSFX;
-
   bool isLiked = false;
   bool isLikeEnabled = true;
   bool isDisliked = false;
@@ -59,6 +55,8 @@ class _CommentItemState extends State<CommentItem> {
   List<User> repliers = [];
 
   final number = ValueNotifier(0);
+
+  AudioPlayer audioPlayer = AudioPlayer();
 
   @override
   Widget build(BuildContext context) {
@@ -187,17 +185,12 @@ class _CommentItemState extends State<CommentItem> {
             height: 1.0,
             width: double.infinity,
             child: DecoratedBox(
-              decoration: BoxDecoration(
-                  color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
-                      ? MyColors.lightLineBreak
-                      : MyColors.darkLineBreak),
+              decoration: BoxDecoration(color: Theme.of(context).dividerColor),
             ),
           ),
           Container(
             height: Sizes.inline_break,
-            color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
-                ? MyColors.lightCardBG
-                : MyColors.darkCardBG,
+            color: Theme.of(context).cardColor,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
@@ -207,12 +200,12 @@ class _CommentItemState extends State<CommentItem> {
                       SizedBox(
                         child: isLiked
                             ? Icon(
-                                FontAwesome.getIconData('thumbs-up'),
+                                FontAwesome.thumbs_up,
                                 size: Sizes.small_card_btn_size,
                                 color: MyColors.darkPrimary,
                               )
                             : Icon(
-                                FontAwesome.getIconData('thumbs-o-up'),
+                                FontAwesome.thumbs_o_up,
                                 size: Sizes.small_card_btn_size,
                               ),
                       ),
@@ -229,14 +222,11 @@ class _CommentItemState extends State<CommentItem> {
                   ),
                   onTap: () async {
                     if (isLikeEnabled) {
-                      _likeSFX == null
-                          ? null
-                          : Audio.loadFromByteData(_likeSFX,
-                              onComplete: () =>
-                                  setState(() => --_spawnedAudioCount))
-                        ..play()
-                        ..dispose();
-                      setState(() => ++_spawnedAudioCount);
+                      audioPlayer
+                          .setAsset(
+                            Strings.like_sound,
+                          )
+                          .then((value) => audioPlayer.play());
                       if (!widget.isReply) {
                         await likeBtnHandler(widget.post, widget.comment);
                       } else {
@@ -250,11 +240,8 @@ class _CommentItemState extends State<CommentItem> {
                   width: 1.0,
                   height: Sizes.inline_break,
                   child: DecoratedBox(
-                    decoration: BoxDecoration(
-                        color: Constants.currentTheme ==
-                                AvailableThemes.LIGHT_THEME
-                            ? MyColors.lightInLineBreak
-                            : MyColors.darkLineBreak),
+                    decoration:
+                        BoxDecoration(color: Theme.of(context).dividerColor),
                   ),
                 ),
                 InkWell(
@@ -263,12 +250,12 @@ class _CommentItemState extends State<CommentItem> {
                       SizedBox(
                         child: isDisliked
                             ? Icon(
-                                FontAwesome.getIconData('thumbs-down'),
+                                FontAwesome.thumbs_down,
                                 size: Sizes.small_card_btn_size,
                                 color: MyColors.darkPrimary,
                               )
                             : Icon(
-                                FontAwesome.getIconData('thumbs-o-down'),
+                                FontAwesome.thumbs_o_down,
                                 size: Sizes.small_card_btn_size,
                               ),
                       ),
@@ -285,14 +272,11 @@ class _CommentItemState extends State<CommentItem> {
                   ),
                   onTap: () async {
                     if (isDislikedEnabled) {
-                      _dislikeSFX == null
-                          ? null
-                          : Audio.loadFromByteData(_dislikeSFX,
-                              onComplete: () =>
-                                  setState(() => --_spawnedAudioCount))
-                        ..play()
-                        ..dispose();
-                      setState(() => ++_spawnedAudioCount);
+                      audioPlayer
+                          .setAsset(
+                            Strings.dislike_sound,
+                          )
+                          .then((value) => audioPlayer.play());
 
                       if (!widget.isReply) {
                         await dislikeBtnHandler(widget.post, widget.comment);
@@ -307,11 +291,8 @@ class _CommentItemState extends State<CommentItem> {
                   width: 1.0,
                   height: Sizes.inline_break,
                   child: DecoratedBox(
-                    decoration: BoxDecoration(
-                        color: Constants.currentTheme ==
-                                AvailableThemes.LIGHT_THEME
-                            ? MyColors.lightInLineBreak
-                            : MyColors.darkLineBreak),
+                    decoration:
+                        BoxDecoration(color: Theme.of(context).dividerColor),
                   ),
                 ),
                 InkWell(
@@ -356,10 +337,7 @@ class _CommentItemState extends State<CommentItem> {
             height: 1.0,
             width: double.infinity,
             child: DecoratedBox(
-              decoration: BoxDecoration(
-                  color: Constants.currentTheme == AvailableThemes.LIGHT_THEME
-                      ? MyColors.lightLineBreak
-                      : MyColors.darkLineBreak),
+              decoration: BoxDecoration(color: Theme.of(context).dividerColor),
             ),
           ),
           !widget.isReply && repliesVisible
@@ -396,52 +374,52 @@ class _CommentItemState extends State<CommentItem> {
     });
     if (isLiked == true && isDisliked == false) {
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(comment.id)
+          .doc(comment.id)
           .collection('likes')
-          .document(Constants.currentUserID)
+          .doc(Constants.currentUserID)
           .delete();
 
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(comment.id)
-          .updateData({'likes': FieldValue.increment(-1)});
+          .doc(comment.id)
+          .update({'likes': FieldValue.increment(-1)});
       setState(() {
         isLiked = false;
         //post.likesCount = likesNo;
       });
     } else if (isDisliked == true && isLiked == false) {
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(comment.id)
+          .doc(comment.id)
           .collection('dislikes')
-          .document(Constants.currentUserID)
+          .doc(Constants.currentUserID)
           .delete();
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(comment.id)
-          .updateData({'dislikes': FieldValue.increment(-1)});
+          .doc(comment.id)
+          .update({'dislikes': FieldValue.increment(-1)});
 
       setState(() {
         isDisliked = false;
         //post.disLikesCount = dislikesNo;
       });
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(comment.id)
+          .doc(comment.id)
           .collection('likes')
-          .document(Constants.currentUserID)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
+          .doc(Constants.currentUserID)
+          .set({'timestamp': FieldValue.serverTimestamp()});
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(comment.id)
-          .updateData({'likes': FieldValue.increment(1)});
+          .doc(comment.id)
+          .update({'likes': FieldValue.increment(1)});
 
       setState(() {
         isLiked = true;
@@ -456,17 +434,17 @@ class _CommentItemState extends State<CommentItem> {
           'like');
     } else if (isLiked == false && isDisliked == false) {
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(comment.id)
+          .doc(comment.id)
           .collection('likes')
-          .document(Constants.currentUserID)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
+          .doc(Constants.currentUserID)
+          .set({'timestamp': FieldValue.serverTimestamp()});
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(comment.id)
-          .updateData({'likes': FieldValue.increment(1)});
+          .doc(comment.id)
+          .update({'likes': FieldValue.increment(1)});
       setState(() {
         isLiked = true;
         //post.likesCount = likesNo;
@@ -499,50 +477,50 @@ class _CommentItemState extends State<CommentItem> {
     });
     if (isDisliked == true && isLiked == false) {
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(comment.id)
+          .doc(comment.id)
           .collection('dislikes')
-          .document(Constants.currentUserID)
+          .doc(Constants.currentUserID)
           .delete();
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(comment.id)
-          .updateData({'dislikes': FieldValue.increment(-1)});
+          .doc(comment.id)
+          .update({'dislikes': FieldValue.increment(-1)});
       setState(() {
         isDisliked = false;
         //post.disLikesCount = dislikesNo;
       });
     } else if (isLiked == true && isDisliked == false) {
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(comment.id)
+          .doc(comment.id)
           .collection('likes')
-          .document(Constants.currentUserID)
+          .doc(Constants.currentUserID)
           .delete();
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(comment.id)
-          .updateData({'likes': FieldValue.increment(-1)});
+          .doc(comment.id)
+          .update({'likes': FieldValue.increment(-1)});
       setState(() {
         isLiked = false;
         //post.likesCount = likesNo;
       });
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(comment.id)
+          .doc(comment.id)
           .collection('dislikes')
-          .document(Constants.currentUserID)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
+          .doc(Constants.currentUserID)
+          .set({'timestamp': FieldValue.serverTimestamp()});
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(comment.id)
-          .updateData({'dislikes': FieldValue.increment(1)});
+          .doc(comment.id)
+          .update({'dislikes': FieldValue.increment(1)});
 
       setState(() {
         isDisliked = true;
@@ -550,17 +528,17 @@ class _CommentItemState extends State<CommentItem> {
       });
     } else if (isDisliked == false && isLiked == false) {
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(comment.id)
+          .doc(comment.id)
           .collection('dislikes')
-          .document(Constants.currentUserID)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
+          .doc(Constants.currentUserID)
+          .set({'timestamp': FieldValue.serverTimestamp()});
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(comment.id)
-          .updateData({'dislikes': FieldValue.increment(1)});
+          .doc(comment.id)
+          .update({'dislikes': FieldValue.increment(1)});
 
       setState(() {
         isDisliked = true;
@@ -584,18 +562,18 @@ class _CommentItemState extends State<CommentItem> {
 
   void initLikes(String postId, Comment comment) async {
     DocumentSnapshot likedSnapshot = await postsRef
-        .document(postId)
+        .doc(postId)
         .collection('comments')
-        .document(comment.id)
+        .doc(comment.id)
         .collection('likes')
-        ?.document(Constants.currentUserID)
+        ?.doc(Constants.currentUserID)
         ?.get();
     DocumentSnapshot dislikedSnapshot = await postsRef
-        .document(postId)
+        .doc(postId)
         .collection('comments')
-        .document(comment.id)
+        .doc(comment.id)
         .collection('dislikes')
-        ?.document(Constants.currentUserID)
+        ?.doc(Constants.currentUserID)
         ?.get();
     //Solves the problem setState() called after dispose()
     if (mounted) {
@@ -613,64 +591,64 @@ class _CommentItemState extends State<CommentItem> {
     });
     if (isLiked == true && isDisliked == false) {
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(parentCommentId)
+          .doc(parentCommentId)
           .collection('replies')
-          .document(comment.id)
+          .doc(comment.id)
           .collection('likes')
-          .document(Constants.currentUserID)
+          .doc(Constants.currentUserID)
           .delete();
 
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(parentCommentId)
+          .doc(parentCommentId)
           .collection('replies')
-          .document(comment.id)
-          .updateData({'likes': FieldValue.increment(-1)});
+          .doc(comment.id)
+          .update({'likes': FieldValue.increment(-1)});
       setState(() {
         isLiked = false;
         //post.likesCount = likesNo;
       });
     } else if (isDisliked == true && isLiked == false) {
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(parentCommentId)
+          .doc(parentCommentId)
           .collection('replies')
-          .document(comment.id)
+          .doc(comment.id)
           .collection('dislikes')
-          .document(Constants.currentUserID)
+          .doc(Constants.currentUserID)
           .delete();
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(parentCommentId)
+          .doc(parentCommentId)
           .collection('replies')
-          .document(comment.id)
-          .updateData({'dislikes': FieldValue.increment(-1)});
+          .doc(comment.id)
+          .update({'dislikes': FieldValue.increment(-1)});
 
       setState(() {
         isDisliked = false;
         //post.disLikesCount = dislikesNo;
       });
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(parentCommentId)
+          .doc(parentCommentId)
           .collection('replies')
-          .document(comment.id)
+          .doc(comment.id)
           .collection('likes')
-          .document(Constants.currentUserID)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
+          .doc(Constants.currentUserID)
+          .set({'timestamp': FieldValue.serverTimestamp()});
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(parentCommentId)
+          .doc(parentCommentId)
           .collection('replies')
-          .document(comment.id)
-          .updateData({'likes': FieldValue.increment(1)});
+          .doc(comment.id)
+          .update({'likes': FieldValue.increment(1)});
 
       setState(() {
         isLiked = true;
@@ -685,21 +663,21 @@ class _CommentItemState extends State<CommentItem> {
           'like');
     } else if (isLiked == false && isDisliked == false) {
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(parentCommentId)
+          .doc(parentCommentId)
           .collection('replies')
-          .document(comment.id)
+          .doc(comment.id)
           .collection('likes')
-          .document(Constants.currentUserID)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
+          .doc(Constants.currentUserID)
+          .set({'timestamp': FieldValue.serverTimestamp()});
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(parentCommentId)
+          .doc(parentCommentId)
           .collection('replies')
-          .document(comment.id)
-          .updateData({'likes': FieldValue.increment(1)});
+          .doc(comment.id)
+          .update({'likes': FieldValue.increment(1)});
       setState(() {
         isLiked = true;
         //post.likesCount = likesNo;
@@ -733,62 +711,62 @@ class _CommentItemState extends State<CommentItem> {
     });
     if (isDisliked == true && isLiked == false) {
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(parentCommentId)
+          .doc(parentCommentId)
           .collection('replies')
-          .document(comment.id)
+          .doc(comment.id)
           .collection('dislikes')
-          .document(Constants.currentUserID)
+          .doc(Constants.currentUserID)
           .delete();
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(parentCommentId)
+          .doc(parentCommentId)
           .collection('replies')
-          .document(comment.id)
-          .updateData({'dislikes': FieldValue.increment(-1)});
+          .doc(comment.id)
+          .update({'dislikes': FieldValue.increment(-1)});
       setState(() {
         isDisliked = false;
         //post.disLikesCount = dislikesNo;
       });
     } else if (isLiked == true && isDisliked == false) {
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(parentCommentId)
+          .doc(parentCommentId)
           .collection('replies')
-          .document(comment.id)
+          .doc(comment.id)
           .collection('likes')
-          .document(Constants.currentUserID)
+          .doc(Constants.currentUserID)
           .delete();
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(parentCommentId)
+          .doc(parentCommentId)
           .collection('replies')
-          .document(comment.id)
-          .updateData({'likes': FieldValue.increment(-1)});
+          .doc(comment.id)
+          .update({'likes': FieldValue.increment(-1)});
       setState(() {
         isLiked = false;
         //post.likesCount = likesNo;
       });
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(parentCommentId)
+          .doc(parentCommentId)
           .collection('replies')
-          .document(comment.id)
+          .doc(comment.id)
           .collection('dislikes')
-          .document(Constants.currentUserID)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
+          .doc(Constants.currentUserID)
+          .set({'timestamp': FieldValue.serverTimestamp()});
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(parentCommentId)
+          .doc(parentCommentId)
           .collection('replies')
-          .document(comment.id)
-          .updateData({'dislikes': FieldValue.increment(1)});
+          .doc(comment.id)
+          .update({'dislikes': FieldValue.increment(1)});
 
       setState(() {
         isDisliked = true;
@@ -796,21 +774,21 @@ class _CommentItemState extends State<CommentItem> {
       });
     } else if (isDisliked == false && isLiked == false) {
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(parentCommentId)
+          .doc(parentCommentId)
           .collection('replies')
-          .document(comment.id)
+          .doc(comment.id)
           .collection('dislikes')
-          .document(Constants.currentUserID)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
+          .doc(Constants.currentUserID)
+          .set({'timestamp': FieldValue.serverTimestamp()});
       await postsRef
-          .document(post.id)
+          .doc(post.id)
           .collection('comments')
-          .document(parentCommentId)
+          .doc(parentCommentId)
           .collection('replies')
-          .document(comment.id)
-          .updateData({'dislikes': FieldValue.increment(1)});
+          .doc(comment.id)
+          .update({'dislikes': FieldValue.increment(1)});
 
       setState(() {
         isDisliked = true;
@@ -836,23 +814,23 @@ class _CommentItemState extends State<CommentItem> {
   void repliesInitLikes(
       String postId, Comment comment, String parentCommentId) async {
     DocumentSnapshot likedSnapshot = await postsRef
-        .document(postId)
+        .doc(postId)
         .collection('comments')
-        .document(parentCommentId)
+        .doc(parentCommentId)
         .collection('replies')
-        .document(comment.id)
+        .doc(comment.id)
         .collection('likes')
-        ?.document(Constants.currentUserID)
+        ?.doc(Constants.currentUserID)
         ?.get();
 
     DocumentSnapshot dislikedSnapshot = await postsRef
-        .document(postId)
+        .doc(postId)
         .collection('comments')
-        .document(parentCommentId)
+        .doc(parentCommentId)
         .collection('replies')
-        .document(comment.id)
+        .doc(comment.id)
         .collection('dislikes')
-        ?.document(Constants.currentUserID)
+        ?.doc(Constants.currentUserID)
         ?.get();
     //Solves the problem setState() called after dispose()
     if (mounted) {
@@ -861,11 +839,6 @@ class _CommentItemState extends State<CommentItem> {
         isDisliked = dislikedSnapshot.exists;
       });
     }
-  }
-
-  void _loadAudioByteData() async {
-    _likeSFX = await rootBundle.load(Strings.like_sound);
-    _dislikeSFX = await rootBundle.load(Strings.dislike_sound);
   }
 
   loadReplies(String postId, String commentId) async {
@@ -891,7 +864,6 @@ class _CommentItemState extends State<CommentItem> {
   @override
   void initState() {
     super.initState();
-    _loadAudioByteData();
     if (!widget.isReply) {
       initLikes(widget.post.id, widget.comment);
       loadReplies(widget.post.id, widget.comment.id);

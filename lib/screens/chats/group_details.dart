@@ -56,12 +56,10 @@ class _GroupDetailsState extends State<GroupDetails>
 
   getGroupMembersIds() async {
     List<String> usersIds = [];
-    QuerySnapshot usersSnapshot = await chatGroupsRef
-        .document(widget.groupId)
-        .collection('users')
-        .getDocuments();
-    usersSnapshot.documents.forEach((doc) {
-      usersIds.add(doc.documentID);
+    QuerySnapshot usersSnapshot =
+        await chatGroupsRef.doc(widget.groupId).collection('users').get();
+    usersSnapshot.docs.forEach((doc) {
+      usersIds.add(doc.id);
     });
 
     //print('member: ${usersIds[0]}');
@@ -88,9 +86,7 @@ class _GroupDetailsState extends State<GroupDetails>
                     image, context, 'group_chat_images/$groupId',
                     groupMembersIds: groupMembersIds);
 
-                await chatGroupsRef
-                    .document(groupId)
-                    .updateData({'image': url});
+                await chatGroupsRef.doc(groupId).update({'image': url});
 
                 getGroup();
 
@@ -279,8 +275,8 @@ class _GroupDetailsState extends State<GroupDetails>
                 ),
                 onPressed: () async {
                   await chatGroupsRef
-                      .document(groupId)
-                      .updateData({'name': _textEditingController.text});
+                      .doc(groupId)
+                      .update({'name': _textEditingController.text});
 
                   getGroup();
 

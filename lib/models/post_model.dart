@@ -29,7 +29,7 @@ class Post {
 
   factory Post.fromDoc(DocumentSnapshot doc) {
     return Post(
-      id: doc.documentID,
+      id: doc.id,
       game: doc['game'],
       imageUrl: doc['image'],
       text: doc['text'],

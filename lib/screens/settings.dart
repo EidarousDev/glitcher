@@ -269,7 +269,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   void initState() {
-    if (Constants.currentTheme == AvailableThemes.LIGHT_THEME) {
+    if (Constants.isDarkTheme == AvailableThemes.LIGHT_THEME) {
       setState(() {
         darkOrLight = 1;
       });

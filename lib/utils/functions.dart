@@ -55,16 +55,16 @@ String validateUsername(String value) {
 }
 
 void setTheme(BuildContext context) async {
-  if (Constants.currentTheme == AvailableThemes.LIGHT_THEME) {
+  if (Constants.isDarkTheme == AvailableThemes.LIGHT_THEME) {
     DynamicTheme.of(context).setThemeData(MyColors.darkTheme);
-    Constants.currentTheme = AvailableThemes.DARK_THEME;
+    Constants.isDarkTheme = AvailableThemes.DARK_THEME;
   } else {
     DynamicTheme.of(context).setThemeData(MyColors.lightTheme);
-    Constants.currentTheme = AvailableThemes.LIGHT_THEME;
+    Constants.isDarkTheme = AvailableThemes.LIGHT_THEME;
   }
 
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  String theme = Constants.currentTheme.toString();
+  String theme = Constants.isDarkTheme.toString();
   await prefs.setString('theme', theme);
 }
 
@@ -101,7 +101,7 @@ Future<List> getHashtags() async {
 
 Color switchColor(Color lightColor, Color darkColor) {
   //print('current theme: ${Constants.currentTheme}');
-  return Constants.currentTheme == AvailableThemes.LIGHT_THEME
+  return Constants.isDarkTheme == AvailableThemes.LIGHT_THEME
       ? lightColor
       : darkColor;
 }

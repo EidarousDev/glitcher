@@ -1,23 +1,23 @@
 //eidarous
-import 'package:audiofileplayer/audiofileplayer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_icons/font_awesome.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/list_items/post_item.dart';
 import 'package:glitcher/models/post_model.dart';
-import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/models/user_model.dart' as user;
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/drawer.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/widgets/rate_app.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -52,11 +52,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  User loggedInUser;
+  user.User loggedInUser;
   String username;
   //String profileImageUrl = '';
   List<Post> _posts = [];
-  FirebaseUser currentUser;
+  User currentFirebaseUser;
   Timestamp lastVisiblePostSnapShot;
   bool _noMorePosts = false;
 //  bool _isFetching = false;
@@ -287,10 +287,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                         enabled: false,
                                         hintStyle: TextStyle(
                                             fontWeight: FontWeight.w400,
-                                            color: Constants.currentTheme ==
-                                                    AvailableThemes.LIGHT_THEME
-                                                ? MyColors.lightPrimary
-                                                : MyColors.darkPrimary)),
+                                            color: Theme.of(context)
+                                                .primaryColor)),
                                   ),
                                 ),
                               ),
@@ -320,12 +318,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           Expanded(
                               child: CardIconText(
                             tStyle: TextStyle(fontWeight: FontWeight.bold),
-                            icon: FontAwesome.getIconData("image"),
+                            icon: FontAwesome.image,
                             text: "Image",
-                            color: Constants.currentTheme ==
-                                    AvailableThemes.LIGHT_THEME
-                                ? MyColors.lightBG
-                                : MyColors.darkLineBreak,
+                            color: Theme.of(context).dividerColor,
                             ccolor:
                                 switchColor(MyColors.lightPrimary, Colors.blue),
                           )),
@@ -334,21 +329,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             width: 1.0,
                             child: DecoratedBox(
                               decoration: BoxDecoration(
-                                  color: Constants.currentTheme ==
-                                          AvailableThemes.LIGHT_THEME
-                                      ? MyColors.lightLineBreak
-                                      : MyColors.darkLineBreak),
+                                  color: Theme.of(context).dividerColor),
                             ),
                           ),
                           Expanded(
                               child: CardIconText(
                             tStyle: TextStyle(fontWeight: FontWeight.bold),
-                            icon: FontAwesome.getIconData("file-video-o"),
+                            icon: FontAwesome.file_video_o,
                             text: "Video",
-                            color: Constants.currentTheme ==
-                                    AvailableThemes.LIGHT_THEME
-                                ? MyColors.lightBG
-                                : MyColors.darkLineBreak,
+                            color: Theme.of(context).dividerColor,
                             ccolor: switchColor(
                                 MyColors.lightPrimary, Colors.greenAccent),
                           )),
@@ -357,21 +346,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             width: 1.0,
                             child: DecoratedBox(
                               decoration: BoxDecoration(
-                                  color: Constants.currentTheme ==
-                                          AvailableThemes.LIGHT_THEME
-                                      ? MyColors.lightLineBreak
-                                      : MyColors.darkLineBreak),
+                                  color: Theme.of(context).dividerColor),
                             ),
                           ),
                           Expanded(
                               child: CardIconText(
                             tStyle: TextStyle(fontWeight: FontWeight.bold),
-                            icon: FontAwesome.getIconData("youtube"),
+                            icon: FontAwesome.youtube,
                             text: "YouTube",
-                            color: Constants.currentTheme ==
-                                    AvailableThemes.LIGHT_THEME
-                                ? MyColors.lightBG
-                                : MyColors.darkLineBreak,
+                            color: Theme.of(context).dividerColor,
                             ccolor:
                                 switchColor(MyColors.lightPrimary, Colors.pink),
                           )),
@@ -411,7 +394,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                   if (!snapshot.hasData) {
                                     return SizedBox.shrink();
                                   }
-                                  User author = snapshot.data;
+                                  user.User author = snapshot.data;
                                   return PostItem(post: post, author: author);
                                 });
                           },
@@ -432,7 +415,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                   if (!snapshot.hasData) {
                                     return SizedBox.shrink();
                                   }
-                                  User author = snapshot.data;
+                                  user.User author = snapshot.data;
                                   return PostItem(
                                     post: post,
                                     author: author,
@@ -543,11 +526,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void loadUserData() async {
-    currentUser = await firebaseAuth.currentUser();
+    currentFirebaseUser = await firebaseAuth.currentUser;
     //print('currentUserID: ${currentUser.uid}');
     // here you write the codes to input the data into firestore
-    loggedInUser =
-        await DatabaseService.getUserWithId(currentUser.uid, checkLocal: false);
+    loggedInUser = await DatabaseService.getUserWithId(currentFirebaseUser.uid,
+        checkLocal: false);
 
     if (mounted) {
       setState(() {
@@ -584,14 +567,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 //    print('cache posts length: ${Cache.homePosts}');
   }
 
+  AudioPlayer audioPlayer = AudioPlayer();
   void _onRefresh() async {
-    _swipeUpSFX == null
-        ? null
-        : Audio.loadFromByteData(_swipeUpSFX,
-            onComplete: () => setState(() => --_spawnedAudioCount))
-      ..play()
-      ..dispose();
-    setState(() => ++_spawnedAudioCount);
+    audioPlayer
+        .setAsset(Strings.swipe_up_to_reload)
+        .then((value) => audioPlayer.play());
     await _setupFeed();
     //await Future.delayed(Duration(milliseconds: 1000));
     _refreshController.refreshCompleted();
