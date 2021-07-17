@@ -9,7 +9,7 @@ Widget gradientAppBar() {
       gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: Constants.isDarkTheme == AvailableThemes.LIGHT_THEME
+          colors: Constants.isDarkTheme == false
               ? <Color>[MyColors.lightCardBG, MyColors.lightBG]
               : <Color>[MyColors.darkCardBG, MyColors.darkBG]),
       boxShadow: [

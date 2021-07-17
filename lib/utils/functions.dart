@@ -2,13 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/models/hashtag_model.dart';
-import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
@@ -20,12 +17,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/constants.dart';
 
 saveToken() async {
-  String token = await FirebaseMessaging().getToken();
-  usersRef
-      .document(Constants.currentUserID)
+  if (Constants.currentUserID == null) return;
+  var token;
+  if (Platform.isIOS || Platform.isMacOS) {
+    token = await FirebaseMessaging.instance.getAPNSToken();
+  } else {
+    print(await FirebaseMessaging.instance.getToken());
+    token = await FirebaseMessaging.instance.getToken();
+  }
+  await usersRef
+      .doc(Constants.currentUserID)
       .collection('tokens')
-      .document(token)
-      .setData({'modifiedAt': FieldValue.serverTimestamp(), 'signed': true});
+      .doc(token)
+      .set({'modifiedAt': FieldValue.serverTimestamp(), 'signed': true});
 }
 
 List<String> searchList(String text) {
@@ -54,27 +58,8 @@ String validateUsername(String value) {
   return _errorMsgUsername;
 }
 
-void setTheme(BuildContext context) async {
-  if (Constants.isDarkTheme == AvailableThemes.LIGHT_THEME) {
-    DynamicTheme.of(context).setThemeData(MyColors.darkTheme);
-    Constants.isDarkTheme = AvailableThemes.DARK_THEME;
-  } else {
-    DynamicTheme.of(context).setThemeData(MyColors.lightTheme);
-    Constants.isDarkTheme = AvailableThemes.LIGHT_THEME;
-  }
-
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String theme = Constants.isDarkTheme.toString();
-  await prefs.setString('theme', theme);
-}
-
-Future getTheme() async {
-  SharedPreferences preferences = await SharedPreferences.getInstance();
-  return preferences.getString('theme');
-}
-
 downloadImage(String url, String name) async {
-  var response = await get(url);
+  var response = await get(Uri.parse(url));
   var firstPath = '/sdcard/download/';
   var filePathAndName = firstPath + '$name.jpg';
   File file2 = new File(filePathAndName);
@@ -99,25 +84,16 @@ Future<List> getHashtags() async {
   return hashtags;
 }
 
-Color switchColor(Color lightColor, Color darkColor) {
-  //print('current theme: ${Constants.currentTheme}');
-  return Constants.isDarkTheme == AvailableThemes.LIGHT_THEME
-      ? lightColor
-      : darkColor;
-}
-
-// Play audio
-//void playSound(String fileName) {
-//  SoundManager soundManager = new SoundManager();
-//  soundManager.playLocal(fileName).then((onValue) {
-//    //do something?
-//  });
-//}
-
 // Pick Image
 pickImage(ImageSource source) async {
-  File selected = await ImagePicker.pickImage(source: source);
-  return selected; // Assign it later to File imageFile variable usign setState((){});.
+  PickedFile selected = await ImagePicker.platform.pickImage(source: source);
+  return File(selected
+      .path); // Assign it later to File imageFile variable usign setState((){});.
+}
+
+Color switchColor(Color lightColor, Color darkColor) {
+  //print('current theme: ${Constants.currentTheme}');
+  return Constants.isDarkTheme ? darkColor : lightColor;
 }
 
 // Crop Image
@@ -168,10 +144,7 @@ void twoButtonsDialog(BuildContext context, confirmFunction,
 }
 
 void moveUserTo(
-    {BuildContext context,
-    Widget widget,
-    String routeId,
-    FirebaseUser currentUser}) {
+    {BuildContext context, Widget widget, String routeId, User currentUser}) {
   Navigator.of(context).push<String>(
     new MaterialPageRoute(
       settings: RouteSettings(name: '/$routeId'),
@@ -181,12 +154,12 @@ void moveUserTo(
 }
 
 class Functions {
-  static FirebaseUser currentUser;
+  static User currentUser;
   static final _auth = FirebaseAuth.instance;
 
   static void getUserCountryInfo() async {
     String url = 'http://ip-api.com/json';
-    var response = await http.get(url);
+    var response = await http.get(Uri.parse(url));
     String body = response.body;
     Constants.country = jsonDecode(body)['country'];
     DatabaseService.updateUserCountry();

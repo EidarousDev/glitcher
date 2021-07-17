@@ -203,7 +203,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                             ),
                           )
                         : widget.type == 'audio'
-                            ? AudioMessagePlayer(url: widget.message)
+                            ? MyAudioPlayer(urlList: [widget.message])
                             : Container(),
               ),
             ],

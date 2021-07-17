@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:audiofileplayer/audiofileplayer.dart';
 import 'package:chewie/chewie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +13,7 @@ import 'package:glitcher/models/post_model.dart';
 import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:video_player/video_player.dart';
 
@@ -81,7 +81,6 @@ class _PostPreviewState extends State<PostPreview>
     super.initState();
 
     loadPostData();
-    _loadAudioByteData();
 
     ///Set up listener here
     _scrollController.addListener(() {
@@ -175,10 +174,8 @@ class _PostPreviewState extends State<PostPreview>
     return Flexible(
       fit: FlexFit.loose,
       child: StreamBuilder<QuerySnapshot>(
-        stream: postsRef
-            .document(widget.post.id)
-            ?.collection('comments')
-            ?.snapshots(),
+        stream:
+            postsRef.doc(widget.post.id)?.collection('comments')?.snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
           switch (snapshot.connectionState) {
@@ -216,18 +213,12 @@ class _PostPreviewState extends State<PostPreview>
     );
   }
 
-  void _loadAudioByteData() async {
-    _swipeUpSFX = await rootBundle.load(Strings.swipe_up_to_reload);
-  }
-
+  AudioPlayer audioPlayer = AudioPlayer();
   void _onRefresh() async {
-    _swipeUpSFX == null
-        ? null
-        : Audio.loadFromByteData(_swipeUpSFX,
-            onComplete: () => setState(() => --_spawnedAudioCount))
-      ..play()
-      ..dispose();
-    setState(() => ++_spawnedAudioCount);
+    audioPlayer
+        .setAsset(Strings.swipe_up_to_reload)
+        .then((value) => audioPlayer.play());
+
     loadPostData();
     loadComments();
     //await Future.delayed(Duration(milliseconds: 1000));

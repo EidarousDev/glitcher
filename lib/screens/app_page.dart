@@ -37,7 +37,7 @@ class _AppPageState extends State<AppPage> {
   int _page = 0; //Highlight the first Icon in the BottomNavigationBarItem
   String username;
   String profileImageUrl;
-  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   PackageInfo packageInfo = PackageInfo(
@@ -236,11 +236,11 @@ class _AppPageState extends State<AppPage> {
 
   userListener() {
     usersRef.snapshots().listen((querySnapshot) {
-      querySnapshot.documentChanges.forEach((change) {
+      querySnapshot.docChanges.forEach((change) {
         if (mounted) {
           setState(() {
-            if (change.document.documentID == Constants.currentUserID) {
-              Constants.currentUser = User.fromDoc(change.document);
+            if (change.doc.id == Constants.currentUserID) {
+              Constants.currentUser = User.fromDoc(change.doc);
             }
           });
         }
@@ -266,11 +266,10 @@ class _AppPageState extends State<AppPage> {
     String token = await _firebaseMessaging.getToken();
     if (token != null) {
       usersRef
-          .document(Constants.currentUserID)
+          .doc(Constants.currentUserID)
           .collection('tokens')
-          .document(token)
-          .setData(
-              {'modifiedAt': FieldValue.serverTimestamp(), 'signed': true});
+          .doc(token)
+          .set({'modifiedAt': FieldValue.serverTimestamp(), 'signed': true});
     }
     print('token = $token');
   }

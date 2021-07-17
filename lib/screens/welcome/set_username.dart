@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
@@ -12,7 +11,7 @@ import 'package:glitcher/widgets/custom_loader.dart';
 import 'widgets/bezier_container.dart';
 
 class SetUsernameScreen extends StatefulWidget {
-  final FirebaseUser user;
+  final User user;
 
   const SetUsernameScreen({Key key, this.user}) : super(key: key);
 

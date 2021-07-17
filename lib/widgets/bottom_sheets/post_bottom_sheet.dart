@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_icons/font_awesome.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
@@ -10,7 +9,6 @@ import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/services/share_link.dart';
-import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:glitcher/widgets/custom_widgets.dart';

@@ -52,8 +52,6 @@ dependencies:
   image: ^3.0.2
   path_provider: ^2.0.2
   chewie_audio: ^1.2.0
-  audioplayer_web: ^0.7.1
-  audioplayers: ^0.19.1
   package_info: ^2.0.2
   flutter_webview_plugin: ^0.4.0
   connectivity: ^3.0.6
@@ -76,6 +74,8 @@ dependencies:
   animations: ^2.0.1
   record: ^3.0.0
   just_audio: ^0.7.1
+  audio_session: ^0.1.1
+  firebase_core: ^1.4.0
 
 dev_dependencies:
   stack: ^0.2.1

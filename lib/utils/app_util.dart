@@ -125,23 +125,23 @@ class AppUtil {
   }
 
   static Future chooseImage({ImageSource source = ImageSource.gallery}) async {
-    File image = await ImagePicker.pickImage(source: source, imageQuality: 80);
-    print('File size: ${image.lengthSync()}');
+    PickedFile image =
+        await ImagePicker.platform.pickImage(source: source, imageQuality: 80);
+    print('File size: ${File(image.path).lengthSync()}');
     return image;
   }
 
   static chooseVideo() async {
-    await ImagePicker.pickVideo(source: ImageSource.gallery);
+    await ImagePicker.platform.pickVideo(source: ImageSource.gallery);
   }
 
   static Future uploadFile(File file, BuildContext context, String path,
       {List<String> groupMembersIds}) async {
     if (file == null) return;
 
-    StorageReference storageReference =
-        FirebaseStorage.instance.ref().child(path);
+    Reference storageReference = FirebaseStorage.instance.ref().child(path);
     print('storage path: $path');
-    StorageUploadTask uploadTask;
+    UploadTask uploadTask;
 
     if (path.contains('group')) {
       Map<String, String> members = {};
@@ -151,7 +151,7 @@ class AppUtil {
       }
       uploadTask = storageReference.putFile(
         file,
-        StorageMetadata(
+        SettableMetadata(
           contentLanguage: 'en',
           customMetadata: members,
         ),
@@ -160,7 +160,7 @@ class AppUtil {
       uploadTask = storageReference.putFile(file);
     }
 
-    await uploadTask.onComplete;
+    await uploadTask;
     print('File Uploaded');
     String url = await storageReference.getDownloadURL();
 
@@ -236,20 +236,21 @@ class AppUtil {
 
         if (newHashtag) {
           String hashtagId = randomAlphaNumeric(20);
-          await hashtagsRef.document(hashtagId).setData(
-              {'text': word, 'timestamp': FieldValue.serverTimestamp()});
+          await hashtagsRef
+              .doc(hashtagId)
+              .set({'text': word, 'timestamp': FieldValue.serverTimestamp()});
 
           await hashtagsRef
-              .document(hashtagId)
+              .doc(hashtagId)
               .collection('posts')
-              .document(postId)
-              .setData({'timestamp': FieldValue.serverTimestamp()});
+              .doc(postId)
+              .set({'timestamp': FieldValue.serverTimestamp()});
         } else {
           await hashtagsRef
-              .document(hashtag.id)
+              .doc(hashtag.id)
               .collection('posts')
-              .document(postId)
-              .setData({'timestamp': FieldValue.serverTimestamp()});
+              .doc(postId)
+              .set({'timestamp': FieldValue.serverTimestamp()});
         }
 
         return hashtag;

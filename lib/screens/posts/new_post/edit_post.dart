@@ -13,13 +13,11 @@ import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/models/game_model.dart';
 import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/post_model.dart';
-import 'package:glitcher/models/user_model.dart';
 import 'package:glitcher/screens/posts/new_post/widget/create_bottom_icon.dart';
 import 'package:glitcher/screens/posts/new_post/widget/create_post_image.dart';
 import 'package:glitcher/screens/posts/new_post/widget/create_post_video.dart';
 import 'package:glitcher/screens/posts/new_post/widget/widget_view.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/services/notification_handler.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/caching_image.dart';
@@ -220,7 +218,7 @@ class _CreatePostReplyPageState extends State<EditPost> {
       'game': selectedGame
     };
 
-    await postsRef.document(postId).setData(postData);
+    await postsRef.doc(postId).set(postData);
 
     await checkIfContainsHashtag(_textEditingController.text, postId);
 
@@ -333,20 +331,21 @@ class _CreatePostReplyPageState extends State<EditPost> {
 
         if (newHashtag) {
           String hashtagId = randomAlphaNumeric(20);
-          await hashtagsRef.document(hashtagId).setData(
-              {'text': word, 'timestamp': FieldValue.serverTimestamp()});
+          await hashtagsRef
+              .doc(hashtagId)
+              .set({'text': word, 'timestamp': FieldValue.serverTimestamp()});
 
           await hashtagsRef
-              .document(hashtagId)
+              .doc(hashtagId)
               .collection('posts')
-              .document(postId)
-              .setData({'timestamp': FieldValue.serverTimestamp()});
+              .doc(postId)
+              .set({'timestamp': FieldValue.serverTimestamp()});
         } else {
           await hashtagsRef
-              .document(hashtag.id)
+              .doc(hashtag.id)
               .collection('posts')
-              .document(postId)
-              .setData({'timestamp': FieldValue.serverTimestamp()});
+              .doc(postId)
+              .set({'timestamp': FieldValue.serverTimestamp()});
         }
 
         return hashtag;
@@ -356,7 +355,7 @@ class _CreatePostReplyPageState extends State<EditPost> {
   }
 
   downloadImage(String url) async {
-    var response = await get(url);
+    var response = await get(Uri.parse(url));
     //getDownloadsDirectory()
     var documentDirectory = await getApplicationDocumentsDirectory();
     var firstPath = documentDirectory.path + "/images";

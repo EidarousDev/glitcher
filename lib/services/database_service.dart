@@ -40,7 +40,7 @@ class DatabaseService {
   static updateUserCountry() async {
     usersRef
         .doc(Constants.currentUserID)
-        .updateData({'country': Constants.country});
+        .update({'country': Constants.country});
   }
 
   // This function is used to get the recent posts of a certain user
@@ -308,9 +308,7 @@ class DatabaseService {
 
       await commentRef.delete();
 
-      await postsRef
-          .doc(postId)
-          .updateData({'comments': FieldValue.increment(-1)});
+      await postsRef.doc(postId).update({'comments': FieldValue.increment(-1)});
     } else {
       DocumentReference replyRef = postsRef
           .doc(postId)
@@ -335,7 +333,7 @@ class DatabaseService {
           .doc(postId)
           .collection('comments')
           .doc(parentCommentId)
-          .updateData({'replies': FieldValue.increment(-1)});
+          .update({'replies': FieldValue.increment(-1)});
     }
   }
 
@@ -826,14 +824,17 @@ class DatabaseService {
   }
 
   static addMemberToGroup(String groupId, String memberId) async {
-    await chatGroupsRef.doc(groupId).collection('users').doc(memberId).setData(
-        {'is_admin': false, 'timestamp': FieldValue.serverTimestamp()});
+    await chatGroupsRef
+        .doc(groupId)
+        .collection('users')
+        .doc(memberId)
+        .set({'is_admin': false, 'timestamp': FieldValue.serverTimestamp()});
 
     await usersRef
         .doc(memberId)
         .collection('chat_groups')
         .doc(groupId)
-        .setData({'timestamp': FieldValue.serverTimestamp()});
+        .set({'timestamp': FieldValue.serverTimestamp()});
   }
 
   static toggleMemberAdmin(String groupId, String memberId) async {
@@ -994,14 +995,12 @@ class DatabaseService {
       'text': commentText,
       'timestamp': FieldValue.serverTimestamp()
     });
-    await postsRef
-        .doc(postId)
-        .updateData({'comments': FieldValue.increment(1)});
+    await postsRef.doc(postId).update({'comments': FieldValue.increment(1)});
   }
 
   static void editComment(
       String postId, String commentId, String commentText) async {
-    await postsRef.doc(postId).collection('comments').doc(commentId).updateData(
+    await postsRef.doc(postId).collection('comments').doc(commentId).update(
         {'text': commentText, 'timestamp': FieldValue.serverTimestamp()});
   }
 
@@ -1021,7 +1020,7 @@ class DatabaseService {
         .doc(postId)
         .collection('comments')
         .doc(commentId)
-        .updateData({'replies': FieldValue.increment(1)});
+        .update({'replies': FieldValue.increment(1)});
   }
 
   static void editReply(
@@ -1032,8 +1031,7 @@ class DatabaseService {
         .doc(commentId)
         .collection('replies')
         .doc(replyId)
-        .updateData(
-            {'text': replyText, 'timestamp': FieldValue.serverTimestamp()});
+        .update({'text': replyText, 'timestamp': FieldValue.serverTimestamp()});
   }
 
   static followGame(String gameId) async {
@@ -1047,12 +1045,12 @@ class DatabaseService {
           .doc(Constants.currentUserID)
           .collection('followedGames')
           .doc(gameId)
-          .setData({'followedAt': FieldValue.serverTimestamp()});
+          .set({'followedAt': FieldValue.serverTimestamp()});
     }
 
     await usersRef
         .doc(Constants.currentUserID)
-        .updateData({'followed_games': FieldValue.increment(1)});
+        .update({'followed_games': FieldValue.increment(1)});
   }
 
   static unFollowGame(String gameId) async {
@@ -1071,7 +1069,7 @@ class DatabaseService {
 
     await usersRef
         .doc(Constants.currentUserID)
-        .updateData({'followed_games': FieldValue.increment(-1)});
+        .update({'followed_games': FieldValue.increment(-1)});
   }
 
   static Future<Game> getGameWithGameName(String gameName) async {
@@ -1220,7 +1218,7 @@ class DatabaseService {
         .doc(Constants.currentUserID)
         .collection('bookmarks')
         .doc(postId)
-        .setData({'timestamp': FieldValue.serverTimestamp()});
+        .set({'timestamp': FieldValue.serverTimestamp()});
   }
 
   static removePostFromBookmarks(String postId) async {
@@ -1285,20 +1283,16 @@ class DatabaseService {
 
       await usersRef
           .doc(Constants.currentUserID)
-          .updateData({'friends': FieldValue.increment(-1)});
+          .update({'friends': FieldValue.increment(-1)});
 
-      await usersRef
-          .doc(userId)
-          .updateData({'friends': FieldValue.increment(-1)});
+      await usersRef.doc(userId).update({'friends': FieldValue.increment(-1)});
     }
 
     await usersRef
         .doc(Constants.currentUserID)
-        .updateData({'following': FieldValue.increment(-1)});
+        .update({'following': FieldValue.increment(-1)});
 
-    await usersRef
-        .doc(userId)
-        .updateData({'followers': FieldValue.increment(-1)});
+    await usersRef.doc(userId).update({'followers': FieldValue.increment(-1)});
   }
 
   static followUser(String userId) async {
@@ -1308,7 +1302,7 @@ class DatabaseService {
         .doc(userId)
         .collection('followers')
         .doc(Constants.currentUserID)
-        .setData({
+        .set({
       'timestamp': FieldValue.serverTimestamp(),
     });
 
@@ -1316,7 +1310,7 @@ class DatabaseService {
         .doc(Constants.currentUserID)
         .collection('following')
         .doc(userId)
-        .setData({
+        .set({
       'timestamp': timestamp,
     });
 
@@ -1331,21 +1325,19 @@ class DatabaseService {
           .doc(Constants.currentUserID)
           .collection('friends')
           .doc(userId)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
+          .set({'timestamp': FieldValue.serverTimestamp()});
 
       await usersRef
           .doc(userId)
           .collection('friends')
           .doc(Constants.currentUserID)
-          .setData({'timestamp': FieldValue.serverTimestamp()});
+          .set({'timestamp': FieldValue.serverTimestamp()});
 
       await usersRef
           .doc(Constants.currentUserID)
-          .updateData({'friends': FieldValue.increment(1)});
+          .update({'friends': FieldValue.increment(1)});
 
-      await usersRef
-          .doc(userId)
-          .updateData({'friends': FieldValue.increment(1)});
+      await usersRef.doc(userId).update({'friends': FieldValue.increment(1)});
 
       //Store/update user locally as a friend
       User user =
@@ -1391,11 +1383,9 @@ class DatabaseService {
     //Increment current user following and other user followers
     await usersRef
         .doc(Constants.currentUserID)
-        .updateData({'following': FieldValue.increment(1)});
+        .update({'following': FieldValue.increment(1)});
 
-    await usersRef
-        .doc(userId)
-        .updateData({'followers': FieldValue.increment(1)});
+    await usersRef.doc(userId).update({'followers': FieldValue.increment(1)});
   }
 
   static addUserToDatabase(String id, String email, String username) async {
@@ -1410,12 +1400,12 @@ class DatabaseService {
       'search': search
     };
 
-    await usersRef.doc(id).setData(userMap);
+    await usersRef.doc(id).set(userMap);
   }
 
   static addUserEmailToNewsletter(
       String userId, String email, String username) async {
-    await newsletterEmailsRef.doc(userId).setData({
+    await newsletterEmailsRef.doc(userId).set({
       'email': email,
       'username': username,
       'timestamp': FieldValue.serverTimestamp()
@@ -1423,15 +1413,13 @@ class DatabaseService {
   }
 
   static makeUserOnline() async {
-    await usersRef
-        .doc(Constants.currentUserID)
-        .updateData({'online': 'online'});
+    await usersRef.doc(Constants.currentUserID).update({'online': 'online'});
   }
 
   static makeUserOffline() async {
     await usersRef
         .doc(Constants.currentUserID)
-        .updateData({'online': FieldValue.serverTimestamp()});
+        .update({'online': FieldValue.serverTimestamp()});
   }
 
   static removeNotification(
@@ -1453,7 +1441,7 @@ class DatabaseService {
 
       await usersRef
           .doc(receiverId)
-          .updateData({'notificationsNumber': FieldValue.increment(-1)});
+          .update({'notificationsNumber': FieldValue.increment(-1)});
     }
   }
 }

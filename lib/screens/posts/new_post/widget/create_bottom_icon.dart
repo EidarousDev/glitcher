@@ -129,10 +129,12 @@ class _CreateBottomIconState extends State<CreateBottomIcon> {
   }
 
   void setImage(ImageSource source) {
-    ImagePicker.pickImage(source: source, imageQuality: 20).then((File file) {
+    ImagePicker.platform
+        .pickImage(source: source, imageQuality: 20)
+        .then((PickedFile file) {
       setState(() {
         // _image = file;
-        widget.onImageIconSelected(file);
+        widget.onImageIconSelected(File(file.path));
       });
     });
   }

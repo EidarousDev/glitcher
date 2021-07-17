@@ -570,6 +570,7 @@ class _ConversationState extends State<Conversation>
                                         bool isGranted =
                                             await PermissionsService()
                                                 .requestMicrophonePermission(
+                                                    context,
                                                     onPermissionDenied: () {
                                           AppUtil.alertDialog(
                                               context,

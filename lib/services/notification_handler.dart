@@ -3,62 +3,109 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/services/database_service.dart';
-import 'package:glitcher/utils/app_util.dart';
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  // MyApp.restartApp(NotificationHandler.context);
+  // print(message.data['type']);
+  // NotificationHandler.lastNotification = message.data;
+}
 
 class NotificationHandler {
+  static AndroidNotificationChannel _channel;
+  static FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
+
   static receiveNotification(
-      BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) {
+      BuildContext context, GlobalKey<ScaffoldState> scaffoldKey) async {
     StreamSubscription iosSubscription;
-    FirebaseMessaging _fcm = FirebaseMessaging();
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    if (!kIsWeb) {
+      _channel = const AndroidNotificationChannel(
+        'high_importance_channel', // id
+        'High Importance Notifications', // title
+        'This channel is used for important notifications.', // description
+        importance: Importance.high,
+      );
 
-    if (Platform.isIOS) {
-      iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
-        // save the token  OR subscribe to a topic here
-      });
+      _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-      _fcm.requestNotificationPermissions(IosNotificationSettings());
+      /// Create an Android Notification Channel.
+      ///
+      /// We use this channel in the `AndroidManifest.xml` file to override the
+      /// default FCM channel to enable heads up notifications.
+      await _flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(_channel);
+
+      /// Update the iOS foreground notification presentation options to allow
+      /// heads up notifications.
+      await FirebaseMessaging.instance
+          .setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
     }
 
-    _fcm.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        print("onMessage: $message");
-        makeNotificationSeen(message['data']['id']);
-
-        AppUtil.showSnackBar(
-          context,
-          scaffoldKey,
-          message['notification']['title'],
-        );
-
-        //showNotification(message);
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        print("onLaunch: $message");
-        makeNotificationSeen(message['data']['id']);
-
-        navigateToScreen(
-            context, message['data']['type'], message['data']['object_id']);
-      },
-      onResume: (Map<String, dynamic> message) async {
-        print("onResume: $message");
-        makeNotificationSeen(message['data']['id']);
-        navigateToScreen(
-            context, message['data']['type'], message['data']['object_id']);
-      },
+    await FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
     );
+
+    FirebaseMessaging.instance
+        .getInitialMessage()
+        .then((RemoteMessage message) {
+      if (message != null) {
+        navigateToScreen(
+            context, message.data['type'], message.data['object_id']);
+      }
+    });
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification notification = message.notification;
+      AndroidNotification android = message.notification?.android;
+      if (notification != null && android != null && !kIsWeb) {
+        _flutterLocalNotificationsPlugin.show(
+            notification.hashCode,
+            notification.title,
+            notification.body,
+            NotificationDetails(
+              iOS: IOSNotificationDetails(
+                  presentAlert: true, presentSound: true),
+              android: AndroidNotificationDetails(
+                _channel.id,
+                _channel.name,
+                _channel.description,
+                // TODO add a proper drawable resource to android, for now using
+                //      one that already exists in example app.
+                icon: 'ic_notification',
+              ),
+            ));
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      navigateToScreen(
+          context, message.data['type'], message.data['object_id']);
+    });
   }
 
   static makeNotificationSeen(String notificationId) {
     usersRef
-        .document(Constants.currentUserID)
+        .doc(Constants.currentUserID)
         .collection('notifications')
-        .document(notificationId)
-        .updateData({
+        .doc(notificationId)
+        .update({
       'seen': true,
     });
   }
@@ -91,7 +138,7 @@ class NotificationHandler {
   static sendNotification(String receiverId, String title, String body,
       String objectId, String type) async {
     if (receiverId == Constants.currentUserID) return;
-    usersRef.document(receiverId).collection('notifications').add({
+    usersRef.doc(receiverId).collection('notifications').add({
       'title': title,
       'body': body,
       'seen': false,
@@ -104,8 +151,8 @@ class NotificationHandler {
     //To increment notificationsNumber
     //User user = await DatabaseService.getUserWithId(receiverId);
     await usersRef
-        .document(receiverId)
-        .updateData({'notificationsNumber': FieldValue.increment(1)});
+        .doc(receiverId)
+        .update({'notificationsNumber': FieldValue.increment(1)});
   }
 
   static removeNotification(
@@ -118,30 +165,35 @@ class NotificationHandler {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  void configLocalNotification() {
+  void configLocalNotification() async {
     var initializationSettingsAndroid =
-        new AndroidInitializationSettings('ic_launcher');
+        new AndroidInitializationSettings('ic_notification');
+
     var initializationSettingsIOS = new IOSInitializationSettings();
     var initializationSettings = new InitializationSettings(
-        initializationSettingsAndroid, initializationSettingsIOS);
-    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+    await _flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onSelectNotification: (data) {
+      print('data: $data');
+    });
   }
 
   void showNotification(Map<String, dynamic> message) async {
-    configLocalNotification();
+    await configLocalNotification();
 
     var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
         Platform.isAndroid ? 'com.devyat.glitcher' : 'com.devyat.glitcher',
-        'glitcher',
+        'Alhany',
         'your channel description',
         enableVibration: true,
-        importance: Importance.Max,
-        priority: Priority.High,
+        importance: Importance.max,
+        priority: Priority.high,
         autoCancel: true);
     var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
     var platformChannelSpecifics = new NotificationDetails(
-        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.show(
+        android: androidPlatformChannelSpecifics,
+        iOS: iOSPlatformChannelSpecifics);
+    await _flutterLocalNotificationsPlugin.show(
         0,
         message['notification']['title'].toString(),
         message['notification']['body'].toString(),
@@ -151,7 +203,7 @@ class NotificationHandler {
 
   clearNotificationsNumber() async {
     await usersRef
-        .document(Constants.currentUserID)
-        .updateData({'notificationsNumber': 0});
+        .doc(Constants.currentUserID)
+        .update({'notificationsNumber': 0});
   }
 }

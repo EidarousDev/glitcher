@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/screens/games/games_screen.dart';
@@ -147,12 +146,12 @@ class _BuildDrawerState extends State<BuildDrawer> {
           ListTile(
             onTap: () async {
               try {
-                String token = await FirebaseMessaging().getToken();
+                String token = await FirebaseMessaging.instance.getToken();
                 usersRef
-                    .document(Constants.currentUserID)
+                    .doc(Constants.currentUserID)
                     .collection('tokens')
-                    .document(token)
-                    .updateData({
+                    .doc(token)
+                    .update({
                   'modifiedAt': FieldValue.serverTimestamp(),
                   'signed': false
                 });

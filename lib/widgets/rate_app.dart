@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_email_sender/flutter_email_sender.dart';
-import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/utils/app_util.dart';
 import 'package:rate_my_app/rate_my_app.dart';
@@ -97,7 +95,7 @@ class RateApp {
           ),
         ];
       },
-      ignoreIOS:
+      ignoreNativeDialog:
           false, // Set to false if you want to show the native Apple app rating dialog on iOS.
       dialogStyle: DialogStyle(
         // Custom dialog styles.

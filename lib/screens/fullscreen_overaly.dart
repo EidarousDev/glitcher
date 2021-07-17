@@ -34,7 +34,8 @@ class _FullscreenOverlayState extends State<FullScreenOverlay> {
                 minScale: PhotoViewComputedScale.contained * 0.8,
                 maxScale: PhotoViewComputedScale.contained * 2,
                 enableRotation: true,
-                loadingChild: Center(child: CircularProgressIndicator()),
+                loadingBuilder: (context, event) =>
+                    Center(child: CircularProgressIndicator()),
                 backgroundDecoration:
                     BoxDecoration(color: Colors.transparent.withOpacity(.3)),
               ),
@@ -131,10 +132,10 @@ class _FullscreenOverlayState extends State<FullScreenOverlay> {
   }
 
   updateProfileImage(String url) async {
-    await usersRef.document(userId).updateData({'profile_url': url});
+    await usersRef.doc(userId).update({'profile_url': url});
   }
 
   updateCoverImage(String url) async {
-    await usersRef.document(userId).updateData({'cover_url': url});
+    await usersRef.doc(userId).update({'cover_url': url});
   }
 }

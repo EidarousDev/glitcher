@@ -248,15 +248,15 @@ class _CreatePostReplyPageState extends State<CreatePost> {
       return;
     }
 
-    await postsRef.document(postId).setData(postData);
+    await postsRef.doc(postId).set(postData);
 
     await AppUtil.checkIfContainsHashtag(
         _textEditingController.text, postId, _isNewHashtag);
 
     await gamesRef
-        .document(
+        .doc(
             (await DatabaseService.getGameWithGameName(widget.selectedGame)).id)
-        .updateData({'frequency': FieldValue.increment(1)});
+        .update({'frequency': FieldValue.increment(1)});
 
     /// Checks for username in tweet description
     /// If found sends notification to all tagged user

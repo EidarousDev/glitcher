@@ -20,21 +20,21 @@ class FirebaseAnonymouslyUtil {
     _view = view;
   }
 
-  Future<FirebaseUser> signIn(String email, String password) async {
-    FirebaseUser user = (await _firebaseAuth.signInWithEmailAndPassword(
-        email: email, password: password)) as FirebaseUser;
+  Future<User> signIn(String email, String password) async {
+    User user = (await _firebaseAuth.signInWithEmailAndPassword(
+        email: email, password: password)) as User;
     return user;
   }
 
   Future<String> createUser(String email, String password) async {
-    FirebaseUser user = (await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email, password: password)) as FirebaseUser;
+    User user = (await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email, password: password)) as User;
 
     return user.uid;
   }
 
   Future<String> currentUser() async {
-    FirebaseUser user = await _firebaseAuth.currentUser();
+    User user = _firebaseAuth.currentUser;
     return user != null ? user.uid : null;
   }
 
@@ -42,7 +42,7 @@ class FirebaseAnonymouslyUtil {
     return _firebaseAuth.signOut();
   }
 
-  void onLoginUserVerified(FirebaseUser currentUser) {
+  void onLoginUserVerified(User currentUser) {
     _view.onLoginUserVerified(currentUser);
   }
 

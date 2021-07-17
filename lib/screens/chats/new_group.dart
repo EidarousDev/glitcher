@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
@@ -14,7 +13,6 @@ import 'package:glitcher/utils/app_util.dart';
 import 'package:glitcher/widgets/bottom_sheets/profile_image_edit_bottom_sheet.dart';
 import 'package:glitcher/widgets/caching_image.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:random_string/random_string.dart';
 
 class NewGroup extends StatefulWidget {
@@ -132,7 +130,8 @@ class _NewGroupState extends State<NewGroup>
                       child: GestureDetector(
                         onTap: () async {
                           bool isGranted = await PermissionsService()
-                              .requestStoragePermission(onPermissionDenied: () {
+                              .requestStoragePermission(context,
+                                  onPermissionDenied: () {
                             print('Permission has been denied');
                           });
 
@@ -286,11 +285,7 @@ class _NewGroupState extends State<NewGroup>
     });
 
     for (Map<String, dynamic> user in chosenUsers) {
-      chatGroupsRef
-          .doc(_groupId)
-          .collection('users')
-          .doc(user['user_id'])
-          .set({
+      chatGroupsRef.doc(_groupId).collection('users').doc(user['user_id']).set({
         'is_admin': user['is_admin'],
         'timestamp': FieldValue.serverTimestamp()
       });

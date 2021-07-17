@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:glitcher/constants/strings.dart';
 import 'package:photo_view/photo_view.dart';
 
 class ImageOverlay extends StatelessWidget {
@@ -23,7 +22,7 @@ class ImageOverlay extends StatelessWidget {
           minScale: PhotoViewComputedScale.contained * 0.8,
           maxScale: PhotoViewComputedScale.contained * 2,
           enableRotation: true,
-          loadingChild: Center(child: CircularProgressIndicator()),
+          loadingBuilder: (_, __) => Center(child: CircularProgressIndicator()),
           backgroundDecoration:
               BoxDecoration(color: Colors.transparent.withOpacity(.3)),
         ),
@@ -66,8 +65,6 @@ imageOverlay(
   );
 }
 
-void handleClick(String value) {
-
-}
+void handleClick(String value) {}
 
 Future<bool> _onBackPressed() {}

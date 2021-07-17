@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:glitcher/constants/constants.dart';
@@ -272,7 +271,7 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
     Navigator.of(context).push(CustomScreenLoader());
 
     try {
-      String email = (await firebaseAuth.currentUser()).email;
+      String email = (await firebaseAuth.currentUser).email;
       await firebaseAuth.signInWithEmailAndPassword(
           email: email, password: _currentPassword);
     } catch (ex) {

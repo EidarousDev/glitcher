@@ -6,7 +6,7 @@ import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/list_items/post_item.dart';
 import 'package:glitcher/models/post_model.dart';
-import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/models/user_model.dart' as user_model;
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
 
@@ -18,11 +18,11 @@ class BookmarksScreen extends StatefulWidget {
 class _BookmarksScreenState extends State<BookmarksScreen>
     with WidgetsBindingObserver {
   ScrollController _scrollController = ScrollController();
-  User loggedInUser;
+  user_model.User loggedInUser;
   String username;
   String profileImageUrl = '';
   var _posts = [];
-  FirebaseUser currentUser;
+  User currentUser;
   Timestamp lastVisiblePostSnapShot;
 
   @override
@@ -69,7 +69,7 @@ class _BookmarksScreenState extends State<BookmarksScreen>
                               if (!snapshot.hasData) {
                                 return SizedBox.shrink();
                               }
-                              User author = snapshot.data;
+                              user_model.User author = snapshot.data;
                               return PostItem(
                                 post: post,
                                 author: author,
@@ -87,9 +87,9 @@ class _BookmarksScreenState extends State<BookmarksScreen>
                                   icon: Icon(Icons.close),
                                   onPressed: () async {
                                     await usersRef
-                                        .document(Constants.currentUserID)
+                                        .doc(Constants.currentUserID)
                                         .collection('bookmarks')
-                                        .document(post.id)
+                                        .doc(post.id)
                                         .delete();
                                     _setupFeed();
                                   },

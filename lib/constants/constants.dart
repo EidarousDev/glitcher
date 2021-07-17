@@ -44,12 +44,12 @@ class Constants {
   static user.User currentUser;
   //static List<String> games = [];
   static const genres = ['Action', 'Sports', 'Racing', 'Fighting'];
-  //static var isDarkTheme = AvailableThemes.DARK_THEME;
+  static var isDarkTheme = true;
   static int favouriteFilter;
 
   static List<String> followingIds = [];
   static List<String> followedGamesNames = [];
-  static List<User> userFriends = []; //mentioning has to be searched
+  static List<user.User> userFriends = []; //mentioning has to be searched
 
   static List<Hashtag> hashtags = [];
   static List<Notification> unseenNotifications = [];

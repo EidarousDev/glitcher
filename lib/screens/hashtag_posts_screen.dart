@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:glitcher/widgets/gradient_appbar.dart';
 import 'package:glitcher/constants/constants.dart';
+import 'package:glitcher/list_items/post_item.dart';
 import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/models/post_model.dart';
-import 'package:glitcher/models/user_model.dart';
-import 'package:glitcher/list_items/post_item.dart';
+import 'package:glitcher/models/user_model.dart' as user_model;
 import 'package:glitcher/services/database_service.dart';
+import 'package:glitcher/widgets/gradient_appbar.dart';
 
 class HashtagPostsScreen extends StatefulWidget {
   final Hashtag hashtag;
@@ -19,11 +19,11 @@ class HashtagPostsScreen extends StatefulWidget {
 
 class _HashtagPostsScreenState extends State<HashtagPostsScreen>
     with WidgetsBindingObserver {
-  User loggedInUser;
+  user_model.User loggedInUser;
   String username;
   String profileImageUrl = '';
   var _posts = [];
-  FirebaseUser currentUser;
+  User currentUser;
   Timestamp lastVisiblePostSnapShot;
 
   ScrollController _scrollController = ScrollController();
@@ -60,7 +60,7 @@ class _HashtagPostsScreenState extends State<HashtagPostsScreen>
                   if (!snapshot.hasData) {
                     return SizedBox.shrink();
                   }
-                  User author = snapshot.data;
+                  user_model.User author = snapshot.data;
                   return PostItem(post: post, author: author);
                 });
           },
@@ -131,7 +131,7 @@ class _HashtagPostsScreenState extends State<HashtagPostsScreen>
   }
 
   void loadUserData() async {
-    currentUser = await firebaseAuth.currentUser();
+    currentUser = firebaseAuth.currentUser;
     //print('currentUserID: ${currentUser.uid}');
     // here you write the codes to input the data into firestore
     loggedInUser =

@@ -10,7 +10,7 @@ import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
 import 'package:glitcher/list_items/post_item.dart';
 import 'package:glitcher/models/post_model.dart';
-import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/models/user_model.dart' as user_model;
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/services/notification_handler.dart';
@@ -54,12 +54,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   var _usernameEditingController = TextEditingController()..text = '';
   var _nameEditingController = TextEditingController()..text = '';
 
-  User userData;
+  user_model.User userData;
 
   bool _loading = false;
   bool _isBtnEnabled = true;
 
-  FirebaseUser currentUser;
+  User currentUser;
 
   bool isFollowing = false;
   bool isFriend = false;
@@ -106,12 +106,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<bool> isUsernameTaken(String username) async {
-    final QuerySnapshot result = await Firestore.instance
+    final QuerySnapshot result = await FirebaseFirestore.instance
         .collection('users')
         .where('username', isEqualTo: username)
         .limit(1)
-        .getDocuments();
-    return result.documents.isEmpty;
+        .get();
+    return result.docs.isEmpty;
   }
 
   @override
@@ -141,9 +141,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (this.widget.userId != currentUser.uid) {
       DocumentSnapshot followSnapshot = await firestore
           .collection('users')
-          .document(currentUser.uid)
+          .doc(currentUser.uid)
           .collection('following')
-          .document(widget.userId)
+          .doc(widget.userId)
           .get();
 
       setState(() {
@@ -152,9 +152,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       DocumentSnapshot friendSnapshot = await firestore
           .collection('users')
-          .document(currentUser.uid)
+          .doc(currentUser.uid)
           .collection('friends')
-          .document(widget.userId)
+          .doc(widget.userId)
           .get();
 
       setState(() {
@@ -186,7 +186,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _loading = true;
     });
     print('profileUserID = ${widget.userId}');
-    User user =
+    user_model.User user =
         await DatabaseService.getUserWithId(widget.userId, checkLocal: false);
     setState(() {
       userData = user;
@@ -200,7 +200,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _loading = false;
     });
 
-    User localUser = await UserSqlite.getUserWithId(user.id);
+    user_model.User localUser = await UserSqlite.getUserWithId(user.id);
     if (localUser == null) {
       int success = await UserSqlite.insert(user);
     } else {
@@ -283,8 +283,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           followUser();
                         },
                   icon: !isFollowing
-                      ? Icon(FontAwesome.getIconData('user-plus'))
-                      : Icon(FontAwesome.getIconData('user-times')),
+                      ? Icon(FontAwesome.user_plus)
+                      : Icon(FontAwesome.user_times),
                   iconSize: 25.0,
                   color: switchColor(MyColors.lightButtonsBackground,
                       MyColors.darkPrimaryTappedBtn),
@@ -617,7 +617,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 if (!snapshot.hasData) {
                                   return SizedBox.shrink();
                                 }
-                                User author = snapshot.data;
+                                user_model.User author = snapshot.data;
                                 return PostItem(post: post, author: author);
                               });
                         },
@@ -718,7 +718,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (validUsername == null) {
         List search = searchList(_usernameEditingController.text);
         search.addAll(searchList(_nameText));
-        await usersRef.document(widget.userId).updateData(
+        await usersRef.doc(widget.userId).update(
             {'username': _usernameEditingController.text, 'search': search});
         setState(() {
           _usernameText = _usernameEditingController.text;
@@ -742,14 +742,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     List search = searchList(_usernameText);
     search.addAll(searchList(_nameText));
     await usersRef
-        .document(widget.userId)
-        .updateData({'name': _nameText, 'search': search});
+        .doc(widget.userId)
+        .update({'name': _nameText, 'search': search});
   }
 
   updateDesc() async {
-    await usersRef
-        .document(widget.userId)
-        .updateData({'description': _descText});
+    await usersRef.doc(widget.userId).update({'description': _descText});
   }
 
   loadPosts() async {
@@ -829,9 +827,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _coverImageUrl = url;
         _coverImageFile = null;
       });
-      await usersRef
-          .document(widget.userId)
-          .updateData({'cover_url': _coverImageUrl});
+      await usersRef.doc(widget.userId).update({'cover_url': _coverImageUrl});
       Navigator.of(context).pop();
     } else {
       await showDialog(
@@ -862,8 +858,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   });
 
                   await usersRef
-                      .document(widget.userId)
-                      .updateData({'cover_url': _coverImageUrl});
+                      .doc(widget.userId)
+                      .update({'cover_url': _coverImageUrl});
                   Navigator.of(context).pop();
 
                   Navigator.of(context).pop();
@@ -892,8 +888,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _profileImageFile = null;
       });
       await usersRef
-          .document(widget.userId)
-          .updateData({'profile_url': _profileImageUrl});
+          .doc(widget.userId)
+          .update({'profile_url': _profileImageUrl});
       Navigator.of(context).pop();
     } else {
       showDialog(
@@ -923,8 +919,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _profileImageFile = null;
                   });
                   await usersRef
-                      .document(widget.userId)
-                      .updateData({'profile_url': _profileImageUrl});
+                      .doc(widget.userId)
+                      .update({'profile_url': _profileImageUrl});
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
                 },

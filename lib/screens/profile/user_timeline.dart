@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class UserTimelineScreen extends StatelessWidget {
   static const String id = 'user_timeline';
-  FirebaseUser currentUser;
+  User currentUser;
 
   UserTimelineScreen(this.currentUser);
 
@@ -21,7 +21,7 @@ class UserTimelineScreen extends StatelessWidget {
 }
 
 class UserTimeline extends StatefulWidget {
-  FirebaseUser currentUser;
+  User currentUser;
 
   UserTimeline(this.currentUser);
 
@@ -30,7 +30,7 @@ class UserTimeline extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<UserTimeline> {
-  FirebaseUser currentUser;
+  User currentUser;
 
   _MyHomePageState(this.currentUser);
 

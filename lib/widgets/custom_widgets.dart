@@ -4,10 +4,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
 import 'package:glitcher/constants/sizes.dart';
 import 'package:glitcher/constants/strings.dart';
+import 'package:glitcher/utils/functions.dart';
 import 'package:image_picker/image_picker.dart';
 
 Widget customTitleText(String title, {BuildContext context}) {
@@ -42,7 +42,9 @@ Widget customIcon(
               ? 'TwitterIcon'
               : isFontAwesomeRegular
                   ? 'AwesomeRegular'
-                  : isFontAwesomeSolid ? 'AwesomeSolid' : 'Fontello'),
+                  : isFontAwesomeSolid
+                      ? 'AwesomeSolid'
+                      : 'Fontello'),
       size: size,
       color: isEnable ? Theme.of(context).primaryColor : iconColor,
     ),
@@ -519,7 +521,9 @@ openImagePicker(BuildContext context, Function onImageSelected) {
 }
 
 getImage(BuildContext context, ImageSource source, Function onImageSelected) {
-  ImagePicker.pickImage(source: source, imageQuality: 50).then((File file) {
+  ImagePicker.platform
+      .pickImage(source: source, imageQuality: 50)
+      .then((PickedFile file) {
     onImageSelected(file);
     Navigator.pop(context);
   });
@@ -531,9 +535,7 @@ Widget customDivider(double height, {double width = double.infinity}) {
     width: width,
     child: DecoratedBox(
       decoration: BoxDecoration(
-          color: Constants.isDarkTheme == AvailableThemes.LIGHT_THEME
-              ? MyColors.lightLineBreak
-              : MyColors.darkLineBreak),
+          color: switchColor(MyColors.lightLineBreak, MyColors.darkLineBreak)),
     ),
   );
 }

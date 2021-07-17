@@ -2,9 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
-import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
-import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/models/user_model.dart' as user_model;
 import 'package:glitcher/screens/welcome/widgets/verify_email.dart';
 import 'package:glitcher/services/auth.dart';
 import 'package:glitcher/services/auth_provider.dart';
@@ -333,13 +332,12 @@ class _LoginPageState extends State<LoginPage> {
     Navigator.of(context).push(CustomScreenLoader());
     //print('Should be true: $_loading');
     try {
-      FirebaseUser user =
-          await auth.signInWithEmailAndPassword(_email, _password);
+      User user = await auth.signInWithEmailAndPassword(_email, _password);
       userId = user.uid;
-      User temp =
+      user_model.User temp =
           await DatabaseService.getUserWithId(userId, checkLocal: false);
 
-      if (user.isEmailVerified && temp.id == null) {
+      if (user.emailVerified && temp.id == null) {
         print('signed up');
         SharedPreferences prefs = await SharedPreferences.getInstance();
         String username = prefs.getString('username');
@@ -351,7 +349,7 @@ class _LoginPageState extends State<LoginPage> {
         saveToken();
 
         Navigator.of(context).pushReplacementNamed('/');
-      } else if (!user.isEmailVerified) {
+      } else if (!user.emailVerified) {
         await auth.signOut();
         //await showVerifyEmailSentDialog(context);
       } else {
@@ -442,7 +440,7 @@ class _LoginPageState extends State<LoginPage> {
       text: "Sign in with Google",
       onPressed: () async {
         print('Google SignIn Button Tapped!');
-        FirebaseUser user = await signInWithGoogle();
+        User user = await signInWithGoogle();
         if ((await DatabaseService.getUserWithId(user.uid, checkLocal: false))
                 .id !=
             null) {
@@ -458,7 +456,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<FirebaseUser> signInWithGoogle() async {
+  Future<User> signInWithGoogle() async {
     final GoogleSignInAccount googleSignInAccount =
         await googleSignIn.signIn().catchError((onError) {
       print('google sign in error code: ${onError.code}');
@@ -468,18 +466,19 @@ class _LoginPageState extends State<LoginPage> {
     final GoogleSignInAuthentication googleSignInAuthentication =
         await googleSignInAccount.authentication;
 
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
+    final AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleSignInAuthentication.accessToken,
       idToken: googleSignInAuthentication.idToken,
     );
 
-    final AuthResult authResult = await _auth.signInWithCredential(credential);
-    final FirebaseUser user = authResult.user;
+    final UserCredential authResult =
+        await _auth.signInWithCredential(credential);
+    final User user = authResult.user;
 
     assert(!user.isAnonymous);
     assert(await user.getIdToken() != null);
 
-    final FirebaseUser currentUser = await _auth.currentUser();
+    final User currentUser = await _auth.currentUser;
     assert(user.uid == currentUser.uid);
 
     return user;

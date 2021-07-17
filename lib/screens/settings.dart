@@ -1,13 +1,14 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:glitcher/constants/constants.dart';
 import 'package:glitcher/constants/my_colors.dart';
+import 'package:glitcher/constants/strings.dart';
+import 'package:glitcher/models/app_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:glitcher/utils/app_util.dart';
+import 'package:glitcher/utils/functions.dart';
 import 'package:glitcher/widgets/custom_loader.dart';
 import 'package:glitcher/widgets/gradient_appbar.dart';
-import 'package:glitcher/constants/constants.dart';
-import 'package:glitcher/constants/strings.dart';
-import 'package:glitcher/utils/functions.dart';
+import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -26,8 +27,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   isSubscribedToNewsletter() async {
     bool isSubscribed =
-        (await newsletterEmailsRef.document(Constants.currentUserID).get())
-            .exists;
+        (await newsletterEmailsRef.doc(Constants.currentUserID).get()).exists;
     setState(() {
       _isSubscribedToNewsletter = isSubscribed;
     });
@@ -74,7 +74,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       value: 0,
                       groupValue: darkOrLight,
                       onChanged: (value) {
-                        setTheme(context);
+                        Provider.of<AppModel>(context, listen: false)
+                            .updateTheme(true);
                         setState(() {
                           darkOrLight = value;
                         });
@@ -87,7 +88,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       value: 1,
                       groupValue: darkOrLight,
                       onChanged: (value) {
-                        setTheme(context);
+                        Provider.of<AppModel>(context, listen: true)
+                            .updateTheme(true);
                         setState(() {
                           darkOrLight = value;
                         });
@@ -234,7 +236,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     bool isSubscribed = await isSubscribedToNewsletter();
     if (isSubscribed) {
-      await newsletterEmailsRef.document(Constants.currentUserID).delete();
+      await newsletterEmailsRef.doc(Constants.currentUserID).delete();
       setState(() {
         _isSubscribedToNewsletter = false;
       });
@@ -257,8 +259,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool isPrivate = await isAccountPrivate() ?? false;
 
     await usersRef
-        .document(Constants.currentUserID)
-        .updateData({'is_account_private': !isPrivate});
+        .doc(Constants.currentUserID)
+        .update({'is_account_private': !isPrivate});
 
     setState(() {
       _isAccountPrivate = !isPrivate;
@@ -269,13 +271,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   void initState() {
-    if (Constants.isDarkTheme == AvailableThemes.LIGHT_THEME) {
+    if (Constants.isDarkTheme) {
       setState(() {
-        darkOrLight = 1;
+        darkOrLight = 0;
       });
     } else {
       setState(() {
-        darkOrLight = 0;
+        darkOrLight = 1;
       });
     }
 

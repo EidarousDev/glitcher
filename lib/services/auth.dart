@@ -2,25 +2,23 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
-import 'package:glitcher/constants/constants.dart';
-import 'package:glitcher/models/user_model.dart';
+import 'package:glitcher/models/user_model.dart' as user_model;
 import 'package:glitcher/services/database_service.dart';
 
-Future<FirebaseUser> getCurrentUser() async {
-  FirebaseUser currentUser = await Auth().getCurrentUser();
+Future<User> getCurrentUser() async {
+  User currentUser = await Auth().getCurrentUser();
   return currentUser;
 }
 
 abstract class BaseAuth {
-  Future<FirebaseUser> signInWithEmailAndPassword(
-      String email, String password);
+  Future<User> signInWithEmailAndPassword(String email, String password);
   Future<String> signIn(String email, String password);
 
   Future<String> signUp(String username, String email, String password);
 
   Future<String> currentUser();
 
-  Future<FirebaseUser> getCurrentUser();
+  Future<User> getCurrentUser();
 
   Future<void> sendEmailVerification();
 
@@ -36,16 +34,15 @@ abstract class BaseAuth {
 
   Future<void> sendPasswordResetMail(String email);
 
-  Future<User> loadUserData();
+  Future<user_model.User> loadUserData();
 }
 
 class Auth implements BaseAuth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   @override
-  Future<FirebaseUser> signInWithEmailAndPassword(
-      String email, String password) async {
-    final FirebaseUser user = (await _firebaseAuth.signInWithEmailAndPassword(
+  Future<User> signInWithEmailAndPassword(String email, String password) async {
+    final User user = (await _firebaseAuth.signInWithEmailAndPassword(
             email: email, password: password))
         .user;
     return user;
@@ -53,16 +50,16 @@ class Auth implements BaseAuth {
 
   @override
   Future<String> signIn(String email, String password) async {
-    FirebaseUser user = (await _firebaseAuth.signInWithEmailAndPassword(
+    User user = (await _firebaseAuth.signInWithEmailAndPassword(
             email: email, password: password))
         .user;
-    if (user.isEmailVerified) return user.uid;
+    if (user.emailVerified) return user.uid;
     return null;
   }
 
   // ignore: missing_return
   Future<String> signUp(String username, String email, String password) async {
-    FirebaseUser user;
+    User user;
     try {
       user = (await _firebaseAuth.createUserWithEmailAndPassword(
               email: email, password: password))
@@ -93,12 +90,12 @@ class Auth implements BaseAuth {
 
   @override
   Future<String> currentUser() async {
-    final FirebaseUser user = await _firebaseAuth.currentUser();
+    final User user = _firebaseAuth.currentUser;
     return user?.uid;
   }
 
-  Future<FirebaseUser> getCurrentUser() async {
-    FirebaseUser user = await _firebaseAuth.currentUser();
+  Future<User> getCurrentUser() async {
+    User user = _firebaseAuth.currentUser;
     return user;
   }
 
@@ -107,18 +104,18 @@ class Auth implements BaseAuth {
   }
 
   Future<void> sendEmailVerification() async {
-    FirebaseUser user = await _firebaseAuth.currentUser();
+    User user = _firebaseAuth.currentUser;
     user.sendEmailVerification();
   }
 
   Future<bool> isEmailVerified() async {
-    FirebaseUser user = await _firebaseAuth.currentUser();
-    return user.isEmailVerified;
+    User user = _firebaseAuth.currentUser;
+    return user.emailVerified;
   }
 
   @override
   Future<void> changeEmail(String email) async {
-    FirebaseUser user = await _firebaseAuth.currentUser();
+    User user = _firebaseAuth.currentUser;
     user.updateEmail(email).then((_) {
       print("Succesfully changed email");
     }).catchError((error) {
@@ -130,7 +127,7 @@ class Auth implements BaseAuth {
   @override
   Future<String> changePassword(String password) async {
     try {
-      FirebaseUser user = await _firebaseAuth.currentUser();
+      User user = _firebaseAuth.currentUser;
       await user.updatePassword(password);
       print("Successfully changed password");
       return null;
@@ -142,7 +139,7 @@ class Auth implements BaseAuth {
 
   @override
   Future<void> deleteUser() async {
-    FirebaseUser user = await _firebaseAuth.currentUser();
+    User user = _firebaseAuth.currentUser;
     user.delete().then((_) {
       print("Succesfull user deleted");
     }).catchError((error) {
@@ -158,12 +155,13 @@ class Auth implements BaseAuth {
     return null;
   }
 
-  Future<User> loadUserData() async {
-    final FirebaseUser user = await firebaseAuth.currentUser();
+  Future<user_model.User> loadUserData() async {
+    final User user = _firebaseAuth.currentUser;
+
     final uid = user.uid;
     //print('currentUserID: $uid');
     // here you write the codes to input the data into firestore
-    User loggedInUser =
+    user_model.User loggedInUser =
         await DatabaseService.getUserWithId(uid, checkLocal: false);
     return loggedInUser;
   }

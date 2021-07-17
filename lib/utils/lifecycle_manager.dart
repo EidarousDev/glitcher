@@ -17,9 +17,9 @@ class _LifecycleManagerState extends State<LifecycleManager>
     with WidgetsBindingObserver {
   AppLifecycleState _lastLifecycleState;
 
-  Firestore _firestore = Firestore.instance;
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  FirebaseUser currentUser;
+  User currentUser;
 
   void getCurrentUser() async {
     this.currentUser = await Auth().getCurrentUser();
@@ -51,13 +51,13 @@ class _LifecycleManagerState extends State<LifecycleManager>
         _lastLifecycleState == AppLifecycleState.paused) {
       await _firestore
           .collection('users')
-          .document(currentUser.uid)
-          .updateData({'online': FieldValue.serverTimestamp()});
+          .doc(currentUser.uid)
+          .update({'online': FieldValue.serverTimestamp()});
     } else if (_lastLifecycleState == AppLifecycleState.resumed) {
       await _firestore
           .collection('users')
-          .document(currentUser.uid)
-          .updateData({'online': 'online'});
+          .doc(currentUser.uid)
+          .update({'online': 'online'});
     }
   }
 
