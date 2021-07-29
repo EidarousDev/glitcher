@@ -9,7 +9,7 @@ import 'package:glitcher/models/hashtag_model.dart';
 import 'package:glitcher/services/database_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
-import 'package:image_cropper/image_cropper.dart';
+//import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -97,12 +97,12 @@ Color switchColor(Color lightColor, Color darkColor) {
 }
 
 // Crop Image
-cropImage(File imageFile) async {
-  File cropped = await ImageCropper.cropImage(
-      sourcePath: imageFile.path, compressQuality: 50);
-  return cropped ??
-      imageFile; // Assign it later to File imageFile variable usign setState((){});.
-}
+// cropImage(File imageFile) async {
+//   File cropped = await ImageCropper.cropImage(
+//       sourcePath: imageFile.path, compressQuality: 50);
+//   return cropped ??
+//       imageFile; // Assign it later to File imageFile variable usign setState((){});.
+// }
 
 /// push Home Screen and kill the current screen
 void pushHomeScreen(BuildContext context) {
